@@ -2,20 +2,79 @@
 <html lang="en">
 <head>
   <meta charset="utf-8">
-  <title>Şentürk – Under Construction</title>
+  <title>Şentürk Construction – Under Construction</title>
   <meta name="viewport" content="width=device-width,initial-scale=1">
   <style>
-    body{display:flex;justify-content:center;align-items:center;
-         height:100vh;margin:0;background:#f4f4f4;font-family:Arial,Helvetica,sans-serif;}
-    .box{text-align:center;padding:2rem;border:3px dashed #555;border-radius:1rem;background:#fff;}
-    h1{margin:0 0 .5rem;font-size:2rem;color:#333;}
-    p{margin:0;color:#777;}
+    /* ---- RESET / BASE ---- */
+    *{box-sizing:border-box; margin:0; padding:0;}
+    body{
+      font-family: "Segoe UI", Arial, Helvetica, sans-serif;
+      background:#f7f9fb url("data:image/svg+xml,%3Csvg width='60' height='60' viewBox='0 0 60 60' xmlns='http://www.w3.org/2000/svg'%3E%3Cg fill='none' stroke='%23d9e1e7' stroke-width='1'%3E%3Cpath d='M0 0L60 60M60 0L0 60'/%3E%3C/g%3E%3C/svg%3E") repeat; /* subtle blueprint cross-hatch */
+      display:flex; align-items:center; justify-content:center;
+      min-height:100vh; padding:1rem;
+      color:#2e4854;
+    }
+
+    /* ---- CARD ---- */
+    .card{
+      background:#fffffffa;
+      border:2px dashed #8aa0ad;
+      border-radius:12px;
+      padding:3rem 2.25rem;
+      max-width:480px;
+      text-align:center;
+      backdrop-filter:saturate(180%) blur(3px);
+    }
+
+    .logo{
+      width:240px;            /* adjust as needed */
+      max-width:90%;
+      margin-bottom:1.5rem;
+    }
+
+    h1{
+      font-size:1.9rem;
+      color:#1e3743;
+      margin-bottom:.75rem;
+    }
+
+    p{
+      font-size:1rem;
+      line-height:1.4;
+      margin-bottom:1.25rem;
+    }
+
+    .barrier{
+      width:100%; height:12px;
+      background:repeating-linear-gradient(
+        45deg,
+        #ffcc00 0 16px,
+        #ffcc00 16px 24px,
+        #2e4854 24px 40px
+      );
+      border-radius:4px;
+      margin-top:1.5rem;
+    }
+
+    /* ---- SMALL SCREENS ---- */
+    @media(max-width:380px){
+      h1{font-size:1.6rem;}
+      .card{padding:2.25rem 1.5rem;}
+    }
   </style>
 </head>
 <body>
-  <div class="box">
+  <main class="card">
+    <!-- Logo -->
+    <img src="senkonlogo.png" alt="SENKON mammoth logo" class="logo">
+
+    <!-- Message -->
     <h1>Site Under Construction</h1>
-    <p>We’re building something great.<br>Check back soon!</p>
-  </div>
+    <p>We’re laying the foundations for something big.<br>
+       Check back soon to see the finished structure!</p>
+
+    <!-- Decorative barrier strip -->
+    <div class="barrier" aria-hidden="true"></div>
+  </main>
 </body>
 </html>
