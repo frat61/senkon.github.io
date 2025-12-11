@@ -8,12 +8,13 @@
   <style>
     :root {
       --bg-grid: #f3f5f7;
-      --card-bg: #ffffff;
-      --border-light: #dcdcdc;
+      --page-bg: #ffffff;
+      --border-light: #e0e3e7;
       --senturk-navy: #1b2533;
       --senturk-orange: #f07530;
-      --text-muted: #666;
       --accent: #7b1f22;
+      --text-muted: #6f7580;
+      --chip-bg: #f5f2ee;
     }
 
     * {
@@ -26,151 +27,212 @@
       font-family: system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI",
                    "Helvetica Neue", Arial, "Noto Sans", sans-serif;
       background:
-        linear-gradient(90deg, rgba(0,0,0,0.02) 1px, transparent 1px),
-        linear-gradient(180deg, rgba(0,0,0,0.02) 1px, transparent 1px);
+        linear-gradient(90deg, rgba(0,0,0,0.025) 1px, transparent 1px),
+        linear-gradient(180deg, rgba(0,0,0,0.025) 1px, transparent 1px);
       background-size: 24px 24px;
       background-color: var(--bg-grid);
-      color: #222;
       min-height: 100vh;
       display: flex;
       align-items: center;
       justify-content: center;
-      padding: 16px;
+      padding: 20px;
+      color: #111827;
     }
 
     .page {
       width: 100%;
-      max-width: 900px;
-      background: var(--card-bg);
-      border-radius: 12px;
-      box-shadow: 0 8px 24px rgba(0,0,0,0.08);
-      padding: 24px 32px 28px;
-      border: 1px solid #e2e2e2;
+      max-width: 980px;
+      background: var(--page-bg);
+      border-radius: 16px;
+      box-shadow: 0 10px 32px rgba(15, 23, 42, 0.12);
+      border: 1px solid rgba(148, 163, 184, 0.25);
+      overflow: hidden;
     }
 
-    /* HEADER */
-
-    .header {
-      text-align: center;
-      margin-bottom: 20px;
+    .page-topbar {
+      height: 5px;
+      background: linear-gradient(90deg, var(--senturk-orange), var(--accent));
     }
 
-    .logo-wrapper {
-      display: inline-flex;
+    .page-inner {
+      padding: 22px 28px 26px;
+    }
+
+    @media (max-width: 720px) {
+      .page-inner {
+        padding: 18px 16px 20px;
+      }
+    }
+
+    /* HERO */
+
+    .hero {
+      display: grid;
+      grid-template-columns: auto 1fr;
+      gap: 20px;
       align-items: center;
-      justify-content: center;
-      padding: 12px 16px 8px;
-      border-radius: 12px;
-      border: 1px dashed #c5c5c5;
-      background-color: #fafafa;
+      margin-bottom: 22px;
     }
 
-    .logo-wrapper img {
+    @media (max-width: 640px) {
+      .hero {
+        grid-template-columns: 1fr;
+        text-align: center;
+      }
+    }
+
+    .hero-logo-wrap {
+      display: inline-flex;
+      padding: 10px 14px;
+      border-radius: 14px;
+      border: 1px dashed rgba(148, 163, 184, 0.9);
+      background: radial-gradient(circle at top left, #ffffff 0%, #f9fafb 55%, #eef2f7 100%);
+    }
+
+    .hero-logo-wrap img {
       max-height: 80px;
       width: auto;
       display: block;
     }
 
-    .site-title {
-      margin-top: 12px;
-      font-size: 24px;
-      letter-spacing: 0.06em;
-      font-weight: 700;
-      color: var(--senturk-navy);
+    .hero-title {
+      font-size: 26px;
+      letter-spacing: 0.08em;
+      font-weight: 800;
       text-transform: uppercase;
+      color: var(--senturk-navy);
+      margin-bottom: 4px;
     }
 
-    .site-subtitle {
-      margin-top: 4px;
+    .hero-subline {
       font-size: 13px;
       color: var(--text-muted);
+      margin-bottom: 12px;
+    }
+
+    .hero-chip-row {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 6px;
+      font-size: 11px;
+      color: #4b5563;
+    }
+
+    .chip {
+      padding: 4px 10px;
+      border-radius: 999px;
+      border: 1px solid rgba(148, 163, 184, 0.65);
+      background: #f9fafb;
+      display: inline-flex;
+      align-items: center;
+      gap: 6px;
+    }
+
+    .chip-dot {
+      width: 6px;
+      height: 6px;
+      border-radius: 999px;
+      background: var(--senturk-orange);
     }
 
     hr.divider {
-      margin: 18px auto 16px;
+      margin: 18px 0 14px;
       border: none;
-      border-top: 1px solid var(--border-light);
-      max-width: 520px;
+      border-top: 1px solid rgba(148, 163, 184, 0.4);
     }
 
-    /* TOOL LIST */
+    /* TOOL SECTION */
 
-    .tool-section-title {
-      font-size: 16px;
+    .section-heading {
+      font-size: 15px;
       font-weight: 600;
       color: var(--senturk-navy);
-      margin-bottom: 8px;
-      text-align: left;
+      margin-bottom: 4px;
     }
 
-    .tool-section-sub {
-      font-size: 13px;
+    .section-sub {
+      font-size: 12px;
       color: var(--text-muted);
-      margin-bottom: 18px;
-      text-align: left;
+      margin-bottom: 16px;
     }
 
     .tool-grid {
       display: grid;
-      grid-template-columns: repeat(auto-fit, minmax(240px, 1fr));
-      gap: 14px;
+      grid-template-columns: 1fr;
+      gap: 12px;
     }
 
+    /* TOOL CARD */
+
     .tool-card {
-      border-radius: 10px;
+      border-radius: 14px;
       border: 1px solid var(--border-light);
-      padding: 14px 14px 12px;
-      background: #fcfcfc;
+      background: linear-gradient(135deg, #ffffff 0%, #fdfcfb 40%, #faf5f2 100%);
+      padding: 14px 16px 12px;
+      box-shadow: 0 10px 20px rgba(15, 23, 42, 0.06);
       display: flex;
       flex-direction: column;
+      gap: 8px;
+    }
+
+    .tool-header-line {
+      display: flex;
       justify-content: space-between;
+      align-items: baseline;
+      gap: 8px;
+      margin-bottom: 4px;
     }
 
     .tool-tag {
-      display: inline-block;
       font-size: 11px;
       text-transform: uppercase;
-      letter-spacing: 0.06em;
+      letter-spacing: 0.08em;
       color: var(--accent);
-      margin-bottom: 4px;
+      background: var(--chip-bg);
+      padding: 4px 10px;
+      border-radius: 999px;
+      border: 1px solid rgba(148, 98, 76, 0.4);
+    }
+
+    .tool-badge {
+      font-size: 11px;
+      color: #64748b;
     }
 
     .tool-title {
       font-size: 15px;
       font-weight: 600;
-      margin-bottom: 4px;
       color: var(--senturk-navy);
+      margin-bottom: 2px;
     }
 
     .tool-desc {
       font-size: 13px;
       color: var(--text-muted);
-      margin-bottom: 10px;
-      line-height: 1.35;
+      line-height: 1.4;
     }
 
     .tool-meta {
       font-size: 11px;
-      color: #999;
-      margin-bottom: 8px;
+      color: #9ca3af;
+      margin-top: 4px;
     }
 
     .tool-actions {
       display: flex;
       justify-content: flex-end;
-      gap: 6px;
-      margin-top: 4px;
+      margin-top: 6px;
     }
 
     .btn {
       border-radius: 999px;
       border: none;
-      padding: 6px 12px;
+      padding: 7px 14px;
       font-size: 12px;
       cursor: pointer;
       display: inline-flex;
       align-items: center;
-      gap: 4px;
+      gap: 6px;
       text-decoration: none;
       white-space: nowrap;
     }
@@ -178,125 +240,135 @@
     .btn-primary {
       background: var(--senturk-navy);
       color: #fff;
+      box-shadow: 0 6px 14px rgba(15, 23, 42, 0.25);
     }
 
     .btn-primary:hover {
-      opacity: 0.9;
+      transform: translateY(-1px);
+      box-shadow: 0 8px 16px rgba(15, 23, 42, 0.3);
     }
 
-    .btn-ghost {
-      background: transparent;
-      color: var(--text-muted);
-      border: 1px dashed #ccc;
-    }
-
-    .btn-ghost:hover {
-      border-style: solid;
+    .btn-primary:active {
+      transform: translateY(0);
+      box-shadow: 0 4px 10px rgba(15, 23, 42, 0.2);
     }
 
     /* FOOTER */
 
     .footer {
-      margin-top: 18px;
+      margin-top: 20px;
       padding-top: 10px;
-      border-top: 1px solid var(--border-light);
+      border-top: 1px solid rgba(148, 163, 184, 0.35);
       font-size: 11px;
       color: var(--text-muted);
       text-align: center;
       line-height: 1.4;
     }
 
-    @media (max-width: 600px) {
-      .page {
-        padding: 18px 16px 20px;
-      }
-      .site-title {
-        font-size: 20px;
-      }
-      .logo-wrapper img {
-        max-height: 60px;
-      }
+    .footer code {
+      font-size: 11px;
+      background: #f3f4f6;
+      padding: 1px 4px;
+      border-radius: 4px;
     }
   </style>
 </head>
 <body>
 
 <div class="page">
+  <div class="page-topbar"></div>
 
-  <!-- HEADER -->
-  <header class="header">
-    <div class="logo-wrapper">
-      <!-- Using existing mammoth logo in repo root -->
-      <img src="senkonlogo.png" alt="Senkon Mühendislik">
-    </div>
-    <div class="site-title">Senkon Mühendislik</div>
-    <div class="site-subtitle">
-      İç araçlar ve otomasyonlar – fiyat listeleri, hesaplayıcılar ve daha fazlası
-    </div>
-  </header>
-
-  <hr class="divider">
-
-  <!-- TOOL LIST -->
-  <section>
-    <div class="tool-section-title">Araçlar</div>
-    <div class="tool-section-sub">
-      Aşağıdan kullanmak istediğiniz işlemi seçin. Yeni araçlar eklendikçe bu liste genişleyecek.
-    </div>
-
-    <div class="tool-grid">
-
-      <!-- TOOL 1: Özet Fiyat Listesi -->
-      <article class="tool-card">
-        <div>
-          <div class="tool-tag">Fiyat Listesi</div>
-          <div class="tool-title">Marshall Özet Fiyat Listesi Matrisi</div>
-          <div class="tool-desc">
-            Excel fiyat listesini yükleyerek ürün grubu, renk ve ambalaj bazında otomatik özet matris
-            oluşturur. Arama ve yazdırma (A4 / mobil) özellikleri içerir.
-          </div>
-          <div class="tool-meta">
-            Dosya: <code>FL_Database-TEST.xlsx</code> &nbsp;•&nbsp; Konum: <code>assets/data/</code>
-          </div>
+  <div class="page-inner">
+    <!-- HERO -->
+    <section class="hero">
+      <div class="hero-left">
+        <div class="hero-logo-wrap">
+          <img src="senkonlogo.png" alt="Senkon Mühendislik">
         </div>
-        <div class="tool-actions">
-          <a class="btn btn-primary" href="fiyat-listesi.html">
-            Aracı Aç
-          </a>
+      </div>
+      <div class="hero-right">
+        <div class="hero-title">SENKON MÜHENDİSLİK</div>
+        <div class="hero-subline">
+          İç araçlar ve otomasyonlar – fiyat listeleri, hesaplayıcılar ve saha işlerini
+          hızlandıran küçük kod parçacıkları.
         </div>
-      </article>
+        <div class="hero-chip-row">
+          <span class="chip"><span class="chip-dot"></span> Fiyat listesi otomasyonu</span>
+          <span class="chip"><span class="chip-dot"></span> Excel tabanlı iş akışları</span>
+          <span class="chip"><span class="chip-dot"></span> Dahili kullanım</span>
+        </div>
+      </div>
+    </section>
 
-      <!-- Future tools: copy this block and change title/link/description -->
-      <!--
-      <article class="tool-card">
-        <div>
-          <div class="tool-tag">Yeni Araç</div>
-          <div class="tool-title">Araç Adı</div>
-          <div class="tool-desc">
-            Bu araca dair kısa açıklama. Örneğin: "X hesabı yapan küçük hesaplayıcı."
+    <hr class="divider">
+
+    <!-- TOOL SECTION -->
+    <section>
+      <div class="section-heading">Araçlar</div>
+      <div class="section-sub">
+        Aşağıdan kullanmak istediğiniz işlemi seçin. Yeni araçlar eklendikçe bu panel genişleyecek.
+      </div>
+
+      <div class="tool-grid">
+
+        <!-- TOOL 1: Özet Fiyat Listesi -->
+        <article class="tool-card">
+          <div>
+            <div class="tool-header-line">
+              <span class="tool-tag">Fiyat Listesi</span>
+              <span class="tool-badge">Marshall / Şentürk Boya</span>
+            </div>
+            <div class="tool-title">Marshall Özet Fiyat Listesi Matrisi</div>
+            <div class="tool-desc">
+              GitHub'da tutulan Excel fiyat listesini kullanarak ürün grubu, renk ve ambalaj
+              bazında otomatik bir özet matris oluşturur. Arama, filtreleme ve A4 / mobil
+              yazdırma desteği içerir.
+            </div>
+            <div class="tool-meta">
+              Varsayılan veri kaynağı: <code>assets/data/FL_Database-TEST.xlsx</code>
+            </div>
           </div>
-          <div class="tool-meta">
-            Kod: <code>arac2.html</code>
+          <div class="tool-actions">
+            <a class="btn btn-primary" href="fiyat-listesi.html">
+              Aracı Aç
+            </a>
           </div>
-        </div>
-        <div class="tool-actions">
-          <a class="btn btn-primary" href="arac2.html">
-            Aracı Aç
-          </a>
-        </div>
-      </article>
-      -->
+        </article>
 
-    </div>
-  </section>
+        <!-- FUTURE TOOL TEMPLATE (copy / adjust / uncomment when needed)
+        <article class="tool-card">
+          <div>
+            <div class="tool-header-line">
+              <span class="tool-tag">Excel İşlemi</span>
+              <span class="tool-badge">Yeni Araç</span>
+            </div>
+            <div class="tool-title">Araç Adı</div>
+            <div class="tool-desc">
+              Bu araca dair kısa açıklama. Örneğin: “Fiyat listesi ham verisinden düzleştirilmiş
+              CSV üretir” gibi.
+            </div>
+            <div class="tool-meta">
+              Kod dosyası: <code>arac2.html</code>
+            </div>
+          </div>
+          <div class="tool-actions">
+            <a class="btn btn-primary" href="arac2.html">
+              Aracı Aç
+            </a>
+          </div>
+        </article>
+        -->
 
-  <!-- FOOTER -->
-  <footer class="footer">
-    Senkon Mühendislik – iç kullanım için geliştirilmiş yardımcı araçlar.<br>
-    Yeni araçlar eklemek için: <code>senkon.github.io</code> reposuna yeni HTML dosyaları ekleyin
-    ve buradaki listeye link verin.
-  </footer>
+      </div>
+    </section>
 
+    <!-- FOOTER -->
+    <footer class="footer">
+      Senkon Mühendislik – iç kullanım için geliştirilmiş yardımcı araçlar.<br>
+      Yeni araç eklemek için <code>senkon.github.io</code> reposuna yeni HTML dosyaları
+      ekleyin ve bu sayfaya kart olarak bağlantı verin.
+    </footer>
+  </div>
 </div>
 
 </body>
