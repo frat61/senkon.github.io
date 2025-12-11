@@ -1,377 +1,299 @@
 <!DOCTYPE html>
-<html lang="tr">
+<html lang="en">
 <head>
-  <meta charset="UTF-8">
-  <title>Senkon Mühendislik – Araç Paneli</title>
-  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <meta charset="UTF-8" />
+  <title>Şentürk Web Tools</title>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
 
   <style>
+    /* ─── COLOR SYSTEM ───────────────────────────────────────────── */
     :root {
-      --grid-bg: #f5f6f7;
-      --white: #ffffff;
-      --border: #d4d7dd;
-      --border-soft: #e2e4e8;
-      --text-dark: #111827;
-      --text-muted: #6b7280;
-      --navy: #1b2533;
-      --nav-bg: #f3f4f6;
-      --nav-active-bg: #e5e7eb;
+      --bg: #0d1117;
+      --bg-light: #161b22;
+      --card: #1e2633;
+      --text: #e6edf3;
+      --subtext: #9ba7b4;
+      --accent: #facc15;
+      --accent-soft: rgba(250, 204, 21, 0.12);
+      --border: rgba(255, 255, 255, 0.12);
+
+      --radius: 18px;
+      --shadow: 0 14px 40px rgba(0, 0, 0, 0.5);
     }
 
+    /* ─── BASE RESET ─────────────────────────────────────────────── */
     * {
-      box-sizing: border-box;
       margin: 0;
       padding: 0;
+      box-sizing: border-box;
     }
 
     body {
-      font-family: "Inter", system-ui, -apple-system, BlinkMacSystemFont,
-                   "Segoe UI", Helvetica, Arial, sans-serif;
-      background:
-        linear-gradient(90deg, rgba(0,0,0,0.025) 1px, transparent 1px),
-        linear-gradient(180deg, rgba(0,0,0,0.025) 1px, transparent 1px);
-      background-size: 26px 26px;
-      background-color: var(--grid-bg);
-      padding: 24px 10px;
-      color: var(--text-dark);
+      background: var(--bg);
+      color: var(--text);
+      font-family: "Segoe UI", Arial, sans-serif;
+      padding: 40px 20px;
+      display: flex;
+      justify-content: center;
     }
 
-    .shell {
-      max-width: 1040px;
-      margin: auto;
-      min-height: calc(100vh - 48px);
-      background: var(--white);
-      border-radius: 10px;
+    /* ─── CONTAINER ─────────────────────────────────────────────── */
+    .container {
+      width: 100%;
+      max-width: 1050px;
+      background: var(--bg-light);
+      padding: 36px;
+      border-radius: 22px;
       border: 1px solid var(--border);
-      display: flex;
-      overflow: hidden;
+      box-shadow: var(--shadow);
+      position: relative;
     }
 
-    /* SIDEBAR */
-
-    .sidebar {
-      width: 230px;
-      border-right: 1px solid var(--border-soft);
-      background: var(--nav-bg);
-      display: flex;
-      flex-direction: column;
-      padding: 16px 14px 18px;
+    /* Decorative glow */
+    .container::before {
+      content: "";
+      position: absolute;
+      top: -120px;
+      right: -60px;
+      width: 320px;
+      height: 320px;
+      background: radial-gradient(circle, rgba(250, 204, 21, 0.13), transparent 65%);
+      pointer-events: none;
     }
 
-    .sb-header {
+    /* ─── HEADER AREA ───────────────────────────────────────────── */
+    .header {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      margin-bottom: 32px;
+      flex-wrap: wrap;
+      gap: 20px;
+    }
+
+    .brand {
       display: flex;
       align-items: center;
-      gap: 10px;
-      margin-bottom: 18px;
+      gap: 16px;
     }
 
-    .logo-box {
-      width: 44px;
-      height: 44px;
-      border: 1px solid #c5c7c9;
-      background: var(--white);
-      padding: 4px;
-      flex-shrink: 0;
+    .brand-logo {
+      width: 52px;
+      height: 52px;
+      border-radius: 14px;
+      background: radial-gradient(circle at 25% 25%, #facc15, #e08b00 45%, #000);
+      display: flex;
+      justify-content: center;
+      align-items: center;
+      font-size: 22px;
+      font-weight: 800;
+      color: #000;
+      box-shadow: 0 10px 25px rgba(250, 204, 21, 0.35);
     }
 
-    .logo-box img {
-      width: 100%;
-      height: auto;
-      display: block;
+    .brand-title {
+      display: flex;
+      flex-direction: column;
     }
 
-    .sb-title-main {
-      font-size: 13px;
-      letter-spacing: 0.16em;
+    .brand-title span:first-child {
+      font-size: 18px;
+      font-weight: 700;
       text-transform: uppercase;
-      font-weight: 600;
-      color: var(--navy);
+      letter-spacing: 0.04em;
     }
 
-    .sb-title-sub {
-      font-size: 11px;
-      color: var(--text-muted);
-      margin-top: 2px;
+    .brand-title span:last-child {
+      font-size: 13px;
+      color: var(--subtext);
     }
 
-    .sb-section-label {
+    .header-right {
+      text-align: right;
+    }
+
+    .badge {
+      display: inline-block;
+      padding: 4px 12px;
+      border-radius: 999px;
       font-size: 11px;
       text-transform: uppercase;
       letter-spacing: 0.12em;
-      color: #9ca3af;
-      margin-bottom: 6px;
-      margin-top: 4px;
+      background: var(--accent-soft);
+      color: var(--accent);
+      border: 1px solid rgba(250, 204, 21, 0.4);
+      margin-bottom: 8px;
     }
 
-    .nav-list {
-      list-style: none;
-      margin-bottom: 16px;
+    .title {
+      font-size: 22px;
+      font-weight: 600;
     }
 
-    .nav-item {
-      margin-bottom: 4px;
+    .subtitle {
+      font-size: 14px;
+      color: var(--subtext);
     }
 
-    .nav-link {
-      display: flex;
-      align-items: center;
-      justify-content: space-between;
-      gap: 6px;
-      font-size: 13px;
-      padding: 6px 8px;
-      border-radius: 6px;
-      color: var(--text-dark);
-      text-decoration: none;
+    /* ─── GRID LAYOUT ───────────────────────────────────────────── */
+    .grid {
+      margin-top: 28px;
+      display: grid;
+      grid-template-columns: repeat(auto-fill, minmax(260px, 1fr));
+      gap: 22px;
     }
 
-    .nav-link span.label {
-      flex: 1;
-      white-space: nowrap;
-      overflow: hidden;
-      text-overflow: ellipsis;
-    }
-
-    .nav-link span.meta {
-      font-size: 11px;
-      color: #9ca3af;
-      white-space: nowrap;
-    }
-
-    .nav-link.active {
-      background: var(--nav-active-bg);
-      font-weight: 500;
+    /* ─── TOOL CARD ─────────────────────────────────────────────── */
+    .card {
+      background: var(--card);
+      border-radius: var(--radius);
       border: 1px solid var(--border);
-    }
-
-    .nav-link:hover:not(.active) {
-      background: rgba(255,255,255,0.8);
-    }
-
-    .sb-footer {
-      margin-top: auto;
-      font-size: 11px;
-      color: var(--text-muted);
-      padding-top: 10px;
-      border-top: 1px solid var(--border-soft);
-    }
-
-    /* MAIN CONTENT */
-
-    .content {
-      flex: 1;
-      padding: 18px 22px 22px;
+      padding: 22px;
+      position: relative;
+      cursor: pointer;
+      transition: transform 0.2s ease, border-color 0.25s ease;
+      min-height: 150px;
       display: flex;
       flex-direction: column;
-    }
-
-    .content-header {
-      display: flex;
       justify-content: space-between;
-      align-items: flex-start;
-      margin-bottom: 14px;
-      border-bottom: 1px solid var(--border-soft);
-      padding-bottom: 10px;
     }
 
-    .ch-left-title {
-      font-size: 16px;
+    .card:hover {
+      transform: translateY(-4px);
+      border-color: var(--accent);
+    }
+
+    .card h3 {
+      font-size: 17px;
       font-weight: 600;
-      color: var(--navy);
-      margin-bottom: 2px;
+      margin-bottom: 6px;
     }
 
-    .ch-left-sub {
-      font-size: 12px;
-      color: var(--text-muted);
+    .card p {
+      font-size: 14px;
+      color: var(--subtext);
+      line-height: 1.4;
+      flex-grow: 1;
     }
 
-    .ch-pill {
-      font-size: 11px;
-      padding: 4px 10px;
-      border-radius: 999px;
-      border: 1px solid var(--border-soft);
-      background: #f9fafb;
-      color: #4b5563;
-      white-space: nowrap;
-    }
-
-    .tool-detail {
-      margin-top: 10px;
-      max-width: 620px;
-      font-size: 13px;
-      color: var(--text-muted);
-      line-height: 1.5;
-    }
-
-    .detail-card {
-      margin-top: 16px;
-      border-radius: 8px;
-      border: 1px solid var(--border-soft);
-      background: #fafafa;
-      padding: 12px 14px;
+    .card-footer {
+      margin-top: 14px;
       display: flex;
       justify-content: space-between;
       align-items: center;
-      gap: 10px;
     }
 
-    .detail-text {
-      font-size: 12px;
-      color: var(--text-muted);
-    }
-
-    .detail-text code {
-      font-size: 11px;
-    }
-
-    .detail-button {
-      font-size: 12px;
-      padding: 7px 14px;
+    .pill {
+      padding: 6px 12px;
       border-radius: 999px;
-      border: 1px solid var(--navy);
-      background: var(--navy);
-      color: #ffffff;
+      border: 1px solid var(--border);
+      font-size: 12px;
+      color: var(--text);
       text-decoration: none;
-      white-space: nowrap;
+      transition: 0.2s;
     }
 
-    .detail-button:hover {
-      opacity: 0.9;
+    .pill:hover {
+      border-color: var(--accent);
+      color: var(--accent);
     }
 
-    .content-footer {
-      margin-top: auto;
-      padding-top: 16px;
-      border-top: 1px solid var(--border-soft);
-      font-size: 11px;
-      color: var(--text-muted);
+    /* Disabled card */
+    .disabled {
+      opacity: 0.55;
+      pointer-events: none;
     }
 
-    /* RESPONSIVE */
+    /* ─── FOOTER ─────────────────────────────────────────────── */
+    .footer {
+      margin-top: 32px;
+      text-align: center;
+      font-size: 12px;
+      color: var(--subtext);
+    }
 
-    @media (max-width: 720px) {
-      .shell {
+    @media (max-width: 650px) {
+      .header {
+        text-align: center;
         flex-direction: column;
       }
 
-      .sidebar {
-        width: 100%;
-        border-right: none;
-        border-bottom: 1px solid var(--border-soft);
-        flex-direction: row;
-        flex-wrap: wrap;
-        align-items: center;
-        gap: 10px;
-      }
-
-      .sb-header {
-        margin-bottom: 0;
-      }
-
-      .sb-section-label {
-        width: 100%;
-        margin-top: 6px;
-      }
-
-      .nav-list {
-        display: flex;
-        flex: 1;
-        margin-bottom: 0;
-      }
-
-      .nav-item {
-        flex: 1;
-      }
-
-      .nav-link {
-        justify-content: center;
-      }
-
-      .sb-footer {
-        display: none;
-      }
-
-      .content {
-        padding: 16px 16px 18px;
+      .header-right {
+        text-align: center;
       }
     }
   </style>
 </head>
 
 <body>
-  <div class="shell">
+  <div class="container">
 
-    <!-- SIDEBAR -->
-    <aside class="sidebar">
-      <div class="sb-header">
-        <div class="logo-box">
-          <img src="senkonlogo.png" alt="Senkon Mühendislik">
-        </div>
-        <div>
-          <div class="sb-title-main">SENKON</div>
-          <div class="sb-title-sub">Mühendislik Araç Paneli</div>
+    <!-- HEADER -->
+    <div class="header">
+      <div class="brand">
+        <div class="brand-logo">Ş</div>
+        <div class="brand-title">
+          <span>Şentürk Dekorasyon</span>
+          <span>Price & Product Tools</span>
         </div>
       </div>
 
-      <div class="sb-section-label">Araçlar</div>
-      <ul class="nav-list">
-        <li class="nav-item">
-          <!-- active item just for display; link goes directly to tool -->
-          <a class="nav-link active" href="fiyat-listesi.html">
-            <span class="label">Marshall Fiyat Listesi Matrisi</span>
-            <span class="meta">Excel</span>
-          </a>
-        </li>
-
-        <!-- Gelecekte yeni araçlar için:
-        <li class="nav-item">
-          <a class="nav-link" href="arac2.html">
-            <span class="label">Yeni Araç Adı</span>
-            <span class="meta">Hesaplayıcı</span>
-          </a>
-        </li>
-        -->
-      </ul>
-
-      <div class="sb-footer">
-        Senkon Mühendislik<br>
-        İç kullanım / internal tools
+      <div class="header-right">
+        <div class="badge">Internal Tools</div>
+        <div class="title">Welcome to your dashboard</div>
+        <div class="subtitle">Choose the operation you want to use.</div>
       </div>
-    </aside>
+    </div>
 
-    <!-- MAIN CONTENT -->
-    <main class="content">
-      <div class="content-header">
-        <div>
-          <div class="ch-left-title">Marshall Özet Fiyat Listesi Matrisi</div>
-          <div class="ch-left-sub">
-            GitHub'da tutulan Excel fiyat listesi verisini kullanarak ürün grubu, renk ve ambalaj
-            bazında özet matris oluşturur. Arama ve A4 / mobil yazdırma desteklidir.
-          </div>
+    <!-- GRID OF TOOLS -->
+    <div class="grid">
+
+      <!-- MARSHALL TOOL -->
+      <div class="card" onclick="window.location.href='fiyat-listesi.html'">
+        <h3>Marshall Full Price List</h3>
+        <p>
+          View the complete Marshall product list (all categories, all sizes)
+          with search, filters and professional print layout.
+        </p>
+
+        <div class="card-footer">
+          <span style="font-size:12px;color:var(--subtext);">Active · Main tool</span>
+          <a href="fiyat-listesi.html" class="pill">Open</a>
         </div>
-        <div class="ch-pill">Araç tipi: Fiyat listesi / Excel</div>
       </div>
 
-      <div class="tool-detail">
-        Bu araç Şentürk / Marshall fiyat listesi dosyanızı temel alır ve iç kullanım için hızlı bir
-        özet görünüm üretir. Güncel Excel dosyanızı GitHub deposundaki
-        <code>assets/data/</code> klasörüne yerleştirerek varsayılan veriyi güncelleyebilirsiniz.
-      </div>
+      <!-- ALTERNATIVE PRODUCTS TOOL (COMING SOON) -->
+      <div class="card disabled">
+        <h3>Alternative Brands & Products</h3>
+        <p>
+          Compare Marshall with Dekor, DaySon, AquaCool and Tiner products.
+          Find cheaper or equivalent alternatives instantly.
+        </p>
 
-      <div class="detail-card">
-        <div class="detail-text">
-          Varsayılan veri kaynağı:<br>
-          <code>assets/data/FL_Database-TEST.xlsx</code>
+        <div class="card-footer">
+          <span style="font-size:12px;">Coming soon</span>
         </div>
-        <a class="detail-button" href="fiyat-listesi.html">
-          Aracı Aç →
-        </a>
       </div>
 
-      <div class="content-footer">
-        Senkon Mühendislik – fiyat listeleri ve mühendislik süreçleri için geliştirilmiş yardımcı araç paneli.
+      <!-- DISCOUNT SIMULATOR (COMING SOON) -->
+      <div class="card disabled">
+        <h3>Discount & Offer Calculator</h3>
+        <p>
+          Calculate cash/card/vadeli prices, apply custom discount rates,
+          and generate customer offers in seconds.
+        </p>
+
+        <div class="card-footer">
+          <span style="font-size:12px;">Planned</span>
+        </div>
       </div>
-    </main>
+
+    </div>
+
+    <!-- FOOTER -->
+    <div class="footer">
+      v1.1 · Designed for Şentürk by ChatGPT · Mobile-optimized
+    </div>
 
   </div>
 </body>
