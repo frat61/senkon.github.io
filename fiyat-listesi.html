@@ -1,0 +1,767 @@
+<!DOCTYPE html>
+<html lang="tr">
+<head>
+  <meta charset="UTF-8">
+  <title>ŞENTÜRK Fiyat Listesi – Özet Matris</title>
+
+  <style>
+    :root {
+      --senturk-navy: #1b2533;
+      --senturk-orange: #f07530;
+      --border-light: #dcdcdc;
+      --text-muted: #666;
+      --bg-light: #f7f7f7;
+      --footer-bordo: #7b1f22;
+    }
+
+    body {
+      margin: 0;
+      padding: 24px;
+      background: #e6e6e6;
+      font-family: system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI",
+                   "Helvetica Neue", Arial, "Noto Sans", sans-serif;
+    }
+
+    .page {
+      max-width: 1000px;
+      margin: auto;
+      background: white;
+      padding: 24px 32px 32px;
+      box-shadow: 0 0 12px rgba(0,0,0,0.12);
+    }
+
+    /* HEADER */
+
+    .header {
+      display: flex;
+      justify-content: space-between;
+      align-items: flex-end;
+      margin-bottom: 12px;
+    }
+
+    .senturk-logo img {
+      height: 50px;
+      width: auto;
+    }
+
+    .marshall-logo img {
+      height: 50px;
+      width: auto;
+    }
+
+    /* SUBHEADER */
+
+    .subheader {
+      margin-top: 6px;
+      padding-top: 8px;
+      margin-bottom: 8px;
+      border-top: 1px solid #000;
+      font-weight: 600;
+      text-align: center;
+      color: var(--senturk-navy);
+    }
+
+    .editable-title {
+      display: inline-block;
+      padding: 0 4px;
+      min-width: 80px;
+      border-bottom: 1px dashed #ccc;
+      cursor: text;
+    }
+
+    .editable-title:focus {
+      outline: 2px solid #ffd27f;
+    }
+
+    /* LEGEND */
+
+    .legend {
+      margin-bottom: 12px;
+      font-size: 11px;
+      color: var(--text-muted);
+      display: flex;
+      flex-wrap: wrap;
+      gap: 6px 10px;
+      align-items: center;
+    }
+
+    .legend-title {
+      font-weight: 600;
+      color: var(--senturk-navy);
+      margin-right: 4px;
+    }
+
+    .legend-item {
+      display: inline-flex;
+      align-items: center;
+      gap: 4px;
+      white-space: nowrap;
+    }
+
+    .legend-swatch {
+      width: 10px;
+      height: 10px;
+      border-radius: 2px;
+      background: #ccc;
+      border: 1px solid rgba(0,0,0,0.2);
+    }
+
+    /* TOOLBAR */
+
+    .toolbar {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      margin-bottom: 12px;
+      gap: 8px;
+      flex-wrap: wrap;
+      font-size: 13px;
+    }
+
+    .toolbar-left {
+      display: flex;
+      align-items: center;
+      gap: 8px;
+      flex-wrap: wrap;
+    }
+
+    .toolbar-right {
+      display: flex;
+      align-items: center;
+      gap: 8px;
+      flex-wrap: wrap;
+    }
+
+    input[type="file"] {
+      padding: 4px 6px;
+      border: 1px solid #ccc;
+      border-radius: 4px;
+      font-size: 12px;
+    }
+
+    .toolbar button {
+      padding: 6px 10px;
+      border-radius: 4px;
+      border: none;
+      background: var(--senturk-navy);
+      color: #fff;
+      font-size: 12px;
+      cursor: pointer;
+    }
+
+    .toolbar button:hover { opacity: 0.9; }
+
+    /* SEARCH INPUT */
+
+    #searchInput {
+      padding: 4px 8px;
+      border-radius: 4px;
+      border: 1px solid #ccc;
+      font-size: 12px;
+      min-width: 180px;
+    }
+
+    #searchInput::placeholder { color: #999; }
+
+    /* CONTENT – 2-column layout on screen */
+
+    #content {
+      column-count: 2;
+      column-gap: 16px;
+    }
+
+    @media (max-width: 900px) {
+      #content {
+        column-count: 1;
+      }
+    }
+
+    .group-block {
+      break-inside: avoid;
+      page-break-inside: avoid;
+      margin-bottom: 8px;
+    }
+
+    /* TABLE – matrix style */
+
+    table.price-matrix {
+      width: 100%;
+      border-collapse: collapse;
+      font-size: 11px;
+      table-layout: fixed;
+      margin-bottom: 4px;
+    }
+
+    th, td {
+      padding: 4px 4px;
+      border: 1px solid var(--border-light);
+      white-space: nowrap;
+      vertical-align: middle;
+      text-align: center;
+    }
+
+    th {
+      background: var(--bg-light);
+      font-weight: 600;
+    }
+
+    td.col-price {
+      font-weight: 600;
+      font-size: 10px;
+    }
+
+    table.price-matrix col.col-product { width: 30%; }
+    table.price-matrix col.col-color   { width: 18%; }
+
+    td.col-product,
+    td.col-color {
+      white-space: normal !important;
+      word-break: break-word;
+      line-height: 1.25;
+    }
+
+    /* CATEGORY STRIPE (per Ürün Grubu) */
+
+    table.price-matrix td.col-product {
+      position: relative;
+      border-left: none !important;
+    }
+
+    table.price-matrix td.col-product::before {
+      content: "";
+      position: absolute;
+      left: 0; top: 0;
+      width: 4px; height: 100%;
+      background: var(--stripe-color, var(--senturk-orange));
+    }
+
+    /* Zebra rows */
+    tbody tr:nth-child(odd)  { background-color: #ffffff !important; }
+    tbody tr:nth-child(even) { background-color: #f5f5f5 !important; }
+
+    /* FOOTER */
+
+    .footer {
+      margin-top: 18px;
+      padding-top: 8px;
+      border-top: 4px solid var(--footer-bordo);
+      font-size: 11px;
+      color: var(--footer-bordo);
+      text-align: center;
+      line-height: 1.4;
+    }
+
+    .footer .line { margin: 2px 0; }
+
+    /* PRINT MODES */
+
+    @media print {
+
+      body {
+        background: white;
+        margin: 0;
+        padding: 0;
+      }
+
+      .page {
+        box-shadow: none;
+        margin: 0;
+        max-width: 100%;
+      }
+
+      .toolbar {
+        display: none !important;
+      }
+
+      .group-block, table, tr, td, th {
+        page-break-inside: avoid !important;
+      }
+
+      .subheader {
+        border-top: none;
+        margin-top: 0;
+        padding-top: 0;
+      }
+
+      .footer {
+        border-top: 4px solid var(--footer-bordo);
+      }
+
+      .price-matrix thead { display: table-header-group; }
+
+      /* DESKTOP PRINT – A4, 2 columns, smaller text */
+      body.desktop-print .page {
+        padding: 10mm 8mm 10mm;
+      }
+
+      body.desktop-print #content {
+        column-count: 2;
+        column-gap: 8px;
+      }
+
+      body.desktop-print table.price-matrix {
+        font-size: 9px;
+      }
+
+      body.desktop-print th,
+      body.desktop-print td {
+        padding: 2px 2px;
+      }
+
+      body.desktop-print td.col-price {
+        font-size: 8px;
+      }
+
+      body.desktop-print .footer {
+        font-size: 10px;
+        margin-top: 10mm;
+        padding-top: 2mm;
+      }
+
+      /* MOBILE PRINT – 1 column, bigger text for readability */
+      body.mobile-print .page {
+        padding: 8mm 6mm 8mm;
+      }
+
+      body.mobile-print #content {
+        column-count: 1;
+        column-gap: 0;
+      }
+
+      body.mobile-print table.price-matrix {
+        font-size: 11px;
+      }
+
+      body.mobile-print th,
+      body.mobile-print td {
+        padding: 3px 3px;
+      }
+
+      body.mobile-print td.col-price {
+        font-size: 10px;
+      }
+
+      body.mobile-print .footer {
+        font-size: 11px;
+        margin-top: 8mm;
+        padding-top: 2mm;
+      }
+    }
+  </style>
+
+  <script src="https://cdn.jsdelivr.net/npm/xlsx@0.18.5/dist/xlsx.full.min.js"></script>
+</head>
+
+<body>
+<div class="page">
+
+  <!-- HEADER -->
+  <div class="header">
+    <div class="senturk-logo">
+      <img src="senturk-logo.png" alt="Şentürk">
+    </div>
+    <div class="marshall-logo">
+      <img src="Marshall_logo.png" alt="Marshall">
+    </div>
+  </div>
+
+  <!-- SUBHEADER (editable title + editable date) -->
+  <div class="subheader">
+    <span id="titleLabel" contenteditable="true" class="editable-title">
+      ÖZET FİYAT LİSTESİ
+    </span>
+    &nbsp;–&nbsp;
+    <span id="monthLabel" contenteditable="true" class="editable-title"></span>
+  </div>
+
+  <!-- LEGEND -->
+  <div id="legend" class="legend"></div>
+
+  <!-- TOOLBAR -->
+  <div class="toolbar">
+    <div class="toolbar-left">
+      <label for="excelInput">Excel Yükle:</label>
+      <input type="file" id="excelInput" accept=".xlsx,.xls">
+    </div>
+    <div class="toolbar-right">
+      <input type="text" id="searchInput" placeholder="Ürün / renk ara...">
+      <button type="button" id="clearSearchBtn">Temizle</button>
+      <button type="button" onclick="printDesktop()">A4 / Standart Yazdır</button>
+      <button type="button" onclick="printMobile()">Telefon için Yazdır</button>
+    </div>
+  </div>
+
+  <!-- CONTENT -->
+  <div id="content"></div>
+
+  <!-- FOOTER -->
+  <div class="footer">
+    <div class="line">
+      Şentürk Boya İnş. Tur. San. Tic. Ltd. Şti. &nbsp;&nbsp;
+      Adres : Petrol İş Mah. Kızılay Bulvarı Efe Sok. No:4 Toprakyol Kartal / İstanbul
+    </div>
+    <div class="line">
+      Telefon: 0216 - 473 78 90 &nbsp;&nbsp;&nbsp;
+      Fax : 0216 - 473 78 93 &nbsp;&nbsp;&nbsp;
+      info@senturkboya.com
+    </div>
+  </div>
+
+</div>
+
+<script>
+// -------------------- CATEGORY COLORS & LEGEND --------------------
+
+const CATEGORY_STYLES = [
+  { match: "iç cephe",             label: "İç Cephe",               color: "#f07530" },
+  { match: "dış cephe",            label: "Dış Cephe",              color: "#1b2533" },
+  { match: "astar",                label: "Astarlar",               color: "#607D8B" },
+  { match: "dekoratif",            label: "Dekoratif Boya",         color: "#9C27B0" },
+  { match: "su yalıtım",           label: "Su Yalıtım",             color: "#2196F3" },
+  { match: "sentetik",             label: "Sentetik",               color: "#3F51B5" },
+  { match: "su bazlı yağlı boya",  label: "Su Bazlı Yağlı Boya",    color: "#4CAF50" },
+  { match: "acomix",               label: "Acomix Colorant",        color: "#FF9800" },
+  { match: "fit",                  label: "FIT",                    color: "#795548" },
+  { match: "cuprinol",             label: "Cuprinol",               color: "#2E7D32" },
+  { match: "hammerite",            label: "Hammerite",              color: "#9E9E9E" },
+  { match: "sprey boya",           label: "Sprey Boya",             color: "#009688" }
+];
+
+function getCategoryInfo(catName) {
+  const s = catName ? catName.toString().toLocaleLowerCase("tr-TR") : "";
+  for (const cfg of CATEGORY_STYLES) {
+    const key = cfg.match.toLocaleLowerCase("tr-TR");
+    if (s.includes(key)) return cfg;
+  }
+  return {
+    label: catName || "Diğer",
+    color: "#999999"
+  };
+}
+
+function renderLegend(catNames) {
+  const legendEl = document.getElementById("legend");
+  if (!legendEl) return;
+
+  const usedKeys = new Set();
+  const items = [];
+
+  catNames.forEach(catName => {
+    const info = getCategoryInfo(catName);
+    const key = info.label + "|" + info.color;
+    if (!usedKeys.has(key)) {
+      usedKeys.add(key);
+      items.push(info);
+    }
+  });
+
+  if (!items.length) {
+    legendEl.innerHTML = "";
+    return;
+  }
+
+  let html = `<span class="legend-title">Ürün Grupları:</span>`;
+  items.forEach(info => {
+    html += `
+      <span class="legend-item">
+        <span class="legend-swatch" style="background:${info.color}"></span>
+        <span>${info.label}</span>
+      </span>
+    `;
+  });
+
+  legendEl.innerHTML = html;
+}
+
+// -------------------- HELPERS --------------------
+
+function formatPrice(val) {
+  if (val == null || val === "" || isNaN(val)) return "-";
+  return Number(val).toLocaleString("tr-TR", {
+    minimumFractionDigits: 2,
+    maximumFractionDigits: 2
+  });
+}
+
+function getField(row, names) {
+  const keys = Object.keys(row);
+  const norm = s => s.toString().toLowerCase().replace(/\s+/g, " ").trim();
+  for (const name of names) {
+    const target = norm(name);
+    for (const key of keys) {
+      if (norm(key) === target) return row[key];
+    }
+  }
+  return "";
+}
+
+function parseVolume(amb) {
+  if (!amb) return 99999;
+  const cleaned = amb.toString().toLowerCase().replace("l", "").trim().replace(",", ".");
+  const num = parseFloat(cleaned);
+  return isNaN(num) ? 99999 : num;
+}
+
+function parseNumberFlexible(val) {
+  if (val == null || val === "") return NaN;
+  if (typeof val === "number") return val;
+
+  let s = val.toString().trim();
+  if (!s) return NaN;
+
+  s = s.replace(/[^0-9,.\-]/g, "");
+
+  if (s.includes(",")) {
+    s = s.replace(/\./g, "").replace(",", ".");
+    return parseFloat(s);
+  }
+
+  const firstDot = s.indexOf(".");
+  const lastDot = s.lastIndexOf(".");
+  if (firstDot !== -1 && firstDot !== lastDot) {
+    const intPart = s.slice(0, lastDot).replace(/\./g, "");
+    const decPart = s.slice(lastDot + 1);
+    s = intPart + "." + decPart;
+  }
+
+  return parseFloat(s);
+}
+
+function shortAmbLabel(amb) {
+  if (!amb) return "";
+  const s = amb.toString();
+  const idx = s.indexOf("(");
+  const base = idx !== -1 ? s.slice(0, idx) : s;
+  return base.trim();
+}
+
+// -------------------- MAIN RENDER --------------------
+
+function renderFromRows(rows) {
+  const catMap = {};
+  let lastCat = "";
+  let lastGroup = "";
+
+  // Forward fill Ürün Grubu & Ürün Tanımı
+  rows.forEach(r => {
+    let cat = getField(r, ["Ürün Grubu"]);
+    let group = getField(r, ["Ürün Tanımı"]);
+
+    if (cat) {
+      lastCat = cat;
+    } else {
+      cat = lastCat;
+    }
+
+    if (group) {
+      lastGroup = group;
+    } else {
+      group = lastGroup;
+    }
+
+    if (!cat || !group) return;
+
+    if (!catMap[cat]) catMap[cat] = {};
+    if (!catMap[cat][group]) catMap[cat][group] = [];
+    catMap[cat][group].push(r);
+  });
+
+  let html = "";
+  const catNames = Object.keys(catMap);
+
+  // Legend
+  renderLegend(catNames);
+
+  catNames.forEach(catName => {
+    const groupMap = catMap[catName];
+    const groupNames = Object.keys(groupMap);
+
+    const catInfo = getCategoryInfo(catName);
+    const stripeStyle = `style="--stripe-color:${catInfo.color}"`;
+
+    groupNames.forEach(groupName => {
+      const groupRows = groupMap[groupName];
+
+      const colorMap = {};
+      const groupAmbSet = new Set();
+
+      // Forward fill Renk
+      let lastColor = "";
+
+      groupRows.forEach(r => {
+        let color = getField(r, ["Renk"]);
+        if (color) {
+          lastColor = color;
+        } else {
+          color = lastColor || "-";
+        }
+
+        const amb = getField(r, ["Ambalaj"]) || "";
+
+        if (!colorMap[color]) colorMap[color] = {};
+        if (amb) {
+          colorMap[color][amb] = r;
+          groupAmbSet.add(amb);
+        }
+      });
+
+      const colors = Object.keys(colorMap);
+      if (colors.length === 0) return;
+
+      const ambOrderGroup = Array.from(groupAmbSet).sort(
+        (a, b) => parseVolume(a) - parseVolume(b)
+      );
+
+      html += `<div class="group-block">`;
+
+      html += `
+        <table class="price-matrix" ${stripeStyle}>
+          <colgroup>
+            <col class="col-product">
+            <col class="col-color">
+      `;
+      ambOrderGroup.forEach(() => (html += `<col class="col-price">`));
+      html += `</colgroup>`;
+
+      html += `
+        <thead>
+          <tr>
+            <th class="col-product">Ürün</th>
+            <th class="col-color">Renk / Baz</th>
+      `;
+      ambOrderGroup.forEach(amb => (html += `<th>${shortAmbLabel(amb)}</th>`));
+      html += `
+          </tr>
+        </thead>
+      `;
+
+      html += `<tbody>`;
+
+      colors.forEach((color, idx) => {
+        html += `<tr>`;
+
+        if (idx === 0) {
+          html += `<td class="col-product" rowspan="${colors.length}">${groupName}</td>`;
+        }
+
+        html += `<td class="col-color">${color}</td>`;
+
+        ambOrderGroup.forEach(amb => {
+          const row = colorMap[color][amb];
+          let cellHtml = "-";
+
+          if (row) {
+            const raw = getField(row, [
+              "Net fiyat (KDV hariç)",
+              "Net fiyat (KDV Dahil)",
+              "Brüt Liste Fiyatı (KDV Dahil)",
+              "Liste Fiyatı (KDV dahil)",
+              "Net fiyat",
+              "Fiyat",
+              "Liste Fiyatı"
+            ]);
+
+            const price = parseNumberFlexible(raw);
+            if (!isNaN(price)) {
+              cellHtml = formatPrice(price);
+            }
+          }
+
+          html += `<td class="col-price">${cellHtml}</td>`;
+        });
+
+        html += `</tr>`;
+      });
+
+      html += `</tbody></table></div>`;
+    });
+  });
+
+  document.getElementById("content").innerHTML = html;
+  applySearch();
+}
+
+// -------------------- SEARCH & PRINT --------------------
+
+function applySearch() {
+  const term = document.getElementById("searchInput").value.trim().toLowerCase();
+  const blocks = document.querySelectorAll("#content .group-block");
+
+  if (!term) {
+    blocks.forEach(b => b.style.display = "");
+    return;
+  }
+
+  blocks.forEach(b => {
+    const text = b.textContent.toLowerCase();
+    b.style.display = text.includes(term) ? "" : "none";
+  });
+}
+
+function setPrintMode(mode) {
+  document.body.classList.remove("desktop-print", "mobile-print");
+  document.body.classList.add(mode);
+  window.print();
+}
+
+function printDesktop() {
+  setPrintMode("desktop-print");
+}
+
+function printMobile() {
+  setPrintMode("mobile-print");
+}
+
+window.addEventListener("afterprint", () => {
+  document.body.classList.remove("desktop-print", "mobile-print");
+});
+
+// -------------------- EXCEL LOAD & INIT --------------------
+
+document.getElementById("excelInput").addEventListener("change", e => {
+  const file = e.target.files[0];
+  if (!file) return;
+
+  const reader = new FileReader();
+  reader.onload = evt => {
+    const workbook = XLSX.read(evt.target.result, { type: "array" });
+    let sheetName = "Sayfa2";
+    if (!workbook.Sheets[sheetName]) sheetName = workbook.SheetNames[0];
+
+    const ws = workbook.Sheets[sheetName];
+    const rows = XLSX.utils.sheet_to_json(ws, { defval: "" });
+
+    renderFromRows(rows);
+  };
+  reader.readAsArrayBuffer(file);
+});
+
+document.addEventListener("DOMContentLoaded", () => {
+  const now = new Date();
+  const months = [
+    "OCAK","ŞUBAT","MART","NİSAN","MAYIS","HAZİRAN",
+    "TEMMUZ","AĞUSTOS","EYLÜL","EKİM","KASIM","ARALIK"
+  ];
+  const monthLabel = document.getElementById("monthLabel");
+  if (monthLabel) {
+    monthLabel.textContent = `${months[now.getMonth()]} ${now.getFullYear()}`;
+  }
+
+  const searchInput = document.getElementById("searchInput");
+  const clearBtn = document.getElementById("clearSearchBtn");
+
+  if (searchInput) {
+    searchInput.addEventListener("input", applySearch);
+  }
+
+  if (clearBtn) {
+    clearBtn.addEventListener("click", () => {
+      searchInput.value = "";
+      applySearch();
+    });
+  }
+});
+</script>
+
+</body>
+</html>
