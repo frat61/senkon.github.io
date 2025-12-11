@@ -358,7 +358,7 @@
   <!-- HEADER -->
   <div class="header">
     <div class="senturk-logo">
-      <img src=""assets/images/senturk_logo.png"" alt="Şentürk">
+      <img src="assets/images/senturk_logo.png" alt="Şentürk">
     </div>
     <div class="marshall-logo">
       <img src="assets/images/marshall_logo.png" alt="Marshall">
@@ -718,6 +718,7 @@ window.addEventListener("afterprint", () => {
 
 // -------------------- EXCEL LOAD & INIT --------------------
 
+// manual upload (still works)
 document.getElementById("excelInput").addEventListener("change", e => {
   const file = e.target.files[0];
   if (!file) return;
@@ -735,6 +736,25 @@ document.getElementById("excelInput").addEventListener("change", e => {
   };
   reader.readAsArrayBuffer(file);
 });
+
+// auto-load Excel from GitHub on page load
+function autoLoadExcel() {
+  fetch("assets/data/FL_Database-TEST.xlsx")
+    .then(response => response.arrayBuffer())
+    .then(buffer => {
+      const workbook = XLSX.read(buffer, { type: "array" });
+      let sheetName = "Sayfa2";
+      if (!workbook.Sheets[sheetName]) {
+        sheetName = workbook.SheetNames[0];
+      }
+      const ws = workbook.Sheets[sheetName];
+      const rows = XLSX.utils.sheet_to_json(ws, { defval: "" });
+      renderFromRows(rows);
+    })
+    .catch(err => {
+      console.error("Auto-load Excel failed:", err);
+    });
+}
 
 document.addEventListener("DOMContentLoaded", () => {
   const now = new Date();
@@ -760,9 +780,11 @@ document.addEventListener("DOMContentLoaded", () => {
       applySearch();
     });
   }
+
+  // load default Excel file on startup
+  autoLoadExcel();
 });
 </script>
 
 </body>
 </html>
-  
