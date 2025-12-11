@@ -2,314 +2,377 @@
 <html lang="tr">
 <head>
   <meta charset="UTF-8">
-  <title>Senkon Mühendislik – Araçlar</title>
+  <title>Senkon Mühendislik – Araç Paneli</title>
   <meta name="viewport" content="width=device-width, initial-scale=1">
 
   <style>
     :root {
-      --bg-grid: #f3f5f7;
-      --page-bg: #ffffff;
-      --border-light: #e0e3e7;
-      --senturk-navy: #1b2533;
-      --senturk-orange: #f07530;
+      --grid-bg: #f5f6f7;
+      --white: #ffffff;
+      --border: #d4d7dd;
+      --border-soft: #e2e4e8;
+      --text-dark: #111827;
       --text-muted: #6b7280;
+      --navy: #1b2533;
+      --nav-bg: #f3f4f6;
+      --nav-active-bg: #e5e7eb;
     }
 
     * {
       box-sizing: border-box;
+      margin: 0;
+      padding: 0;
     }
 
     body {
-      margin: 0;
-      padding: 32px 16px;
-      font-family: system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI",
-                   "Helvetica Neue", Arial, "Noto Sans", sans-serif;
+      font-family: "Inter", system-ui, -apple-system, BlinkMacSystemFont,
+                   "Segoe UI", Helvetica, Arial, sans-serif;
       background:
-        linear-gradient(90deg, rgba(0,0,0,0.03) 1px, transparent 1px),
-        linear-gradient(180deg, rgba(0,0,0,0.03) 1px, transparent 1px);
-      background-size: 28px 28px;
-      background-color: var(--bg-grid);
-      color: #111827;
+        linear-gradient(90deg, rgba(0,0,0,0.025) 1px, transparent 1px),
+        linear-gradient(180deg, rgba(0,0,0,0.025) 1px, transparent 1px);
+      background-size: 26px 26px;
+      background-color: var(--grid-bg);
+      padding: 24px 10px;
+      color: var(--text-dark);
     }
 
-    .page {
-      max-width: 960px;
-      margin: 0 auto;
-      min-height: calc(100vh - 64px);
-      background: var(--page-bg);
-      border-radius: 14px;
-      box-shadow: 0 10px 30px rgba(15, 23, 42, 0.12);
-      border: 1px solid rgba(148, 163, 184, 0.4);
-      padding: 24px 28px 22px;
+    .shell {
+      max-width: 1040px;
+      margin: auto;
+      min-height: calc(100vh - 48px);
+      background: var(--white);
+      border-radius: 10px;
+      border: 1px solid var(--border);
+      display: flex;
+      overflow: hidden;
+    }
+
+    /* SIDEBAR */
+
+    .sidebar {
+      width: 230px;
+      border-right: 1px solid var(--border-soft);
+      background: var(--nav-bg);
       display: flex;
       flex-direction: column;
+      padding: 16px 14px 18px;
     }
 
-    @media (max-width: 768px) {
-      .page {
-        padding: 20px 18px 18px;
-      }
-    }
-
-    /* HEADER */
-
-    .header {
+    .sb-header {
       display: flex;
       align-items: center;
-      justify-content: space-between;
-      gap: 16px;
+      gap: 10px;
       margin-bottom: 18px;
     }
 
-    .header-left {
-      display: flex;
-      align-items: center;
-      gap: 16px;
-      min-width: 0;
-    }
-
-    .logo-small {
-      width: 68px;
-      height: 68px;
-      border: 2px solid #111827;
-      padding: 6px;
-      background: #ffffff;
+    .logo-box {
+      width: 44px;
+      height: 44px;
+      border: 1px solid #c5c7c9;
+      background: var(--white);
+      padding: 4px;
       flex-shrink: 0;
     }
 
-    .logo-small img {
+    .logo-box img {
       width: 100%;
       height: auto;
       display: block;
     }
 
-    .title-block {
-      display: flex;
-      flex-direction: column;
-      gap: 4px;
-      min-width: 0;
-    }
-
-    .title-main {
-      font-size: 20px;
-      letter-spacing: 0.18em;
+    .sb-title-main {
+      font-size: 13px;
+      letter-spacing: 0.16em;
       text-transform: uppercase;
       font-weight: 600;
-      color: var(--senturk-navy);
-      white-space: nowrap;
-      overflow: hidden;
-      text-overflow: ellipsis;
+      color: var(--navy);
     }
 
-    .title-sub {
-      font-size: 13px;
-      color: var(--text-muted);
-    }
-
-    .header-pill {
+    .sb-title-sub {
       font-size: 11px;
-      padding: 4px 10px;
-      border-radius: 999px;
-      border: 1px solid rgba(148, 163, 184, 0.8);
-      color: #4b5563;
-      background: #f9fafb;
-      white-space: nowrap;
+      color: var(--text-muted);
+      margin-top: 2px;
     }
 
-    @media (max-width: 640px) {
-      .header {
-        flex-direction: column;
-        align-items: flex-start;
-      }
+    .sb-section-label {
+      font-size: 11px;
+      text-transform: uppercase;
+      letter-spacing: 0.12em;
+      color: #9ca3af;
+      margin-bottom: 6px;
+      margin-top: 4px;
     }
 
-    hr.divider {
-      margin: 8px 0 18px;
-      border: none;
-      border-top: 1px solid rgba(209, 213, 219, 0.9);
+    .nav-list {
+      list-style: none;
+      margin-bottom: 16px;
     }
 
-    /* TOOL SECTION */
-
-    .section-title {
-      font-size: 16px;
-      font-weight: 600;
-      color: var(--senturk-navy);
+    .nav-item {
       margin-bottom: 4px;
     }
 
-    .section-sub {
+    .nav-link {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: 6px;
       font-size: 13px;
-      color: var(--text-muted);
-      margin-bottom: 14px;
+      padding: 6px 8px;
+      border-radius: 6px;
+      color: var(--text-dark);
+      text-decoration: none;
     }
 
-    .tool-list {
+    .nav-link span.label {
+      flex: 1;
+      white-space: nowrap;
+      overflow: hidden;
+      text-overflow: ellipsis;
+    }
+
+    .nav-link span.meta {
+      font-size: 11px;
+      color: #9ca3af;
+      white-space: nowrap;
+    }
+
+    .nav-link.active {
+      background: var(--nav-active-bg);
+      font-weight: 500;
+      border: 1px solid var(--border);
+    }
+
+    .nav-link:hover:not(.active) {
+      background: rgba(255,255,255,0.8);
+    }
+
+    .sb-footer {
+      margin-top: auto;
+      font-size: 11px;
+      color: var(--text-muted);
+      padding-top: 10px;
+      border-top: 1px solid var(--border-soft);
+    }
+
+    /* MAIN CONTENT */
+
+    .content {
+      flex: 1;
+      padding: 18px 22px 22px;
       display: flex;
       flex-direction: column;
+    }
+
+    .content-header {
+      display: flex;
+      justify-content: space-between;
+      align-items: flex-start;
+      margin-bottom: 14px;
+      border-bottom: 1px solid var(--border-soft);
+      padding-bottom: 10px;
+    }
+
+    .ch-left-title {
+      font-size: 16px;
+      font-weight: 600;
+      color: var(--navy);
+      margin-bottom: 2px;
+    }
+
+    .ch-left-sub {
+      font-size: 12px;
+      color: var(--text-muted);
+    }
+
+    .ch-pill {
+      font-size: 11px;
+      padding: 4px 10px;
+      border-radius: 999px;
+      border: 1px solid var(--border-soft);
+      background: #f9fafb;
+      color: #4b5563;
+      white-space: nowrap;
+    }
+
+    .tool-detail {
+      margin-top: 10px;
+      max-width: 620px;
+      font-size: 13px;
+      color: var(--text-muted);
+      line-height: 1.5;
+    }
+
+    .detail-card {
+      margin-top: 16px;
+      border-radius: 8px;
+      border: 1px solid var(--border-soft);
+      background: #fafafa;
+      padding: 12px 14px;
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
       gap: 10px;
     }
 
-    .tool-row {
-      border-radius: 999px;
-      border: 1px solid var(--border-light);
-      background: #f9fafb;
-      padding: 8px 12px;
-      display: flex;
-      align-items: center;
-      gap: 12px;
-      transition: background 0.15s ease, box-shadow 0.15s ease,
-                  transform 0.1s ease;
-    }
-
-    .tool-dot {
-      width: 8px;
-      height: 8px;
-      border-radius: 999px;
-      background: #111827;
-      flex-shrink: 0;
-    }
-
-    .tool-main {
-      display: flex;
-      flex-direction: column;
-      gap: 2px;
-      min-width: 0;
-      flex: 1;
-    }
-
-    .tool-name {
-      font-size: 14px;
-      font-weight: 500;
-      color: #111827;
-      white-space: nowrap;
-      overflow: hidden;
-      text-overflow: ellipsis;
-    }
-
-    .tool-desc {
+    .detail-text {
       font-size: 12px;
       color: var(--text-muted);
-      white-space: nowrap;
-      overflow: hidden;
-      text-overflow: ellipsis;
     }
 
-    .tool-meta {
+    .detail-text code {
       font-size: 11px;
-      color: #9ca3af;
     }
 
-    .tool-button {
-      border-radius: 999px;
-      border: none;
-      padding: 6px 12px;
+    .detail-button {
       font-size: 12px;
-      cursor: pointer;
-      background: var(--senturk-navy);
+      padding: 7px 14px;
+      border-radius: 999px;
+      border: 1px solid var(--navy);
+      background: var(--navy);
       color: #ffffff;
-      white-space: nowrap;
       text-decoration: none;
-      display: inline-flex;
-      align-items: center;
-      gap: 4px;
-      box-shadow: 0 4px 10px rgba(15, 23, 42, 0.25);
+      white-space: nowrap;
     }
 
-    .tool-button span.arrow {
-      font-size: 13px;
+    .detail-button:hover {
+      opacity: 0.9;
     }
 
-    .tool-row:hover {
-      background: #ffffff;
-      transform: translateY(-1px);
-      box-shadow: 0 6px 14px rgba(15, 23, 42, 0.12);
-    }
-
-    /* FOOTER */
-
-    .footer {
-      margin-top: 22px;
-      padding-top: 14px;
-      border-top: 1px solid rgba(209, 213, 219, 0.9);
-      text-align: center;
+    .content-footer {
+      margin-top: auto;
+      padding-top: 16px;
+      border-top: 1px solid var(--border-soft);
       font-size: 11px;
       color: var(--text-muted);
+    }
+
+    /* RESPONSIVE */
+
+    @media (max-width: 720px) {
+      .shell {
+        flex-direction: column;
+      }
+
+      .sidebar {
+        width: 100%;
+        border-right: none;
+        border-bottom: 1px solid var(--border-soft);
+        flex-direction: row;
+        flex-wrap: wrap;
+        align-items: center;
+        gap: 10px;
+      }
+
+      .sb-header {
+        margin-bottom: 0;
+      }
+
+      .sb-section-label {
+        width: 100%;
+        margin-top: 6px;
+      }
+
+      .nav-list {
+        display: flex;
+        flex: 1;
+        margin-bottom: 0;
+      }
+
+      .nav-item {
+        flex: 1;
+      }
+
+      .nav-link {
+        justify-content: center;
+      }
+
+      .sb-footer {
+        display: none;
+      }
+
+      .content {
+        padding: 16px 16px 18px;
+      }
     }
   </style>
 </head>
+
 <body>
+  <div class="shell">
 
-<div class="page">
-  <!-- HEADER -->
-  <header class="header">
-    <div class="header-left">
-      <div class="logo-small">
-        <!-- mammoth logo in repo root -->
-        <img src="senkonlogo.png" alt="Senkon Mühendislik">
-      </div>
-      <div class="title-block">
-        <div class="title-main">SENKON MÜHENDİSLİK</div>
-        <div class="title-sub">
-          İç kullanım araçları: fiyat listeleri, hesaplayıcılar ve ofis iş akışlarını
-          hızlandıran küçük kod tabanlı çözümler.
+    <!-- SIDEBAR -->
+    <aside class="sidebar">
+      <div class="sb-header">
+        <div class="logo-box">
+          <img src="senkonlogo.png" alt="Senkon Mühendislik">
+        </div>
+        <div>
+          <div class="sb-title-main">SENKON</div>
+          <div class="sb-title-sub">Mühendislik Araç Paneli</div>
         </div>
       </div>
-    </div>
 
-    <div class="header-pill">
-      İç kullanım / internal tools
-    </div>
-  </header>
+      <div class="sb-section-label">Araçlar</div>
+      <ul class="nav-list">
+        <li class="nav-item">
+          <!-- active item just for display; link goes directly to tool -->
+          <a class="nav-link active" href="fiyat-listesi.html">
+            <span class="label">Marshall Fiyat Listesi Matrisi</span>
+            <span class="meta">Excel</span>
+          </a>
+        </li>
 
-  <hr class="divider">
+        <!-- Gelecekte yeni araçlar için:
+        <li class="nav-item">
+          <a class="nav-link" href="arac2.html">
+            <span class="label">Yeni Araç Adı</span>
+            <span class="meta">Hesaplayıcı</span>
+          </a>
+        </li>
+        -->
+      </ul>
 
-  <!-- TOOLS -->
-  <main>
-    <h2 class="section-title">Araçlar</h2>
-    <p class="section-sub">
-      Kullanmak istediğiniz işlemi seçin. Yeni araçlar eklendikçe bu liste genişleyecek.
-    </p>
+      <div class="sb-footer">
+        Senkon Mühendislik<br>
+        İç kullanım / internal tools
+      </div>
+    </aside>
 
-    <div class="tool-list">
-      <!-- TOOL 1 -->
-      <div class="tool-row">
-        <div class="tool-dot"></div>
-        <div class="tool-main">
-          <div class="tool-name">Marshall Özet Fiyat Listesi Matrisi</div>
-          <div class="tool-desc">
-            Excel fiyat listesinden ürün grubu / renk / ambalaj bazında özet matris ve yazdırma.
-          </div>
-          <div class="tool-meta">
-            Veri kaynağı: assets/data/FL_Database-TEST.xlsx
+    <!-- MAIN CONTENT -->
+    <main class="content">
+      <div class="content-header">
+        <div>
+          <div class="ch-left-title">Marshall Özet Fiyat Listesi Matrisi</div>
+          <div class="ch-left-sub">
+            GitHub'da tutulan Excel fiyat listesi verisini kullanarak ürün grubu, renk ve ambalaj
+            bazında özet matris oluşturur. Arama ve A4 / mobil yazdırma desteklidir.
           </div>
         </div>
-        <a class="tool-button" href="fiyat-listesi.html">
-          Aracı Aç <span class="arrow">→</span>
+        <div class="ch-pill">Araç tipi: Fiyat listesi / Excel</div>
+      </div>
+
+      <div class="tool-detail">
+        Bu araç Şentürk / Marshall fiyat listesi dosyanızı temel alır ve iç kullanım için hızlı bir
+        özet görünüm üretir. Güncel Excel dosyanızı GitHub deposundaki
+        <code>assets/data/</code> klasörüne yerleştirerek varsayılan veriyi güncelleyebilirsiniz.
+      </div>
+
+      <div class="detail-card">
+        <div class="detail-text">
+          Varsayılan veri kaynağı:<br>
+          <code>assets/data/FL_Database-TEST.xlsx</code>
+        </div>
+        <a class="detail-button" href="fiyat-listesi.html">
+          Aracı Aç →
         </a>
       </div>
 
-      <!-- Gelecekte yeni araç eklemek için bu bloğu kopyalayıp href + isimleri değiştirmeniz yeterli
-      <div class="tool-row">
-        <div class="tool-dot"></div>
-        <div class="tool-main">
-          <div class="tool-name">Yeni Araç Adı</div>
-          <div class="tool-desc">Kısa açıklama...</div>
-          <div class="tool-meta">Kod dosyası: arac2.html</div>
-        </div>
-        <a class="tool-button" href="arac2.html">
-          Aracı Aç <span class="arrow">→</span>
-        </a>
+      <div class="content-footer">
+        Senkon Mühendislik – fiyat listeleri ve mühendislik süreçleri için geliştirilmiş yardımcı araç paneli.
       </div>
-      -->
-    </div>
-  </main>
+    </main>
 
-  <!-- FOOTER -->
-  <footer class="footer">
-    Senkon Mühendislik – iç kullanım için geliştirilmiş yardımcı araçlar.
-  </footer>
-</div>
-
+  </div>
 </body>
 </html>
