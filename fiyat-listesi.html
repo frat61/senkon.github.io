@@ -739,7 +739,7 @@ document.getElementById("excelInput").addEventListener("change", e => {
 
 // auto-load Excel from GitHub on page load
 function autoLoadExcel() {
-  fetch("assets/data/FL_Database-TEST.xlsx")
+  fetch("assets/data/FL_Database.xlsx")
     .then(response => response.arrayBuffer())
     .then(buffer => {
       const workbook = XLSX.read(buffer, { type: "array" });
