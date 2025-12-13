@@ -28,8 +28,8 @@
 
       --rowAlt:#f7f7f7;
 
-      /* NEW: light section bar colors */
-      --sectionBg:#f8fafc;        /* white-ish */
+      /* Light section bar */
+      --sectionBg:#f8fafc;
       --sectionText:#111827;
     }
 
@@ -73,6 +73,7 @@
       height: 54px;
       width:auto;
       object-fit:contain;
+      display:block;
     }
 
     .titleWrap{
@@ -138,17 +139,16 @@
       page-break-inside: avoid;
     }
 
-    /* UPDATED: section header bar is white-ish now */
     .sectionHead{
       background: var(--sectionBg);
       color: var(--sectionText);
       padding: 10px 12px;
-      border-radius: 8px 8px 0 0;
+      border-radius: 10px 10px 0 0;
       display:flex;
       justify-content:flex-start;
       align-items:center;
-      gap: 10px;
-      font-weight: 750;
+      gap: 12px;
+      font-weight: 800;
       font-size: 14px;
       border: 1px solid var(--tableBorder);
       border-bottom: none;
@@ -157,14 +157,15 @@
     .sectionLeft{
       display:flex;
       align-items:center;
-      gap:10px;
+      gap:12px;
       min-width: 0;
     }
 
+    /* BIGGER brand logo (PC) */
     .brandLogo{
-      width: 30px;
-      height: 30px;
-      border-radius: 8px;
+      width: 40px;
+      height: 40px;
+      border-radius: 10px;
       background: #fff;
       display:flex;
       align-items:center;
@@ -173,18 +174,18 @@
       border: 1px solid var(--tableBorder);
       flex: 0 0 auto;
     }
-
     .brandLogo img{
       width: 100%;
       height: 100%;
       object-fit: contain;
-      padding: 3px;
+      padding: 4px;
+      display:block;
     }
 
     .brandBadge{
-      width: 30px;
-      height: 30px;
-      border-radius: 8px;
+      width: 40px;
+      height: 40px;
+      border-radius: 10px;
       background: #fff;
       border: 1px solid var(--tableBorder);
       display:flex;
@@ -206,7 +207,7 @@
       border: 1px solid var(--tableBorder);
       border-top: none;
       overflow:auto;
-      border-radius: 0 0 8px 8px;
+      border-radius: 0 0 10px 10px;
     }
 
     table{
@@ -226,7 +227,7 @@
     th{
       background: var(--thead);
       font-size: 13px;
-      font-weight: 800;
+      font-weight: 900;
       position: sticky;
       top: 0;
     }
@@ -234,11 +235,90 @@
     tbody tr:nth-child(even){ background: var(--rowAlt); }
     .hidden{ display:none !important; }
 
+    /* ─────────────────────────────────────────────
+       MOBILE VIEW: table -> cards
+       ───────────────────────────────────────────── */
+    @media (max-width: 760px){
+      body{ padding: 10px; }
+      .paper{ padding: 14px 12px 16px; }
+
+      .logoSide{ min-width: 0; }
+      .logoSide img{ height: 42px; }
+
+      .titleWrap{
+        margin: 0;
+        border-top: 0;
+        padding-top: 0;
+      }
+      .titleWrap h1{ font-size: 15px; letter-spacing: .04em; }
+      .titleWrap .sub{ font-size: 11px; }
+
+      .controlsRow{ gap: 8px; }
+      .search{ min-width: 100%; flex: 1 1 100%; }
+      input[type="file"]{ width: 100%; }
+      .btn{ flex: 1 1 auto; }
+
+      /* Bigger brand logo on mobile */
+      .brandLogo, .brandBadge{
+        width: 46px;
+        height: 46px;
+        border-radius: 12px;
+      }
+      .brandLogo img{ padding: 5px; }
+
+      /* Card mode */
+      .tableWrap{ overflow: visible; }
+      table{
+        min-width: 0;
+        width: 100%;
+        border-collapse: separate;
+        border-spacing: 0 10px;
+      }
+      thead{ display:none; }
+
+      tbody tr{
+        display:block;
+        background:#fff;
+        border: 1px solid var(--tableBorder);
+        border-radius: 12px;
+        overflow:hidden;
+      }
+      tbody tr:nth-child(even){ background:#fff; }
+
+      td{
+        display:grid;
+        grid-template-columns: 44% 56%;
+        gap: 10px;
+        white-space: normal;
+        border: none;
+        border-bottom: 1px solid var(--tableBorder);
+        padding: 10px 12px;
+      }
+      td:last-child{ border-bottom:none; }
+
+      td::before{
+        content: attr(data-label);
+        font-weight: 900;
+        color:#111827;
+        opacity: .9;
+      }
+
+      /* Product name: bigger + bold inside cards */
+      td.cell-product{
+        font-size: 15px;
+        font-weight: 900;
+      }
+    }
+
+    @media (max-width: 420px){
+      td{ grid-template-columns: 48% 52%; padding: 9px 10px; }
+    }
+
     @media print{
       body{ background:#fff; padding:0 }
       .paper{ box-shadow:none; border:none; padding:10mm; }
       .controlsRow,.hint{ display:none }
-      table{ min-width:auto }
+      table{ min-width:auto; border-collapse:collapse; border-spacing:0; }
       th{ position:static }
       td,th{ white-space:normal }
     }
@@ -259,7 +339,8 @@
     </div>
 
     <div class="logoSide right">
-      <img src="assets/images/marshall_logo.png" alt="" onerror="this.style.display='none'">
+      <!-- ✅ changed to your new uploaded file -->
+      <img src="assets/images/alt_toplu_logo.png" alt="" onerror="this.style.display='none'">
     </div>
   </div>
 
@@ -274,11 +355,12 @@
   <div class="hint">
     • Her Excel sheet = 1 marka<br>
     • Logo adı: <code>assets/images/&lt;sheet_adi&gt;_logo.png</code><br>
-    • Boş marka/ürün hücreleri üst satırdan otomatik devralınır (merged cell fix)
+    • Boş marka/ürün/kod hücreleri üst satırdan otomatik devralınır
   </div>
 
   <div id="container"></div>
-  <div id="summary" class="hint"></div>
+  <!-- ✅ kept but always empty (counter removed) -->
+  <div id="summary" class="hint" style="display:none;"></div>
 
 </div>
 
@@ -310,7 +392,7 @@ function autoLoad(){
       return r.arrayBuffer();
     })
     .then(buf => parseExcel(buf))
-    .catch(() => summary.textContent="Excel otomatik yüklenemedi. Manuel yükleyebilirsiniz.");
+    .catch(() => { /* silent */ });
 }
 
 function loadFile(file){
@@ -341,12 +423,20 @@ function headerNorm(h){
     .trim();
 }
 
+function isProductHeader(h){
+  const n = headerNorm(h);
+  // "Ürün", "Ürün Adı", "Açıklama" etc. (but NOT "Ürün Markası")
+  const looksLikeProduct =
+    n === "urun" || n.includes("urunadi") || n.includes("aciklama") || n.includes("açiklama");
+  const isBrand = n.includes("urunmarkasi") || (n === "marka") || (n.includes("marka") && !n.includes("ambalaj"));
+  return looksLikeProduct && !isBrand;
+}
+
 function detectCarryColumns(headers){
   // columns that should "inherit from above" when empty (merged cells)
   const carry = [];
   headers.forEach((h, i) => {
     const n = headerNorm(h);
-    // brand + product + code are typical merged columns
     if (
       n.includes("urunmarkasi") || n.includes("marka") ||
       n === "urun" || n.includes("urunadi") ||
@@ -354,7 +444,6 @@ function detectCarryColumns(headers){
       n.includes("kod")
     ) carry.push(i);
   });
-  // fallback: at least carry first column
   if (carry.length === 0 && headers.length) carry.push(0);
   return Array.from(new Set(carry));
 }
@@ -377,7 +466,6 @@ function format(v){
     return rounded.toLocaleString("tr-TR", { maximumFractionDigits: 2 });
   }
   const s = String(v ?? "").trim();
-  // fix long float strings
   if (s && /^-?\d+(\.\d+)?$/.test(s) && s.length > 10) {
     const num = Number(s);
     if (!Number.isNaN(num)) return format(num);
@@ -409,15 +497,15 @@ function parseExcel(buffer){
   container.innerHTML="";
   allRows=[]; allSections=[];
 
+  // ✅ cancel bottom counter completely
+  summary.textContent = "";
+
   const wb = XLSX.read(new Uint8Array(buffer), {type:"array"});
-  let totalRows = 0;
-  let usedSheets = 0;
 
   wb.SheetNames.forEach(sheetName=>{
     const ws = wb.Sheets[sheetName];
     const rows = XLSX.utils.sheet_to_json(ws,{header:1,raw:true,defval:""});
 
-    // find first row that looks like headers (>=2 filled)
     const headerIdx = rows.findIndex(r => r.filter(c => !isBlank(c)).length >= 2);
     if (headerIdx < 0) return;
 
@@ -425,14 +513,11 @@ function parseExcel(buffer){
     let data = rows
       .slice(headerIdx+1)
       .filter(r => r.some(c => !isBlank(c)));
-
     if (!data.length) return;
 
-    // ✅ FIX: merged-cell / empty brand/product -> inherit above
+    // merged-cell fix
     const carryIdxs = detectCarryColumns(headers);
     data = forwardFill(data, carryIdxs);
-
-    usedSheets++;
 
     const section = document.createElement("div");
     section.className="section";
@@ -451,8 +536,6 @@ function parseExcel(buffer){
     left.appendChild(nameEl);
 
     head.appendChild(left);
-
-    // ❌ removed "9 satır" counter entirely
     section.appendChild(head);
 
     const wrap = document.createElement("div");
@@ -475,9 +558,16 @@ function parseExcel(buffer){
       const tr=document.createElement("tr");
       tr.dataset.search=(sheetName+" "+r.map(format).join(" ")).toLowerCase();
 
-      headers.forEach((_,i)=>{
+      headers.forEach((h,i)=>{
         const td=document.createElement("td");
         td.textContent=format(r[i]);
+
+        // ✅ needed for mobile cards
+        td.setAttribute("data-label", h || "");
+
+        // ✅ make product name bold on mobile
+        if (isProductHeader(h)) td.classList.add("cell-product");
+
         tr.appendChild(td);
       });
 
@@ -490,11 +580,8 @@ function parseExcel(buffer){
     section.appendChild(wrap);
     container.appendChild(section);
     allSections.push(section);
-
-    totalRows += data.length;
   });
 
-  summary.textContent = `${usedSheets} marka · ${totalRows} satır`;
   applySearch();
 }
 
