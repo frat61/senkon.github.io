@@ -26,9 +26,11 @@
       --tableBorder:#dedede;
       --thead:#f2f2f2;
 
-      --sectionHead:#111827;
-      --sectionHeadText:#f9fafb;
       --rowAlt:#f7f7f7;
+
+      /* NEW: light section bar colors */
+      --sectionBg:#f8fafc;        /* white-ish */
+      --sectionText:#111827;
     }
 
     *{box-sizing:border-box;margin:0;padding:0}
@@ -136,35 +138,40 @@
       page-break-inside: avoid;
     }
 
+    /* UPDATED: section header bar is white-ish now */
     .sectionHead{
-      background: var(--sectionHead);
-      color: var(--sectionHeadText);
-      padding: 7px 10px;
-      border-radius: 6px 6px 0 0;
+      background: var(--sectionBg);
+      color: var(--sectionText);
+      padding: 10px 12px;
+      border-radius: 8px 8px 0 0;
       display:flex;
-      justify-content:space-between;
+      justify-content:flex-start;
       align-items:center;
-      font-weight: 700;
-      font-size: 13px;
       gap: 10px;
+      font-weight: 750;
+      font-size: 14px;
+      border: 1px solid var(--tableBorder);
+      border-bottom: none;
     }
 
     .sectionLeft{
       display:flex;
       align-items:center;
       gap:10px;
+      min-width: 0;
     }
 
     .brandLogo{
-      width: 28px;
-      height: 28px;
-      border-radius: 6px;
-      background: rgba(255,255,255,0.1);
+      width: 30px;
+      height: 30px;
+      border-radius: 8px;
+      background: #fff;
       display:flex;
       align-items:center;
       justify-content:center;
       overflow:hidden;
-      border: 1px solid rgba(255,255,255,0.2);
+      border: 1px solid var(--tableBorder);
+      flex: 0 0 auto;
     }
 
     .brandLogo img{
@@ -175,20 +182,31 @@
     }
 
     .brandBadge{
-      width: 28px;
-      height: 28px;
-      border-radius: 6px;
-      background: rgba(255,255,255,0.2);
+      width: 30px;
+      height: 30px;
+      border-radius: 8px;
+      background: #fff;
+      border: 1px solid var(--tableBorder);
       display:flex;
       align-items:center;
       justify-content:center;
-      font-weight: 800;
+      font-weight: 900;
+      color: #111827;
+      flex: 0 0 auto;
+    }
+
+    .brandName{
+      white-space: nowrap;
+      overflow: hidden;
+      text-overflow: ellipsis;
+      max-width: 900px;
     }
 
     .tableWrap{
       border: 1px solid var(--tableBorder);
       border-top: none;
       overflow:auto;
+      border-radius: 0 0 8px 8px;
     }
 
     table{
@@ -200,15 +218,15 @@
 
     th, td{
       border: 1px solid var(--tableBorder);
-      padding: 6px 8px;
+      padding: 7px 10px;
       white-space: nowrap;
       vertical-align: top;
     }
 
     th{
       background: var(--thead);
-      font-size: 12px;
-      font-weight: 700;
+      font-size: 13px;
+      font-weight: 800;
       position: sticky;
       top: 0;
     }
@@ -256,7 +274,7 @@
   <div class="hint">
     • Her Excel sheet = 1 marka<br>
     • Logo adı: <code>assets/images/&lt;sheet_adi&gt;_logo.png</code><br>
-    • Excel otomatik yüklenir (manuel yükleme isteğe bağlı)
+    • Boş marka/ürün hücreleri üst satırdan otomatik devralınır (merged cell fix)
   </div>
 
   <div id="container"></div>
@@ -287,31 +305,134 @@ document.getElementById("printPhone").onclick = () => {
 
 function autoLoad(){
   fetch(EXCEL_PATH)
-    .then(r => r.arrayBuffer())
+    .then(r => {
+      if (!r.ok) throw new Error("Excel not found: " + EXCEL_PATH);
+      return r.arrayBuffer();
+    })
     .then(buf => parseExcel(buf))
-    .catch(() => summary.textContent="Excel otomatik yüklenemedi.");
+    .catch(() => summary.textContent="Excel otomatik yüklenemedi. Manuel yükleyebilirsiniz.");
 }
 
 function loadFile(file){
+  if (!file) return;
   const reader = new FileReader();
   reader.onload = e => parseExcel(e.target.result);
   reader.readAsArrayBuffer(file);
 }
 
+/* ---------- Helpers ---------- */
+function isBlank(v){ return String(v ?? "").trim() === ""; }
+
+function normalizeForLogo(s){
+  return String(s || "")
+    .toLowerCase()
+    .replace(/ı/g,"i").replace(/ğ/g,"g").replace(/ü/g,"u")
+    .replace(/ş/g,"s").replace(/ö/g,"o").replace(/ç/g,"c")
+    .replace(/[^a-z0-9]+/g,"_")
+    .replace(/^_+|_+$/g,"");
+}
+
+function headerNorm(h){
+  return String(h || "")
+    .toLowerCase()
+    .replace(/ı/g,"i").replace(/ğ/g,"g").replace(/ü/g,"u")
+    .replace(/ş/g,"s").replace(/ö/g,"o").replace(/ç/g,"c")
+    .replace(/\s+/g,"")
+    .trim();
+}
+
+function detectCarryColumns(headers){
+  // columns that should "inherit from above" when empty (merged cells)
+  const carry = [];
+  headers.forEach((h, i) => {
+    const n = headerNorm(h);
+    // brand + product + code are typical merged columns
+    if (
+      n.includes("urunmarkasi") || n.includes("marka") ||
+      n === "urun" || n.includes("urunadi") ||
+      n.includes("aciklama") || n.includes("açiklama") ||
+      n.includes("kod")
+    ) carry.push(i);
+  });
+  // fallback: at least carry first column
+  if (carry.length === 0 && headers.length) carry.push(0);
+  return Array.from(new Set(carry));
+}
+
+function forwardFill(rows, carryIdxs){
+  const last = {};
+  return rows.map(r => {
+    const row = r.slice();
+    carryIdxs.forEach(idx => {
+      if (isBlank(row[idx]) && last[idx] !== undefined) row[idx] = last[idx];
+      if (!isBlank(row[idx])) last[idx] = row[idx];
+    });
+    return row;
+  });
+}
+
+function format(v){
+  if (typeof v === "number") {
+    const rounded = Math.round((v + Number.EPSILON) * 100) / 100;
+    return rounded.toLocaleString("tr-TR", { maximumFractionDigits: 2 });
+  }
+  const s = String(v ?? "").trim();
+  // fix long float strings
+  if (s && /^-?\d+(\.\d+)?$/.test(s) && s.length > 10) {
+    const num = Number(s);
+    if (!Number.isNaN(num)) return format(num);
+  }
+  return s;
+}
+
+function makeLogo(sheetName){
+  const box = document.createElement("div");
+  box.className = "brandLogo";
+  const img = document.createElement("img");
+  img.alt = sheetName + " logo";
+  img.src = `assets/images/${normalizeForLogo(sheetName)}_logo.png`;
+  img.onerror = () => box.replaceWith(makeBadge(sheetName));
+  box.appendChild(img);
+  return box;
+}
+
+function makeBadge(sheetName){
+  const b = document.createElement("div");
+  b.className = "brandBadge";
+  const t = String(sheetName || "").trim();
+  b.textContent = t ? t[0].toUpperCase() : "?";
+  return b;
+}
+
+/* ---------- Main ---------- */
 function parseExcel(buffer){
   container.innerHTML="";
   allRows=[]; allSections=[];
+
   const wb = XLSX.read(new Uint8Array(buffer), {type:"array"});
-  let total=0;
+  let totalRows = 0;
+  let usedSheets = 0;
 
-  wb.SheetNames.forEach(name=>{
-    const ws = wb.Sheets[name];
-    const rows = XLSX.utils.sheet_to_json(ws,{header:1,defval:""});
-    const headerIdx = rows.findIndex(r=>r.filter(c=>c).length>=2);
-    if(headerIdx<0) return;
+  wb.SheetNames.forEach(sheetName=>{
+    const ws = wb.Sheets[sheetName];
+    const rows = XLSX.utils.sheet_to_json(ws,{header:1,raw:true,defval:""});
 
-    const headers = rows[headerIdx];
-    const data = rows.slice(headerIdx+1).filter(r=>r.some(c=>c));
+    // find first row that looks like headers (>=2 filled)
+    const headerIdx = rows.findIndex(r => r.filter(c => !isBlank(c)).length >= 2);
+    if (headerIdx < 0) return;
+
+    const headers = rows[headerIdx].map(h => String(h ?? "").trim());
+    let data = rows
+      .slice(headerIdx+1)
+      .filter(r => r.some(c => !isBlank(c)));
+
+    if (!data.length) return;
+
+    // ✅ FIX: merged-cell / empty brand/product -> inherit above
+    const carryIdxs = detectCarryColumns(headers);
+    data = forwardFill(data, carryIdxs);
+
+    usedSheets++;
 
     const section = document.createElement("div");
     section.className="section";
@@ -321,82 +442,76 @@ function parseExcel(buffer){
 
     const left = document.createElement("div");
     left.className="sectionLeft";
-    left.appendChild(makeLogo(name));
-    left.appendChild(document.createTextNode(name));
 
-    const meta = document.createElement("div");
-    meta.textContent = data.length+" satır";
+    left.appendChild(makeLogo(sheetName));
 
-    head.append(left,meta);
+    const nameEl = document.createElement("div");
+    nameEl.className = "brandName";
+    nameEl.textContent = sheetName;
+    left.appendChild(nameEl);
+
+    head.appendChild(left);
+
+    // ❌ removed "9 satır" counter entirely
     section.appendChild(head);
 
+    const wrap = document.createElement("div");
+    wrap.className = "tableWrap";
+
     const table=document.createElement("table");
+
     const thead=document.createElement("thead");
     const trh=document.createElement("tr");
-    headers.forEach(h=>{const th=document.createElement("th");th.textContent=h;trh.appendChild(th);});
-    thead.appendChild(trh); table.appendChild(thead);
+    headers.forEach(h=>{
+      const th=document.createElement("th");
+      th.textContent=h;
+      trh.appendChild(th);
+    });
+    thead.appendChild(trh);
+    table.appendChild(thead);
 
     const tbody=document.createElement("tbody");
     data.forEach(r=>{
       const tr=document.createElement("tr");
-      tr.dataset.search=(name+" "+r.join(" ")).toLowerCase();
+      tr.dataset.search=(sheetName+" "+r.map(format).join(" ")).toLowerCase();
+
       headers.forEach((_,i)=>{
         const td=document.createElement("td");
         td.textContent=format(r[i]);
         tr.appendChild(td);
       });
+
       tbody.appendChild(tr);
       allRows.push(tr);
     });
 
     table.appendChild(tbody);
-    section.appendChild(table);
+    wrap.appendChild(table);
+    section.appendChild(wrap);
     container.appendChild(section);
     allSections.push(section);
-    total+=data.length;
+
+    totalRows += data.length;
   });
 
-  summary.textContent = `${wb.SheetNames.length} marka · ${total} satır`;
+  summary.textContent = `${usedSheets} marka · ${totalRows} satır`;
+  applySearch();
 }
 
 function applySearch(){
-  const q=search.value.toLowerCase();
-  const visible=new Set();
+  const q = search.value.trim().toLowerCase();
+  if (!q) {
+    allRows.forEach(r => r.classList.remove("hidden"));
+    allSections.forEach(s => s.classList.remove("hidden"));
+    return;
+  }
+  const visible = new Set();
   allRows.forEach(r=>{
-    const ok=r.dataset.search.includes(q);
-    r.classList.toggle("hidden",!ok);
-    if(ok) visible.add(r.closest(".section"));
+    const ok = r.dataset.search.includes(q);
+    r.classList.toggle("hidden", !ok);
+    if (ok) visible.add(r.closest(".section"));
   });
-  allSections.forEach(s=>s.classList.toggle("hidden",!visible.has(s)));
-}
-
-function normalize(s){
-  return s.toLowerCase()
-    .replace(/ı/g,"i").replace(/ğ/g,"g").replace(/ü/g,"u")
-    .replace(/ş/g,"s").replace(/ö/g,"o").replace(/ç/g,"c")
-    .replace(/[^a-z0-9]+/g,"_").replace(/^_|_$/g,"");
-}
-
-function makeLogo(name){
-  const box=document.createElement("div");
-  box.className="brandLogo";
-  const img=document.createElement("img");
-  img.src=`assets/images/${normalize(name)}_logo.png`;
-  img.onerror=()=>box.replaceWith(badge(name));
-  box.appendChild(img);
-  return box;
-}
-
-function badge(name){
-  const b=document.createElement("div");
-  b.className="brandBadge";
-  b.textContent=name[0].toUpperCase();
-  return b;
-}
-
-function format(v){
-  if(typeof v==="number") return v.toLocaleString("tr-TR",{maximumFractionDigits:2});
-  return v||"";
+  allSections.forEach(s => s.classList.toggle("hidden", !visible.has(s)));
 }
 </script>
 </body>
