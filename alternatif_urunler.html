@@ -69,12 +69,17 @@
       text-align:right;
     }
 
-    /* ✅ bigger top logos on desktop */
+    /* Default (left) logo size */
     .logoSide img{
-      height: 78px;
+      height: 64px;
       width:auto;
       object-fit:contain;
       display:block;
+    }
+
+    /* ✅ Make ONLY the top-right collage bigger on desktop */
+    .logoSide.right img{
+      height: 72px;
     }
 
     .titleWrap{
@@ -91,7 +96,7 @@
       letter-spacing: 0.06em;
     }
 
-    /* removed text line completely */
+    /* removed */
     .titleWrap .sub{ display:none; }
 
     /* ── CONTROLS ──────────────────────────────────── */
@@ -156,7 +161,6 @@
       min-width: 0;
     }
 
-    /* Bigger brand logos (sections) */
     .brandLogo{
       width: 52px;
       height: 52px;
@@ -242,7 +246,6 @@
       body{ padding: 10px; }
       .paper{ padding: 14px 12px 16px; }
 
-      /* Option A: stacked header */
       .topbar{
         flex-direction: column;
         align-items: center;
@@ -255,9 +258,9 @@
         justify-content: center;
       }
 
-      /* ✅ bigger Şentürk logo on mobile */
+      /* keep Şentürk as before */
       .logoSide img{
-        height: 96px;
+        height: 72px;
       }
 
       .titleWrap{
@@ -273,23 +276,21 @@
         line-height: 1.25;
       }
 
-      /* brand collage stays centered */
       .logoSide.right{
         width: 100%;
         justify-content: center;
       }
 
+      /* ✅ Make ONLY the collage logo bigger on mobile */
       .logoSide.right img{
-        height: 44px;
+        height: 56px;
       }
 
-      /* Controls */
       .controlsRow{ gap: 8px; }
       .search{ min-width: 100%; flex: 1 1 100%; }
       input[type="file"]{ width: 100%; }
       .btn{ flex: 1 1 auto; }
 
-      /* Bigger section brand logos */
       .brandLogo, .brandBadge{
         width: 56px;
         height: 56px;
@@ -297,7 +298,6 @@
       }
       .brandLogo img{ padding: 7px; }
 
-      /* Fit table to phone width (no horizontal scroll) */
       .tableWrap{ overflow: hidden; }
 
       table{
@@ -314,7 +314,6 @@
         padding: 7px 8px;
       }
 
-      /* Hide Ürün Markası column on mobile */
       .hide-mobile{ display:none !important; }
     }
 
@@ -339,7 +338,6 @@
 
     <div class="titleWrap">
       <h1>DİĞER MARKALAR FİYAT LİSTESİ</h1>
-      <!-- ✅ removed sub line -->
     </div>
 
     <div class="logoSide right">
