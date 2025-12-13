@@ -6,7 +6,6 @@
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
 
   <style>
-    /* ─── COLOR SYSTEM ───────────────────────────────────────────── */
     :root {
       --bg: #0d1117;
       --bg-light: #161b22;
@@ -21,12 +20,7 @@
       --shadow: 0 14px 40px rgba(0, 0, 0, 0.5);
     }
 
-    /* ─── BASE RESET ─────────────────────────────────────────────── */
-    * {
-      margin: 0;
-      padding: 0;
-      box-sizing: border-box;
-    }
+    * { margin: 0; padding: 0; box-sizing: border-box; }
 
     body {
       background: var(--bg);
@@ -37,7 +31,6 @@
       justify-content: center;
     }
 
-    /* ─── CONTAINER ─────────────────────────────────────────────── */
     .container {
       width: 100%;
       max-width: 1050px;
@@ -49,7 +42,6 @@
       position: relative;
     }
 
-    /* Decorative glow */
     .container::before {
       content: "";
       position: absolute;
@@ -61,7 +53,6 @@
       pointer-events: none;
     }
 
-    /* ─── HEADER AREA ───────────────────────────────────────────── */
     .header {
       display: flex;
       justify-content: space-between;
@@ -108,9 +99,7 @@
       color: var(--subtext);
     }
 
-    .header-right {
-      text-align: right;
-    }
+    .header-right { text-align: right; }
 
     .badge {
       display: inline-block;
@@ -125,17 +114,9 @@
       margin-bottom: 8px;
     }
 
-    .title {
-      font-size: 22px;
-      font-weight: 600;
-    }
+    .title { font-size: 22px; font-weight: 600; }
+    .subtitle { font-size: 14px; color: var(--subtext); }
 
-    .subtitle {
-      font-size: 14px;
-      color: var(--subtext);
-    }
-
-    /* ─── GRID LAYOUT ───────────────────────────────────────────── */
     .grid {
       margin-top: 28px;
       display: grid;
@@ -143,7 +124,6 @@
       gap: 22px;
     }
 
-    /* ─── TOOL CARD ─────────────────────────────────────────────── */
     .card {
       background: var(--card);
       border-radius: var(--radius);
@@ -181,6 +161,7 @@
       display: flex;
       justify-content: space-between;
       align-items: center;
+      gap: 12px;
     }
 
     .pill {
@@ -191,6 +172,7 @@
       color: var(--text);
       text-decoration: none;
       transition: 0.2s;
+      white-space: nowrap;
     }
 
     .pill:hover {
@@ -198,13 +180,11 @@
       color: var(--accent);
     }
 
-    /* Disabled card */
     .disabled {
       opacity: 0.55;
       pointer-events: none;
     }
 
-    /* ─── FOOTER ─────────────────────────────────────────────── */
     .footer {
       margin-top: 32px;
       text-align: center;
@@ -213,14 +193,8 @@
     }
 
     @media (max-width: 650px) {
-      .header {
-        text-align: center;
-        flex-direction: column;
-      }
-
-      .header-right {
-        text-align: center;
-      }
+      .header { text-align: center; flex-direction: column; }
+      .header-right { text-align: center; }
     }
   </style>
 </head>
@@ -228,7 +202,6 @@
 <body>
   <div class="container">
 
-    <!-- HEADER -->
     <div class="header">
       <div class="brand">
         <div class="brand-logo">Ş</div>
@@ -245,7 +218,6 @@
       </div>
     </div>
 
-    <!-- GRID OF TOOLS -->
     <div class="grid">
 
       <!-- MARSHALL TOOL -->
@@ -255,23 +227,22 @@
           View the complete Marshall product list (all categories, all sizes)
           with search, filters and professional print layout.
         </p>
-
         <div class="card-footer">
           <span style="font-size:12px;color:var(--subtext);">Active · Main tool</span>
           <a href="fiyat-listesi.html" class="pill">Open</a>
         </div>
       </div>
 
-      <!-- ALTERNATIVE PRODUCTS TOOL (COMING SOON) -->
-      <div class="card disabled">
+      <!-- ALTERNATIVE PRODUCTS TOOL (ACTIVE) -->
+      <div class="card" onclick="window.location.href='alternatif_urunler.html'">
         <h3>Alternative Brands & Products</h3>
         <p>
-          Compare Marshall with Dekor, DaySon, AquaCool and Tiner products.
-          Find cheaper or equivalent alternatives instantly.
+          Show customers the full range of non-Marshall products you sell
+          (DaySon, Aquacool Trend, Dekor, Doğuş, etc.) grouped by brand.
         </p>
-
         <div class="card-footer">
-          <span style="font-size:12px;">Coming soon</span>
+          <span style="font-size:12px;color:var(--subtext);">Active · Excel-based</span>
+          <a href="alternatif_urunler.html" class="pill">Open</a>
         </div>
       </div>
 
@@ -282,7 +253,6 @@
           Calculate cash/card/vadeli prices, apply custom discount rates,
           and generate customer offers in seconds.
         </p>
-
         <div class="card-footer">
           <span style="font-size:12px;">Planned</span>
         </div>
@@ -290,9 +260,8 @@
 
     </div>
 
-    <!-- FOOTER -->
     <div class="footer">
-      v1.1 · Designed for Şentürk by ChatGPT · Mobile-optimized
+      v1.2 · Designed for Şentürk by ChatGPT · Mobile-optimized
     </div>
 
   </div>
