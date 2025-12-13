@@ -55,7 +55,7 @@
       align-items:center;
       justify-content:space-between;
       gap:16px;
-      margin-bottom: 10px;
+      margin-bottom: 12px;
     }
 
     .logoSide{
@@ -69,8 +69,9 @@
       text-align:right;
     }
 
+    /* ✅ BIGGER top logos (desktop) */
     .logoSide img{
-      height: 54px;
+      height: 64px;
       width:auto;
       object-fit:contain;
       display:block;
@@ -101,24 +102,24 @@
       align-items:center;
       gap:10px;
       flex-wrap:wrap;
-      margin-top: 14px;
-      margin-bottom: 12px;
+      margin-top: 12px;
+      margin-bottom: 16px;
     }
 
     input[type="file"]{ font-size: 12px; }
 
     .search{
-      padding: 7px 12px;
+      padding: 8px 12px;
       border: 1px solid #cfcfcf;
-      border-radius: 6px;
-      min-width: 260px;
+      border-radius: 8px;
+      min-width: 320px;
       font-size: 13px;
     }
 
     .btn{
       border: 1px solid #111827;
-      border-radius: 6px;
-      padding: 7px 12px;
+      border-radius: 8px;
+      padding: 8px 12px;
       cursor:pointer;
       font-size: 13px;
       white-space:nowrap;
@@ -127,12 +128,8 @@
     .btn-dark{ background: var(--btn); color: var(--btnText); }
     .btn-light{ background: var(--btn2); color: var(--btn2Text); border-color: #cfcfcf; }
 
-    .hint{
-      font-size: 12px;
-      color: var(--muted);
-      margin: 8px 0 14px;
-      line-height: 1.4;
-    }
+    /* ✅ help text removed (we keep a tiny spacing only) */
+    .hint{ display:none; }
 
     .section{
       margin-top: 16px;
@@ -161,11 +158,11 @@
       min-width: 0;
     }
 
-    /* BIGGER brand logo (PC) */
+    /* ✅ BIGGER brand logo (desktop) */
     .brandLogo{
-      width: 40px;
-      height: 40px;
-      border-radius: 10px;
+      width: 52px;
+      height: 52px;
+      border-radius: 12px;
       background: #fff;
       display:flex;
       align-items:center;
@@ -178,14 +175,14 @@
       width: 100%;
       height: 100%;
       object-fit: contain;
-      padding: 4px;
+      padding: 6px;
       display:block;
     }
 
     .brandBadge{
-      width: 40px;
-      height: 40px;
-      border-radius: 10px;
+      width: 52px;
+      height: 52px;
+      border-radius: 12px;
       background: #fff;
       border: 1px solid var(--tableBorder);
       display:flex;
@@ -194,6 +191,7 @@
       font-weight: 900;
       color: #111827;
       flex: 0 0 auto;
+      font-size: 18px;
     }
 
     .brandName{
@@ -206,7 +204,7 @@
     .tableWrap{
       border: 1px solid var(--tableBorder);
       border-top: none;
-      overflow:auto;
+      overflow:auto; /* ✅ keep browser-like view; phone can scroll horizontally */
       border-radius: 0 0 10px 10px;
     }
 
@@ -214,12 +212,12 @@
       width:100%;
       border-collapse:collapse;
       font-size: 13px;
-      min-width: 820px;
+      min-width: 820px; /* ✅ keeps same look as desktop */
     }
 
     th, td{
       border: 1px solid var(--tableBorder);
-      padding: 7px 10px;
+      padding: 8px 10px;
       white-space: nowrap;
       vertical-align: top;
     }
@@ -230,95 +228,56 @@
       font-weight: 900;
       position: sticky;
       top: 0;
+      z-index: 1;
     }
 
     tbody tr:nth-child(even){ background: var(--rowAlt); }
     .hidden{ display:none !important; }
 
     /* ─────────────────────────────────────────────
-       MOBILE VIEW: table -> cards
+       MOBILE: keep same table view, only tighten layout
        ───────────────────────────────────────────── */
     @media (max-width: 760px){
       body{ padding: 10px; }
       .paper{ padding: 14px 12px 16px; }
 
-      .logoSide{ min-width: 0; }
-      .logoSide img{ height: 42px; }
+      /* ✅ make left top logo bigger on mobile too */
+      .logoSide img{ height: 56px; }
 
       .titleWrap{
         margin: 0;
         border-top: 0;
         padding-top: 0;
       }
-      .titleWrap h1{ font-size: 15px; letter-spacing: .04em; }
+      .titleWrap h1{ font-size: 16px; letter-spacing: .04em; }
       .titleWrap .sub{ font-size: 11px; }
 
       .controlsRow{ gap: 8px; }
-      .search{ min-width: 100%; flex: 1 1 100%; }
+      .search{
+        min-width: 100%;
+        flex: 1 1 100%;
+      }
       input[type="file"]{ width: 100%; }
       .btn{ flex: 1 1 auto; }
 
-      /* Bigger brand logo on mobile */
+      /* ✅ bigger brand logos on mobile */
       .brandLogo, .brandBadge{
-        width: 46px;
-        height: 46px;
-        border-radius: 12px;
+        width: 56px;
+        height: 56px;
+        border-radius: 14px;
       }
-      .brandLogo img{ padding: 5px; }
+      .brandLogo img{ padding: 7px; }
 
-      /* Card mode */
-      .tableWrap{ overflow: visible; }
-      table{
-        min-width: 0;
-        width: 100%;
-        border-collapse: separate;
-        border-spacing: 0 10px;
-      }
-      thead{ display:none; }
-
-      tbody tr{
-        display:block;
-        background:#fff;
-        border: 1px solid var(--tableBorder);
-        border-radius: 12px;
-        overflow:hidden;
-      }
-      tbody tr:nth-child(even){ background:#fff; }
-
-      td{
-        display:grid;
-        grid-template-columns: 44% 56%;
-        gap: 10px;
-        white-space: normal;
-        border: none;
-        border-bottom: 1px solid var(--tableBorder);
-        padding: 10px 12px;
-      }
-      td:last-child{ border-bottom:none; }
-
-      td::before{
-        content: attr(data-label);
-        font-weight: 900;
-        color:#111827;
-        opacity: .9;
-      }
-
-      /* Product name: bigger + bold inside cards */
-      td.cell-product{
-        font-size: 15px;
-        font-weight: 900;
-      }
-    }
-
-    @media (max-width: 420px){
-      td{ grid-template-columns: 48% 52%; padding: 9px 10px; }
+      /* slightly smaller table text for phone, same look */
+      table{ font-size: 12.5px; min-width: 760px; }
+      th, td{ padding: 7px 9px; }
     }
 
     @media print{
       body{ background:#fff; padding:0 }
       .paper{ box-shadow:none; border:none; padding:10mm; }
-      .controlsRow,.hint{ display:none }
-      table{ min-width:auto; border-collapse:collapse; border-spacing:0; }
+      .controlsRow{ display:none }
+      table{ min-width:auto; }
       th{ position:static }
       td,th{ white-space:normal }
     }
@@ -330,6 +289,7 @@
 
   <div class="topbar">
     <div class="logoSide">
+      <!-- ✅ bigger via CSS -->
       <img src="assets/images/senturk_logo.png" alt="Şentürk">
     </div>
 
@@ -339,7 +299,7 @@
     </div>
 
     <div class="logoSide right">
-      <!-- ✅ changed to your new uploaded file -->
+      <!-- ✅ new top-right logo -->
       <img src="assets/images/alt_toplu_logo.png" alt="" onerror="this.style.display='none'">
     </div>
   </div>
@@ -352,22 +312,19 @@
     <button class="btn btn-dark" id="printPhone">Telefon Yazdır</button>
   </div>
 
-  <div class="hint">
-    • Her Excel sheet = 1 marka<br>
-    • Logo adı: <code>assets/images/&lt;sheet_adi&gt;_logo.png</code><br>
-    • Boş marka/ürün/kod hücreleri üst satırdan otomatik devralınır
-  </div>
+  <!-- ✅ removed help text -->
+  <div class="hint"></div>
 
   <div id="container"></div>
-  <!-- ✅ kept but always empty (counter removed) -->
-  <div id="summary" class="hint" style="display:none;"></div>
+
+  <!-- ✅ removed summary counter -->
+  <div id="summary" style="display:none;"></div>
 
 </div>
 
 <script>
 const EXCEL_PATH = "assets/data/alternatif_urunler.xlsx";
 const container = document.getElementById("container");
-const summary = document.getElementById("summary");
 const search = document.getElementById("search");
 const fileInput = document.getElementById("file");
 
@@ -379,11 +336,7 @@ fileInput.addEventListener("change", e => loadFile(e.target.files[0]));
 search.addEventListener("input", applySearch);
 document.getElementById("clear").onclick = () => { search.value=""; applySearch(); };
 document.getElementById("printA4").onclick = () => window.print();
-document.getElementById("printPhone").onclick = () => {
-  document.body.classList.add("phonePrint");
-  window.print();
-  document.body.classList.remove("phonePrint");
-};
+document.getElementById("printPhone").onclick = () => window.print();
 
 function autoLoad(){
   fetch(EXCEL_PATH)
@@ -423,17 +376,7 @@ function headerNorm(h){
     .trim();
 }
 
-function isProductHeader(h){
-  const n = headerNorm(h);
-  // "Ürün", "Ürün Adı", "Açıklama" etc. (but NOT "Ürün Markası")
-  const looksLikeProduct =
-    n === "urun" || n.includes("urunadi") || n.includes("aciklama") || n.includes("açiklama");
-  const isBrand = n.includes("urunmarkasi") || (n === "marka") || (n.includes("marka") && !n.includes("ambalaj"));
-  return looksLikeProduct && !isBrand;
-}
-
 function detectCarryColumns(headers){
-  // columns that should "inherit from above" when empty (merged cells)
   const carry = [];
   headers.forEach((h, i) => {
     const n = headerNorm(h);
@@ -497,9 +440,6 @@ function parseExcel(buffer){
   container.innerHTML="";
   allRows=[]; allSections=[];
 
-  // ✅ cancel bottom counter completely
-  summary.textContent = "";
-
   const wb = XLSX.read(new Uint8Array(buffer), {type:"array"});
 
   wb.SheetNames.forEach(sheetName=>{
@@ -561,13 +501,6 @@ function parseExcel(buffer){
       headers.forEach((h,i)=>{
         const td=document.createElement("td");
         td.textContent=format(r[i]);
-
-        // ✅ needed for mobile cards
-        td.setAttribute("data-label", h || "");
-
-        // ✅ make product name bold on mobile
-        if (isProductHeader(h)) td.classList.add("cell-product");
-
         tr.appendChild(td);
       });
 
