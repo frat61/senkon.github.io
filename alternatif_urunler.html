@@ -50,6 +50,7 @@
       padding: 22px 26px 28px;
     }
 
+    /* ── TOP HEADER (desktop) ───────────────────────── */
     .topbar{
       display:flex;
       align-items:center;
@@ -96,6 +97,7 @@
       color: var(--muted);
     }
 
+    /* ── CONTROLS ──────────────────────────────────── */
     .controlsRow{
       display:flex;
       align-items:center;
@@ -127,9 +129,10 @@
     .btn-dark{ background: var(--btn); color: var(--btnText); }
     .btn-light{ background: var(--btn2); color: var(--btn2Text); border-color: #cfcfcf; }
 
-    /* Removed info text completely */
+    /* removed help text */
     .hint{ display:none; }
 
+    /* ── SECTIONS ──────────────────────────────────── */
     .section{
       margin-top: 16px;
       page-break-inside: avoid;
@@ -157,7 +160,7 @@
       min-width: 0;
     }
 
-    /* Bigger brand logos */
+    /* Bigger brand logos (sections) */
     .brandLogo{
       width: 52px;
       height: 52px;
@@ -200,10 +203,11 @@
       max-width: 900px;
     }
 
+    /* ── TABLE ─────────────────────────────────────── */
     .tableWrap{
       border: 1px solid var(--tableBorder);
       border-top: none;
-      overflow:auto; /* Desktop: scroll ok */
+      overflow:auto; /* desktop ok */
       border-radius: 0 0 10px 10px;
     }
 
@@ -211,7 +215,7 @@
       width:100%;
       border-collapse:collapse;
       font-size: 13px;
-      min-width: 820px; /* Desktop look */
+      min-width: 820px; /* desktop style */
     }
 
     th, td{
@@ -233,32 +237,68 @@
     tbody tr:nth-child(even){ background: var(--rowAlt); }
     .hidden{ display:none !important; }
 
-    /* ✅ cells to hide on mobile */
+    /* marker class for mobile-hide */
     .hide-mobile{ }
 
     /* ─────────────────────────────────────────────
-       MOBILE: NO horizontal scroll + hide Ürün Markası
+       MOBILE: OPTION A header + no horizontal scroll
        ───────────────────────────────────────────── */
     @media (max-width: 760px){
       body{ padding: 10px; }
       .paper{ padding: 14px 12px 16px; }
 
-      .logoSide{ min-width: 0; }
-      .logoSide img{ height: 58px; } /* left logo bigger on mobile too */
+      /* ✅ Option A: stacked header */
+      .topbar{
+        flex-direction: column;
+        align-items: center;
+        gap: 14px;
+      }
+
+      .logoSide{
+        min-width: 0;
+        width: 100%;
+        justify-content: center;
+      }
+
+      /* Şentürk logo bigger */
+      .logoSide img{
+        height: 72px;
+      }
 
       .titleWrap{
-        margin: 0;
-        border-top: 0;
+        width: 100%;
+        text-align: center;
+        border-top: none;
         padding-top: 0;
+        margin: 0;
       }
-      .titleWrap h1{ font-size: 16px; letter-spacing: .04em; }
-      .titleWrap .sub{ font-size: 11px; }
 
+      .titleWrap h1{
+        font-size: 18px;
+        line-height: 1.25;
+      }
+
+      .titleWrap .sub{
+        font-size: 12px;
+      }
+
+      .logoSide.right{
+        width: 100%;
+        justify-content: center;
+      }
+
+      /* brand collage smaller than main logo */
+      .logoSide.right img{
+        height: 44px;
+      }
+
+      /* Controls */
       .controlsRow{ gap: 8px; }
       .search{ min-width: 100%; flex: 1 1 100%; }
       input[type="file"]{ width: 100%; }
       .btn{ flex: 1 1 auto; }
 
+      /* Bigger section brand logos */
       .brandLogo, .brandBadge{
         width: 56px;
         height: 56px;
@@ -266,28 +306,28 @@
       }
       .brandLogo img{ padding: 7px; }
 
-      /* ✅ Fit to phone width */
+      /* ✅ Fit table to phone width (no horizontal scrolling) */
       .tableWrap{
-        overflow: hidden;   /* no horizontal scrolling */
+        overflow: hidden;
       }
 
       table{
-        min-width: 0;       /* remove forced width */
+        min-width: 0;
         width: 100%;
         table-layout: fixed;
         font-size: 12.5px;
       }
 
       th, td{
-        white-space: normal;     /* allow wrap */
-        word-break: break-word;  /* force wrap long text */
+        white-space: normal;
+        word-break: break-word;
         overflow-wrap: anywhere;
         padding: 7px 8px;
       }
 
-      /* ✅ Hide Ürün Markası column (and any marked cells) */
+      /* ✅ Hide Ürün Markası on mobile */
       .hide-mobile{
-        display: none !important;
+        display:none !important;
       }
     }
 
@@ -366,7 +406,6 @@ function loadFile(file){
   reader.readAsArrayBuffer(file);
 }
 
-/* ---------- Helpers ---------- */
 function isBlank(v){ return String(v ?? "").trim() === ""; }
 
 function normalizeForLogo(s){
@@ -451,7 +490,6 @@ function makeBadge(sheetName){
   return b;
 }
 
-/* ---------- Main ---------- */
 function parseExcel(buffer){
   container.innerHTML="";
   allRows=[]; allSections=[];
@@ -469,7 +507,6 @@ function parseExcel(buffer){
     let data = rows.slice(headerIdx+1).filter(r => r.some(c => !isBlank(c)));
     if (!data.length) return;
 
-    // merged-cell fix
     const carryIdxs = detectCarryColumns(headers);
     data = forwardFill(data, carryIdxs);
 
@@ -498,30 +535,24 @@ function parseExcel(buffer){
 
     const thead = document.createElement("thead");
     const trh = document.createElement("tr");
-    headers.forEach((h, i) => {
+    headers.forEach(h=>{
       const th = document.createElement("th");
       th.textContent = h;
-
-      // ✅ hide brand column on mobile
       if (isBrandHeader(h)) th.classList.add("hide-mobile");
-
       trh.appendChild(th);
     });
     thead.appendChild(trh);
     table.appendChild(thead);
 
     const tbody = document.createElement("tbody");
-    data.forEach(r => {
+    data.forEach(r=>{
       const tr = document.createElement("tr");
-      tr.dataset.search = (sheetName + " " + r.map(format).join(" ")).toLowerCase();
+      tr.dataset.search = (sheetName+" "+r.map(format).join(" ")).toLowerCase();
 
-      headers.forEach((h, i) => {
+      headers.forEach((h,i)=>{
         const td = document.createElement("td");
         td.textContent = format(r[i]);
-
-        // ✅ hide brand column on mobile
         if (isBrandHeader(h)) td.classList.add("hide-mobile");
-
         tr.appendChild(td);
       });
 
