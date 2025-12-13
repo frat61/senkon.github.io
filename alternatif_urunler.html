@@ -49,7 +49,7 @@
       padding: 22px 26px 28px;
     }
 
-    /* ── TOP HEADER (desktop) ───────────────────────── */
+    /* ── TOP HEADER ───────────────────────── */
     .topbar{
       display:flex;
       align-items:center;
@@ -69,7 +69,6 @@
       text-align:right;
     }
 
-    /* Default (left) logo size */
     .logoSide img{
       height: 64px;
       width:auto;
@@ -77,9 +76,11 @@
       display:block;
     }
 
-    /* ✅ Make ONLY the top-right collage bigger on desktop */
+    /* ✅ top-right collage responsive by width */
     .logoSide.right img{
-      height: 90px;
+      max-width: 240px;   /* desktop */
+      width: 100%;
+      height: auto;
     }
 
     .titleWrap{
@@ -161,6 +162,7 @@
       min-width: 0;
     }
 
+    /* brand logos (sections) */
     .brandLogo{
       width: 52px;
       height: 52px;
@@ -237,6 +239,13 @@
     tbody tr:nth-child(even){ background: var(--rowAlt); }
     .hidden{ display:none !important; }
 
+    /* ✅ NEW: alignment helpers */
+    .col-center{ text-align:center; }
+    .col-price{
+      text-align:center;
+      font-variant-numeric: tabular-nums;
+    }
+
     .hide-mobile{ }
 
     /* ─────────────────────────────────────────────
@@ -258,7 +267,6 @@
         justify-content: center;
       }
 
-      /* keep Şentürk as before */
       .logoSide img{
         height: 72px;
       }
@@ -281,9 +289,9 @@
         justify-content: center;
       }
 
-      /* ✅ Make ONLY the collage logo bigger on mobile */
+      /* ✅ responsive by width on mobile too */
       .logoSide.right img{
-        max-width: 200px;   /* mobile size */
+        max-width: 200px;  /* mobile */
         width: 100%;
         height: auto;
       }
@@ -316,6 +324,7 @@
         padding: 7px 8px;
       }
 
+      /* Hide Ürün Markası column on mobile */
       .hide-mobile{ display:none !important; }
     }
 
@@ -418,6 +427,34 @@ function isBrandHeader(h){
   return n.includes("urunmarkasi") || n === "marka" || (n.includes("marka") && !n.includes("ambalaj"));
 }
 
+/* ✅ detect columns to center & columns that are prices */
+function isPackageHeader(h){
+  const n = headerNorm(h);
+  return (
+    n.includes("ambalaj") ||
+    n.includes("dolum") ||
+    n.includes("koli") ||
+    n.includes("paket") ||
+    n.includes("adet") ||
+    n.includes("ml") ||
+    n.includes("lt") ||
+    n.includes("kg")
+  );
+}
+
+function isPriceHeader(h){
+  const n = headerNorm(h);
+  return (
+    n.includes("fiyat") ||
+    n.includes("tutar") ||
+    n.includes("bedel") ||
+    n.includes("nakit") ||
+    n.includes("kredikarti") ||
+    n.includes("vadeli") ||
+    n.includes("kdv")
+  );
+}
+
 function detectCarryColumns(headers){
   const carry = [];
   headers.forEach((h, i) => {
@@ -445,17 +482,32 @@ function forwardFill(rows, carryIdxs){
   });
 }
 
-function format(v){
-  if (typeof v === "number") {
-    const rounded = Math.round((v + Number.EPSILON) * 100) / 100;
-    return rounded.toLocaleString("tr-TR", { maximumFractionDigits: 2 });
-  }
+/* numeric helpers */
+function coerceNumber(v){
+  if (typeof v === "number") return v;
   const s = String(v ?? "").trim();
-  if (s && /^-?\d+(\.\d+)?$/.test(s) && s.length > 10) {
-    const num = Number(s);
-    if (!Number.isNaN(num)) return format(num);
+  if (!s) return null;
+
+  // Try Turkish style: 1.234,56 or 1234,56
+  // Remove thousand separators (.) and swap comma to dot
+  const tr = s.replace(/\./g,"").replace(/,/g,".");
+  if (/^-?\d+(\.\d+)?$/.test(tr)) {
+    const num = Number(tr);
+    return Number.isFinite(num) ? num : null;
   }
-  return s;
+
+  // Plain number
+  if (/^-?\d+(\.\d+)?$/.test(s)) {
+    const num = Number(s);
+    return Number.isFinite(num) ? num : null;
+  }
+
+  return null;
+}
+
+function formatNumberTR(n){
+  const rounded = Math.round((n + Number.EPSILON) * 100) / 100;
+  return rounded.toLocaleString("tr-TR", { maximumFractionDigits: 2 });
 }
 
 function makeLogo(sheetName){
@@ -520,12 +572,23 @@ function parseExcel(buffer){
 
     const table = document.createElement("table");
 
+    // Pre-detect column types for this sheet
+    const colType = headers.map(h => ({
+      isBrand: isBrandHeader(h),
+      isPack: isPackageHeader(h),
+      isPrice: isPriceHeader(h)
+    }));
+
     const thead = document.createElement("thead");
     const trh = document.createElement("tr");
-    headers.forEach(h=>{
+    headers.forEach((h, idx)=>{
       const th = document.createElement("th");
       th.textContent = h;
-      if (isBrandHeader(h)) th.classList.add("hide-mobile");
+
+      if (colType[idx].isBrand) th.classList.add("hide-mobile");
+      if (colType[idx].isPack)  th.classList.add("col-center");
+      if (colType[idx].isPrice) th.classList.add("col-price");
+
       trh.appendChild(th);
     });
     thead.appendChild(trh);
@@ -534,12 +597,29 @@ function parseExcel(buffer){
     const tbody = document.createElement("tbody");
     data.forEach(r=>{
       const tr = document.createElement("tr");
-      tr.dataset.search = (sheetName+" "+r.map(format).join(" ")).toLowerCase();
+
+      // searchable text without forcing ₺
+      const searchable = (sheetName+" "+r.map(v => String(v ?? "")).join(" ")).toLowerCase();
+      tr.dataset.search = searchable;
 
       headers.forEach((h,i)=>{
         const td = document.createElement("td");
-        td.textContent = format(r[i]);
-        if (isBrandHeader(h)) td.classList.add("hide-mobile");
+
+        if (colType[i].isBrand) td.classList.add("hide-mobile");
+        if (colType[i].isPack)  td.classList.add("col-center");
+        if (colType[i].isPrice) td.classList.add("col-price");
+
+        // ✅ price formatting with ₺ (only if numeric)
+        if (colType[i].isPrice) {
+          const num = coerceNumber(r[i]);
+          if (num !== null) td.textContent = formatNumberTR(num) + " ₺";
+          else td.textContent = String(r[i] ?? "").trim();
+        } else {
+          // normal formatting
+          const num = coerceNumber(r[i]);
+          td.textContent = (num !== null && typeof r[i] !== "string") ? formatNumberTR(num) : String(r[i] ?? "").trim();
+        }
+
         tr.appendChild(td);
       });
 
@@ -575,4 +655,3 @@ function applySearch(){
 </script>
 </body>
 </html>
-
