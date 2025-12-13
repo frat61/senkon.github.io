@@ -69,7 +69,6 @@
       text-align:right;
     }
 
-    /* ✅ BIGGER top logos (desktop) */
     .logoSide img{
       height: 64px;
       width:auto;
@@ -128,7 +127,7 @@
     .btn-dark{ background: var(--btn); color: var(--btnText); }
     .btn-light{ background: var(--btn2); color: var(--btn2Text); border-color: #cfcfcf; }
 
-    /* ✅ help text removed (we keep a tiny spacing only) */
+    /* Removed info text completely */
     .hint{ display:none; }
 
     .section{
@@ -158,7 +157,7 @@
       min-width: 0;
     }
 
-    /* ✅ BIGGER brand logo (desktop) */
+    /* Bigger brand logos */
     .brandLogo{
       width: 52px;
       height: 52px;
@@ -204,7 +203,7 @@
     .tableWrap{
       border: 1px solid var(--tableBorder);
       border-top: none;
-      overflow:auto; /* ✅ keep browser-like view; phone can scroll horizontally */
+      overflow:auto; /* Desktop: scroll ok */
       border-radius: 0 0 10px 10px;
     }
 
@@ -212,7 +211,7 @@
       width:100%;
       border-collapse:collapse;
       font-size: 13px;
-      min-width: 820px; /* ✅ keeps same look as desktop */
+      min-width: 820px; /* Desktop look */
     }
 
     th, td{
@@ -234,15 +233,18 @@
     tbody tr:nth-child(even){ background: var(--rowAlt); }
     .hidden{ display:none !important; }
 
+    /* ✅ cells to hide on mobile */
+    .hide-mobile{ }
+
     /* ─────────────────────────────────────────────
-       MOBILE: keep same table view, only tighten layout
+       MOBILE: NO horizontal scroll + hide Ürün Markası
        ───────────────────────────────────────────── */
     @media (max-width: 760px){
       body{ padding: 10px; }
       .paper{ padding: 14px 12px 16px; }
 
-      /* ✅ make left top logo bigger on mobile too */
-      .logoSide img{ height: 56px; }
+      .logoSide{ min-width: 0; }
+      .logoSide img{ height: 58px; } /* left logo bigger on mobile too */
 
       .titleWrap{
         margin: 0;
@@ -253,14 +255,10 @@
       .titleWrap .sub{ font-size: 11px; }
 
       .controlsRow{ gap: 8px; }
-      .search{
-        min-width: 100%;
-        flex: 1 1 100%;
-      }
+      .search{ min-width: 100%; flex: 1 1 100%; }
       input[type="file"]{ width: 100%; }
       .btn{ flex: 1 1 auto; }
 
-      /* ✅ bigger brand logos on mobile */
       .brandLogo, .brandBadge{
         width: 56px;
         height: 56px;
@@ -268,16 +266,36 @@
       }
       .brandLogo img{ padding: 7px; }
 
-      /* slightly smaller table text for phone, same look */
-      table{ font-size: 12.5px; min-width: 760px; }
-      th, td{ padding: 7px 9px; }
+      /* ✅ Fit to phone width */
+      .tableWrap{
+        overflow: hidden;   /* no horizontal scrolling */
+      }
+
+      table{
+        min-width: 0;       /* remove forced width */
+        width: 100%;
+        table-layout: fixed;
+        font-size: 12.5px;
+      }
+
+      th, td{
+        white-space: normal;     /* allow wrap */
+        word-break: break-word;  /* force wrap long text */
+        overflow-wrap: anywhere;
+        padding: 7px 8px;
+      }
+
+      /* ✅ Hide Ürün Markası column (and any marked cells) */
+      .hide-mobile{
+        display: none !important;
+      }
     }
 
     @media print{
       body{ background:#fff; padding:0 }
       .paper{ box-shadow:none; border:none; padding:10mm; }
       .controlsRow{ display:none }
-      table{ min-width:auto; }
+      table{ min-width:auto; table-layout:auto; }
       th{ position:static }
       td,th{ white-space:normal }
     }
@@ -289,7 +307,6 @@
 
   <div class="topbar">
     <div class="logoSide">
-      <!-- ✅ bigger via CSS -->
       <img src="assets/images/senturk_logo.png" alt="Şentürk">
     </div>
 
@@ -299,7 +316,6 @@
     </div>
 
     <div class="logoSide right">
-      <!-- ✅ new top-right logo -->
       <img src="assets/images/alt_toplu_logo.png" alt="" onerror="this.style.display='none'">
     </div>
   </div>
@@ -312,12 +328,7 @@
     <button class="btn btn-dark" id="printPhone">Telefon Yazdır</button>
   </div>
 
-  <!-- ✅ removed help text -->
-  <div class="hint"></div>
-
   <div id="container"></div>
-
-  <!-- ✅ removed summary counter -->
   <div id="summary" style="display:none;"></div>
 
 </div>
@@ -374,6 +385,11 @@ function headerNorm(h){
     .replace(/ş/g,"s").replace(/ö/g,"o").replace(/ç/g,"c")
     .replace(/\s+/g,"")
     .trim();
+}
+
+function isBrandHeader(h){
+  const n = headerNorm(h);
+  return n.includes("urunmarkasi") || n === "marka" || (n.includes("marka") && !n.includes("ambalaj"));
 }
 
 function detectCarryColumns(headers){
@@ -450,9 +466,7 @@ function parseExcel(buffer){
     if (headerIdx < 0) return;
 
     const headers = rows[headerIdx].map(h => String(h ?? "").trim());
-    let data = rows
-      .slice(headerIdx+1)
-      .filter(r => r.some(c => !isBlank(c)));
+    let data = rows.slice(headerIdx+1).filter(r => r.some(c => !isBlank(c)));
     if (!data.length) return;
 
     // merged-cell fix
@@ -467,7 +481,6 @@ function parseExcel(buffer){
 
     const left = document.createElement("div");
     left.className="sectionLeft";
-
     left.appendChild(makeLogo(sheetName));
 
     const nameEl = document.createElement("div");
@@ -481,26 +494,34 @@ function parseExcel(buffer){
     const wrap = document.createElement("div");
     wrap.className = "tableWrap";
 
-    const table=document.createElement("table");
+    const table = document.createElement("table");
 
-    const thead=document.createElement("thead");
-    const trh=document.createElement("tr");
-    headers.forEach(h=>{
-      const th=document.createElement("th");
-      th.textContent=h;
+    const thead = document.createElement("thead");
+    const trh = document.createElement("tr");
+    headers.forEach((h, i) => {
+      const th = document.createElement("th");
+      th.textContent = h;
+
+      // ✅ hide brand column on mobile
+      if (isBrandHeader(h)) th.classList.add("hide-mobile");
+
       trh.appendChild(th);
     });
     thead.appendChild(trh);
     table.appendChild(thead);
 
-    const tbody=document.createElement("tbody");
-    data.forEach(r=>{
-      const tr=document.createElement("tr");
-      tr.dataset.search=(sheetName+" "+r.map(format).join(" ")).toLowerCase();
+    const tbody = document.createElement("tbody");
+    data.forEach(r => {
+      const tr = document.createElement("tr");
+      tr.dataset.search = (sheetName + " " + r.map(format).join(" ")).toLowerCase();
 
-      headers.forEach((h,i)=>{
-        const td=document.createElement("td");
-        td.textContent=format(r[i]);
+      headers.forEach((h, i) => {
+        const td = document.createElement("td");
+        td.textContent = format(r[i]);
+
+        // ✅ hide brand column on mobile
+        if (isBrandHeader(h)) td.classList.add("hide-mobile");
+
         tr.appendChild(td);
       });
 
