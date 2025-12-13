@@ -28,7 +28,6 @@
 
       --rowAlt:#f7f7f7;
 
-      /* Light section bar */
       --sectionBg:#f8fafc;
       --sectionText:#111827;
     }
@@ -70,8 +69,9 @@
       text-align:right;
     }
 
+    /* ✅ bigger top logos on desktop */
     .logoSide img{
-      height: 64px;
+      height: 78px;
       width:auto;
       object-fit:contain;
       display:block;
@@ -91,11 +91,8 @@
       letter-spacing: 0.06em;
     }
 
-    .titleWrap .sub{
-      margin-top: 6px;
-      font-size: 12px;
-      color: var(--muted);
-    }
+    /* removed text line completely */
+    .titleWrap .sub{ display:none; }
 
     /* ── CONTROLS ──────────────────────────────────── */
     .controlsRow{
@@ -129,7 +126,6 @@
     .btn-dark{ background: var(--btn); color: var(--btnText); }
     .btn-light{ background: var(--btn2); color: var(--btn2Text); border-color: #cfcfcf; }
 
-    /* removed help text */
     .hint{ display:none; }
 
     /* ── SECTIONS ──────────────────────────────────── */
@@ -237,17 +233,16 @@
     tbody tr:nth-child(even){ background: var(--rowAlt); }
     .hidden{ display:none !important; }
 
-    /* marker class for mobile-hide */
     .hide-mobile{ }
 
     /* ─────────────────────────────────────────────
-       MOBILE: OPTION A header + no horizontal scroll
+       MOBILE: Option A header + fit table to screen
        ───────────────────────────────────────────── */
     @media (max-width: 760px){
       body{ padding: 10px; }
       .paper{ padding: 14px 12px 16px; }
 
-      /* ✅ Option A: stacked header */
+      /* Option A: stacked header */
       .topbar{
         flex-direction: column;
         align-items: center;
@@ -260,9 +255,9 @@
         justify-content: center;
       }
 
-      /* Şentürk logo bigger */
+      /* ✅ bigger Şentürk logo on mobile */
       .logoSide img{
-        height: 72px;
+        height: 96px;
       }
 
       .titleWrap{
@@ -278,16 +273,12 @@
         line-height: 1.25;
       }
 
-      .titleWrap .sub{
-        font-size: 12px;
-      }
-
+      /* brand collage stays centered */
       .logoSide.right{
         width: 100%;
         justify-content: center;
       }
 
-      /* brand collage smaller than main logo */
       .logoSide.right img{
         height: 44px;
       }
@@ -306,10 +297,8 @@
       }
       .brandLogo img{ padding: 7px; }
 
-      /* ✅ Fit table to phone width (no horizontal scrolling) */
-      .tableWrap{
-        overflow: hidden;
-      }
+      /* Fit table to phone width (no horizontal scroll) */
+      .tableWrap{ overflow: hidden; }
 
       table{
         min-width: 0;
@@ -325,10 +314,8 @@
         padding: 7px 8px;
       }
 
-      /* ✅ Hide Ürün Markası on mobile */
-      .hide-mobile{
-        display:none !important;
-      }
+      /* Hide Ürün Markası column on mobile */
+      .hide-mobile{ display:none !important; }
     }
 
     @media print{
@@ -352,7 +339,7 @@
 
     <div class="titleWrap">
       <h1>DİĞER MARKALAR FİYAT LİSTESİ</h1>
-      <div class="sub">Excel sheet bazlı · otomatik yüklü</div>
+      <!-- ✅ removed sub line -->
     </div>
 
     <div class="logoSide right">
