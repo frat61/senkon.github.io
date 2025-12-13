@@ -70,7 +70,6 @@
     .logoSide img{
       height: 54px;
       width:auto;
-      display:block;
       object-fit:contain;
     }
 
@@ -103,16 +102,7 @@
       margin-bottom: 12px;
     }
 
-    .controlsRow label{
-      font-size: 12px;
-      color: var(--muted);
-      margin-right: 4px;
-      white-space:nowrap;
-    }
-
-    input[type="file"]{
-      font-size: 12px;
-    }
+    input[type="file"]{ font-size: 12px; }
 
     .search{
       padding: 7px 12px;
@@ -128,19 +118,11 @@
       padding: 7px 12px;
       cursor:pointer;
       font-size: 13px;
-      line-height: 1;
       white-space:nowrap;
     }
 
-    .btn-dark{
-      background: var(--btn);
-      color: var(--btnText);
-    }
-    .btn-light{
-      background: var(--btn2);
-      color: var(--btn2Text);
-      border-color: #cfcfcf;
-    }
+    .btn-dark{ background: var(--btn); color: var(--btnText); }
+    .btn-light{ background: var(--btn2); color: var(--btn2Text); border-color: #cfcfcf; }
 
     .hint{
       font-size: 12px;
@@ -149,7 +131,6 @@
       line-height: 1.4;
     }
 
-    /* Brand sections */
     .section{
       margin-top: 16px;
       page-break-inside: avoid;
@@ -172,56 +153,36 @@
       display:flex;
       align-items:center;
       gap:10px;
-      min-width: 0;
     }
 
     .brandLogo{
       width: 28px;
       height: 28px;
       border-radius: 6px;
-      background: rgba(255,255,255,0.08);
+      background: rgba(255,255,255,0.1);
       display:flex;
       align-items:center;
       justify-content:center;
       overflow:hidden;
-      flex: 0 0 auto;
-      border: 1px solid rgba(255,255,255,0.12);
+      border: 1px solid rgba(255,255,255,0.2);
     }
+
     .brandLogo img{
       width: 100%;
       height: 100%;
       object-fit: contain;
       padding: 3px;
-      display:block;
     }
 
     .brandBadge{
       width: 28px;
       height: 28px;
       border-radius: 6px;
-      background: rgba(255,255,255,0.12);
-      color: rgba(255,255,255,0.95);
+      background: rgba(255,255,255,0.2);
       display:flex;
       align-items:center;
       justify-content:center;
       font-weight: 800;
-      letter-spacing: .02em;
-      flex: 0 0 auto;
-      border: 1px solid rgba(255,255,255,0.18);
-    }
-
-    .brandName{
-      white-space: nowrap;
-      overflow: hidden;
-      text-overflow: ellipsis;
-      max-width: 680px;
-    }
-
-    .sectionMeta{
-      font-size: 11px;
-      color:#e5e7eb;
-      flex: 0 0 auto;
-      white-space:nowrap;
     }
 
     .tableWrap{
@@ -236,351 +197,207 @@
       font-size: 13px;
       min-width: 820px;
     }
+
     th, td{
       border: 1px solid var(--tableBorder);
       padding: 6px 8px;
-      text-align:left;
-      vertical-align: top;
       white-space: nowrap;
+      vertical-align: top;
     }
+
     th{
       background: var(--thead);
       font-size: 12px;
       font-weight: 700;
       position: sticky;
       top: 0;
-      z-index: 2;
     }
-    tbody tr:nth-child(even){
-      background: var(--rowAlt);
-    }
-    td.wrap{white-space: normal}
 
-    .summary{
-      margin-top: 12px;
-      font-size: 12px;
-      color: var(--muted);
-    }
-    .hidden{display:none !important}
+    tbody tr:nth-child(even){ background: var(--rowAlt); }
+    .hidden{ display:none !important; }
 
     @media print{
-      body{background:#fff;padding:0}
-      .paper{box-shadow:none;border:none;padding:10mm;max-width:none}
-      .controlsRow,.hint{display:none !important}
-      .tableWrap{overflow:visible}
-      th{position: static}
-      table{min-width: auto}
-      td,th{white-space: normal}
+      body{ background:#fff; padding:0 }
+      .paper{ box-shadow:none; border:none; padding:10mm; }
+      .controlsRow,.hint{ display:none }
+      table{ min-width:auto }
+      th{ position:static }
+      td,th{ white-space:normal }
     }
   </style>
 </head>
 
 <body>
-  <div class="paper">
+<div class="paper">
 
-    <div class="topbar">
-      <div class="logoSide">
-        <img src="assets/images/senturk_logo.png" alt="Şentürk" />
-      </div>
-
-      <div class="titleWrap">
-        <h1>DİĞER MARKALAR FİYAT LİSTESİ</h1>
-        <div class="sub" id="subtitle">Excel Sheet bazlı (her marka ayrı sayfa)</div>
-      </div>
-
-      <div class="logoSide right">
-        <!-- Optional: if you don't want Marshall here, delete this img -->
-        <img src="assets/images/marshall_logo.png" alt="Logo" onerror="this.style.display='none';" />
-      </div>
+  <div class="topbar">
+    <div class="logoSide">
+      <img src="assets/images/senturk_logo.png" alt="Şentürk">
     </div>
 
-    <div class="controlsRow">
-      <label>Excel Yükle:</label>
-      <input type="file" id="file" accept=".xlsx,.xls" />
-      <input class="search" id="search" type="text" placeholder="Ürün / ambalaj / fiyat ara..." />
-      <button class="btn btn-light" id="clear">Temizle</button>
-      <button class="btn btn-dark" id="printA4">A4 / Standart Yazdır</button>
-      <button class="btn btn-dark" id="printPhone">Telefon için Yazdır</button>
+    <div class="titleWrap">
+      <h1>DİĞER MARKALAR FİYAT LİSTESİ</h1>
+      <div class="sub">Excel sheet bazlı · otomatik yüklü</div>
     </div>
 
-    <div class="hint">
-      • Her sheet = 1 marka bölümü. Her sheet’in ilk dolu satırı başlık kabul edilir ve tabloda aynen görünür.<br>
-      • Birleştirilmiş hücrelerden kaynaklı boş “Ürün/Kod” alanları otomatik olarak üst satırdan devralınır.<br>
-      • Logo dosyaları: <code>assets/images/dayson_logo.png</code>, <code>assets/images/aquacool_trend_logo.png</code> gibi.
+    <div class="logoSide right">
+      <img src="assets/images/marshall_logo.png" alt="" onerror="this.style.display='none'">
     </div>
-
-    <div id="container"></div>
-    <div class="summary" id="summary"></div>
   </div>
 
+  <div class="controlsRow">
+    <input type="file" id="file" accept=".xlsx,.xls">
+    <input class="search" id="search" placeholder="Ürün / ambalaj / fiyat ara...">
+    <button class="btn btn-light" id="clear">Temizle</button>
+    <button class="btn btn-dark" id="printA4">A4 Yazdır</button>
+    <button class="btn btn-dark" id="printPhone">Telefon Yazdır</button>
+  </div>
+
+  <div class="hint">
+    • Her Excel sheet = 1 marka<br>
+    • Logo adı: <code>assets/images/&lt;sheet_adi&gt;_logo.png</code><br>
+    • Excel otomatik yüklenir (manuel yükleme isteğe bağlı)
+  </div>
+
+  <div id="container"></div>
+  <div id="summary" class="hint"></div>
+
+</div>
+
 <script>
-  const elFile = document.getElementById("file");
-  const elSearch = document.getElementById("search");
-  const elClear = document.getElementById("clear");
-  const elPrintA4 = document.getElementById("printA4");
-  const elPrintPhone = document.getElementById("printPhone");
-  const container = document.getElementById("container");
-  const summary = document.getElementById("summary");
+const EXCEL_PATH = "assets/data/alternatif_urunler.xlsx";
+const container = document.getElementById("container");
+const summary = document.getElementById("summary");
+const search = document.getElementById("search");
+const fileInput = document.getElementById("file");
 
-  let allRows = [];
-  let allSections = [];
+let allRows = [];
+let allSections = [];
 
-  elFile.addEventListener("change", onFile);
-  elSearch.addEventListener("input", applySearch);
-  elClear.addEventListener("click", () => { elSearch.value=""; applySearch(); });
+window.addEventListener("DOMContentLoaded", () => autoLoad());
+fileInput.addEventListener("change", e => loadFile(e.target.files[0]));
+search.addEventListener("input", applySearch);
+document.getElementById("clear").onclick = () => { search.value=""; applySearch(); };
+document.getElementById("printA4").onclick = () => window.print();
+document.getElementById("printPhone").onclick = () => {
+  document.body.classList.add("phonePrint");
+  window.print();
+  document.body.classList.remove("phonePrint");
+};
 
-  elPrintA4.addEventListener("click", () => {
-    document.body.classList.remove("phonePrint");
-    window.print();
-  });
+function autoLoad(){
+  fetch(EXCEL_PATH)
+    .then(r => r.arrayBuffer())
+    .then(buf => parseExcel(buf))
+    .catch(() => summary.textContent="Excel otomatik yüklenemedi.");
+}
 
-  elPrintPhone.addEventListener("click", () => {
-    document.body.classList.add("phonePrint");
-    window.print();
-    document.body.classList.remove("phonePrint");
-  });
+function loadFile(file){
+  const reader = new FileReader();
+  reader.onload = e => parseExcel(e.target.result);
+  reader.readAsArrayBuffer(file);
+}
 
-  // Phone print tweaks
-  const phoneStyle = document.createElement("style");
-  phoneStyle.textContent = `
-    body.phonePrint .paper{ padding: 6mm !important; }
-    body.phonePrint table{ font-size: 15px !important; }
-    body.phonePrint th{ font-size: 13px !important; }
-    body.phonePrint td, body.phonePrint th{ white-space: normal !important; }
-  `;
-  document.head.appendChild(phoneStyle);
+function parseExcel(buffer){
+  container.innerHTML="";
+  allRows=[]; allSections=[];
+  const wb = XLSX.read(new Uint8Array(buffer), {type:"array"});
+  let total=0;
 
-  function isEmptyRow(row){
-    return row.every(c => String(c ?? "").trim() === "");
-  }
+  wb.SheetNames.forEach(name=>{
+    const ws = wb.Sheets[name];
+    const rows = XLSX.utils.sheet_to_json(ws,{header:1,defval:""});
+    const headerIdx = rows.findIndex(r=>r.filter(c=>c).length>=2);
+    if(headerIdx<0) return;
 
-  function normalize(s){
-    return String(s ?? "")
-      .trim()
-      .toLowerCase()
-      .replace(/ı/g,"i").replace(/İ/g,"i")
-      .replace(/ğ/g,"g").replace(/Ğ/g,"g")
-      .replace(/ü/g,"u").replace(/Ü/g,"u")
-      .replace(/ş/g,"s").replace(/Ş/g,"s")
-      .replace(/ö/g,"o").replace(/Ö/g,"o")
-      .replace(/ç/g,"c").replace(/Ç/g,"c")
-      .replace(/[^a-z0-9]+/g,"_")
-      .replace(/^_+|_+$/g,"");
-  }
+    const headers = rows[headerIdx];
+    const data = rows.slice(headerIdx+1).filter(r=>r.some(c=>c));
 
-  function formatCell(v){
-    if (typeof v === "number") {
-      const rounded = Math.round((v + Number.EPSILON) * 100) / 100;
-      return rounded.toLocaleString("tr-TR", {
-        minimumFractionDigits: Number.isInteger(rounded) ? 0 : 2,
-        maximumFractionDigits: 2
-      }).replace(/,00$/,"");
-    }
-    const s = String(v ?? "").trim();
-    if (s && /^-?\d+(\.\d+)?$/.test(s) && s.length > 10) {
-      const num = Number(s);
-      if (!Number.isNaN(num)) return formatCell(num);
-    }
-    return s;
-  }
+    const section = document.createElement("div");
+    section.className="section";
 
-  function guessCarryColumns(headers){
-    const idxs = [];
-    headers.forEach((h, i) => {
-      const n = String(h || "").toLowerCase();
-      if (n.includes("kod") || (n.includes("ürün") || n.includes("urun")) || n.includes("renk") || n.includes("baz")) idxs.push(i);
-    });
-    if (idxs.length === 0 && headers.length) idxs.push(0);
-    return Array.from(new Set(idxs));
-  }
+    const head = document.createElement("div");
+    head.className="sectionHead";
 
-  function forwardFill(rows, carryIdxs){
-    const last = {};
-    const out = [];
-    for (const r of rows) {
-      const row = r.slice();
-      const hasAny = row.some(c => String(c ?? "").trim() !== "");
-      if (!hasAny) continue;
+    const left = document.createElement("div");
+    left.className="sectionLeft";
+    left.appendChild(makeLogo(name));
+    left.appendChild(document.createTextNode(name));
 
-      for (const idx of carryIdxs) {
-        const cur = String(row[idx] ?? "").trim();
-        if (!cur && last[idx] !== undefined) row[idx] = last[idx];
-        else if (cur) last[idx] = row[idx];
-      }
-      out.push(row);
-    }
-    return out;
-  }
+    const meta = document.createElement("div");
+    meta.textContent = data.length+" satır";
 
-  function makeBrandLogoNode(sheetName){
-    // Expected naming: assets/images/<normalized_sheet>_logo.png
-    // e.g. "Aquacool Trend" -> aquacool_trend_logo.png
-    const file = `assets/images/${normalize(sheetName)}_logo.png`;
+    head.append(left,meta);
+    section.appendChild(head);
 
-    const holder = document.createElement("div");
-    holder.className = "brandLogo";
+    const table=document.createElement("table");
+    const thead=document.createElement("thead");
+    const trh=document.createElement("tr");
+    headers.forEach(h=>{const th=document.createElement("th");th.textContent=h;trh.appendChild(th);});
+    thead.appendChild(trh); table.appendChild(thead);
 
-    const img = document.createElement("img");
-    img.alt = sheetName + " logo";
-    img.src = file;
-
-    // If not found, replace with a badge
-    img.onerror = () => {
-      holder.replaceWith(makeBrandBadge(sheetName));
-    };
-
-    holder.appendChild(img);
-    return holder;
-  }
-
-  function makeBrandBadge(sheetName){
-    const b = document.createElement("div");
-    b.className = "brandBadge";
-    const clean = String(sheetName || "").trim();
-    b.textContent = clean ? clean[0].toUpperCase() : "?";
-    return b;
-  }
-
-  function onFile(e){
-    const file = e.target.files?.[0];
-    if (!file) return;
-
-    container.innerHTML = "";
-    summary.textContent = "";
-    allRows = [];
-    allSections = [];
-
-    const reader = new FileReader();
-    reader.onload = ev => {
-      const data = new Uint8Array(ev.target.result);
-      const wb = XLSX.read(data, { type: "array" });
-
-      let totalVisible = 0;
-      let sheetsUsed = 0;
-
-      (wb.SheetNames || []).forEach(sheetName => {
-        const ws = wb.Sheets[sheetName];
-        const grid = XLSX.utils.sheet_to_json(ws, { header: 1, raw: true, defval: "" });
-
-        // header: first non-empty row with at least 2 cells
-        let hIdx = -1;
-        for (let i=0;i<grid.length;i++){
-          if (!isEmptyRow(grid[i]) && grid[i].filter(c => String(c??"").trim()!=="").length >= 2) { hIdx=i; break; }
-        }
-        if (hIdx === -1) return;
-
-        const headers = grid[hIdx].map(h => String(h ?? "").trim());
-        const dataRowsRaw = grid.slice(hIdx+1).filter(r => !isEmptyRow(r));
-        if (dataRowsRaw.length === 0) return;
-
-        const carryIdxs = guessCarryColumns(headers);
-        const dataRows = forwardFill(dataRowsRaw, carryIdxs);
-        if (dataRows.length === 0) return;
-
-        sheetsUsed++;
-
-        const section = document.createElement("section");
-        section.className = "section";
-
-        const head = document.createElement("div");
-        head.className = "sectionHead";
-
-        const left = document.createElement("div");
-        left.className = "sectionLeft";
-
-        // brand logo (auto)
-        left.appendChild(makeBrandLogoNode(sheetName));
-
-        const name = document.createElement("div");
-        name.className = "brandName";
-        name.textContent = sheetName;
-        left.appendChild(name);
-
-        const meta = document.createElement("div");
-        meta.className = "sectionMeta";
-        meta.textContent = `${dataRows.length} satır`;
-
-        head.appendChild(left);
-        head.appendChild(meta);
-
-        section.appendChild(head);
-
-        const wrap = document.createElement("div");
-        wrap.className = "tableWrap";
-
-        const table = document.createElement("table");
-
-        const thead = document.createElement("thead");
-        const trh = document.createElement("tr");
-        headers.forEach(h => {
-          const th = document.createElement("th");
-          th.textContent = h || "";
-          trh.appendChild(th);
-        });
-        thead.appendChild(trh);
-        table.appendChild(thead);
-
-        const tbody = document.createElement("tbody");
-
-        dataRows.forEach(r => {
-          const row = r.slice(0, headers.length);
-          while (row.length < headers.length) row.push("");
-
-          const hasAny = row.some(c => String(c ?? "").trim() !== "");
-          if (!hasAny) return;
-
-          const tr = document.createElement("tr");
-          tr.dataset.search = (sheetName + " | " + row.map(formatCell).join(" | ")).toLowerCase();
-
-          row.forEach((cell, idx) => {
-            const td = document.createElement("td");
-            const hn = String(headers[idx] || "").toLowerCase();
-            if (hn.includes("ürün") || hn.includes("urun") || hn.includes("açıklama") || hn.includes("aciklama")) td.classList.add("wrap");
-            td.textContent = formatCell(cell);
-            tr.appendChild(td);
-          });
-
-          tbody.appendChild(tr);
-          allRows.push(tr);
-        });
-
-        table.appendChild(tbody);
-        wrap.appendChild(table);
-        section.appendChild(wrap);
-        container.appendChild(section);
-        allSections.push(section);
-
-        totalVisible += dataRows.length;
+    const tbody=document.createElement("tbody");
+    data.forEach(r=>{
+      const tr=document.createElement("tr");
+      tr.dataset.search=(name+" "+r.join(" ")).toLowerCase();
+      headers.forEach((_,i)=>{
+        const td=document.createElement("td");
+        td.textContent=format(r[i]);
+        tr.appendChild(td);
       });
-
-      summary.textContent = `${sheetsUsed} marka (sheet) yüklendi. Toplam satır: ${totalVisible}.`;
-      applySearch();
-    };
-
-    reader.readAsArrayBuffer(file);
-  }
-
-  function applySearch(){
-    const q = elSearch.value.trim().toLowerCase();
-    if (!q) {
-      allRows.forEach(tr => tr.classList.remove("hidden"));
-      allSections.forEach(sec => sec.classList.remove("hidden"));
-      return;
-    }
-
-    const visibleSec = new Set();
-
-    allRows.forEach(tr => {
-      const ok = tr.dataset.search.includes(q);
-      tr.classList.toggle("hidden", !ok);
-      if (ok) {
-        const sec = tr.closest(".section");
-        if (sec) visibleSec.add(sec);
-      }
+      tbody.appendChild(tr);
+      allRows.push(tr);
     });
 
-    allSections.forEach(sec => sec.classList.toggle("hidden", !visibleSec.has(sec)));
-  }
+    table.appendChild(tbody);
+    section.appendChild(table);
+    container.appendChild(section);
+    allSections.push(section);
+    total+=data.length;
+  });
+
+  summary.textContent = `${wb.SheetNames.length} marka · ${total} satır`;
+}
+
+function applySearch(){
+  const q=search.value.toLowerCase();
+  const visible=new Set();
+  allRows.forEach(r=>{
+    const ok=r.dataset.search.includes(q);
+    r.classList.toggle("hidden",!ok);
+    if(ok) visible.add(r.closest(".section"));
+  });
+  allSections.forEach(s=>s.classList.toggle("hidden",!visible.has(s)));
+}
+
+function normalize(s){
+  return s.toLowerCase()
+    .replace(/ı/g,"i").replace(/ğ/g,"g").replace(/ü/g,"u")
+    .replace(/ş/g,"s").replace(/ö/g,"o").replace(/ç/g,"c")
+    .replace(/[^a-z0-9]+/g,"_").replace(/^_|_$/g,"");
+}
+
+function makeLogo(name){
+  const box=document.createElement("div");
+  box.className="brandLogo";
+  const img=document.createElement("img");
+  img.src=`assets/images/${normalize(name)}_logo.png`;
+  img.onerror=()=>box.replaceWith(badge(name));
+  box.appendChild(img);
+  return box;
+}
+
+function badge(name){
+  const b=document.createElement("div");
+  b.className="brandBadge";
+  b.textContent=name[0].toUpperCase();
+  return b;
+}
+
+function format(v){
+  if(typeof v==="number") return v.toLocaleString("tr-TR",{maximumFractionDigits:2});
+  return v||"";
+}
 </script>
 </body>
 </html>
