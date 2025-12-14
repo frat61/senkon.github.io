@@ -151,6 +151,13 @@
 
     .toolbar button:hover { opacity: 0.9; }
 
+    /* Secondary-looking button (mobile view toggle) */
+    .toolbar button.btn-soft{
+      background: #f1f3f5;
+      color: #111;
+      border: 1px solid #cfcfcf;
+    }
+
     /* SEARCH INPUT */
 
     #searchInput {
@@ -252,6 +259,85 @@
     }
 
     .footer .line { margin: 2px 0; }
+
+    /* ==========================================================
+       ✅ MOBILE VIEW MODE (screen only, does NOT affect printing)
+       ========================================================== */
+
+    body.mobile-view {
+      padding: 10px;
+    }
+
+    body.mobile-view .page{
+      max-width: 100%;
+      padding: 14px 12px 16px;
+      box-shadow: 0 0 10px rgba(0,0,0,0.10);
+    }
+
+    /* Make header stack nicely if needed */
+    body.mobile-view .header{
+      align-items: center;
+    }
+    body.mobile-view .senturk-logo img,
+    body.mobile-view .marshall-logo img{
+      height: 56px;
+    }
+
+    /* Force 1 column in mobile view, always */
+    body.mobile-view #content{
+      column-count: 1 !important;
+      column-gap: 0 !important;
+    }
+
+    /* Let tables breathe + fit screen */
+    body.mobile-view table.price-matrix{
+      font-size: 12.5px;
+    }
+
+    body.mobile-view th,
+    body.mobile-view td{
+      padding: 7px 6px;
+      white-space: normal;              /* allow wrapping */
+      overflow-wrap: anywhere;
+      word-break: break-word;
+    }
+
+    /* Make product cell more readable */
+    body.mobile-view td.col-product{
+      font-size: 12.5px;
+    }
+
+    /* Price cells: clearer */
+    body.mobile-view td.col-price{
+      font-size: 12px;
+      font-variant-numeric: tabular-nums;
+    }
+
+    /* Keep the stripe visible */
+    body.mobile-view table.price-matrix td.col-product::before{
+      width: 5px;
+    }
+
+    /* Toolbar: fit on phone */
+    @media (max-width: 760px){
+      body.mobile-view .toolbar{
+        gap: 8px;
+      }
+      body.mobile-view .toolbar-left,
+      body.mobile-view .toolbar-right{
+        width: 100%;
+        justify-content: center;
+      }
+      body.mobile-view #searchInput{
+        min-width: 100%;
+      }
+      body.mobile-view input[type="file"]{
+        width: 100%;
+      }
+      body.mobile-view .toolbar button{
+        flex: 1 1 auto;
+      }
+    }
 
     /* PRINT MODES */
 
@@ -386,6 +472,10 @@
     <div class="toolbar-right">
       <input type="text" id="searchInput" placeholder="Ürün / renk ara...">
       <button type="button" id="clearSearchBtn">Temizle</button>
+
+      <!-- ✅ NEW: Mobile View toggle (screen mode) -->
+      <button type="button" id="mobileViewBtn" class="btn-soft">Mobil Görünüm: Kapalı</button>
+
       <button type="button" onclick="printDesktop()">A4 / Standart Yazdır</button>
       <button type="button" onclick="printMobile()">Telefon için Yazdır</button>
     </div>
@@ -716,6 +806,21 @@ window.addEventListener("afterprint", () => {
   document.body.classList.remove("desktop-print", "mobile-print");
 });
 
+// -------------------- MOBILE VIEW TOGGLE (screen mode) --------------------
+
+function updateMobileBtnLabel(){
+  const btn = document.getElementById("mobileViewBtn");
+  if (!btn) return;
+  const on = document.body.classList.contains("mobile-view");
+  btn.textContent = on ? "Mobil Görünüm: Açık" : "Mobil Görünüm: Kapalı";
+}
+
+function setMobileView(on){
+  document.body.classList.toggle("mobile-view", !!on);
+  localStorage.setItem("marshall_mobile_view", on ? "1" : "0");
+  updateMobileBtnLabel();
+}
+
 // -------------------- EXCEL LOAD & INIT --------------------
 
 // manual upload (still works)
@@ -780,6 +885,18 @@ document.addEventListener("DOMContentLoaded", () => {
       applySearch();
     });
   }
+
+  // ✅ mobile view toggle init + remember setting
+  const btn = document.getElementById("mobileViewBtn");
+  if (btn){
+    btn.addEventListener("click", () => {
+      const on = !document.body.classList.contains("mobile-view");
+      setMobileView(on);
+    });
+  }
+  const saved = localStorage.getItem("marshall_mobile_view");
+  if (saved === "1") setMobileView(true);
+  else updateMobileBtnLabel();
 
   // load default Excel file on startup
   autoLoadExcel();
