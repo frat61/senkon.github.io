@@ -1,200 +1,292 @@
 <!DOCTYPE html>
-<html lang="en">
+<html lang="tr">
 <head>
   <meta charset="UTF-8" />
-  <title>Şentürk Web Tools</title>
+  <title>Şentürk Web Araçları</title>
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
 
   <style>
-    :root {
-      --bg: #0d1117;
-      --bg-light: #161b22;
-      --card: #1e2633;
-      --text: #e6edf3;
-      --subtext: #9ba7b4;
-      --accent: #facc15;
-      --accent-soft: rgba(250, 204, 21, 0.12);
-      --border: rgba(255, 255, 255, 0.12);
+    :root{
+      /* Clean/light theme inspired by your price list look */
+      --page-bg: #f3f3f3;
+      --surface: #ffffff;
+      --surface-2: #fafafa;
 
-      --radius: 18px;
-      --shadow: 0 14px 40px rgba(0, 0, 0, 0.5);
+      --text: #1f2937;
+      --muted: #6b7280;
+
+      --border: #d9d9d9;
+      --border-2: #ececec;
+
+      /* Brand-ish accents (maroon + calm blue like your print page vibe) */
+      --brand: #6b2b2b;      /* deep maroon */
+      --brand-2: #203a7a;    /* deep blue */
+      --accent: #c77a2a;     /* warm orange (optional highlight) */
+
+      --radius: 16px;
+      --shadow: 0 10px 30px rgba(0,0,0,0.08);
     }
 
-    * { margin: 0; padding: 0; box-sizing: border-box; }
+    *{margin:0;padding:0;box-sizing:border-box;}
 
-    body {
-      background: var(--bg);
+    body{
+      background: var(--page-bg);
       color: var(--text);
       font-family: "Segoe UI", Arial, sans-serif;
-      padding: 40px 20px;
-      display: flex;
-      justify-content: center;
+      padding: 34px 16px;
+      display:flex;
+      justify-content:center;
     }
 
-    .container {
-      width: 100%;
-      max-width: 1050px;
-      background: var(--bg-light);
-      padding: 36px;
-      border-radius: 22px;
+    .container{
+      width:100%;
+      max-width: 1120px;
+      background: var(--surface);
       border: 1px solid var(--border);
+      border-radius: 18px;
       box-shadow: var(--shadow);
-      position: relative;
+      overflow:hidden;
     }
 
-    .container::before {
-      content: "";
-      position: absolute;
-      top: -120px;
-      right: -60px;
-      width: 320px;
-      height: 320px;
-      background: radial-gradient(circle, rgba(250, 204, 21, 0.13), transparent 65%);
-      pointer-events: none;
+    /* Top header bar (like a document header) */
+    .topbar{
+      padding: 22px 26px;
+      border-bottom: 1px solid var(--border);
+      background: linear-gradient(180deg, #ffffff, #fbfbfb);
     }
 
-    .header {
-      display: flex;
-      justify-content: space-between;
-      align-items: center;
-      margin-bottom: 32px;
+    .header{
+      display:flex;
+      align-items:center;
+      justify-content:space-between;
+      gap: 18px;
       flex-wrap: wrap;
-      gap: 20px;
     }
 
-    .brand {
-      display: flex;
-      align-items: center;
-      gap: 16px;
+    .brand{
+      display:flex;
+      align-items:center;
+      gap: 14px;
+      min-width: 260px;
     }
 
-    .brand-logo {
-      width: 52px;
-      height: 52px;
-      border-radius: 14px;
-      background: radial-gradient(circle at 25% 25%, #facc15, #e08b00 45%, #000);
-      display: flex;
-      justify-content: center;
-      align-items: center;
-      font-size: 22px;
-      font-weight: 800;
-      color: #000;
-      box-shadow: 0 10px 25px rgba(250, 204, 21, 0.35);
+    .brand img{
+      height: 46px;
+      width: auto;
+      display:block;
+      object-fit: contain;
     }
 
-    .brand-title {
-      display: flex;
-      flex-direction: column;
+    .brand-text{
+      display:flex;
+      flex-direction:column;
+      line-height:1.15;
     }
 
-    .brand-title span:first-child {
+    .brand-text .name{
       font-size: 18px;
-      font-weight: 700;
+      font-weight: 800;
+      letter-spacing: .02em;
+      color: var(--brand);
       text-transform: uppercase;
-      letter-spacing: 0.04em;
     }
 
-    .brand-title span:last-child {
+    .brand-text .desc{
       font-size: 13px;
-      color: var(--subtext);
+      color: var(--muted);
+      margin-top: 3px;
     }
 
-    .header-right { text-align: right; }
+    .header-right{
+      text-align:right;
+      flex: 1;
+      min-width: 240px;
+    }
 
-    .badge {
-      display: inline-block;
-      padding: 4px 12px;
+    .badge{
+      display:inline-block;
+      padding: 6px 12px;
       border-radius: 999px;
-      font-size: 11px;
-      text-transform: uppercase;
-      letter-spacing: 0.12em;
-      background: var(--accent-soft);
-      color: var(--accent);
-      border: 1px solid rgba(250, 204, 21, 0.4);
+      font-size: 12px;
+      border: 1px solid var(--border);
+      background: var(--surface-2);
+      color: var(--brand-2);
+      font-weight: 600;
+      letter-spacing: .02em;
       margin-bottom: 8px;
     }
 
-    .title { font-size: 22px; font-weight: 600; }
-    .subtitle { font-size: 14px; color: var(--subtext); }
-
-    .grid {
-      margin-top: 28px;
-      display: grid;
-      grid-template-columns: repeat(auto-fill, minmax(260px, 1fr));
-      gap: 22px;
+    .title{
+      font-size: 20px;
+      font-weight: 800;
+      color: var(--text);
     }
 
-    .card {
-      background: var(--card);
-      border-radius: var(--radius);
+    .subtitle{
+      font-size: 13.5px;
+      color: var(--muted);
+      margin-top: 4px;
+    }
+
+    /* Content */
+    .content{
+      padding: 22px 26px 26px 26px;
+    }
+
+    .tools-head{
+      display:flex;
+      align-items:center;
+      justify-content:space-between;
+      gap: 14px;
+      flex-wrap: wrap;
+      margin-bottom: 16px;
+    }
+
+    .tools-head h2{
+      font-size: 15px;
+      font-weight: 800;
+      color: var(--brand-2);
+      letter-spacing: .02em;
+      text-transform: uppercase;
+    }
+
+    .search{
+      display:flex;
+      gap: 10px;
+      align-items:center;
+      flex-wrap: wrap;
+    }
+
+    .search input{
+      width: min(360px, 70vw);
+      padding: 10px 12px;
       border: 1px solid var(--border);
-      padding: 22px;
-      position: relative;
-      cursor: pointer;
-      transition: transform 0.2s ease, border-color 0.25s ease;
-      min-height: 150px;
-      display: flex;
-      flex-direction: column;
-      justify-content: space-between;
+      border-radius: 10px;
+      outline: none;
+      background: #fff;
+      font-size: 14px;
     }
 
-    .card:hover {
-      transform: translateY(-4px);
-      border-color: var(--accent);
-    }
-
-    .card h3 {
-      font-size: 17px;
+    .btn{
+      padding: 10px 12px;
+      border-radius: 10px;
+      border: 1px solid var(--border);
+      background: var(--surface-2);
+      cursor:pointer;
       font-weight: 600;
+      color: var(--text);
+      transition: .15s;
+      white-space: nowrap;
+    }
+    .btn:hover{ border-color: var(--brand-2); color: var(--brand-2); }
+
+    .grid{
+      display:grid;
+      grid-template-columns: repeat(auto-fill, minmax(270px, 1fr));
+      gap: 16px;
+    }
+
+    .card{
+      background: #fff;
+      border: 1px solid var(--border);
+      border-radius: var(--radius);
+      padding: 16px 16px 14px 16px;
+      box-shadow: 0 8px 18px rgba(0,0,0,0.05);
+      cursor:pointer;
+      transition: transform .18s ease, border-color .18s ease, box-shadow .18s ease;
+      display:flex;
+      flex-direction:column;
+      min-height: 150px;
+      position: relative;
+      overflow:hidden;
+    }
+
+    /* left colored stripe like your category marks */
+    .card::before{
+      content:"";
+      position:absolute;
+      left:0; top:0; bottom:0;
+      width: 6px;
+      background: var(--brand-2);
+      opacity: .9;
+    }
+
+    .card:hover{
+      transform: translateY(-3px);
+      border-color: rgba(32,58,122,.55);
+      box-shadow: 0 14px 26px rgba(0,0,0,0.08);
+    }
+
+    .card h3{
+      font-size: 16px;
+      font-weight: 800;
+      margin-left: 8px;
       margin-bottom: 6px;
     }
 
-    .card p {
-      font-size: 14px;
-      color: var(--subtext);
-      line-height: 1.4;
-      flex-grow: 1;
+    .card p{
+      font-size: 13.5px;
+      color: var(--muted);
+      line-height: 1.45;
+      margin-left: 8px;
+      flex: 1;
     }
 
-    .card-footer {
-      margin-top: 14px;
-      display: flex;
-      justify-content: space-between;
-      align-items: center;
-      gap: 12px;
+    .card-footer{
+      margin-top: 12px;
+      display:flex;
+      justify-content:space-between;
+      align-items:center;
+      gap: 10px;
+      margin-left: 8px;
     }
 
-    .pill {
-      padding: 6px 12px;
-      border-radius: 999px;
-      border: 1px solid var(--border);
+    .meta{
       font-size: 12px;
-      color: var(--text);
-      text-decoration: none;
-      transition: 0.2s;
+      color: var(--muted);
       white-space: nowrap;
     }
 
-    .pill:hover {
-      border-color: var(--accent);
-      color: var(--accent);
+    .pill{
+      padding: 8px 12px;
+      border-radius: 999px;
+      border: 1px solid var(--border);
+      background: #fff;
+      text-decoration:none;
+      font-size: 12px;
+      font-weight: 700;
+      color: var(--brand-2);
+      transition: .15s;
+      white-space: nowrap;
     }
 
-    .disabled {
-      opacity: 0.55;
+    .pill:hover{
+      border-color: var(--brand-2);
+      background: rgba(32,58,122,.06);
+    }
+
+    .disabled{
+      opacity: .55;
       pointer-events: none;
     }
 
-    .footer {
-      margin-top: 32px;
-      text-align: center;
-      font-size: 12px;
-      color: var(--subtext);
+    .disabled::before{
+      background: #9ca3af; /* grey stripe */
     }
 
-    @media (max-width: 650px) {
-      .header { text-align: center; flex-direction: column; }
-      .header-right { text-align: center; }
+    .footer{
+      padding: 14px 18px;
+      text-align:center;
+      border-top: 1px solid var(--border);
+      background: #fbfbfb;
+      color: var(--muted);
+      font-size: 12px;
+    }
+
+    @media (max-width: 650px){
+      .header-right{ text-align:center; }
+      .brand{ justify-content:center; width:100%; }
+      .tools-head{ justify-content:center; }
     }
   </style>
 </head>
@@ -202,68 +294,177 @@
 <body>
   <div class="container">
 
-    <div class="header">
-      <div class="brand">
-        <div class="brand-logo">Ş</div>
-        <div class="brand-title">
-          <span>Şentürk Dekorasyon</span>
-          <span>Price & Product Tools</span>
+    <div class="topbar">
+      <div class="header">
+        <div class="brand">
+          <!-- ✅ Put your real logo file next to index.html -->
+          <img src="senturk-logo.png" alt="Şentürk Logo" />
+          <div class="brand-text">
+            <div class="name">Şentürk Boya</div>
+            <div class="desc">Fiyat & Ürün Araçları</div>
+          </div>
         </div>
-      </div>
 
-      <div class="header-right">
-        <div class="badge">Internal Tools</div>
-        <div class="title">Welcome to your dashboard</div>
-        <div class="subtitle">Choose the operation you want to use.</div>
+        <div class="header-right">
+          <div class="badge">İç Kullanım</div>
+          <div class="title">Kontrol Paneli</div>
+          <div class="subtitle">Kullanmak istediğiniz işlemi seçin.</div>
+        </div>
       </div>
     </div>
 
-    <div class="grid">
-
-      <!-- MARSHALL TOOL -->
-      <div class="card" onclick="window.location.href='fiyat-listesi.html'">
-        <h3>Marshall Full Price List</h3>
-        <p>
-          View the complete Marshall product list (all categories, all sizes)
-          with search, filters and professional print layout.
-        </p>
-        <div class="card-footer">
-          <span style="font-size:12px;color:var(--subtext);">Active · Main tool</span>
-          <a href="fiyat-listesi.html" class="pill">Open</a>
+    <div class="content">
+      <div class="tools-head">
+        <h2>Araçlar</h2>
+        <div class="search">
+          <input id="searchInput" type="text" placeholder="Araç ara (örn: Marshall, alternatif, indirim)..." />
+          <button class="btn" id="clearBtn" type="button">Temizle</button>
         </div>
       </div>
 
-      <!-- ALTERNATIVE PRODUCTS TOOL (ACTIVE) -->
-      <div class="card" onclick="window.location.href='alternatif_urunler.html'">
-        <h3>Alternative Brands & Products</h3>
-        <p>
-          Show customers the full range of non-Marshall products you sell
-          (DaySon, Aquacool Trend, Dekor, Doğuş, etc.) grouped by brand.
-        </p>
-        <div class="card-footer">
-          <span style="font-size:12px;color:var(--subtext);">Active · Excel-based</span>
-          <a href="alternatif_urunler.html" class="pill">Open</a>
-        </div>
-      </div>
-
-      <!-- DISCOUNT SIMULATOR (COMING SOON) -->
-      <div class="card disabled">
-        <h3>Discount & Offer Calculator</h3>
-        <p>
-          Calculate cash/card/vadeli prices, apply custom discount rates,
-          and generate customer offers in seconds.
-        </p>
-        <div class="card-footer">
-          <span style="font-size:12px;">Planned</span>
-        </div>
-      </div>
-
+      <div id="toolsGrid" class="grid"></div>
     </div>
 
     <div class="footer">
-      v1.2 · Designed for Şentürk by ChatGPT · Mobile-optimized
+      v1.2 · Şentürk için tasarlandı · Mobil uyumlu
     </div>
 
   </div>
+
+  <script>
+    // ✅ Only edit this list to add / change tools
+    const TOOLS = [
+      {
+        title: "Marshall Tam Fiyat Listesi",
+        description:
+          "Tüm Marshall ürünlerini (tüm gruplar, tüm ambalajlar) arama/filtreleme ve profesyonel yazdırma düzeni ile görüntüleyin.",
+        href: "fiyat-listesi.html",
+        statusText: "Aktif · Ana araç",
+        pillText: "Aç",
+        enabled: true,
+        stripe: "#c77a2a" // warm stripe (like iç cephe turuncu vibe)
+      },
+      {
+        title: "Alternatif Markalar & Ürünler",
+        description:
+          "Marshall dışındaki ürünlerinizi (DaySon, Aquacool Trend, Dekor, Doğuş vb.) marka bazında listeleyin.",
+        href: "alternatif_urunler.html",
+        statusText: "Aktif · Excel tabanlı",
+        pillText: "Aç",
+        enabled: true,
+        stripe: "#203a7a" // deep blue
+      },
+      {
+        title: "İndirim & Teklif Hesaplayıcı",
+        description:
+          "Nakit/kart/vadeli fiyat hesaplama, özel iskonto uygulama ve saniyeler içinde teklif oluşturma.",
+        statusText: "Planlandı",
+        enabled: false,
+        stripe: "#9ca3af"
+      }
+    ];
+
+    const grid = document.getElementById("toolsGrid");
+    const searchInput = document.getElementById("searchInput");
+    const clearBtn = document.getElementById("clearBtn");
+
+    function render(tools) {
+      grid.innerHTML = "";
+      tools.forEach(tool => grid.appendChild(createToolCard(tool)));
+    }
+
+    function createToolCard(tool) {
+      const card = document.createElement("div");
+      card.className = "card" + (tool.enabled ? "" : " disabled");
+      card.setAttribute("role", "button");
+      card.setAttribute("tabindex", tool.enabled ? "0" : "-1");
+      card.setAttribute("aria-disabled", tool.enabled ? "false" : "true");
+
+      // stripe color per tool
+      card.style.setProperty("--stripe", tool.stripe || "#203a7a");
+      card.style.position = "relative";
+      card.style.overflow = "hidden";
+      card.style.setProperty("border-color", "var(--border)");
+
+      // override ::before color by injecting a real stripe div (simple + reliable)
+      const stripe = document.createElement("div");
+      stripe.style.position = "absolute";
+      stripe.style.left = "0";
+      stripe.style.top = "0";
+      stripe.style.bottom = "0";
+      stripe.style.width = "6px";
+      stripe.style.background = tool.stripe || "#203a7a";
+      stripe.style.opacity = "0.9";
+      card.appendChild(stripe);
+
+      const h3 = document.createElement("h3");
+      h3.textContent = tool.title;
+
+      const p = document.createElement("p");
+      p.textContent = tool.description;
+
+      const footer = document.createElement("div");
+      footer.className = "card-footer";
+
+      const status = document.createElement("span");
+      status.className = "meta";
+      status.textContent = tool.statusText || "";
+
+      footer.appendChild(status);
+
+      if (tool.enabled && tool.href) {
+        const a = document.createElement("a");
+        a.href = tool.href;
+        a.className = "pill";
+        a.textContent = tool.pillText || "Aç";
+        a.addEventListener("click", (e) => e.stopPropagation());
+        footer.appendChild(a);
+
+        card.addEventListener("click", () => window.location.href = tool.href);
+        card.addEventListener("keydown", (e) => {
+          if (e.key === "Enter" || e.key === " ") {
+            e.preventDefault();
+            window.location.href = tool.href;
+          }
+        });
+      }
+
+      card.appendChild(h3);
+      card.appendChild(p);
+      card.appendChild(footer);
+      return card;
+    }
+
+    function normalize(s) {
+      return (s || "")
+        .toLowerCase()
+        .replaceAll("ı","i").replaceAll("İ","i")
+        .replaceAll("ş","s").replaceAll("Ş","s")
+        .replaceAll("ğ","g").replaceAll("Ğ","g")
+        .replaceAll("ü","u").replaceAll("Ü","u")
+        .replaceAll("ö","o").replaceAll("Ö","o")
+        .replaceAll("ç","c").replaceAll("Ç","c");
+    }
+
+    function applyFilter() {
+      const q = normalize(searchInput.value.trim());
+      if (!q) return render(TOOLS);
+
+      const filtered = TOOLS.filter(t => {
+        const hay = normalize(t.title + " " + t.description + " " + (t.statusText || ""));
+        return hay.includes(q);
+      });
+      render(filtered);
+    }
+
+    searchInput.addEventListener("input", applyFilter);
+    clearBtn.addEventListener("click", () => {
+      searchInput.value = "";
+      render(TOOLS);
+      searchInput.focus();
+    });
+
+    render(TOOLS);
+  </script>
 </body>
 </html>
