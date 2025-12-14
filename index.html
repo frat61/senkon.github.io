@@ -7,7 +7,6 @@
 
   <style>
     :root{
-      /* Clean/light theme inspired by your price list look */
       --page-bg: #f3f3f3;
       --surface: #ffffff;
       --surface-2: #fafafa;
@@ -18,10 +17,9 @@
       --border: #d9d9d9;
       --border-2: #ececec;
 
-      /* Brand-ish accents (maroon + calm blue like your print page vibe) */
       --brand: #6b2b2b;      /* deep maroon */
       --brand-2: #203a7a;    /* deep blue */
-      --accent: #c77a2a;     /* warm orange (optional highlight) */
+      --accent: #c77a2a;     /* warm orange */
 
       --radius: 16px;
       --shadow: 0 10px 30px rgba(0,0,0,0.08);
@@ -48,7 +46,6 @@
       overflow:hidden;
     }
 
-    /* Top header bar (like a document header) */
     .topbar{
       padding: 22px 26px;
       border-bottom: 1px solid var(--border);
@@ -57,7 +54,7 @@
 
     .header{
       display:flex;
-      align-items:center;
+      align-items:flex-start;
       justify-content:space-between;
       gap: 18px;
       flex-wrap: wrap;
@@ -67,7 +64,7 @@
       display:flex;
       align-items:center;
       gap: 14px;
-      min-width: 260px;
+      min-width: 280px;
     }
 
     .brand img{
@@ -100,7 +97,7 @@
     .header-right{
       text-align:right;
       flex: 1;
-      min-width: 240px;
+      min-width: 260px;
     }
 
     .badge{
@@ -111,14 +108,14 @@
       border: 1px solid var(--border);
       background: var(--surface-2);
       color: var(--brand-2);
-      font-weight: 600;
+      font-weight: 700;
       letter-spacing: .02em;
-      margin-bottom: 8px;
+      margin-bottom: 10px;
     }
 
     .title{
-      font-size: 20px;
-      font-weight: 800;
+      font-size: 22px;
+      font-weight: 900;
       color: var(--text);
     }
 
@@ -128,7 +125,23 @@
       margin-top: 4px;
     }
 
-    /* Content */
+    /* small logos on the right (optional) */
+    .header-logos{
+      margin-top: 10px;
+      display:flex;
+      justify-content:flex-end;
+      gap: 10px;
+      flex-wrap: wrap;
+    }
+
+    .header-logos img{
+      height: 28px;
+      width: auto;
+      object-fit: contain;
+      filter: saturate(0.95);
+      opacity: 0.95;
+    }
+
     .content{
       padding: 22px 26px 26px 26px;
     }
@@ -144,7 +157,7 @@
 
     .tools-head h2{
       font-size: 15px;
-      font-weight: 800;
+      font-weight: 900;
       color: var(--brand-2);
       letter-spacing: .02em;
       text-transform: uppercase;
@@ -158,55 +171,55 @@
     }
 
     .search input{
-      width: min(360px, 70vw);
-      padding: 10px 12px;
+      width: min(560px, 76vw);
+      padding: 12px 14px;
       border: 1px solid var(--border);
-      border-radius: 10px;
+      border-radius: 14px;
       outline: none;
       background: #fff;
-      font-size: 14px;
+      font-size: 15px;
     }
 
     .btn{
-      padding: 10px 12px;
-      border-radius: 10px;
+      padding: 12px 16px;
+      border-radius: 14px;
       border: 1px solid var(--border);
       background: var(--surface-2);
       cursor:pointer;
-      font-weight: 600;
+      font-weight: 800;
       color: var(--text);
       transition: .15s;
       white-space: nowrap;
+      font-size: 15px;
     }
     .btn:hover{ border-color: var(--brand-2); color: var(--brand-2); }
 
     .grid{
       display:grid;
-      grid-template-columns: repeat(auto-fill, minmax(270px, 1fr));
-      gap: 16px;
+      grid-template-columns: repeat(auto-fill, minmax(290px, 1fr));
+      gap: 18px;
     }
 
     .card{
       background: #fff;
       border: 1px solid var(--border);
       border-radius: var(--radius);
-      padding: 16px 16px 14px 16px;
+      padding: 18px 18px 16px 18px;
       box-shadow: 0 8px 18px rgba(0,0,0,0.05);
       cursor:pointer;
       transition: transform .18s ease, border-color .18s ease, box-shadow .18s ease;
       display:flex;
       flex-direction:column;
-      min-height: 150px;
+      min-height: 160px;
       position: relative;
       overflow:hidden;
     }
 
-    /* left colored stripe like your category marks */
-    .card::before{
-      content:"";
+    /* left colored stripe */
+    .stripe{
       position:absolute;
       left:0; top:0; bottom:0;
-      width: 6px;
+      width: 7px;
       background: var(--brand-2);
       opacity: .9;
     }
@@ -217,44 +230,60 @@
       box-shadow: 0 14px 26px rgba(0,0,0,0.08);
     }
 
+    .card-top{
+      display:flex;
+      align-items:center;
+      justify-content:space-between;
+      gap: 10px;
+      margin-left: 10px;
+      margin-bottom: 8px;
+    }
+
+    .card-logo{
+      height: 26px;
+      width: auto;
+      object-fit: contain;
+      opacity: 0.95;
+    }
+
     .card h3{
-      font-size: 16px;
-      font-weight: 800;
-      margin-left: 8px;
+      font-size: 20px;
+      font-weight: 900;
+      margin-left: 10px;
       margin-bottom: 6px;
     }
 
     .card p{
-      font-size: 13.5px;
+      font-size: 15px;
       color: var(--muted);
       line-height: 1.45;
-      margin-left: 8px;
+      margin-left: 10px;
       flex: 1;
     }
 
     .card-footer{
-      margin-top: 12px;
+      margin-top: 14px;
       display:flex;
       justify-content:space-between;
       align-items:center;
       gap: 10px;
-      margin-left: 8px;
+      margin-left: 10px;
     }
 
     .meta{
-      font-size: 12px;
+      font-size: 13px;
       color: var(--muted);
       white-space: nowrap;
     }
 
     .pill{
-      padding: 8px 12px;
+      padding: 10px 16px;
       border-radius: 999px;
       border: 1px solid var(--border);
       background: #fff;
       text-decoration:none;
-      font-size: 12px;
-      font-weight: 700;
+      font-size: 14px;
+      font-weight: 900;
       color: var(--brand-2);
       transition: .15s;
       white-space: nowrap;
@@ -270,10 +299,6 @@
       pointer-events: none;
     }
 
-    .disabled::before{
-      background: #9ca3af; /* grey stripe */
-    }
-
     .footer{
       padding: 14px 18px;
       text-align:center;
@@ -285,8 +310,10 @@
 
     @media (max-width: 650px){
       .header-right{ text-align:center; }
+      .header-logos{ justify-content:center; }
       .brand{ justify-content:center; width:100%; }
       .tools-head{ justify-content:center; }
+      .search{ justify-content:center; }
     }
   </style>
 </head>
@@ -297,10 +324,10 @@
     <div class="topbar">
       <div class="header">
         <div class="brand">
-          <!-- ✅ Put your real logo file next to index.html -->
-          <img src="senturk-logo.png" alt="Şentürk Logo" />
+          <!-- ✅ Your real logo path -->
+          <img src="assets/images/senturk_logo.png" alt="Şentürk Logo" />
           <div class="brand-text">
-            <div class="name">Şentürk Boya</div>
+            <div class="name">ŞENTÜRK BOYA</div>
             <div class="desc">Fiyat & Ürün Araçları</div>
           </div>
         </div>
@@ -309,6 +336,12 @@
           <div class="badge">İç Kullanım</div>
           <div class="title">Kontrol Paneli</div>
           <div class="subtitle">Kullanmak istediğiniz işlemi seçin.</div>
+
+          <!-- Optional small logos on the right -->
+          <div class="header-logos">
+            <img src="assets/images/marshall_logo.png" alt="Marshall Logo" />
+            <img src="assets/images/alt_toplu_logo.png" alt="Alternatif Markalar" />
+          </div>
         </div>
       </div>
     </div>
@@ -332,7 +365,6 @@
   </div>
 
   <script>
-    // ✅ Only edit this list to add / change tools
     const TOOLS = [
       {
         title: "Marshall Tam Fiyat Listesi",
@@ -342,7 +374,8 @@
         statusText: "Aktif · Ana araç",
         pillText: "Aç",
         enabled: true,
-        stripe: "#c77a2a" // warm stripe (like iç cephe turuncu vibe)
+        stripe: "#c77a2a",
+        logo: "assets/images/marshall_logo.png"
       },
       {
         title: "Alternatif Markalar & Ürünler",
@@ -352,7 +385,8 @@
         statusText: "Aktif · Excel tabanlı",
         pillText: "Aç",
         enabled: true,
-        stripe: "#203a7a" // deep blue
+        stripe: "#203a7a",
+        logo: "assets/images/alt_toplu_logo.png"
       },
       {
         title: "İndirim & Teklif Hesaplayıcı",
@@ -380,22 +414,28 @@
       card.setAttribute("tabindex", tool.enabled ? "0" : "-1");
       card.setAttribute("aria-disabled", tool.enabled ? "false" : "true");
 
-      // stripe color per tool
-      card.style.setProperty("--stripe", tool.stripe || "#203a7a");
-      card.style.position = "relative";
-      card.style.overflow = "hidden";
-      card.style.setProperty("border-color", "var(--border)");
-
-      // override ::before color by injecting a real stripe div (simple + reliable)
       const stripe = document.createElement("div");
-      stripe.style.position = "absolute";
-      stripe.style.left = "0";
-      stripe.style.top = "0";
-      stripe.style.bottom = "0";
-      stripe.style.width = "6px";
+      stripe.className = "stripe";
       stripe.style.background = tool.stripe || "#203a7a";
-      stripe.style.opacity = "0.9";
       card.appendChild(stripe);
+
+      // optional logo row (top-right inside card)
+      const cardTop = document.createElement("div");
+      cardTop.className = "card-top";
+      // spacer on left so logo doesn't look stuck
+      const spacer = document.createElement("div");
+      spacer.style.height = "1px";
+      spacer.style.flex = "1";
+      cardTop.appendChild(spacer);
+
+      if (tool.logo) {
+        const img = document.createElement("img");
+        img.className = "card-logo";
+        img.src = tool.logo;
+        img.alt = tool.title + " Logo";
+        cardTop.appendChild(img);
+      }
+      card.appendChild(cardTop);
 
       const h3 = document.createElement("h3");
       h3.textContent = tool.title;
@@ -409,7 +449,6 @@
       const status = document.createElement("span");
       status.className = "meta";
       status.textContent = tool.statusText || "";
-
       footer.appendChild(status);
 
       if (tool.enabled && tool.href) {
@@ -432,10 +471,11 @@
       card.appendChild(h3);
       card.appendChild(p);
       card.appendChild(footer);
+
       return card;
     }
 
-    function normalize(s) {
+    function normalizeTR(s) {
       return (s || "")
         .toLowerCase()
         .replaceAll("ı","i").replaceAll("İ","i")
@@ -447,11 +487,11 @@
     }
 
     function applyFilter() {
-      const q = normalize(searchInput.value.trim());
+      const q = normalizeTR(searchInput.value.trim());
       if (!q) return render(TOOLS);
 
       const filtered = TOOLS.filter(t => {
-        const hay = normalize(t.title + " " + t.description + " " + (t.statusText || ""));
+        const hay = normalizeTR(t.title + " " + t.description + " " + (t.statusText || ""));
         return hay.includes(q);
       });
       render(filtered);
