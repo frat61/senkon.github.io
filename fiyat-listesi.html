@@ -31,7 +31,6 @@
     }
 
     /* HEADER */
-
     .header {
       display: flex;
       justify-content: space-between;
@@ -50,7 +49,6 @@
     }
 
     /* SUBHEADER */
-
     .subheader {
       margin-top: 6px;
       padding-top: 8px;
@@ -74,7 +72,6 @@
     }
 
     /* LEGEND */
-
     .legend {
       margin-bottom: 12px;
       font-size: 11px;
@@ -107,7 +104,6 @@
     }
 
     /* TOOLBAR */
-
     .toolbar {
       display: flex;
       align-items: center;
@@ -118,13 +114,7 @@
       font-size: 13px;
     }
 
-    .toolbar-left {
-      display: flex;
-      align-items: center;
-      gap: 8px;
-      flex-wrap: wrap;
-    }
-
+    .toolbar-left,
     .toolbar-right {
       display: flex;
       align-items: center;
@@ -159,7 +149,6 @@
     }
 
     /* SEARCH INPUT */
-
     #searchInput {
       padding: 4px 8px;
       border-radius: 4px;
@@ -170,17 +159,14 @@
 
     #searchInput::placeholder { color: #999; }
 
-    /* CONTENT – 2-column layout on screen */
-
+    /* CONTENT – 2-column layout on desktop */
     #content {
       column-count: 2;
       column-gap: 16px;
     }
 
     @media (max-width: 900px) {
-      #content {
-        column-count: 1;
-      }
+      #content { column-count: 1; }
     }
 
     .group-block {
@@ -190,7 +176,6 @@
     }
 
     /* TABLE – matrix style */
-
     table.price-matrix {
       width: 100%;
       border-collapse: collapse;
@@ -227,8 +212,7 @@
       line-height: 1.25;
     }
 
-    /* CATEGORY STRIPE (per Ürün Grubu) */
-
+    /* CATEGORY STRIPE */
     table.price-matrix td.col-product {
       position: relative;
       border-left: none !important;
@@ -247,7 +231,6 @@
     tbody tr:nth-child(even) { background-color: #f5f5f5 !important; }
 
     /* FOOTER */
-
     .footer {
       margin-top: 18px;
       padding-top: 8px;
@@ -257,11 +240,11 @@
       text-align: center;
       line-height: 1.4;
     }
-
     .footer .line { margin: 2px 0; }
 
     /* ==========================================================
        ✅ MOBILE VIEW MODE (screen only, does NOT affect printing)
+       ✅ FORCED 1 COLUMN
        ========================================================== */
 
     body.mobile-view {
@@ -274,22 +257,21 @@
       box-shadow: 0 0 10px rgba(0,0,0,0.10);
     }
 
-    /* Make header stack nicely if needed */
     body.mobile-view .header{
       align-items: center;
     }
+
     body.mobile-view .senturk-logo img,
     body.mobile-view .marshall-logo img{
       height: 56px;
     }
 
-    /* Force 1 column in mobile view, always */
+    /* ✅ Force 1 column always in mobile view */
     body.mobile-view #content{
       column-count: 1 !important;
       column-gap: 0 !important;
     }
 
-    /* Let tables breathe + fit screen */
     body.mobile-view table.price-matrix{
       font-size: 12.5px;
     }
@@ -297,32 +279,25 @@
     body.mobile-view th,
     body.mobile-view td{
       padding: 7px 6px;
-      white-space: normal;              /* allow wrapping */
+      white-space: normal !important;
       overflow-wrap: anywhere;
       word-break: break-word;
     }
 
-    /* Make product cell more readable */
     body.mobile-view td.col-product{
       font-size: 12.5px;
     }
 
-    /* Price cells: clearer */
     body.mobile-view td.col-price{
       font-size: 12px;
       font-variant-numeric: tabular-nums;
     }
 
-    /* Keep the stripe visible */
     body.mobile-view table.price-matrix td.col-product::before{
       width: 5px;
     }
 
-    /* Toolbar: fit on phone */
     @media (max-width: 760px){
-      body.mobile-view .toolbar{
-        gap: 8px;
-      }
       body.mobile-view .toolbar-left,
       body.mobile-view .toolbar-right{
         width: 100%;
@@ -340,98 +315,32 @@
     }
 
     /* PRINT MODES */
-
     @media print {
+      body { background: white; margin: 0; padding: 0; }
+      .page { box-shadow: none; margin: 0; max-width: 100%; }
+      .toolbar { display: none !important; }
 
-      body {
-        background: white;
-        margin: 0;
-        padding: 0;
-      }
+      .group-block, table, tr, td, th { page-break-inside: avoid !important; }
 
-      .page {
-        box-shadow: none;
-        margin: 0;
-        max-width: 100%;
-      }
+      .subheader { border-top: none; margin-top: 0; padding-top: 0; }
 
-      .toolbar {
-        display: none !important;
-      }
-
-      .group-block, table, tr, td, th {
-        page-break-inside: avoid !important;
-      }
-
-      .subheader {
-        border-top: none;
-        margin-top: 0;
-        padding-top: 0;
-      }
-
-      .footer {
-        border-top: 4px solid var(--footer-bordo);
-      }
+      .footer { border-top: 4px solid var(--footer-bordo); }
 
       .price-matrix thead { display: table-header-group; }
 
-      /* DESKTOP PRINT – A4, 2 columns, smaller text */
-      body.desktop-print .page {
-        padding: 10mm 8mm 10mm;
-      }
+      body.desktop-print .page { padding: 10mm 8mm 10mm; }
+      body.desktop-print #content { column-count: 2; column-gap: 8px; }
+      body.desktop-print table.price-matrix { font-size: 9px; }
+      body.desktop-print th, body.desktop-print td { padding: 2px 2px; }
+      body.desktop-print td.col-price { font-size: 8px; }
+      body.desktop-print .footer { font-size: 10px; margin-top: 10mm; padding-top: 2mm; }
 
-      body.desktop-print #content {
-        column-count: 2;
-        column-gap: 8px;
-      }
-
-      body.desktop-print table.price-matrix {
-        font-size: 9px;
-      }
-
-      body.desktop-print th,
-      body.desktop-print td {
-        padding: 2px 2px;
-      }
-
-      body.desktop-print td.col-price {
-        font-size: 8px;
-      }
-
-      body.desktop-print .footer {
-        font-size: 10px;
-        margin-top: 10mm;
-        padding-top: 2mm;
-      }
-
-      /* MOBILE PRINT – 1 column, bigger text for readability */
-      body.mobile-print .page {
-        padding: 8mm 6mm 8mm;
-      }
-
-      body.mobile-print #content {
-        column-count: 1;
-        column-gap: 0;
-      }
-
-      body.mobile-print table.price-matrix {
-        font-size: 11px;
-      }
-
-      body.mobile-print th,
-      body.mobile-print td {
-        padding: 3px 3px;
-      }
-
-      body.mobile-print td.col-price {
-        font-size: 10px;
-      }
-
-      body.mobile-print .footer {
-        font-size: 11px;
-        margin-top: 8mm;
-        padding-top: 2mm;
-      }
+      body.mobile-print .page { padding: 8mm 6mm 8mm; }
+      body.mobile-print #content { column-count: 1; column-gap: 0; }
+      body.mobile-print table.price-matrix { font-size: 11px; }
+      body.mobile-print th, body.mobile-print td { padding: 3px 3px; }
+      body.mobile-print td.col-price { font-size: 10px; }
+      body.mobile-print .footer { font-size: 11px; margin-top: 8mm; padding-top: 2mm; }
     }
   </style>
 
@@ -451,11 +360,9 @@
     </div>
   </div>
 
-  <!-- SUBHEADER (editable title + editable date) -->
+  <!-- SUBHEADER -->
   <div class="subheader">
-    <span id="titleLabel" contenteditable="true" class="editable-title">
-      ÖZET FİYAT LİSTESİ
-    </span>
+    <span id="titleLabel" contenteditable="true" class="editable-title">ÖZET FİYAT LİSTESİ</span>
     &nbsp;–&nbsp;
     <span id="monthLabel" contenteditable="true" class="editable-title"></span>
   </div>
@@ -473,7 +380,7 @@
       <input type="text" id="searchInput" placeholder="Ürün / renk ara...">
       <button type="button" id="clearSearchBtn">Temizle</button>
 
-      <!-- ✅ NEW: Mobile View toggle (screen mode) -->
+      <!-- ✅ Mobile View toggle (screen mode) -->
       <button type="button" id="mobileViewBtn" class="btn-soft">Mobil Görünüm: Kapalı</button>
 
       <button type="button" onclick="printDesktop()">A4 / Standart Yazdır</button>
@@ -523,10 +430,7 @@ function getCategoryInfo(catName) {
     const key = cfg.match.toLocaleLowerCase("tr-TR");
     if (s.includes(key)) return cfg;
   }
-  return {
-    label: catName || "Diğer",
-    color: "#999999"
-  };
+  return { label: catName || "Diğer", color: "#999999" };
 }
 
 function renderLegend(catNames) {
@@ -539,16 +443,10 @@ function renderLegend(catNames) {
   catNames.forEach(catName => {
     const info = getCategoryInfo(catName);
     const key = info.label + "|" + info.color;
-    if (!usedKeys.has(key)) {
-      usedKeys.add(key);
-      items.push(info);
-    }
+    if (!usedKeys.has(key)) { usedKeys.add(key); items.push(info); }
   });
 
-  if (!items.length) {
-    legendEl.innerHTML = "";
-    return;
-  }
+  if (!items.length) { legendEl.innerHTML = ""; return; }
 
   let html = `<span class="legend-title">Ürün Grupları:</span>`;
   items.forEach(info => {
@@ -567,10 +465,7 @@ function renderLegend(catNames) {
 
 function formatPrice(val) {
   if (val == null || val === "" || isNaN(val)) return "-";
-  return Number(val).toLocaleString("tr-TR", {
-    minimumFractionDigits: 2,
-    maximumFractionDigits: 2
-  });
+  return Number(val).toLocaleString("tr-TR", { minimumFractionDigits: 2, maximumFractionDigits: 2 });
 }
 
 function getField(row, names) {
@@ -632,22 +527,12 @@ function renderFromRows(rows) {
   let lastCat = "";
   let lastGroup = "";
 
-  // Forward fill Ürün Grubu & Ürün Tanımı
   rows.forEach(r => {
     let cat = getField(r, ["Ürün Grubu"]);
     let group = getField(r, ["Ürün Tanımı"]);
 
-    if (cat) {
-      lastCat = cat;
-    } else {
-      cat = lastCat;
-    }
-
-    if (group) {
-      lastGroup = group;
-    } else {
-      group = lastGroup;
-    }
+    if (cat) lastCat = cat; else cat = lastCat;
+    if (group) lastGroup = group; else group = lastGroup;
 
     if (!cat || !group) return;
 
@@ -659,7 +544,6 @@ function renderFromRows(rows) {
   let html = "";
   const catNames = Object.keys(catMap);
 
-  // Legend
   renderLegend(catNames);
 
   catNames.forEach(catName => {
@@ -674,17 +558,11 @@ function renderFromRows(rows) {
 
       const colorMap = {};
       const groupAmbSet = new Set();
-
-      // Forward fill Renk
       let lastColor = "";
 
       groupRows.forEach(r => {
         let color = getField(r, ["Renk"]);
-        if (color) {
-          lastColor = color;
-        } else {
-          color = lastColor || "-";
-        }
+        if (color) lastColor = color; else color = lastColor || "-";
 
         const amb = getField(r, ["Ambalaj"]) || "";
 
@@ -696,11 +574,9 @@ function renderFromRows(rows) {
       });
 
       const colors = Object.keys(colorMap);
-      if (colors.length === 0) return;
+      if (!colors.length) return;
 
-      const ambOrderGroup = Array.from(groupAmbSet).sort(
-        (a, b) => parseVolume(a) - parseVolume(b)
-      );
+      const ambOrderGroup = Array.from(groupAmbSet).sort((a, b) => parseVolume(a) - parseVolume(b));
 
       html += `<div class="group-block">`;
 
@@ -752,9 +628,7 @@ function renderFromRows(rows) {
             ]);
 
             const price = parseNumberFlexible(raw);
-            if (!isNaN(price)) {
-              cellHtml = formatPrice(price);
-            }
+            if (!isNaN(price)) cellHtml = formatPrice(price);
           }
 
           html += `<td class="col-price">${cellHtml}</td>`;
@@ -777,10 +651,7 @@ function applySearch() {
   const term = document.getElementById("searchInput").value.trim().toLowerCase();
   const blocks = document.querySelectorAll("#content .group-block");
 
-  if (!term) {
-    blocks.forEach(b => b.style.display = "");
-    return;
-  }
+  if (!term) { blocks.forEach(b => b.style.display = ""); return; }
 
   blocks.forEach(b => {
     const text = b.textContent.toLowerCase();
@@ -794,19 +665,14 @@ function setPrintMode(mode) {
   window.print();
 }
 
-function printDesktop() {
-  setPrintMode("desktop-print");
-}
-
-function printMobile() {
-  setPrintMode("mobile-print");
-}
+function printDesktop() { setPrintMode("desktop-print"); }
+function printMobile()  { setPrintMode("mobile-print"); }
 
 window.addEventListener("afterprint", () => {
   document.body.classList.remove("desktop-print", "mobile-print");
 });
 
-// -------------------- MOBILE VIEW TOGGLE (screen mode) --------------------
+// -------------------- MOBILE VIEW TOGGLE + AUTO ENABLE --------------------
 
 function updateMobileBtnLabel(){
   const btn = document.getElementById("mobileViewBtn");
@@ -821,9 +687,15 @@ function setMobileView(on){
   updateMobileBtnLabel();
 }
 
+function isLikelyPhone(){
+  // Phone-sized viewport OR coarse pointer (touch)
+  const small = window.matchMedia("(max-width: 760px)").matches;
+  const coarse = window.matchMedia("(pointer: coarse)").matches;
+  return small || coarse;
+}
+
 // -------------------- EXCEL LOAD & INIT --------------------
 
-// manual upload (still works)
 document.getElementById("excelInput").addEventListener("change", e => {
   const file = e.target.files[0];
   if (!file) return;
@@ -842,23 +714,19 @@ document.getElementById("excelInput").addEventListener("change", e => {
   reader.readAsArrayBuffer(file);
 });
 
-// auto-load Excel from GitHub on page load
 function autoLoadExcel() {
   fetch("assets/data/FL_Database.xlsx")
     .then(response => response.arrayBuffer())
     .then(buffer => {
       const workbook = XLSX.read(buffer, { type: "array" });
       let sheetName = "Sayfa2";
-      if (!workbook.Sheets[sheetName]) {
-        sheetName = workbook.SheetNames[0];
-      }
+      if (!workbook.Sheets[sheetName]) sheetName = workbook.SheetNames[0];
+
       const ws = workbook.Sheets[sheetName];
       const rows = XLSX.utils.sheet_to_json(ws, { defval: "" });
       renderFromRows(rows);
     })
-    .catch(err => {
-      console.error("Auto-load Excel failed:", err);
-    });
+    .catch(err => console.error("Auto-load Excel failed:", err));
 }
 
 document.addEventListener("DOMContentLoaded", () => {
@@ -868,16 +736,12 @@ document.addEventListener("DOMContentLoaded", () => {
     "TEMMUZ","AĞUSTOS","EYLÜL","EKİM","KASIM","ARALIK"
   ];
   const monthLabel = document.getElementById("monthLabel");
-  if (monthLabel) {
-    monthLabel.textContent = `${months[now.getMonth()]} ${now.getFullYear()}`;
-  }
+  if (monthLabel) monthLabel.textContent = `${months[now.getMonth()]} ${now.getFullYear()}`;
 
   const searchInput = document.getElementById("searchInput");
   const clearBtn = document.getElementById("clearSearchBtn");
 
-  if (searchInput) {
-    searchInput.addEventListener("input", applySearch);
-  }
+  if (searchInput) searchInput.addEventListener("input", applySearch);
 
   if (clearBtn) {
     clearBtn.addEventListener("click", () => {
@@ -886,7 +750,7 @@ document.addEventListener("DOMContentLoaded", () => {
     });
   }
 
-  // ✅ mobile view toggle init + remember setting
+  // Toggle button
   const btn = document.getElementById("mobileViewBtn");
   if (btn){
     btn.addEventListener("click", () => {
@@ -894,11 +758,19 @@ document.addEventListener("DOMContentLoaded", () => {
       setMobileView(on);
     });
   }
+
+  // ✅ Auto-enable on phones unless user already chose something
   const saved = localStorage.getItem("marshall_mobile_view");
   if (saved === "1") setMobileView(true);
-  else updateMobileBtnLabel();
+  else if (saved === "0") setMobileView(false);
+  else setMobileView(isLikelyPhone());
 
-  // load default Excel file on startup
+  // If device rotates/resizes and user never made a choice, follow device
+  window.addEventListener("resize", () => {
+    const s = localStorage.getItem("marshall_mobile_view");
+    if (s === null) setMobileView(isLikelyPhone());
+  });
+
   autoLoadExcel();
 });
 </script>
