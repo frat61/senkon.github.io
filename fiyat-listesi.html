@@ -141,14 +141,12 @@
 
     .toolbar button:hover { opacity: 0.9; }
 
-    /* Secondary-looking button (mobile view toggle) */
     .toolbar button.btn-soft{
       background: #f1f3f5;
       color: #111;
       border: 1px solid #cfcfcf;
     }
 
-    /* SEARCH INPUT */
     #searchInput {
       padding: 4px 8px;
       border-radius: 4px;
@@ -159,7 +157,7 @@
 
     #searchInput::placeholder { color: #999; }
 
-    /* CONTENT – 2-column layout on desktop */
+    /* CONTENT */
     #content {
       column-count: 2;
       column-gap: 16px;
@@ -175,7 +173,7 @@
       margin-bottom: 8px;
     }
 
-    /* TABLE – matrix style */
+    /* TABLE */
     table.price-matrix {
       width: 100%;
       border-collapse: collapse;
@@ -212,7 +210,6 @@
       line-height: 1.25;
     }
 
-    /* CATEGORY STRIPE */
     table.price-matrix td.col-product {
       position: relative;
       border-left: none !important;
@@ -226,7 +223,6 @@
       background: var(--stripe-color, var(--senturk-orange));
     }
 
-    /* Zebra rows */
     tbody tr:nth-child(odd)  { background-color: #ffffff !important; }
     tbody tr:nth-child(even) { background-color: #f5f5f5 !important; }
 
@@ -240,81 +236,12 @@
       text-align: center;
       line-height: 1.4;
     }
+
     .footer .line { margin: 2px 0; }
 
     /* ==========================================================
-       ✅ MOBILE VIEW MODE (screen only, does NOT affect printing)
-       ✅ FORCED 1 COLUMN
+       PRINT MODES (EXISTING)
        ========================================================== */
-
-    body.mobile-view {
-      padding: 10px;
-    }
-
-    body.mobile-view .page{
-      max-width: 100%;
-      padding: 14px 12px 16px;
-      box-shadow: 0 0 10px rgba(0,0,0,0.10);
-    }
-
-    body.mobile-view .header{
-      align-items: center;
-    }
-
-    body.mobile-view .senturk-logo img,
-    body.mobile-view .marshall-logo img{
-      height: 56px;
-    }
-
-    /* ✅ Force 1 column always in mobile view */
-    body.mobile-view #content{
-      column-count: 1 !important;
-      column-gap: 0 !important;
-    }
-
-    body.mobile-view table.price-matrix{
-      font-size: 12.5px;
-    }
-
-    body.mobile-view th,
-    body.mobile-view td{
-      padding: 7px 6px;
-      white-space: normal !important;
-      overflow-wrap: anywhere;
-      word-break: break-word;
-    }
-
-    body.mobile-view td.col-product{
-      font-size: 12.5px;
-    }
-
-    body.mobile-view td.col-price{
-      font-size: 12px;
-      font-variant-numeric: tabular-nums;
-    }
-
-    body.mobile-view table.price-matrix td.col-product::before{
-      width: 5px;
-    }
-
-    @media (max-width: 760px){
-      body.mobile-view .toolbar-left,
-      body.mobile-view .toolbar-right{
-        width: 100%;
-        justify-content: center;
-      }
-      body.mobile-view #searchInput{
-        min-width: 100%;
-      }
-      body.mobile-view input[type="file"]{
-        width: 100%;
-      }
-      body.mobile-view .toolbar button{
-        flex: 1 1 auto;
-      }
-    }
-
-    /* PRINT MODES */
     @media print {
       body { background: white; margin: 0; padding: 0; }
       .page { box-shadow: none; margin: 0; max-width: 100%; }
@@ -341,6 +268,55 @@
       body.mobile-print th, body.mobile-print td { padding: 3px 3px; }
       body.mobile-print td.col-price { font-size: 10px; }
       body.mobile-print .footer { font-size: 11px; margin-top: 8mm; padding-top: 2mm; }
+
+      /* ======================================================
+         ✅ ADDED: BLACK & WHITE HIGH-CONTRAST PRINT OVERRIDE
+         ====================================================== */
+
+      * {
+        color: #000 !important;
+        background: #fff !important;
+        box-shadow: none !important;
+        text-shadow: none !important;
+      }
+
+      table.price-matrix,
+      table.price-matrix th,
+      table.price-matrix td {
+        border: 1px solid #000 !important;
+      }
+
+      table.price-matrix th {
+        font-weight: 700 !important;
+      }
+
+      tbody tr:nth-child(odd),
+      tbody tr:nth-child(even) {
+        background: #fff !important;
+      }
+
+      table.price-matrix td.col-product::before {
+        background: #000 !important;
+      }
+
+      .legend {
+        color: #000 !important;
+      }
+
+      .legend-swatch {
+        background: #fff !important;
+        border: 1px solid #000 !important;
+      }
+
+      .footer {
+        color: #000 !important;
+        border-top: 2px solid #000 !important;
+      }
+
+      :root {
+        -webkit-print-color-adjust: exact;
+        print-color-adjust: exact;
+      }
     }
   </style>
 
