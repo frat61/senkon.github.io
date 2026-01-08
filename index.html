@@ -96,7 +96,7 @@
     }
 
     .header-right img{
-      height: 42px;   /* ⬅️ MADE BIGGER */
+      height: 42px;
       width:auto;
       object-fit:contain;
     }
@@ -161,6 +161,7 @@
       display:flex;
       flex-direction:column;
       transition:.18s;
+      min-height: 190px;
     }
 
     .card:hover{
@@ -173,6 +174,8 @@
       left:0;top:0;bottom:0;
       width:7px;
       background:#203a7a;
+      border-top-left-radius: var(--radius);
+      border-bottom-left-radius: var(--radius);
     }
 
     .card-top{
@@ -180,20 +183,26 @@
       justify-content:flex-end;
       margin-left:10px;
       margin-bottom:6px;
+      min-height: 30px;
+      align-items:center;
     }
 
     .card-logo{
       height:28px;
+      width:auto;
+      object-fit:contain;
     }
 
     .card h3{
       margin-left:10px;
       font-size:20px;
       font-weight:900;
+      line-height: 1.15;
     }
 
     .card p{
       margin-left:10px;
+      margin-top: 8px;
       font-size:15px;
       color:var(--muted);
       line-height:1.45;
@@ -206,6 +215,7 @@
       display:flex;
       justify-content:space-between;
       align-items:center;
+      gap: 12px;
     }
 
     .meta{
@@ -220,6 +230,8 @@
       font-weight:900;
       text-decoration:none;
       color:var(--brand-2);
+      background:#fff;
+      white-space:nowrap;
     }
 
     .disabled{
@@ -233,6 +245,7 @@
       font-size:12px;
       color:var(--muted);
       border-top:1px solid var(--border);
+      background: #fff;
     }
 
     @media(max-width:650px){
@@ -259,6 +272,7 @@
       <!-- ONLY LOGOS ON RIGHT -->
       <div class="header-right">
         <img src="assets/images/marshall_logo.png" alt="Marshall">
+        <img src="assets/images/stargill_logo.png" alt="StarGil">
         <img src="assets/images/alt_toplu_logo.png" alt="Alternatif Markalar">
       </div>
     </div>
@@ -269,7 +283,7 @@
     <div class="tools-head">
       <h2>Araçlar</h2>
       <div class="search">
-        <input id="searchInput" placeholder="Araç ara (örn: Marshall, alternatif, indirim)…">
+        <input id="searchInput" placeholder="Araç ara (örn: Marshall, StarGil, alternatif, indirim)…">
         <button class="btn" id="clearBtn">Temizle</button>
       </div>
     </div>
@@ -278,7 +292,7 @@
   </div>
 
   <div class="footer">
-    v1.2 · Şentürk için tasarlandı · Mobil uyumlu
+    v1.3 · Şentürk için tasarlandı · Mobil uyumlu
   </div>
 
 </div>
@@ -286,83 +300,117 @@
 <script>
 const TOOLS = [
   {
-    title:"Marshall Tam Fiyat Listesi",
-    description:"Tüm Marshall ürünlerini (tüm gruplar, tüm ambalajlar) arama/filtreleme ve profesyonel yazdırma düzeni ile görüntüleyin.",
-    href:"fiyat-listesi.html",
-    status:"Aktif · Ana araç",
-    stripe:"#c77a2a",
-    logo:"assets/images/marshall_logo.png",
-    enabled:true
+    title: "Marshall Tam Fiyat Listesi",
+    description: "Tüm Marshall ürünlerini (tüm gruplar, tüm ambalajlar) arama/filtreleme ve profesyonel yazdırma düzeni ile görüntüleyin.",
+    href: "fiyat-listesi.html",
+    status: "Aktif · Ana araç",
+    stripe: "#c77a2a",
+    logo: "assets/images/marshall_logo.png",
+    enabled: true
   },
   {
-    title:"Alternatif Markalar & Ürünler",
-    description:"Marshall dışındaki ürünlerinizi (DaySon, Aquacool Trend, Dekor, Doğuş vb.) marka bazında listeleyin.",
-    href:"alternatif_urunler.html",
-    status:"Aktif · Excel tabanlı",
-    stripe:"#203a7a",
-    logo:"assets/images/alt_toplu_logo.png",
-    enabled:true
+    title: "StarGil Fiyat Listesi",
+    description: "StarGil ürünlerini Excel’den otomatik yükleyin, bölümler halinde görüntüleyin ve yazdırma için optimize edilmiş düzenle alın.",
+    href: "stargill_fiyat.html",   /* ✅ UPDATED */
+    status: "Aktif · Excel tabanlı",
+    stripe: "#1b2533",
+    logo: "assets/images/stargill_logo.png",
+    enabled: true
   },
   {
-    title:"İndirim & Teklif Hesaplayıcı",
-    description:"Nakit/kart/vadeli fiyat hesaplama, özel iskonto uygulama ve hızlı teklif oluşturma.",
-    status:"Planlandı",
-    stripe:"#9ca3af",
-    enabled:false
+    title: "Alternatif Markalar & Ürünler",
+    description: "Marshall dışındaki ürünlerinizi (DaySon, Aquacool Trend, Dekor, Doğuş vb.) marka bazında listeleyin.",
+    href: "alternatif_urunler.html",
+    status: "Aktif · Excel tabanlı",
+    stripe: "#203a7a",
+    logo: "assets/images/alt_toplu_logo.png",
+    enabled: true
+  },
+  {
+    title: "İndirim & Teklif Hesaplayıcı",
+    description: "Nakit/kart/vadeli fiyat hesaplama, özel iskonto uygulama ve hızlı teklif oluşturma.",
+    status: "Planlandı",
+    stripe: "#9ca3af",
+    enabled: false
   }
 ];
 
-const grid=document.getElementById("toolsGrid");
-const searchInput=document.getElementById("searchInput");
-const clearBtn=document.getElementById("clearBtn");
+const grid = document.getElementById("toolsGrid");
+const searchInput = document.getElementById("searchInput");
+const clearBtn = document.getElementById("clearBtn");
+
+function createEl(tag, className, text){
+  const el = document.createElement(tag);
+  if (className) el.className = className;
+  if (text != null) el.textContent = text;
+  return el;
+}
 
 function render(list){
-  grid.innerHTML="";
-  list.forEach(t=>{
-    const c=document.createElement("div");
-    c.className="card"+(t.enabled?"":" disabled");
-    const s=document.createElement("div");
-    s.className="stripe"; s.style.background=t.stripe;
-    c.appendChild(s);
+  grid.innerHTML = "";
 
-    const top=document.createElement("div");
-    top.className="card-top";
-    if(t.logo){
-      const i=document.createElement("img");
-      i.src=t.logo; i.className="card-logo";
-      top.appendChild(i);
-    }
-    c.appendChild(top);
+  list.forEach(t => {
+    const card = createEl("div", "card" + (t.enabled ? "" : " disabled"));
 
-    c.innerHTML+=`<h3>${t.title}</h3><p>${t.description}</p>`;
-    const f=document.createElement("div");
-    f.className="card-footer";
-    f.innerHTML=`<span class="meta">${t.status||""}</span>`;
-    if(t.enabled){
-      const a=document.createElement("a");
-      a.href=t.href; a.className="pill"; a.textContent="Aç";
-      a.onclick=e=>e.stopPropagation();
-      f.appendChild(a);
-      c.onclick=()=>location.href=t.href;
+    const stripe = createEl("div", "stripe");
+    stripe.style.background = t.stripe || "#203a7a";
+    card.appendChild(stripe);
+
+    const top = createEl("div", "card-top");
+    if (t.logo){
+      const img = document.createElement("img");
+      img.src = t.logo;
+      img.alt = t.title;
+      img.className = "card-logo";
+      top.appendChild(img);
     }
-    c.appendChild(f);
-    grid.appendChild(c);
+    card.appendChild(top);
+
+    const h3 = createEl("h3", "", t.title);
+    h3.style.marginLeft = "10px";
+    card.appendChild(h3);
+
+    const p = createEl("p", "", t.description);
+    p.style.marginLeft = "10px";
+    card.appendChild(p);
+
+    const footer = createEl("div", "card-footer");
+    const meta = createEl("span", "meta", t.status || "");
+    footer.appendChild(meta);
+
+    if (t.enabled){
+      const a = document.createElement("a");
+      a.href = t.href;
+      a.className = "pill";
+      a.textContent = "Aç";
+      a.onclick = (e) => e.stopPropagation();
+      footer.appendChild(a);
+
+      card.onclick = () => location.href = t.href;
+    }
+
+    card.appendChild(footer);
+    grid.appendChild(card);
   });
 }
 
-function norm(s){
-  return s.toLowerCase()
+function normTR(s){
+  return (s || "").toLowerCase()
     .replace(/[ıİ]/g,"i").replace(/[şŞ]/g,"s")
     .replace(/[ğĞ]/g,"g").replace(/[üÜ]/g,"u")
     .replace(/[öÖ]/g,"o").replace(/[çÇ]/g,"c");
 }
 
-searchInput.oninput=()=>{
-  const q=norm(searchInput.value);
-  render(TOOLS.filter(t=>norm(t.title+t.description).includes(q)));
-};
+searchInput.addEventListener("input", () => {
+  const q = normTR(searchInput.value);
+  const filtered = TOOLS.filter(t => normTR((t.title||"") + " " + (t.description||"")).includes(q));
+  render(filtered);
+});
 
-clearBtn.onclick=()=>{searchInput.value="";render(TOOLS);};
+clearBtn.addEventListener("click", () => {
+  searchInput.value = "";
+  render(TOOLS);
+});
 
 render(TOOLS);
 </script>
