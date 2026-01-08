@@ -2,7 +2,7 @@
 <html lang="tr">
 <head>
   <meta charset="UTF-8" />
-  <title>STARGILL Fiyat Listesi</title>
+  <title>STARGIL Fiyat Listesi</title>
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
 
   <style>
@@ -36,8 +36,8 @@
       align-items:flex-end;
       margin-bottom:12px;
     }
-    .senturk-logo img{ height:50px; }
-    .brand-logo img{ height:50px; }
+    .senturk-logo img{ height:50px; width:auto; }
+    .brand-logo img{ height:50px; width:auto; }
 
     /* SUBHEADER */
     .subheader{
@@ -52,29 +52,45 @@
     .editable-title{
       display:inline-block;
       padding:0 4px;
+      min-width:80px;
       border-bottom:1px dashed #ccc;
+      cursor:text;
     }
+    .editable-title:focus{ outline:2px solid #ffd27f; }
 
     /* TOOLBAR */
     .toolbar{
       display:flex;
+      align-items:center;
       justify-content:space-between;
+      margin-bottom:12px;
       gap:8px;
       flex-wrap:wrap;
-      margin-bottom:12px;
       font-size:13px;
     }
     .toolbar-left,.toolbar-right{
       display:flex;
+      align-items:center;
       gap:8px;
       flex-wrap:wrap;
     }
-    input[type="file"], #searchInput{
-      padding:4px 8px;
+    input[type="file"]{
+      padding:4px 6px;
       border:1px solid #ccc;
       border-radius:4px;
       font-size:12px;
+      background:#fff;
     }
+    #searchInput{
+      padding:4px 8px;
+      border-radius:4px;
+      border:1px solid #ccc;
+      font-size:12px;
+      min-width:220px;
+      background:#fff;
+    }
+    #searchInput::placeholder{ color:#999; }
+
     .toolbar button{
       padding:6px 10px;
       border-radius:4px;
@@ -84,8 +100,9 @@
       font-size:12px;
       cursor:pointer;
     }
+    .toolbar button:hover{ opacity:0.9; }
 
-    /* CONTENT */
+    /* CONTENT – 2 columns on big screens */
     #content{
       column-count:2;
       column-gap:16px;
@@ -105,36 +122,55 @@
       border-collapse:collapse;
       table-layout:fixed;
       font-size:11px;
+      background:#fff;
     }
-    th, td{
+    table.section-matrix th,
+    table.section-matrix td{
       border:1px solid var(--border-light);
-      padding:6px;
+      padding:6px 6px;
       text-align:center;
       vertical-align:middle;
+      line-height:1.2;
     }
-    th{
+    table.section-matrix th{
       background:var(--bg-light);
       font-weight:900;
       font-size:10px;
+      white-space:normal;
+      word-break:break-word;
     }
 
+    /* Section name: WHITE + WIDER FEEL */
     td.section-name{
       font-weight:900;
       background:#fff;
+      white-space:normal;
       word-break:break-word;
-    }
-
-    td.nowrap{
-      white-space:nowrap;
-      font-variant-numeric:tabular-nums;
+      overflow-wrap:anywhere;
+      line-height:1.35;
+      font-size:11.5px;
+      padding:10px 8px;
     }
 
     td.sec-desc{
+      white-space:normal;
       word-break:break-word;
+      overflow-wrap:anywhere;
+      line-height:1.25;
     }
 
+    /* Numeric cells never wrap (prevents split digits) */
+    td.nowrap{
+      white-space:nowrap !important;
+      word-break:normal !important;
+      overflow-wrap:normal !important;
+      font-variant-numeric:tabular-nums;
+    }
     td.sec-price{ font-weight:900; }
 
+    table.section-matrix tbody tr:nth-child(even){ background:#f7f7f7; }
+
+    /* Header label swapping (long on screen, short on print) */
     .h-short{ display:none; }
 
     /* FOOTER */
@@ -145,56 +181,83 @@
       font-size:11px;
       color:var(--footer-bordo);
       text-align:center;
+      line-height:1.4;
     }
+    .footer .line{ margin:2px 0; }
 
     /* ==========================================================
-       PRINT
+       PRINT FIXES
        ========================================================== */
     @media print{
       body{ background:#fff; margin:0; padding:0; }
-      .page{ box-shadow:none; padding:8mm 6mm; }
-      .toolbar{ display:none; }
+      .page{
+        box-shadow:none !important;
+        margin:0;
+        max-width:100%;
+        padding:8mm 6mm 8mm;
+      }
+      .toolbar{ display:none !important; }
 
-      /* default print = portrait, 1 column */
-      #content{ column-count:1; }
+      /* Default print: 1 column */
+      #content{
+        column-count:1 !important;
+        column-gap:0 !important;
+      }
 
-      .h-long{ display:none; }
-      .h-short{ display:inline; }
+      /* Short header labels in print */
+      .h-long{ display:none !important; }
+      .h-short{ display:inline !important; }
 
-      table.section-matrix{ font-size:9px; }
-      th, td{ padding:1.6mm 1.2mm; }
+      /* Less ink */
+      table.section-matrix tbody tr:nth-child(even){ background:#fff !important; }
 
-      table, th, td{ border-color:#000; }
+      /* Compact for paper */
+      table.section-matrix{ font-size:9px !important; }
+      table.section-matrix th{
+        font-size:8px !important;
+        padding:1.6mm 1.2mm !important;
+        line-height:1.05 !important;
+      }
+      table.section-matrix td{
+        padding:1.6mm 1.2mm !important;
+        line-height:1.1 !important;
+      }
 
-      .group-block, table, tr, td{ page-break-inside:avoid; }
+      /* Strong borders */
+      table.section-matrix, table.section-matrix th, table.section-matrix td{
+        border-color:#000 !important;
+      }
+
+      /* Prevent splitting */
+      .group-block, table, tr, td, th{ page-break-inside:avoid !important; }
+
+      /* Default margins */
+      @page { margin: 8mm 6mm; }
 
       /* LANDSCAPE */
+      body.landscape-print @page { size: A4 landscape; }
       body.landscape-print #content{
-        column-count:2;
-        column-gap:7mm;
-      }
-      body.landscape-print @page{
-        size:A4 landscape;
+        column-count:2 !important;
+        column-gap:7mm !important;
       }
 
-      /* BLACK & WHITE (DEFAULT = LANDSCAPE + 2 COLS) */
-      body.bw-print{
-        color:#000;
-      }
+      /* BLACK & WHITE – DEFAULT = LANDSCAPE + 2 COLS */
       body.bw-print *{
         color:#000 !important;
-        background:#fff !important;
+        text-shadow:none !important;
         box-shadow:none !important;
+      }
+      body.bw-print table.section-matrix th{ background:#fff !important; }
+      body.bw-print .footer{
+        color:#000 !important;
+        border-top:2px solid #000 !important;
       }
       body.bw-print #content{
         column-count:2 !important;
         column-gap:7mm !important;
       }
       body.bw-print @page{
-        size:A4 landscape;
-      }
-      body.bw-print .footer{
-        border-top:2px solid #000;
+        size: A4 landscape;
       }
     }
   </style>
@@ -207,28 +270,31 @@
 
   <div class="header">
     <div class="senturk-logo">
-      <img src="assets/images/senturk_logo.png">
+      <img src="assets/images/senturk_logo.png" alt="Şentürk" />
     </div>
     <div class="brand-logo">
-      <img src="assets/images/stargill_logo.png">
+      <img src="assets/images/stargill_logo.png" alt="StarGil" />
     </div>
   </div>
 
   <div class="subheader">
-    <span class="editable-title">STARGIL FİYAT LİSTESİ</span>
+    <span id="titleLabel" contenteditable="true" class="editable-title">STARGIL FİYAT LİSTESİ</span>
     &nbsp;–&nbsp;
-    <span id="monthLabel" class="editable-title"></span>
+    <span id="monthLabel" contenteditable="true" class="editable-title"></span>
   </div>
 
   <div class="toolbar">
     <div class="toolbar-left">
-      <input type="file" id="excelInput" accept=".xlsx,.xls">
+      <label for="excelInput">Excel Yükle:</label>
+      <input type="file" id="excelInput" accept=".xlsx,.xls" />
     </div>
     <div class="toolbar-right">
-      <input type="text" id="searchInput" placeholder="Ara...">
-      <button onclick="printPortrait()">A4 / Dikey</button>
-      <button onclick="printLandscape()">A4 / Yatay</button>
-      <button onclick="printBW()">Siyah Beyaz Yazdır</button>
+      <input type="text" id="searchInput" placeholder="Ürün / kod / ebat ara..." />
+      <button type="button" id="clearSearchBtn">Temizle</button>
+
+      <button type="button" onclick="printPortrait()">Yazdır (A4 / Dikey)</button>
+      <button type="button" onclick="printLandscape()">Yazdır (A4 / Yatay 2 Kolon)</button>
+      <button type="button" onclick="printBW()">Siyah Beyaz Yazdır</button>
     </div>
   </div>
 
@@ -249,109 +315,390 @@
 </div>
 
 <script>
-/* ================= CONFIG ================= */
-const DEFAULT_EXCEL_PATH="assets/data/stargill_fiyat.xlsx";
+/* ==========================================================
+   CONFIG
+   ========================================================== */
+const DEFAULT_EXCEL_PATH = "assets/data/stargill_fiyat.xlsx";
 
-/* ================= HELPERS ================= */
-const isBlank=v=>v==null||String(v).trim()==="";
-const isBlankRow=r=>r.every(isBlank);
+/* ==========================================================
+   HELPERS
+   ========================================================== */
+function isBlank(v){ return v === null || v === undefined || String(v).trim() === ""; }
+function isBlankRow(r){ return r.every(isBlank); }
+function norm(v){ return (v ?? "").toString().trim().toLocaleLowerCase("tr-TR"); }
 
-function fmt(val){
-  if(val==null) return "";
-  let n=parseFloat(String(val).replace(",","."));
-  if(isNaN(n)) return val;
-  return n.toLocaleString("tr-TR",{minimumFractionDigits:2});
-}
-function fmtCode(v){
-  if(typeof v==="number") return String(v).padStart(5,"0");
-  return v;
+function parseNumberFlexible(val){
+  if (val == null || val === "") return NaN;
+  if (typeof val === "number") return val;
+
+  let s = val.toString().trim();
+  if (!s) return NaN;
+
+  // keep only number-ish characters
+  s = s.replace(/[^0-9,.\-]/g, "");
+
+  // Turkish decimal comma support
+  if (s.includes(",")){
+    s = s.replace(/\./g, "").replace(",", ".");
+    return parseFloat(s);
+  }
+
+  // 1.234.567.89 => 1234567.89
+  const firstDot = s.indexOf(".");
+  const lastDot = s.lastIndexOf(".");
+  if (firstDot !== -1 && firstDot !== lastDot){
+    const intPart = s.slice(0, lastDot).replace(/\./g, "");
+    const decPart = s.slice(lastDot + 1);
+    s = intPart + "." + decPart;
+  }
+
+  return parseFloat(s);
 }
 
-/* ================= PRINT ================= */
-function clearPrint(){
-  document.body.classList.remove("bw-print","landscape-print");
-}
-function printPortrait(){
-  clearPrint(); window.print();
-}
-function printLandscape(){
-  clearPrint(); document.body.classList.add("landscape-print"); window.print();
-}
-function printBW(){
-  clearPrint();
-  document.body.classList.add("bw-print","landscape-print"); // ✅ DEFAULT
-  window.print();
-}
-window.onafterprint=clearPrint;
+/* ✅ PRICE: always 2 decimals (fixes long floating decimals) */
+function fmtPrice(val){
+  if (val == null || val === "") return "";
+  const n = (typeof val === "number") ? val : parseNumberFlexible(val);
+  if (isNaN(n)) return (val ?? "").toString().trim();
 
-/* ================= RENDER ================= */
-function renderAOA(aoa){
-  let html="", i=0;
-  while(i<aoa.length){
-    if(aoa[i].some(c=>String(c).toLowerCase().includes("kod"))){
-      let section="", items=[];
-      let header=aoa[i]; i++;
-      while(i<aoa.length&&!isBlankRow(aoa[i])){
-        let r=aoa[i];
-        if(r[0]) section=r[0];
-        if(r[1]){
+  return n.toLocaleString("tr-TR", {
+    minimumFractionDigits: 2,
+    maximumFractionDigits: 2
+  });
+}
+
+/* ✅ EBAT / AÇIKLAMA-NUMERIC: max 2 decimals, but keep strings like "3 (65)" */
+function fmtSmart(val){
+  if (val == null || val === "") return "";
+
+  if (typeof val === "string" && /[()]/.test(val)) return val.trim();
+
+  const n = (typeof val === "number") ? val : parseNumberFlexible(val);
+  if (isNaN(n)) return (val ?? "").toString().trim();
+
+  return n.toLocaleString("tr-TR", {
+    minimumFractionDigits: 0,
+    maximumFractionDigits: 2
+  });
+}
+
+function fmtCode(val){
+  if (val == null) return "";
+  if (typeof val === "number"){
+    const s = String(Math.trunc(val));
+    return s.padStart(5, "0");
+  }
+  const s = val.toString().trim();
+  if (/^\d+$/.test(s) && s.length < 5) return s.padStart(5, "0");
+  return s;
+}
+
+/* ==========================================================
+   HEADER DETECTION
+   - Açıklama is OPTIONAL
+   ========================================================== */
+function detectHeaderMap(row){
+  const findIdx = (pred) => {
+    for (let i=0;i<row.length;i++){
+      const t = norm(row[i]);
+      if (pred(t)) return i;
+    }
+    return -1;
+  };
+
+  const kodNo = findIdx(t => t === "kod no" || t === "kod" || t.includes("kod"));
+  const aciklama = findIdx(t => t === "açıklama" || t === "aciklama" || t.includes("açıklama") || t.includes("aciklama"));
+  const ebat = findIdx(t => t === "ebat" || t.includes("ebat"));
+  const fiyat = findIdx(t => t.includes("fiyat"));
+  const kdvDahil = findIdx(t => t.includes("kdv") && (t.includes("dahil") || t === "kdv"));
+
+  let sectionCol = 0;
+  if (kodNo > 0) sectionCol = kodNo - 1;
+
+  const isValid = kodNo !== -1 && ebat !== -1 && fiyat !== -1;
+  return { isValid, sectionCol, kodNo, aciklama, ebat, fiyat, kdvDahil };
+}
+function isHeaderRow(row){ return detectHeaderMap(row).isValid; }
+
+/* ==========================================================
+   RENDER
+   ========================================================== */
+function renderFromAOA(aoa){
+  let html = "";
+  let i = 0;
+
+  while (i < aoa.length){
+    const row = aoa[i];
+
+    if (isHeaderRow(row)){
+      const map = detectHeaderMap(row);
+      i++;
+
+      let sectionName = "";
+      let lastDesc = "";
+      const items = [];
+
+      while (i < aoa.length && !isBlankRow(aoa[i]) && !isHeaderRow(aoa[i])){
+        const r = aoa[i];
+
+        const secCell = (map.sectionCol >= 0) ? (r[map.sectionCol] ?? "") : "";
+        const maybeSection = (secCell ?? "").toString().trim();
+        if (maybeSection) sectionName = maybeSection;
+
+        const code = fmtCode(r[map.kodNo]);
+
+        // Açıklama optional: if removed, we simply skip it
+        let desc = "";
+        if (map.aciklama !== -1){
+          desc = (r[map.aciklama] ?? "").toString().trim();
+          if (desc) lastDesc = desc;
+        }
+
+        const ebatVal = r[map.ebat];
+        const fiyatVal = r[map.fiyat];
+        const kdvVal = (map.kdvDahil !== -1) ? r[map.kdvDahil] : "";
+
+        if (!isBlank(code)){
           items.push({
-            code:fmtCode(r[1]),
-            desc:r[2]||"",
-            ebat:r[3],
-            fiyat:r[4],
-            kdv:r[5]
+            sectionName: sectionName || "Bölüm",
+            code,
+            desc: map.aciklama !== -1 ? (desc || lastDesc || "") : "",
+            ebat: fmtSmart(ebatVal),
+            fiyat: fmtPrice(fiyatVal),
+            kdv: fmtPrice(kdvVal),
+            hasDesc: map.aciklama !== -1
           });
         }
         i++;
       }
-      if(items.length){
-        html+=`<div class="group-block"><table class="section-matrix">
-        <thead><tr>
-          <th></th><th>Kod</th>
-          ${items[0].desc?'<th>Açıklama</th>':''}
-          <th>Ebat</th><th>Fiyat</th><th>KDV</th>
-        </tr></thead><tbody>`;
-        items.forEach((it,idx)=>{
-          html+=`<tr>`;
-          if(idx===0) html+=`<td class="section-name" rowspan="${items.length}">${section}</td>`;
-          html+=`<td class="nowrap">${it.code}</td>`;
-          if(it.desc) html+=`<td class="sec-desc">${it.desc}</td>`;
-          html+=`<td class="nowrap">${it.ebat}</td>
-                 <td class="nowrap sec-price">${fmt(it.fiyat)}</td>
-                 <td class="nowrap sec-price">${fmt(it.kdv)}</td></tr>`;
-        });
-        html+=`</tbody></table></div>`;
+
+      if (items.length){
+        const secName = items[0].sectionName;
+        const hasDesc = items[0].hasDesc;
+
+        html += `<div class="group-block">`;
+
+        if (!hasDesc){
+          /* ✅ NO AÇIKLAMA TABLE (5 columns)
+             ✅ SECTION NAME WIDER via colgroup (34%)
+          */
+          html += `
+            <table class="section-matrix">
+              <colgroup>
+                <col style="width:34%">
+                <col style="width:12%">
+                <col style="width:14%">
+                <col style="width:20%">
+                <col style="width:20%">
+              </colgroup>
+              <thead>
+                <tr>
+                  <th></th>
+                  <th>Kod</th>
+                  <th>Ebat</th>
+                  <th>
+                    <span class="h-long">Fiyat (KDV Hariç)</span>
+                    <span class="h-short">Fiyat</span>
+                  </th>
+                  <th>
+                    <span class="h-long">KDV Dahil</span>
+                    <span class="h-short">KDV</span>
+                  </th>
+                </tr>
+              </thead>
+              <tbody>
+          `;
+
+          items.forEach((it, idx) => {
+            html += `<tr>`;
+            if (idx === 0){
+              html += `<td class="section-name" rowspan="${items.length}">${secName}</td>`;
+            }
+            html += `
+              <td class="nowrap">${it.code}</td>
+              <td class="nowrap">${it.ebat}</td>
+              <td class="nowrap sec-price">${it.fiyat}</td>
+              <td class="nowrap sec-price">${it.kdv}</td>
+            `;
+            html += `</tr>`;
+          });
+
+          html += `</tbody></table>`;
+        } else {
+          /* ✅ WITH AÇIKLAMA TABLE (6 columns)
+             ✅ SECTION NAME WIDER (30%)
+          */
+          html += `
+            <table class="section-matrix">
+              <colgroup>
+                <col style="width:30%">
+                <col style="width:11%">
+                <col style="width:29%">
+                <col style="width:10%">
+                <col style="width:10%">
+                <col style="width:10%">
+              </colgroup>
+              <thead>
+                <tr>
+                  <th></th>
+                  <th>Kod</th>
+                  <th>Açıklama</th>
+                  <th>Ebat</th>
+                  <th>
+                    <span class="h-long">Fiyat (KDV Hariç)</span>
+                    <span class="h-short">Fiyat</span>
+                  </th>
+                  <th>
+                    <span class="h-long">KDV Dahil</span>
+                    <span class="h-short">KDV</span>
+                  </th>
+                </tr>
+              </thead>
+              <tbody>
+          `;
+
+          items.forEach((it, idx) => {
+            html += `<tr>`;
+            if (idx === 0){
+              html += `<td class="section-name" rowspan="${items.length}">${secName}</td>`;
+            }
+            html += `
+              <td class="nowrap">${it.code}</td>
+              <td class="sec-desc">${it.desc}</td>
+              <td class="nowrap">${it.ebat}</td>
+              <td class="nowrap sec-price">${it.fiyat}</td>
+              <td class="nowrap sec-price">${it.kdv}</td>
+            `;
+            html += `</tr>`;
+          });
+
+          html += `</tbody></table>`;
+        }
+
+        html += `</div>`;
       }
+
+      while (i < aoa.length && isBlankRow(aoa[i])) i++;
+      continue;
     }
+
     i++;
   }
-  document.getElementById("content").innerHTML=html;
+
+  document.getElementById("content").innerHTML =
+    html || `<div style="color:#666;font-size:13px;">Excel verisi bulunamadı.</div>`;
+
+  applySearch();
 }
 
-/* ================= LOAD ================= */
-function loadExcel(buf){
-  let wb=XLSX.read(buf,{type:"array"});
-  let ws=wb.Sheets[wb.SheetNames[0]];
-  renderAOA(XLSX.utils.sheet_to_json(ws,{header:1,defval:""}));
+/* ==========================================================
+   SEARCH
+   ========================================================== */
+function applySearch(){
+  const term = document.getElementById("searchInput").value.trim().toLowerCase();
+  const blocks = document.querySelectorAll("#content .group-block");
+  if (!term){
+    blocks.forEach(b => b.style.display = "");
+    return;
+  }
+  blocks.forEach(b => {
+    const text = b.textContent.toLowerCase();
+    b.style.display = text.includes(term) ? "" : "none";
+  });
 }
 
-document.getElementById("excelInput").onchange=e=>{
-  let f=e.target.files[0];
-  if(!f) return;
-  let r=new FileReader();
-  r.onload=ev=>loadExcel(ev.target.result);
-  r.readAsArrayBuffer(f);
-};
+/* ==========================================================
+   PRINT
+   ========================================================== */
+function clearPrintClasses(){
+  document.body.classList.remove("bw-print","landscape-print");
+}
+function printPortrait(){
+  clearPrintClasses();
+  window.print();
+}
+function printLandscape(){
+  clearPrintClasses();
+  document.body.classList.add("landscape-print");
+  window.print();
+}
+/* ✅ BW defaults to LANDSCAPE + 2 COLUMNS */
+function printBW(){
+  clearPrintClasses();
+  document.body.classList.add("bw-print","landscape-print");
+  window.print();
+}
+window.addEventListener("afterprint", clearPrintClasses);
 
-fetch(DEFAULT_EXCEL_PATH)
-  .then(r=>r.arrayBuffer())
-  .then(loadExcel);
+/* ==========================================================
+   EXCEL LOAD
+   ========================================================== */
+function renderWorksheet(ws){
+  const aoa = XLSX.utils.sheet_to_json(ws, { header: 1, defval: "" });
+  const hasHeader = aoa.some(r => isHeaderRow(r));
+  if (!hasHeader){
+    document.getElementById("content").innerHTML =
+      `<div style="color:#b00;font-size:13px;">
+        Bu sayfa en az şu başlıkları bekliyor: “Kod / Kod No”, “Ebat”, “Fiyat ...”.<br>
+        “Açıklama” ve “KDV Dahil” varsa gösterilir; yoksa otomatik boş kalır.
+      </div>`;
+    return;
+  }
+  renderFromAOA(aoa);
+}
 
-/* ================= INIT ================= */
-const m=["OCAK","ŞUBAT","MART","NİSAN","MAYIS","HAZİRAN","TEMMUZ","AĞUSTOS","EYLÜL","EKİM","KASIM","ARALIK"];
-document.getElementById("monthLabel").textContent=
-  m[new Date().getMonth()]+" "+new Date().getFullYear();
+document.getElementById("excelInput").addEventListener("change", e => {
+  const file = e.target.files[0];
+  if (!file) return;
+
+  const reader = new FileReader();
+  reader.onload = evt => {
+    const workbook = XLSX.read(evt.target.result, { type: "array" });
+    let sheetName = "Sheet1";
+    if (!workbook.Sheets[sheetName]) sheetName = workbook.SheetNames[0];
+    renderWorksheet(workbook.Sheets[sheetName]);
+  };
+  reader.readAsArrayBuffer(file);
+});
+
+function autoLoadExcel(){
+  fetch(DEFAULT_EXCEL_PATH)
+    .then(r => r.arrayBuffer())
+    .then(buf => {
+      const workbook = XLSX.read(buf, { type: "array" });
+      let sheetName = "Sheet1";
+      if (!workbook.Sheets[sheetName]) sheetName = workbook.SheetNames[0];
+      renderWorksheet(workbook.Sheets[sheetName]);
+    })
+    .catch(err => {
+      console.error("Auto-load Excel failed:", err);
+      document.getElementById("content").innerHTML =
+        `<div style="color:#b00;font-size:13px;">
+          Otomatik Excel yükleme başarısız.<br>
+          Dosya yolu doğru mu? <b>${DEFAULT_EXCEL_PATH}</b>
+        </div>`;
+    });
+}
+
+/* INIT */
+document.addEventListener("DOMContentLoaded", () => {
+  const now = new Date();
+  const months = ["OCAK","ŞUBAT","MART","NİSAN","MAYIS","HAZİRAN","TEMMUZ","AĞUSTOS","EYLÜL","EKİM","KASIM","ARALIK"];
+  const monthLabel = document.getElementById("monthLabel");
+  if (monthLabel) monthLabel.textContent = `${months[now.getMonth()]} ${now.getFullYear()}`;
+
+  const searchInput = document.getElementById("searchInput");
+  const clearBtn = document.getElementById("clearSearchBtn");
+  if (searchInput) searchInput.addEventListener("input", applySearch);
+  if (clearBtn){
+    clearBtn.addEventListener("click", () => {
+      searchInput.value = "";
+      applySearch();
+    });
+  }
+
+  autoLoadExcel();
+});
 </script>
 </body>
 </html>
