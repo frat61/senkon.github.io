@@ -1,0 +1,2300 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Beam Analyzer — Structural Engineering Tool</title>
+<link href="https://fonts.googleapis.com/css2?family=JetBrains+Mono:wght@300;400;500;600;700&family=Crimson+Pro:ital,wght@0,300;0,400;0,600;1,300;1,400&display=swap" rel="stylesheet">
+<style>
+*, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+:root {
+  --ink:     #0f0e0c;
+  --ink2:    #2a2925;
+  --muted:   #7a7870;
+  --faint:   #b8b5ae;
+  --rule:    #dedad3;
+  --paper:   #f7f5f0;
+  --white:   #ffffff;
+  --red:     #b03020;
+  --blue:    #1b3a5e;
+  --green:   #1e5c2a;
+  --amber:   #8b5e00;
+  --mono:    'JetBrains Mono', monospace;
+  --serif:   'Crimson Pro', Georgia, serif;
+  --r: 2px;
+}
+
+html, body { height: 100%; }
+
+body {
+  font-family: var(--mono);
+  background: var(--paper);
+  color: var(--ink);
+  display: flex;
+  flex-direction: column;
+  height: 100vh;
+  overflow: hidden;
+}
+
+/* ── HEADER ── */
+header {
+  background: var(--ink);
+  color: var(--paper);
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 0 20px;
+  height: 44px;
+  flex-shrink: 0;
+  border-bottom: 2px solid #333;
+}
+
+.header-left { display: flex; align-items: baseline; gap: 14px; }
+.h-title { font-size: 13px; font-weight: 700; letter-spacing: .1em; text-transform: uppercase; }
+.h-sub   { font-size: 10px; color: #888; letter-spacing: .06em; }
+.h-badge {
+  font-size: 9px; padding: 2px 7px; border: 1px solid #555;
+  color: #aaa; letter-spacing: .08em; text-transform: uppercase;
+}
+
+/* ── LAYOUT ── */
+.layout {
+  display: grid;
+  grid-template-columns: 270px 1fr 280px;
+  flex: 1;
+  min-height: 0;
+  overflow: hidden;
+}
+
+/* ── PANEL BASE ── */
+.panel {
+  display: flex;
+  flex-direction: column;
+  overflow-y: auto;
+  scrollbar-width: thin;
+  scrollbar-color: var(--rule) transparent;
+}
+
+.panel-left  { background: var(--white); border-right: 1px solid var(--rule); }
+.panel-right { background: var(--ink2); border-left: 1px solid #111; color: var(--paper); }
+
+/* ── SECTION ── */
+.sec { border-bottom: 1px solid var(--rule); padding: 14px 16px; }
+.sec-dark { border-bottom: 1px solid #222; padding: 14px 16px; }
+
+.sec-hd {
+  font-size: 9px; font-weight: 700; letter-spacing: .14em;
+  text-transform: uppercase; color: var(--muted);
+  margin-bottom: 10px; display: flex; align-items: center; gap: 8px;
+}
+.sec-hd-dark {
+  font-size: 9px; font-weight: 700; letter-spacing: .14em;
+  text-transform: uppercase; color: #666;
+  margin-bottom: 10px; display: flex; align-items: center; gap: 8px;
+}
+.sec-hd::after, .sec-hd-dark::after {
+  content:''; flex:1; height:1px; background: currentColor; opacity:.25;
+}
+
+/* ── FORM ── */
+.field { margin-bottom: 9px; }
+label { display: block; font-size: 9px; color: var(--muted); margin-bottom: 3px; letter-spacing: .05em; }
+input, select {
+  width: 100%; font-family: var(--mono); font-size: 11px;
+  border: 1px solid var(--rule); background: var(--paper);
+  padding: 6px 8px; color: var(--ink); outline: none;
+  border-radius: var(--r); transition: border-color .12s, background .12s;
+}
+input:focus, select:focus { border-color: var(--ink); background: var(--white); }
+.g2 { display: grid; grid-template-columns: 1fr 1fr; gap: 7px; }
+.g3 { display: grid; grid-template-columns: 1fr 1fr 1fr; gap: 5px; }
+
+/* ── BUTTONS ── */
+.btn {
+  font-family: var(--mono); font-size: 10px; font-weight: 600;
+  letter-spacing: .07em; text-transform: uppercase;
+  padding: 8px 12px; cursor: pointer; border-radius: var(--r);
+  transition: all .12s; width: 100%; border: none;
+}
+.btn-ink    { background: var(--ink); color: var(--paper); }
+.btn-ink:hover { background: #333; }
+.btn-outline { background: transparent; color: var(--muted); border: 1px solid var(--rule); margin-top: 5px; }
+.btn-outline:hover { border-color: var(--ink); color: var(--ink); }
+.btn-red    { background: var(--red); color: white; margin-top: 3px; }
+.btn-red:hover { background: #8b1a10; }
+.btn-sm {
+  font-family: var(--mono); font-size: 9px; padding: 3px 7px;
+  border: 1px solid var(--rule); background: transparent;
+  color: var(--muted); cursor: pointer; border-radius: 2px; transition: all .12s;
+}
+.btn-sm:hover { border-color: var(--red); color: var(--red); }
+
+/* ── ITEMS ── */
+.item-list { display: flex; flex-direction: column; gap: 4px; min-height: 20px; }
+.item {
+  display: flex; align-items: center; justify-content: space-between;
+  background: var(--paper); border: 1px solid var(--rule);
+  padding: 5px 8px; border-radius: var(--r); font-size: 10px;
+}
+.tag {
+  font-size: 8px; padding: 1px 5px; border-radius: 1px;
+  border: 1px solid currentColor; font-weight: 600; letter-spacing: .05em;
+}
+.tag-pin    { color: var(--blue); }
+.tag-roller { color: var(--green); }
+.tag-fixed  { color: var(--amber); }
+.tag-hinge  { color: #7a007a; }
+.tag-point  { color: var(--red); }
+.tag-udl    { color: var(--amber); }
+.tag-moment { color: var(--green); }
+.empty-note { font-size: 10px; color: var(--faint); font-style: italic; }
+
+/* ── LOAD CATEGORY PILLS ── */
+.lcat { font-size: 8px; font-weight: 700; padding: 1px 6px; border-radius: 10px; letter-spacing:.06em; }
+.lcat-D { background:#2a3a52; color:#8ab4e8; }
+.lcat-L { background:#2a4030; color:#6dcf8a; }
+.lcat-W { background:#3a2a10; color:#f0b840; }
+.lcat-S { background:#2a3a40; color:#70d4e8; }
+.lcat-E { background:#3a1a1a; color:#f07060; }
+
+/* ── COMBO PANEL ── */
+.combo-panel { padding: 0 12px 12px; }
+.combo-card {
+  border: 1px solid #2a2a26; border-radius: 3px; margin-bottom: 6px;
+  overflow: hidden; transition: border-color .15s;
+}
+.combo-card:hover { border-color: #555; }
+.combo-card.active-combo { border-color: #7ab8f5 !important; }
+
+.combo-row {
+  display: flex; align-items: center; gap: 8px;
+  padding: 8px 10px; cursor: pointer; background: #1e1e1a;
+}
+.combo-row:hover { background: #252520; }
+.combo-check { width: 14px; height: 14px; border: 1px solid #555; border-radius: 2px; flex-shrink:0; display:flex;align-items:center;justify-content:center; font-size:9px; color:#7ab8f5; }
+.combo-check.on { background:#1b3a5e; border-color:#7ab8f5; }
+.combo-name { font-size: 10px; font-weight:600; color:#ccc; flex:1; letter-spacing:.03em; }
+.combo-expr { font-size: 9px; color: #888; font-style:italic; }
+.combo-edit { display:none; padding: 8px 10px; background:#171714; border-top:1px solid #222; }
+.combo-card.active-combo .combo-edit { display:block; }
+
+.combo-factors { display: grid; grid-template-columns: repeat(5,1fr); gap:5px; margin-bottom:7px; }
+.factor-cell { display:flex; flex-direction:column; align-items:center; gap:3px; }
+.factor-lbl { font-size:8px; color:#888; letter-spacing:.05em; }
+.factor-inp {
+  width:100%; font-family:var(--mono); font-size:10px; text-align:center;
+  background:#111; border:1px solid #333; color:#ddd; padding:3px 0;
+  border-radius:2px; outline:none;
+}
+.factor-inp:focus { border-color:#7ab8f5; color:white; }
+
+.custom-combo { margin-top: 8px; padding-top:8px; border-top:1px solid #2a2a26; }
+.custom-combo-title { font-size:9px; color:#666; letter-spacing:.08em; text-transform:uppercase; margin-bottom:6px; }
+
+.analyze-combo-btn {
+  width:100%; font-family:var(--mono); font-size:10px; font-weight:700;
+  letter-spacing:.08em; text-transform:uppercase; padding:8px;
+  background: #8b1a10; color:white; border:none; cursor:pointer;
+  border-radius:2px; margin-top:8px; transition:background .12s;
+}
+.analyze-combo-btn:hover { background:#c03020; }
+
+/* combo result badge */
+.combo-badge {
+  display:inline-flex; align-items:center; gap:5px;
+  background:#1b3a5e22; border:1px solid #4a7ab5;
+  padding:4px 10px; border-radius:2px; font-size:10px; color:#7ab8f5;
+  margin-bottom:10px;
+}
+.combo-badge span { font-weight:700; }
+
+/* ── TOOL BAR ── */
+.toolbar {
+  display: flex; gap: 4px; flex-wrap: wrap; margin-bottom: 8px;
+}
+.tool-btn {
+  font-family: var(--mono); font-size: 9px; font-weight: 600;
+  padding: 4px 9px; border: 1px solid var(--rule); background: var(--paper);
+  cursor: pointer; letter-spacing: .04em; border-radius: var(--r);
+  transition: all .12s; color: var(--muted);
+}
+.tool-btn:hover { border-color: var(--ink); color: var(--ink); }
+.tool-btn.active { background: var(--ink); color: var(--paper); border-color: var(--ink); }
+
+/* ── MAIN CENTER ── */
+.main-center {
+  display: flex; flex-direction: column; overflow: hidden; background: var(--paper);
+}
+
+.canvas-wrap {
+  background: var(--white); border-bottom: 1px solid var(--rule);
+  padding: 16px 20px; flex-shrink: 0;
+}
+.canvas-label { font-size: 9px; color: var(--muted); letter-spacing: .1em; text-transform: uppercase; margin-bottom: 8px; }
+canvas#beamCanvas { border: 1px solid var(--rule); display: block; cursor: crosshair; width: 100%; background: white; }
+.canvas-hint { font-size: 9px; color: var(--faint); margin-top: 5px; letter-spacing: .03em; }
+
+/* ── OUTPUT ── */
+.output {
+  flex: 1; overflow-y: auto; padding: 16px 20px;
+  scrollbar-width: thin; scrollbar-color: var(--rule) transparent;
+}
+
+.out-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 12px; }
+.card {
+  background: var(--white); border: 1px solid var(--rule);
+  border-radius: var(--r); padding: 12px;
+}
+.card-full { grid-column: 1 / -1; }
+.card-hd {
+  font-size: 9px; font-weight: 700; letter-spacing: .12em;
+  text-transform: uppercase; color: var(--muted);
+  padding-bottom: 8px; margin-bottom: 10px;
+  border-bottom: 1px solid var(--rule);
+}
+
+.rx-row {
+  display: flex; justify-content: space-between; align-items: center;
+  padding: 5px 0; border-bottom: 1px solid var(--rule);
+  font-size: 11px;
+}
+.rx-row:last-child { border: none; }
+.rx-val { font-weight: 700; color: var(--blue); }
+
+.step { padding: 7px 0; border-bottom: 1px solid var(--rule); font-size: 10px; line-height: 1.75; }
+.step:last-child { border: none; }
+.step-n { display:inline-block; background:var(--ink); color:white; font-size:8px; padding:1px 5px; margin-right:5px; border-radius:1px; }
+.hl-eq  { color: var(--blue); font-weight: 600; }
+.hl-val { color: var(--red);  font-weight: 700; }
+
+.placeholder {
+  display: flex; flex-direction: column; align-items: center;
+  justify-content: center; height: 100%; gap: 10px; color: var(--faint);
+}
+.placeholder svg { opacity: .12; }
+.placeholder p { font-size: 11px; letter-spacing: .06em; }
+
+.err-box {
+  background: #fff5f5; border: 1px solid #e0a0a0; padding: 10px 13px;
+  font-size: 11px; color: var(--red); border-radius: var(--r);
+}
+
+/* ── FORMULA PANEL ── */
+.formula-panel { padding: 0; }
+
+.formula-card {
+  margin: 12px; background: #1e1e1a; border: 1px solid #333;
+  border-radius: 3px; overflow: hidden; cursor: pointer;
+  transition: border-color .15s;
+}
+.formula-card:hover { border-color: #666; }
+.formula-card.expanded { border-color: #888; }
+
+.fc-head {
+  display: flex; align-items: center; justify-content: space-between;
+  padding: 9px 11px; background: #252520;
+}
+.fc-label { font-size: 10px; font-weight: 600; letter-spacing: .05em; color: #ddd; }
+.fc-tag   { font-size: 8px; color: #888; letter-spacing: .07em; text-transform: uppercase; }
+.fc-arrow { font-size: 10px; color: #666; transition: transform .2s; }
+.formula-card.expanded .fc-arrow { transform: rotate(90deg); }
+
+.fc-body { display: none; padding: 10px 11px 12px; border-top: 1px solid #2a2a26; }
+.formula-card.expanded .fc-body { display: block; }
+
+/* Mini beam SVG */
+.mini-beam-wrap { margin-bottom: 9px; }
+.mini-beam-wrap svg { width: 100%; height: auto; display: block; }
+
+/* Formula line */
+.f-line {
+  display: flex; align-items: baseline; gap: 8px;
+  padding: 5px 0; border-bottom: 1px solid #2a2a26;
+  font-size: 10px;
+}
+.f-line:last-child { border: none; padding-bottom: 0; }
+.f-sym  { color: #e8a848; font-weight: 600; min-width: 70px; font-size: 11px; }
+.f-eq   { color: #7ab8f5; font-family: var(--serif); font-size: 12px; font-style: italic; }
+.f-note { color: #888; font-size: 9px; margin-left: auto; text-align: right; }
+
+.panel-search {
+  padding: 10px 12px; border-bottom: 1px solid #222; position: sticky; top: 0;
+  background: var(--ink2); z-index: 2;
+}
+.panel-search input {
+  background: #111; border: 1px solid #333; color: #ccc;
+  font-size: 10px; padding: 5px 8px;
+}
+.panel-search input::placeholder { color: #555; }
+.panel-search input:focus { border-color: #666; background: #161612; }
+
+.formula-count { font-size: 9px; color: #555; padding: 6px 12px; letter-spacing: .05em; }
+
+/* diagram canvas */
+.diag-canvas { display: block; width: 100%; border: 1px solid var(--rule); border-radius: 1px; }
+
+/* ── RIGHT PANEL TABS ── */
+.rpanel-tab {
+  flex:1; font-family:var(--mono); font-size:10px; font-weight:600;
+  letter-spacing:.06em; text-transform:uppercase;
+  padding:10px 0; background:transparent; border:none; color:#666;
+  cursor:pointer; border-bottom:2px solid transparent; transition:all .15s;
+}
+.rpanel-tab:hover { color:#aaa; }
+.rpanel-tab.active { color:#ddd; border-bottom-color:#7ab8f5; }
+
+/* ── CROSSHAIR TOOLTIP ── */
+.diag-wrap { position:relative; }
+.crosshair-tooltip {
+  position:absolute; pointer-events:none; display:none;
+  background: var(--ink); color: var(--paper);
+  border-radius:3px; padding:7px 10px; font-size:10px; line-height:1.7;
+  border: 1px solid #444; white-space:nowrap; z-index:10;
+  box-shadow: 0 4px 16px rgba(0,0,0,.3);
+}
+.crosshair-tooltip .ct-x  { color:#aaa; font-size:9px; border-bottom:1px solid #333; margin-bottom:4px; padding-bottom:3px; }
+.crosshair-tooltip .ct-v  { color:#7ab8f5; }
+.crosshair-tooltip .ct-m  { color:#e8806a; }
+.crosshair-tooltip .ct-y  { color:#80d898; }
+
+/* ── EI INPUTS IN HEADER ── */
+.ei-group { display:flex; align-items:center; gap:8px; }
+.ei-field { display:flex; align-items:center; gap:5px; }
+.ei-label { font-size:9px; color:#888; letter-spacing:.06em; }
+.ei-input {
+  width:72px; font-family:var(--mono); font-size:10px;
+  background:#1a1917; border:1px solid #444; color:#ddd;
+  padding:4px 6px; border-radius:2px; outline:none;
+}
+.ei-input:focus { border-color:#7ab8f5; }
+.ei-unit { font-size:8px; color:#555; }
+
+/* ── REPORT VIEW BUTTON ── */
+.btn-report {
+  font-family:var(--mono); font-size:10px; font-weight:600;
+  letter-spacing:.07em; text-transform:uppercase;
+  padding:6px 14px; border:1px solid #555; background:transparent;
+  color:#aaa; cursor:pointer; border-radius:2px; transition:all .15s;
+}
+.btn-report:hover { border-color:#7ab8f5; color:#7ab8f5; }
+
+/* ── REPORT OVERLAY ── */
+#reportOverlay {
+  display:none; position:fixed; inset:0; background:white; z-index:1000;
+  overflow-y:auto; font-family:'JetBrains Mono',monospace;
+}
+#reportOverlay.visible { display:block; }
+
+.report-page {
+  max-width:900px; margin:0 auto; padding:40px 50px;
+  color:#111;
+}
+
+.report-titleblock {
+  display:grid; grid-template-columns:1fr auto;
+  border:2px solid #111; margin-bottom:28px;
+}
+.report-title-left { padding:16px 20px; }
+.report-proj { font-size:11px; color:#666; letter-spacing:.1em; text-transform:uppercase; margin-bottom:4px; }
+.report-main-title { font-size:22px; font-weight:700; letter-spacing:.04em; }
+.report-subtitle { font-size:11px; color:#666; margin-top:4px; }
+.report-title-right {
+  border-left:2px solid #111; padding:12px 16px;
+  display:flex; flex-direction:column; justify-content:center; gap:6px; min-width:180px;
+}
+.report-meta { display:flex; justify-content:space-between; gap:12px; font-size:10px; }
+.report-meta-label { color:#888; }
+.report-meta-val { font-weight:600; }
+
+.report-section { margin-bottom:28px; }
+.report-section-title {
+  font-size:10px; font-weight:700; letter-spacing:.14em; text-transform:uppercase;
+  color:#666; border-bottom:1px solid #ddd; padding-bottom:6px; margin-bottom:14px;
+}
+
+.report-beam-wrap { border:1px solid #ddd; background:#fafafa; padding:16px; margin-bottom:16px; }
+.report-diag-wrap { border:1px solid #ddd; background:#fff; padding:12px; margin-bottom:10px; }
+.report-diag-title { font-size:9px; font-weight:700; letter-spacing:.1em; text-transform:uppercase; color:#888; margin-bottom:8px; }
+
+.report-table { width:100%; border-collapse:collapse; font-size:11px; margin-bottom:12px; }
+.report-table th { background:#f0ede6; text-align:left; padding:6px 10px; font-size:9px; letter-spacing:.08em; text-transform:uppercase; border:1px solid #ddd; }
+.report-table td { padding:6px 10px; border:1px solid #eee; }
+.report-table tr:nth-child(even) td { background:#fafaf8; }
+
+.report-controls {
+  position:sticky; top:0; background:white; border-bottom:2px solid #111;
+  padding:10px 50px; display:flex; justify-content:space-between; align-items:center; z-index:10;
+}
+.report-ctrl-title { font-size:11px; font-weight:700; letter-spacing:.08em; color:#666; text-transform:uppercase; }
+
+.btn-print {
+  font-family:var(--mono); font-size:10px; font-weight:700; letter-spacing:.08em;
+  text-transform:uppercase; padding:7px 18px; background:#111; color:white;
+  border:none; cursor:pointer; border-radius:2px;
+}
+.btn-print:hover { background:#333; }
+.btn-close-report {
+  font-family:var(--mono); font-size:10px; padding:7px 14px; background:transparent;
+  border:1px solid #ddd; color:#666; cursor:pointer; border-radius:2px;
+}
+.btn-close-report:hover { border-color:#999; color:#333; }
+
+@media print {
+  #reportOverlay { position:static; }
+  .report-controls { display:none !important; }
+  body > *:not(#reportOverlay) { display:none !important; }
+  #reportOverlay { display:block !important; }
+}
+</style>
+</head>
+<body>
+
+<header>
+  <div class="header-left">
+    <span class="h-title">⬛ Beam Analyzer</span>
+    <span class="h-sub">SFD · BMD · Deflection · LRFD</span>
+  </div>
+  <div class="ei-group">
+    <div class="ei-field">
+      <span class="ei-label">E</span>
+      <input class="ei-input" id="eVal" value="200" type="number" step="1" title="Young's Modulus">
+      <span class="ei-unit">GPa</span>
+    </div>
+    <div class="ei-field">
+      <span class="ei-label">I</span>
+      <input class="ei-input" id="iVal" value="8000" type="number" step="100" title="Moment of Inertia">
+      <span class="ei-unit">cm⁴</span>
+    </div>
+    <button class="btn-report" onclick="openReport()">⊞ Report View</button>
+  </div>
+  <span class="h-badge">v4.0</span>
+</header>
+
+<!-- REPORT OVERLAY -->
+<div id="reportOverlay">
+  <div class="report-controls">
+    <span class="report-ctrl-title">⊞ Engineering Report — Preview</span>
+    <div style="display:flex;gap:8px">
+      <button class="btn-close-report" onclick="closeReport()">✕ Close</button>
+      <button class="btn-print" onclick="window.print()">⎙ Print / Export PDF</button>
+    </div>
+  </div>
+  <div class="report-page" id="reportPage"></div>
+</div>
+
+<div class="layout">
+
+<!-- ══════════════════ LEFT PANEL ══════════════════ -->
+<div class="panel panel-left">
+
+  <div class="sec">
+    <div class="sec-hd">Beam</div>
+    <div class="field">
+      <label>Total Length (m)</label>
+      <input type="number" id="beamLen" value="6" min="0.1" step="0.5">
+    </div>
+  </div>
+
+  <div class="sec">
+    <div class="sec-hd">Add Support</div>
+    <div class="field">
+      <label>Type</label>
+      <select id="supType">
+        <option value="pin">Pin</option>
+        <option value="roller">Roller</option>
+        <option value="fixed">Fixed (Cantilever)</option>
+        <option value="hinge">Internal Hinge</option>
+      </select>
+    </div>
+    <div class="field">
+      <label>Position x (m)</label>
+      <input type="number" id="supPos" value="0" min="0" step="0.5">
+    </div>
+    <button class="btn btn-ink" onclick="addSupport()">+ Add Support</button>
+  </div>
+
+  <div class="sec">
+    <div class="sec-hd">Supports</div>
+    <div class="item-list" id="supList"><span class="empty-note">None added</span></div>
+  </div>
+
+  <div class="sec">
+    <div class="sec-hd">Add Load</div>
+    <div class="field">
+      <label>Type</label>
+      <select id="loadType" onchange="updateLoadFields()">
+        <option value="point">Point Load</option>
+        <option value="udl">Distributed Load (UDL)</option>
+        <option value="moment">Applied Moment</option>
+      </select>
+    </div>
+    <div id="loadFields">
+      <div class="field">
+        <label>Load Category</label>
+        <select id="loadCat">
+          <option value="D">D — Dead Load</option>
+          <option value="L">L — Live Load</option>
+          <option value="W">W — Wind Load</option>
+          <option value="S">S — Snow Load</option>
+          <option value="E">E — Seismic Load</option>
+        </select>
+      </div>
+      <div class="field">
+        <label>Position x (m)</label>
+        <input type="number" id="loadPos" value="3" step="0.5">
+      </div>
+      <div class="field" id="udlEndField" style="display:none">
+        <label>End Position (m)</label>
+        <input type="number" id="loadEnd" value="5" step="0.5">
+      </div>
+      <div class="field">
+        <label>Magnitude (kN or kN/m)</label>
+        <input type="number" id="loadMag" value="10" step="1">
+      </div>
+      <div class="field" id="dirField">
+        <label>Direction</label>
+        <select id="loadDir">
+          <option value="-1">↓ Downward</option>
+          <option value="1">↑ Upward</option>
+        </select>
+      </div>
+    </div>
+    <button class="btn btn-ink" onclick="addLoad()">+ Add Load</button>
+  </div>
+
+  <div class="sec">
+    <div class="sec-hd">Loads</div>
+    <div class="item-list" id="loadList"><span class="empty-note">None added</span></div>
+  </div>
+
+  <div class="sec">
+    <button class="btn btn-red" onclick="analyze()" style="font-size:11px;padding:11px">▶ ANALYZE BEAM</button>
+    <button class="btn btn-outline" onclick="resetAll()">↺ Reset All</button>
+  </div>
+
+</div>
+
+<!-- ══════════════════ CENTER ══════════════════ -->
+<div class="main-center">
+
+  <div class="canvas-wrap">
+    <div class="canvas-label">Beam Canvas</div>
+    <div class="toolbar">
+      <button class="tool-btn active" id="tool-select" onclick="setTool('select')">✦ Select</button>
+      <button class="tool-btn" id="tool-pin"    onclick="setTool('pin')">▲ Pin</button>
+      <button class="tool-btn" id="tool-roller" onclick="setTool('roller')">◎ Roller</button>
+      <button class="tool-btn" id="tool-fixed"  onclick="setTool('fixed')">▐ Fixed</button>
+      <button class="tool-btn" id="tool-hinge"  onclick="setTool('hinge')">◉ Hinge</button>
+      <button class="tool-btn" id="tool-point"  onclick="setTool('point')">↓ Point</button>
+      <button class="tool-btn" id="tool-udl"    onclick="setTool('udl')">≋ UDL</button>
+      <button class="tool-btn" id="tool-moment" onclick="setTool('moment')">↻ Moment</button>
+    </div>
+    <canvas id="beamCanvas" height="220" onclick="canvasClick(event)" onmousemove="canvasHover(event)"></canvas>
+    <div class="canvas-hint">Click toolbar → click on beam canvas to place elements at that position. UDL: click start then end.</div>
+  </div>
+
+  <div class="output" id="outputArea">
+    <div class="placeholder" id="placeholder">
+      <svg width="60" height="60" viewBox="0 0 60 60">
+        <rect x="5" y="28" width="50" height="5" fill="#333"/>
+        <polygon points="10,33 3,48 17,48" fill="none" stroke="#333" stroke-width="2"/>
+        <polygon points="50,33 43,48 57,48" fill="none" stroke="#333" stroke-width="2"/>
+        <line x1="30" y1="10" x2="30" y2="33" stroke="#c00" stroke-width="2"/>
+        <polygon points="30,33 26,24 34,24" fill="#c00"/>
+      </svg>
+      <p>Define beam · Add supports · Add loads · Analyze</p>
+    </div>
+  </div>
+
+</div>
+
+<!-- ══════════════════ RIGHT PANEL — TABS ══════════════════ -->
+<div class="panel panel-right">
+
+  <!-- Tab bar -->
+  <div style="display:flex;border-bottom:1px solid #222;flex-shrink:0;">
+    <button class="rpanel-tab active" id="rtab-combo" onclick="switchRTab('combo')">⚖ Combinations</button>
+    <button class="rpanel-tab" id="rtab-formula" onclick="switchRTab('formula')">∑ Formulas</button>
+  </div>
+
+  <!-- COMBINATIONS TAB -->
+  <div id="rtab-combo-content" style="flex:1;overflow-y:auto;display:flex;flex-direction:column;">
+
+    <div style="padding:10px 12px 6px;border-bottom:1px solid #1a1a16;">
+      <div class="sec-hd-dark" style="margin-bottom:4px;">Load Combinations</div>
+      <div style="font-size:9px;color:#555;line-height:1.6;">Select a combination and click Analyze.<br>Edit factors freely or build a custom one.</div>
+    </div>
+
+    <div style="padding:8px 0;" id="comboList"></div>
+
+    <!-- Custom combo -->
+    <div style="padding:0 12px 12px;" class="custom-combo">
+      <div class="custom-combo-title">Custom Combination</div>
+      <div class="combo-factors">
+        <div class="factor-cell"><div class="factor-lbl">D</div><input class="factor-inp" id="cf-D" value="1.0" type="number" step="0.1"></div>
+        <div class="factor-cell"><div class="factor-lbl">L</div><input class="factor-inp" id="cf-L" value="1.0" type="number" step="0.1"></div>
+        <div class="factor-cell"><div class="factor-lbl">W</div><input class="factor-inp" id="cf-W" value="0.0" type="number" step="0.1"></div>
+        <div class="factor-cell"><div class="factor-lbl">S</div><input class="factor-inp" id="cf-S" value="0.0" type="number" step="0.1"></div>
+        <div class="factor-cell"><div class="factor-lbl">E</div><input class="factor-inp" id="cf-E" value="0.0" type="number" step="0.1"></div>
+      </div>
+      <div class="field" style="margin-bottom:0;">
+        <label style="color:#666;">Combination Name</label>
+        <input type="text" id="cf-name" value="Custom" style="background:#111;border-color:#333;color:#ccc;font-size:10px;">
+      </div>
+      <button class="analyze-combo-btn" onclick="analyzeCustom()">▶ ANALYZE CUSTOM</button>
+    </div>
+
+  </div>
+
+  <!-- FORMULA TAB -->
+  <div id="rtab-formula-content" style="flex:1;overflow-y:auto;display:none;flex-direction:column;">
+    <div class="panel-search">
+      <div class="sec-hd-dark" style="margin-bottom:8px">Formula Reference</div>
+      <input type="text" placeholder="Search formulas…" id="formulaSearch" oninput="filterFormulas()">
+    </div>
+    <div class="formula-count" id="formulaCount"></div>
+    <div id="formulaList" class="formula-panel"></div>
+  </div>
+
+</div>
+</div><!-- /layout -->
+
+<script>
+// ═══════════════════════════════════════════════════════════
+//  FORMULA DATABASE
+// ═══════════════════════════════════════════════════════════
+const FORMULAS = [
+  {
+    id: 'ss-center',
+    label: 'Simply Supported — Center Point Load',
+    tag: 'SS · PL',
+    beam: drawSSCenter,
+    formulas: [
+      { sym: 'R_A = R_B',  eq: 'P / 2',             note: 'Reactions' },
+      { sym: 'V_max',      eq: 'P / 2',             note: 'Shear' },
+      { sym: 'M_max',      eq: 'P·L / 4',           note: 'At midspan' },
+      { sym: 'δ_max',      eq: '(P·L³) / (48·E·I)', note: 'Deflection at center' },
+    ]
+  },
+  {
+    id: 'ss-any',
+    label: 'Simply Supported — Point Load at Any Position',
+    tag: 'SS · Pa/b',
+    beam: drawSSAny,
+    formulas: [
+      { sym: 'R_A',   eq: 'P·b / L',                note: 'a = left dist, b = right dist' },
+      { sym: 'R_B',   eq: 'P·a / L',                note: '' },
+      { sym: 'M_max', eq: 'P·a·b / L',              note: 'Under the load' },
+      { sym: 'δ_max', eq: '(P·a·b·(L+b)·√(3ab)) / (27·E·I·L)', note: 'Approx. at x_max' },
+    ]
+  },
+  {
+    id: 'ss-udl',
+    label: 'Simply Supported — Full UDL',
+    tag: 'SS · w·L²',
+    beam: drawSSUDL,
+    formulas: [
+      { sym: 'R_A = R_B', eq: 'w·L / 2',              note: 'Reactions' },
+      { sym: 'V_max',     eq: 'w·L / 2',              note: 'At supports' },
+      { sym: 'M_max',     eq: 'w·L² / 8',             note: 'At midspan' },
+      { sym: 'δ_max',     eq: '(5·w·L⁴) / (384·E·I)', note: 'Deflection at center' },
+    ]
+  },
+  {
+    id: 'ss-udl-partial',
+    label: 'Simply Supported — Partial UDL',
+    tag: 'SS · partial',
+    beam: drawSSPartialUDL,
+    formulas: [
+      { sym: 'R_A',   eq: 'w·c·(2b+c) / (2L)',      note: 'b=start, c=length of UDL' },
+      { sym: 'R_B',   eq: 'w·L − R_A',               note: '' },
+      { sym: 'M_max', eq: 'R_A² / (2w)',             note: 'In UDL zone' },
+    ]
+  },
+  {
+    id: 'ss-moment',
+    label: 'Simply Supported — Applied End Moment',
+    tag: 'SS · M₀',
+    beam: drawSSMoment,
+    formulas: [
+      { sym: 'R_A',   eq: 'M₀ / L',                  note: '↑ upward' },
+      { sym: 'R_B',   eq: 'M₀ / L',                  note: '↓ downward' },
+      { sym: 'M_max', eq: 'M₀·(1 − a/L)',             note: 'a = dist to moment' },
+      { sym: 'δ_max', eq: '(M₀·L²) / (9√3·E·I)',     note: 'Approx.' },
+    ]
+  },
+  {
+    id: 'cant-end',
+    label: 'Cantilever — Point Load at Free End',
+    tag: 'CANT · P',
+    beam: drawCantEnd,
+    formulas: [
+      { sym: 'R_A',   eq: 'P',                        note: 'Vertical reaction' },
+      { sym: 'M_A',   eq: 'P·L',                      note: 'Fixed end moment' },
+      { sym: 'V_max', eq: 'P',                        note: 'Constant along beam' },
+      { sym: 'M_max', eq: 'P·L',                      note: 'At fixed end' },
+      { sym: 'δ_max', eq: '(P·L³) / (3·E·I)',         note: 'At free end' },
+    ]
+  },
+  {
+    id: 'cant-udl',
+    label: 'Cantilever — Full UDL',
+    tag: 'CANT · w',
+    beam: drawCantUDL,
+    formulas: [
+      { sym: 'R_A',   eq: 'w·L',                      note: 'Vertical reaction' },
+      { sym: 'M_A',   eq: 'w·L² / 2',                 note: 'Fixed end moment' },
+      { sym: 'V_max', eq: 'w·L',                      note: 'At fixed end' },
+      { sym: 'M_max', eq: 'w·L² / 2',                 note: 'At fixed end' },
+      { sym: 'δ_max', eq: '(w·L⁴) / (8·E·I)',         note: 'At free end' },
+    ]
+  },
+  {
+    id: 'cant-midpoint',
+    label: 'Cantilever — Point Load at Midspan',
+    tag: 'CANT · P/2',
+    beam: drawCantMid,
+    formulas: [
+      { sym: 'R_A',   eq: 'P',                        note: 'Reaction at fixed end' },
+      { sym: 'M_A',   eq: 'P·L / 2',                  note: 'Fixed end moment' },
+      { sym: 'δ_max', eq: '(5·P·L³) / (48·E·I)',      note: 'At free end' },
+    ]
+  },
+  {
+    id: 'overhang-end',
+    label: 'Overhanging Beam — Point Load at Overhang',
+    tag: 'OVERHANG',
+    beam: drawOverhang,
+    formulas: [
+      { sym: 'R_A',   eq: '−P·c / a',                 note: 'c=overhang, a=span' },
+      { sym: 'R_B',   eq: 'P·(a+c) / a',              note: '' },
+      { sym: 'M_B',   eq: 'P·c',                      note: 'At inner support' },
+      { sym: 'M_max', eq: 'R_A · x_0  (x_0=R_A/0)',  note: 'Between supports' },
+    ]
+  },
+  {
+    id: 'propped-udl',
+    label: 'Propped Cantilever — Full UDL',
+    tag: 'PROPPED',
+    beam: drawPropped,
+    formulas: [
+      { sym: 'R_B',   eq: '3·w·L / 8',               note: 'Roller end' },
+      { sym: 'R_A',   eq: '5·w·L / 8',               note: 'Fixed end' },
+      { sym: 'M_A',   eq: 'w·L² / 8',                note: 'Fixed end moment' },
+      { sym: 'M_max', eq: '9·w·L² / 128',            note: 'At x = 3L/8' },
+      { sym: 'δ_max', eq: '(w·L⁴) / (185·E·I)',      note: 'Approx. max deflection' },
+    ]
+  },
+  {
+    id: 'fixed-fixed-udl',
+    label: 'Fixed-Fixed Beam — Full UDL',
+    tag: 'FIX-FIX',
+    beam: drawFixedFixed,
+    formulas: [
+      { sym: 'R_A = R_B', eq: 'w·L / 2',             note: 'Reactions' },
+      { sym: 'M_A = M_B', eq: 'w·L² / 12',           note: 'Fixed end moments (hogging)' },
+      { sym: 'M_mid',     eq: 'w·L² / 24',           note: 'At midspan (sagging)' },
+      { sym: 'δ_max',     eq: '(w·L⁴) / (384·E·I)', note: 'Deflection at center' },
+    ]
+  },
+  {
+    id: 'fixed-fixed-center',
+    label: 'Fixed-Fixed Beam — Center Point Load',
+    tag: 'FIX-FIX · P',
+    beam: drawFixedFixedP,
+    formulas: [
+      { sym: 'R_A = R_B', eq: 'P / 2',               note: 'Reactions' },
+      { sym: 'M_A = M_B', eq: 'P·L / 8',             note: 'Fixed end moments' },
+      { sym: 'M_mid',     eq: 'P·L / 8',             note: 'At center' },
+      { sym: 'δ_max',     eq: '(P·L³) / (192·E·I)', note: 'Deflection at center' },
+    ]
+  },
+];
+
+// ═══════════════════════════════════════════════════════════
+//  MINI BEAM DRAWING FUNCTIONS
+// ═══════════════════════════════════════════════════════════
+function miniSVG(content, h=54) {
+  return `<svg viewBox="0 0 220 ${h}" xmlns="http://www.w3.org/2000/svg" style="width:100%;height:auto">
+    <defs>
+      <marker id="ah" markerWidth="6" markerHeight="6" refX="3" refY="3" orient="auto">
+        <path d="M0,0 L6,3 L0,6 Z" fill="#e87040"/>
+      </marker>
+      <marker id="ahb" markerWidth="6" markerHeight="6" refX="3" refY="3" orient="auto">
+        <path d="M0,0 L6,3 L0,6 Z" fill="#5a8af0"/>
+      </marker>
+    </defs>
+    ${content}
+  </svg>`;
+}
+
+function beamLine(y=34, x1=15, x2=205) {
+  return `<rect x="${x1}" y="${y-3}" width="${x2-x1}" height="6" rx="1" fill="#dedad3"/>
+          <rect x="${x1}" y="${y-2}" width="${x2-x1}" height="4" rx="1" fill="#555"/>`;
+}
+function pinAt(x, y=34) {
+  return `<polygon points="${x},${y+2} ${x-9},${y+18} ${x+9},${y+18}" fill="none" stroke="#7ab8f5" stroke-width="1.5"/>
+          <circle cx="${x}" cy="${y}" r="3" fill="#7ab8f5"/>
+          <line x1="${x-12}" y1="${y+18}" x2="${x+12}" y2="${y+18}" stroke="#7ab8f5" stroke-width="1.5"/>
+          <line x1="${x-11}" y1="${y+18}" x2="${x-16}" y2="${y+24}" stroke="#7ab8f5" stroke-width="1.2"/>
+          <line x1="${x-5}"  y1="${y+18}" x2="${x-10}" y2="${y+24}" stroke="#7ab8f5" stroke-width="1.2"/>
+          <line x1="${x+1}"  y1="${y+18}" x2="${x-4}"  y2="${y+24}" stroke="#7ab8f5" stroke-width="1.2"/>
+          <line x1="${x+7}"  y1="${y+18}" x2="${x+2}"  y2="${y+24}" stroke="#7ab8f5" stroke-width="1.2"/>`;
+}
+function rollerAt(x, y=34) {
+  return `<polygon points="${x},${y+2} ${x-9},${y+16} ${x+9},${y+16}" fill="none" stroke="#6ada8a" stroke-width="1.5"/>
+          <circle cx="${x}" cy="${y}" r="3" fill="#6ada8a"/>
+          <circle cx="${x-6}" cy="${y+19}" r="3" fill="none" stroke="#6ada8a" stroke-width="1.2"/>
+          <circle cx="${x+6}" cy="${y+19}" r="3" fill="none" stroke="#6ada8a" stroke-width="1.2"/>
+          <line x1="${x-12}" y1="${y+22}" x2="${x+12}" y2="${y+22}" stroke="#6ada8a" stroke-width="1.2"/>`;
+}
+function fixedAt(x, y=34, side='left') {
+  const dir = side==='left' ? -1 : 1;
+  let s = `<rect x="${x}" y="${y-16}" width="${7*dir}" height="32" fill="#e8a848"/>`;
+  for (let dy=-14; dy<=14; dy+=7) s += `<line x1="${x}" y1="${y+dy}" x2="${x+dir*10}" y2="${y+dy-6}" stroke="#e8a848" stroke-width="1"/>`;
+  return s;
+}
+function arrowDown(x, y1, y2, col='#e87040', label='') {
+  return `<line x1="${x}" y1="${y1}" x2="${x}" y2="${y2-4}" stroke="${col}" stroke-width="1.5"/>
+          <polygon points="${x},${y2} ${x-4},${y2-8} ${x+4},${y2-8}" fill="${col}"/>
+          ${label ? `<text x="${x}" y="${y1-3}" font-family="JetBrains Mono,monospace" font-size="8" fill="${col}" text-anchor="middle">${label}</text>` : ''}`;
+}
+function reactionUp(x, y, label='R', col='#7ab8f5') {
+  return `<line x1="${x}" y1="${y+28}" x2="${x}" y2="${y+5}" stroke="${col}" stroke-width="1.5"/>
+          <polygon points="${x},${y} ${x-4},${y+8} ${x+4},${y+8}" fill="${col}"/>
+          <text x="${x}" y="${y+38}" font-family="JetBrains Mono,monospace" font-size="8" fill="${col}" text-anchor="middle">${label}</text>`;
+}
+function udlBand(x1, x2, y=34, col='#e8a848') {
+  let s = `<line x1="${x1}" y1="${y-20}" x2="${x2}" y2="${y-20}" stroke="${col}" stroke-width="1.2" stroke-dasharray="3,2"/>`;
+  for (let x=x1+4; x<=x2-4; x+=10) s += arrowDown(x, y-20, y, col);
+  return s;
+}
+function momentArc(x, y, cw=true, col='#6ada8a', label='M₀') {
+  const r = 14;
+  const sweep = cw ? `M ${x+r},${y} A ${r},${r} 0 1 1 ${x},${y-r}` : `M ${x-r},${y} A ${r},${r} 0 1 0 ${x},${y-r}`;
+  return `<path d="${sweep}" fill="none" stroke="${col}" stroke-width="1.5"/>
+          <text x="${x}" y="${y-r-4}" font-family="JetBrains Mono,monospace" font-size="8" fill="${col}" text-anchor="middle">${label}</text>`;
+}
+function dimLine(x1, x2, y, label) {
+  return `<line x1="${x1}" y1="${y}" x2="${x2}" y2="${y}" stroke="#555" stroke-width="1" marker-end="url(#ahb)" marker-start="url(#ahb)"/>
+          <text x="${(x1+x2)/2}" y="${y-3}" font-family="JetBrains Mono,monospace" font-size="7.5" fill="#888" text-anchor="middle">${label}</text>`;
+}
+
+function drawSSCenter(svg) {
+  svg.innerHTML = miniSVG(`
+    ${beamLine(34,15,205)}
+    ${pinAt(15,34)} ${rollerAt(205,34)}
+    ${arrowDown(110, 6, 32, '#e87040', 'P')}
+    ${reactionUp(15,34,'R_A')} ${reactionUp(205,34,'R_B')}
+    ${dimLine(15,205,60,'L')}
+  `, 68);
+}
+function drawSSAny(svg) {
+  svg.innerHTML = miniSVG(`
+    ${beamLine(34,15,205)}
+    ${pinAt(15,34)} ${rollerAt(205,34)}
+    ${arrowDown(90, 6, 32, '#e87040', 'P')}
+    ${reactionUp(15,34,'R_A')} ${reactionUp(205,34,'R_B')}
+    ${dimLine(15,90,56,'a')} ${dimLine(90,205,56,'b')}
+  `, 66);
+}
+function drawSSUDL(svg) {
+  svg.innerHTML = miniSVG(`
+    ${udlBand(15,205,34)}
+    ${beamLine(34,15,205)}
+    ${pinAt(15,34)} ${rollerAt(205,34)}
+    ${reactionUp(15,34,'R_A')} ${reactionUp(205,34,'R_B')}
+    ${dimLine(15,205,66,'L')}
+    <text x="110" y="10" font-family="JetBrains Mono,monospace" font-size="8" fill="#e8a848" text-anchor="middle">w (kN/m)</text>
+  `, 74);
+}
+function drawSSPartialUDL(svg) {
+  svg.innerHTML = miniSVG(`
+    ${udlBand(75,165,34)}
+    ${beamLine(34,15,205)}
+    ${pinAt(15,34)} ${rollerAt(205,34)}
+    ${reactionUp(15,34,'R_A')} ${reactionUp(205,34,'R_B')}
+    ${dimLine(15,75,60,'b')} ${dimLine(75,165,60,'c')}
+  `, 70);
+}
+function drawSSMoment(svg) {
+  svg.innerHTML = miniSVG(`
+    ${beamLine(34,15,205)}
+    ${pinAt(15,34)} ${rollerAt(205,34)}
+    ${momentArc(110,34,true,'#6ada8a','M₀')}
+    ${reactionUp(15,34,'R_A')} ${reactionUp(205,34,'R_B')}
+  `, 64);
+}
+function drawCantEnd(svg) {
+  svg.innerHTML = miniSVG(`
+    ${beamLine(34,15,205)}
+    ${fixedAt(15,34,'left')}
+    ${arrowDown(205, 6, 32, '#e87040', 'P')}
+    ${dimLine(15,205,58,'L')}
+  `, 66);
+}
+function drawCantUDL(svg) {
+  svg.innerHTML = miniSVG(`
+    ${udlBand(15,205,34)}
+    ${beamLine(34,15,205)}
+    ${fixedAt(15,34,'left')}
+    ${dimLine(15,205,64,'L')}
+    <text x="110" y="10" font-family="JetBrains Mono,monospace" font-size="8" fill="#e8a848" text-anchor="middle">w (kN/m)</text>
+  `, 72);
+}
+function drawCantMid(svg) {
+  svg.innerHTML = miniSVG(`
+    ${beamLine(34,15,205)}
+    ${fixedAt(15,34,'left')}
+    ${arrowDown(110, 6, 32, '#e87040', 'P')}
+    ${dimLine(15,110,56,'L/2')}
+  `, 64);
+}
+function drawOverhang(svg) {
+  svg.innerHTML = miniSVG(`
+    ${beamLine(34,15,205)}
+    ${pinAt(15,34)} ${pinAt(160,34)}
+    ${arrowDown(205, 6, 32, '#e87040', 'P')}
+    ${reactionUp(15,34,'R_A')} ${reactionUp(160,34,'R_B')}
+    ${dimLine(15,160,60,'a')} ${dimLine(160,205,60,'c')}
+  `, 68);
+}
+function drawPropped(svg) {
+  svg.innerHTML = miniSVG(`
+    ${udlBand(15,205,34)}
+    ${beamLine(34,15,205)}
+    ${fixedAt(15,34,'left')}
+    ${rollerAt(205,34)}
+    ${reactionUp(205,34,'R_B')}
+    <text x="110" y="10" font-family="JetBrains Mono,monospace" font-size="8" fill="#e8a848" text-anchor="middle">w (kN/m)</text>
+    ${dimLine(15,205,66,'L')}
+  `, 74);
+}
+function drawFixedFixed(svg) {
+  svg.innerHTML = miniSVG(`
+    ${udlBand(15,205,34)}
+    ${beamLine(34,15,205)}
+    ${fixedAt(15,34,'left')} ${fixedAt(205,34,'right')}
+    <text x="110" y="10" font-family="JetBrains Mono,monospace" font-size="8" fill="#e8a848" text-anchor="middle">w (kN/m)</text>
+    ${dimLine(15,205,66,'L')}
+  `, 72);
+}
+function drawFixedFixedP(svg) {
+  svg.innerHTML = miniSVG(`
+    ${beamLine(34,15,205)}
+    ${fixedAt(15,34,'left')} ${fixedAt(205,34,'right')}
+    ${arrowDown(110, 6, 32, '#e87040', 'P')}
+    ${dimLine(15,205,58,'L')}
+  `, 66);
+}
+
+// ═══════════════════════════════════════════════════════════
+//  RENDER FORMULA CARDS
+// ═══════════════════════════════════════════════════════════
+function buildFormulaCards(list) {
+  const container = document.getElementById('formulaList');
+  container.innerHTML = '';
+  document.getElementById('formulaCount').textContent = `${list.length} formula groups`;
+  list.forEach(f => {
+    const card = document.createElement('div');
+    card.className = 'formula-card';
+    card.dataset.id = f.id;
+    card.innerHTML = `
+      <div class="fc-head" onclick="toggleFormula('${f.id}')">
+        <div>
+          <div class="fc-label">${f.label}</div>
+          <div class="fc-tag">${f.tag}</div>
+        </div>
+        <span class="fc-arrow">›</span>
+      </div>
+      <div class="fc-body">
+        <div class="mini-beam-wrap" id="beam-${f.id}"></div>
+        ${f.formulas.map(fl => `
+          <div class="f-line">
+            <span class="f-sym">${fl.sym}</span>
+            <span class="f-eq">= ${fl.eq}</span>
+            <span class="f-note">${fl.note}</span>
+          </div>`).join('')}
+      </div>`;
+    container.appendChild(card);
+  });
+}
+
+function toggleFormula(id) {
+  const card = document.querySelector(`.formula-card[data-id="${id}"]`);
+  const wasOpen = card.classList.contains('expanded');
+  document.querySelectorAll('.formula-card').forEach(c => c.classList.remove('expanded'));
+  if (!wasOpen) {
+    card.classList.add('expanded');
+    const f = FORMULAS.find(x => x.id === id);
+    const beamDiv = document.getElementById('beam-' + id);
+    if (beamDiv && !beamDiv.children.length) f.beam(beamDiv);
+  }
+}
+
+function filterFormulas() {
+  const q = document.getElementById('formulaSearch').value.toLowerCase();
+  const filtered = q ? FORMULAS.filter(f =>
+    f.label.toLowerCase().includes(q) || f.tag.toLowerCase().includes(q) ||
+    f.formulas.some(fl => fl.sym.toLowerCase().includes(q) || fl.eq.toLowerCase().includes(q))
+  ) : FORMULAS;
+  buildFormulaCards(filtered);
+}
+
+buildFormulaCards(FORMULAS);
+
+// ═══════════════════════════════════════════════════════════
+//  BEAM STATE
+// ═══════════════════════════════════════════════════════════
+let supports = [], loads = [], currentTool = 'select', udlStart = null;
+
+function setTool(t) {
+  currentTool = t; udlStart = null;
+  document.querySelectorAll('.tool-btn').forEach(b => b.classList.remove('active'));
+  document.getElementById('tool-' + t).classList.add('active');
+}
+
+function updateLoadFields() {
+  const t = document.getElementById('loadType').value;
+  document.getElementById('udlEndField').style.display = t==='udl' ? '' : 'none';
+  document.getElementById('dirField').style.display = t==='moment' ? 'none' : '';
+}
+
+// ═══════════════════════════════════════════════════════════
+//  CANVAS
+// ═══════════════════════════════════════════════════════════
+function getBeamX(e) {
+  const L = parseFloat(document.getElementById('beamLen').value) || 6;
+  const canvas = document.getElementById('beamCanvas');
+  const rect = canvas.getBoundingClientRect();
+  const scaleX = canvas.width / rect.width;
+  const px = (e.clientX - rect.left) * scaleX;
+  const margin = 64;
+  const bw = canvas.width - margin * 2;
+  const pos = ((px - margin) / bw) * L;
+  return Math.round(Math.max(0, Math.min(L, pos)) * 8) / 8;
+}
+
+let hoverX = null;
+function canvasHover(e) { hoverX = getBeamX(e); drawBeam(); }
+
+function canvasClick(e) {
+  const pos = getBeamX(e);
+  if (currentTool === 'select') return;
+  if (['pin','roller','fixed','hinge'].includes(currentTool)) {
+    supports.push({ type: currentTool, pos });
+    renderSupportList(); drawBeam();
+  } else if (currentTool === 'point') {
+    const mag = parseFloat(prompt(`Point load at ${pos}m\nMagnitude (kN, positive = down):`, '10'));
+    if (isNaN(mag)) return;
+    const cat = promptCat();
+    loads.push({ type:'point', cat, pos, mag:-Math.abs(mag), label:`${Math.abs(mag)}kN` });
+    renderLoadList(); drawBeam();
+  } else if (currentTool === 'moment') {
+    const mag = parseFloat(prompt(`Moment at ${pos}m\nMagnitude (kN·m, + = CCW):`, '10'));
+    if (isNaN(mag)) return;
+    const cat = promptCat();
+    loads.push({ type:'moment', cat, pos, mag, label:`${mag}kN·m` });
+    renderLoadList(); drawBeam();
+  } else if (currentTool === 'udl') {
+    if (!udlStart) { udlStart = pos; drawBeam(); }
+    else {
+      const s = Math.min(udlStart, pos), end = Math.max(udlStart, pos);
+      if (end === s) { udlStart = null; return; }
+      const mag = parseFloat(prompt(`UDL from ${s}m to ${end}m\nIntensity (kN/m, positive = down):`, '5'));
+      if (isNaN(mag)) { udlStart=null; return; }
+      const cat = promptCat();
+      loads.push({ type:'udl', cat, pos:s, end, mag:-Math.abs(mag), label:`${Math.abs(mag)}kN/m` });
+      udlStart = null; renderLoadList(); drawBeam();
+    }
+  }
+}
+
+function promptCat() {
+  const r = prompt('Load category:\nD = Dead  L = Live  W = Wind  S = Snow  E = Seismic', 'D');
+  const v = (r||'D').trim().toUpperCase();
+  return ['D','L','W','S','E'].includes(v) ? v : 'D';
+}
+
+// ═══════════════════════════════════════════════════════════
+//  DRAW BEAM CANVAS
+// ═══════════════════════════════════════════════════════════
+function drawBeam() {
+  const canvas = document.getElementById('beamCanvas');
+  const dpr = window.devicePixelRatio || 1;
+  const W = canvas.parentElement.clientWidth - 40;
+
+  // Taller canvas — give room for stacked load rows above beam
+  const cH = 220;
+  canvas.style.width = W + 'px';
+  canvas.style.height = cH + 'px';
+  canvas.width  = W * dpr;
+  canvas.height = cH * dpr;
+
+  const ctx = canvas.getContext('2d');
+  ctx.scale(dpr, dpr);
+  const L = parseFloat(document.getElementById('beamLen').value) || 6;
+  const MX = 70, bw = cW = W - MX*2;
+  const cy = 148; // beam center — more room above for loads
+  const scale = bw / L;
+
+  ctx.clearRect(0,0,W,cH);
+
+  // Background grid (subtle)
+  ctx.strokeStyle = '#f5f3ee'; ctx.lineWidth = 1;
+  for (let i=0; i<=L; i++) {
+    const x = MX + i*scale;
+    ctx.beginPath(); ctx.moveTo(x,8); ctx.lineTo(x,cH-8); ctx.stroke();
+  }
+
+  // Hover indicator
+  if (hoverX !== null && currentTool !== 'select') {
+    const hx = MX + hoverX*scale;
+    ctx.strokeStyle = '#ddd'; ctx.lineWidth = 1; ctx.setLineDash([3,3]);
+    ctx.beginPath(); ctx.moveTo(hx,8); ctx.lineTo(hx,cH-8); ctx.stroke();
+    ctx.setLineDash([]);
+    // pill background for hover label
+    const lbl = hoverX.toFixed(2)+'m';
+    ctx.font = '9px JetBrains Mono';
+    const lw = ctx.measureText(lbl).width + 8;
+    ctx.fillStyle = '#eee';
+    ctx.fillRect(hx - lw/2, 2, lw, 13);
+    ctx.fillStyle = '#999'; ctx.textAlign = 'center';
+    ctx.fillText(lbl, hx, 12);
+  }
+
+  // UDL start indicator
+  if (udlStart !== null) {
+    const ux = MX + udlStart*scale;
+    ctx.strokeStyle = '#e8a84888'; ctx.lineWidth = 1.5; ctx.setLineDash([4,3]);
+    ctx.beginPath(); ctx.moveTo(ux,20); ctx.lineTo(ux,cy-8); ctx.stroke();
+    ctx.setLineDash([]);
+    drawPill(ctx, ux, 18, 'UDL start: '+udlStart+'m', '#e8a848', '#fffbe6');
+  }
+
+  // ── Assign each load a vertical "lane" above the beam ──
+  // Lanes: each is 44px tall, stacked downward from top
+  // We assign loads to lanes to avoid label collision
+  const catOrder = ['D','L','W','S','E'];
+  const catCols  = {D:'#c03020',L:'#2d8a4e',W:'#c8860a',S:'#2080a0',E:'#8a2090'};
+
+  // Collect which cats are present in UDL vs point loads
+  const udlLoads   = loads.filter(l=>l.type==='udl');
+  const pointLoads = loads.filter(l=>l.type==='point');
+  const momentLoads= loads.filter(l=>l.type==='moment');
+
+  // Assign lane per load index — different cats get different lanes
+  // Lane 0 = topmost (farthest from beam), lane N = closest to beam
+  const laneH = 42; // height per lane
+  const laneBase = cy - 12; // bottom of lane 0 is 12px above beam
+
+  // Map each unique category to a lane index (sorted by catOrder)
+  const presentCats = [...new Set(loads.map(l=>l.cat||'D'))].sort((a,b)=>catOrder.indexOf(a)-catOrder.indexOf(b));
+  const catLane = {};
+  presentCats.forEach((c,i) => { catLane[c] = i; });
+  const totalLanes = Math.max(presentCats.length, 1);
+
+  // Draw UDL bands per category lane
+  udlLoads.forEach(ld => {
+    const col = catCols[ld.cat||'D'];
+    const lane = catLane[ld.cat||'D'] ?? 0;
+    const x1 = MX + ld.pos*scale, x2 = MX + ld.end*scale;
+    const topY = laneBase - (totalLanes - lane) * laneH;
+    const botY = cy - 6;
+    drawUDLCanvas(ctx, x1, x2, topY, botY, ld.label, ld.cat||'D', col);
+  });
+
+  // ── Beam body ──
+  ctx.shadowColor = 'rgba(0,0,0,0.12)'; ctx.shadowBlur = 5; ctx.shadowOffsetY = 3;
+  ctx.fillStyle = '#2e2c28';
+  ctx.fillRect(MX, cy-6, bw, 12);
+  ctx.shadowColor = 'transparent';
+  // Top sheen
+  const sheen = ctx.createLinearGradient(0,cy-6,0,cy+6);
+  sheen.addColorStop(0,'rgba(255,255,255,0.14)');
+  sheen.addColorStop(0.4,'rgba(255,255,255,0.04)');
+  sheen.addColorStop(1,'rgba(0,0,0,0.1)');
+  ctx.fillStyle = sheen; ctx.fillRect(MX, cy-6, bw, 12);
+  // End caps
+  ctx.fillStyle = '#1a1917';
+  ctx.fillRect(MX-2, cy-7, 4, 14);
+  ctx.fillRect(MX+bw-2, cy-7, 4, 14);
+
+  // Point loads — drawn in their lane column
+  pointLoads.forEach(ld => {
+    const col = catCols[ld.cat||'D'];
+    const lane = catLane[ld.cat||'D'] ?? 0;
+    const x = MX + ld.pos*scale;
+    const topY = laneBase - (totalLanes - lane) * laneH + 4;
+    drawPointLoadCanvas(ctx, x, cy, topY, ld.label, ld.cat||'D', col);
+  });
+
+  // Moments
+  momentLoads.forEach(ld => {
+    const col = catCols[ld.cat||'D'];
+    const x = MX + ld.pos*scale;
+    drawMomentCanvas(ctx, x, cy, ld.mag, ld.label, col);
+  });
+
+  // Supports (drawn on top of beam ends)
+  supports.forEach(s => {
+    const x = MX + s.pos*scale;
+    drawSupportCanvas(ctx, x, cy, s.type);
+  });
+
+  // ── Dimension line ──
+  const dimY = cy + 42;
+  ctx.strokeStyle = '#c8c5be'; ctx.lineWidth = 1; ctx.setLineDash([5,4]);
+  ctx.beginPath(); ctx.moveTo(MX, dimY); ctx.lineTo(MX+bw, dimY); ctx.stroke();
+  ctx.setLineDash([]);
+  ctx.strokeStyle = '#c8c5be'; ctx.lineWidth = 1;
+  [MX, MX+bw].forEach(x => {
+    ctx.beginPath(); ctx.moveTo(x, dimY-4); ctx.lineTo(x, dimY+4); ctx.stroke();
+  });
+  ctx.fillStyle = '#aaa'; ctx.font = '10px JetBrains Mono'; ctx.textAlign = 'center';
+  ctx.fillText(`L = ${L} m`, MX+bw/2, dimY+14);
+
+  // X tick marks + labels
+  ctx.fillStyle = '#bbb'; ctx.font = '9px JetBrains Mono';
+  for (let i=0; i<=L; i++) {
+    const x = MX + i*scale;
+    ctx.beginPath(); ctx.strokeStyle='#e0ddd6'; ctx.lineWidth=1;
+    ctx.moveTo(x, cy+10); ctx.lineTo(x, dimY-5); ctx.stroke();
+    ctx.textAlign = 'center';
+    ctx.fillStyle = '#bbb';
+    ctx.fillText(i, x, cy+24);
+  }
+
+  // Lane labels on left axis
+  if (presentCats.length > 0) {
+    presentCats.forEach((c,i) => {
+      const col = catCols[c];
+      const lane = catLane[c];
+      const midY = laneBase - (totalLanes - lane)*laneH + laneH/2;
+      ctx.fillStyle = col+'cc';
+      ctx.font = 'bold 9px JetBrains Mono';
+      ctx.textAlign = 'right';
+      ctx.fillText(c, MX - 6, midY + 4);
+    });
+  }
+}
+
+// ─── Draw a pill/badge label ───────────────────────────────
+function drawPill(ctx, x, y, text, textCol, bgCol) {
+  ctx.font = 'bold 9px JetBrains Mono';
+  const tw = ctx.measureText(text).width;
+  const pw = tw + 10, ph = 14;
+  ctx.fillStyle = bgCol || '#fff';
+  roundRect(ctx, x - pw/2, y - ph/2, pw, ph, 3);
+  ctx.fill();
+  ctx.fillStyle = textCol || '#333';
+  ctx.textAlign = 'center';
+  ctx.fillText(text, x, y + 4);
+}
+
+function roundRect(ctx, x, y, w, h, r) {
+  ctx.beginPath();
+  ctx.moveTo(x+r, y);
+  ctx.lineTo(x+w-r, y); ctx.arcTo(x+w,y,x+w,y+r,r);
+  ctx.lineTo(x+w, y+h-r); ctx.arcTo(x+w,y+h,x+w-r,y+h,r);
+  ctx.lineTo(x+r, y+h); ctx.arcTo(x,y+h,x,y+h-r,r);
+  ctx.lineTo(x, y+r); ctx.arcTo(x,y,x+r,y,r);
+  ctx.closePath();
+}
+
+function drawSupportCanvas(ctx, x, y, type) {
+  const col = { pin:'#4a90d9', roller:'#3a9e4a', fixed:'#c8860a', hinge:'#9a30a0' }[type] || '#555';
+  ctx.strokeStyle = col; ctx.fillStyle = col; ctx.lineWidth = 2;
+
+  if (type === 'pin') {
+    ctx.beginPath(); ctx.moveTo(x,y+5); ctx.lineTo(x-14,y+26); ctx.lineTo(x+14,y+26); ctx.closePath(); ctx.stroke();
+    ctx.beginPath(); ctx.arc(x,y,5,0,Math.PI*2); ctx.fill();
+    ctx.lineWidth=1.5;
+    ctx.beginPath(); ctx.moveTo(x-17,y+26); ctx.lineTo(x+17,y+26); ctx.stroke();
+    for (let i=-14; i<=14; i+=6) { ctx.beginPath(); ctx.moveTo(x+i,y+26); ctx.lineTo(x+i-5,y+33); ctx.stroke(); }
+  } else if (type === 'roller') {
+    ctx.beginPath(); ctx.moveTo(x,y+5); ctx.lineTo(x-12,y+22); ctx.lineTo(x+12,y+22); ctx.closePath(); ctx.stroke();
+    ctx.beginPath(); ctx.arc(x,y,5,0,Math.PI*2); ctx.fill();
+    ctx.lineWidth=1.5;
+    ctx.beginPath(); ctx.arc(x-8,y+26,4,0,Math.PI*2); ctx.stroke();
+    ctx.beginPath(); ctx.arc(x+8,y+26,4,0,Math.PI*2); ctx.stroke();
+    ctx.beginPath(); ctx.moveTo(x-15,y+31); ctx.lineTo(x+15,y+31); ctx.stroke();
+  } else if (type === 'fixed') {
+    ctx.fillRect(x-5, y-22, 10, 44);
+    ctx.lineWidth=1.2; ctx.strokeStyle=col+'88';
+    for (let dy=-20; dy<=20; dy+=7) { ctx.beginPath(); ctx.moveTo(x-5,y+dy); ctx.lineTo(x-16,y+dy-8); ctx.stroke(); }
+  } else if (type === 'hinge') {
+    ctx.beginPath(); ctx.arc(x,y,8,0,Math.PI*2);
+    ctx.fillStyle='white'; ctx.fill();
+    ctx.lineWidth=2; ctx.strokeStyle=col; ctx.stroke();
+    ctx.beginPath(); ctx.arc(x,y,3,0,Math.PI*2); ctx.fillStyle=col; ctx.fill();
+  }
+}
+
+function drawPointLoadCanvas(ctx, x, cy, topY, label, cat, col) {
+  // Arrow from topY down to beam
+  const arrowTip = cy - 7;
+  ctx.strokeStyle = col; ctx.lineWidth = 2;
+  ctx.beginPath(); ctx.moveTo(x, topY+14); ctx.lineTo(x, arrowTip); ctx.stroke();
+  // Arrowhead
+  ctx.beginPath(); ctx.moveTo(x,arrowTip); ctx.lineTo(x-6,arrowTip-12); ctx.lineTo(x+6,arrowTip-12); ctx.closePath();
+  ctx.fillStyle=col; ctx.fill();
+  // Label pill
+  const lbl = `${label} [${cat}]`;
+  drawPill(ctx, x, topY+6, lbl, col, col+'18');
+}
+
+function drawUDLCanvas(ctx, x1, x2, topY, botY, label, cat, col) {
+  const arrowLen = botY - topY - 4;
+  // Top dashed line
+  ctx.strokeStyle = col; ctx.lineWidth = 1.5; ctx.setLineDash([4,3]);
+  ctx.beginPath(); ctx.moveTo(x1, topY); ctx.lineTo(x2, topY); ctx.stroke();
+  ctx.setLineDash([]);
+  // Left & right end verticals
+  ctx.beginPath(); ctx.moveTo(x1, topY); ctx.lineTo(x1, botY); ctx.stroke();
+  ctx.beginPath(); ctx.moveTo(x2, topY); ctx.lineTo(x2, botY); ctx.stroke();
+  // Fill band
+  ctx.fillStyle = col + '14';
+  ctx.fillRect(x1, topY, x2-x1, botY-topY);
+  // Arrow shafts — evenly spaced, minimum 3
+  const nArrows = Math.max(3, Math.min(14, Math.floor((x2-x1)/28)));
+  const spacing = (x2-x1) / (nArrows+1);
+  for (let i=1; i<=nArrows; i++) {
+    const ax = x1 + i*spacing;
+    ctx.strokeStyle = col; ctx.lineWidth = 1.5;
+    ctx.beginPath(); ctx.moveTo(ax, topY+4); ctx.lineTo(ax, botY-6); ctx.stroke();
+    ctx.beginPath(); ctx.moveTo(ax,botY-5); ctx.lineTo(ax-4,botY-13); ctx.lineTo(ax+4,botY-13); ctx.closePath();
+    ctx.fillStyle=col; ctx.fill();
+  }
+  // Label pill centered in band
+  const midX = (x1+x2)/2, midY = topY + (botY-topY)*0.35;
+  drawPill(ctx, midX, midY, `${label}/m [${cat}]`, col, col+'22');
+}
+
+function drawMomentCanvas(ctx, x, cy, mag, label, col) {
+  col = col || '#2d8a4e';
+  const r = 20;
+  // Arc
+  ctx.strokeStyle = col; ctx.lineWidth = 2.5;
+  const start = mag > 0 ? 0.2 : Math.PI*0.8;
+  const end   = mag > 0 ? Math.PI*1.8 : Math.PI*2.2;
+  ctx.beginPath(); ctx.arc(x, cy-r-2, r, start, end, mag<=0); ctx.stroke();
+  // Arrowhead at arc end
+  const ex = x + r*Math.cos(end), ey = cy-r-2 + r*Math.sin(end);
+  ctx.beginPath(); ctx.arc(ex, ey, 4, 0, Math.PI*2); ctx.fillStyle=col; ctx.fill();
+  // Label pill above
+  drawPill(ctx, x, cy-r-2-r-6, `${label} [M]`, col, col+'18');
+}
+
+// ═══════════════════════════════════════════════════════════
+//  FORM INPUTS
+// ═══════════════════════════════════════════════════════════
+function addSupport() {
+  const type = document.getElementById('supType').value;
+  const pos  = parseFloat(document.getElementById('supPos').value);
+  if (isNaN(pos)) return alert('Enter a valid position.');
+  supports.push({ type, pos });
+  renderSupportList(); drawBeam();
+}
+
+function addLoad() {
+  const type = document.getElementById('loadType').value;
+  const cat  = document.getElementById('loadCat').value;
+  const pos  = parseFloat(document.getElementById('loadPos').value);
+  const mag  = parseFloat(document.getElementById('loadMag').value);
+  const dir  = parseFloat(document.getElementById('loadDir').value);
+  if (isNaN(pos)||isNaN(mag)) return alert('Enter valid values.');
+  if (type === 'point') {
+    loads.push({ type:'point', cat, pos, mag:mag*dir, label:`${mag}kN` });
+  } else if (type === 'udl') {
+    const end = parseFloat(document.getElementById('loadEnd').value);
+    if (isNaN(end)||end<=pos) return alert('UDL end must be > start position.');
+    loads.push({ type:'udl', cat, pos, end, mag:mag*dir, label:`${mag}kN/m` });
+  } else if (type === 'moment') {
+    loads.push({ type:'moment', cat, pos, mag, label:`${mag}kN·m` });
+  }
+  renderLoadList(); drawBeam();
+}
+
+function renderSupportList() {
+  const el = document.getElementById('supList');
+  if (!supports.length) { el.innerHTML = '<span class="empty-note">None added</span>'; return; }
+  el.innerHTML = supports.map((s,i) => `
+    <div class="item">
+      <span class="tag tag-${s.type}">${s.type.toUpperCase()}</span>
+      <span style="font-size:10px">${s.pos} m</span>
+      <button class="btn-sm" onclick="removeSupport(${i})">✕</button>
+    </div>`).join('');
+}
+
+function renderLoadList() {
+  const el = document.getElementById('loadList');
+  if (!loads.length) { el.innerHTML = '<span class="empty-note">None added</span>'; return; }
+  el.innerHTML = loads.map((l,i) => `
+    <div class="item">
+      <span class="tag tag-${l.type}">${l.type.toUpperCase()}</span>
+      <span class="lcat lcat-${l.cat||'D'}">${l.cat||'D'}</span>
+      <span style="font-size:10px;flex:1;padding:0 4px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap">${l.label} @ ${l.pos}m</span>
+      <button class="btn-sm" onclick="removeLoad(${i})">✕</button>
+    </div>`).join('');
+}
+
+function removeSupport(i) { supports.splice(i,1); renderSupportList(); drawBeam(); }
+function removeLoad(i)    { loads.splice(i,1);    renderLoadList();    drawBeam(); }
+
+function resetAll() {
+  supports=[]; loads=[];
+  renderSupportList(); renderLoadList(); drawBeam();
+  document.getElementById('outputArea').innerHTML = `<div class="placeholder"><svg width="60" height="60" viewBox="0 0 60 60"><rect x="5" y="28" width="50" height="5" fill="#333"/><polygon points="10,33 3,48 17,48" fill="none" stroke="#333" stroke-width="2"/><polygon points="50,33 43,48 57,48" fill="none" stroke="#333" stroke-width="2"/><line x1="30" y1="10" x2="30" y2="33" stroke="#c00" stroke-width="2"/><polygon points="30,33 26,24 34,24" fill="#c00"/></svg><p>Define beam · Add supports · Add loads · Analyze</p></div>`;
+}
+
+function plotDiagram(id, data, N, L, maxVal, col, ylabel, flipSign) {
+  const canvas = document.getElementById(id);
+  if (!canvas) return;
+  const dpr = window.devicePixelRatio || 1;
+
+  // Robust width measurement — wait for layout if needed
+  let W = 0;
+  const par = canvas.parentElement;
+  if (par) W = par.getBoundingClientRect().width - 24;
+  if (!W || W < 100) W = canvas.getBoundingClientRect().width || 600;
+  if (!W || W < 100) W = 600;
+  W = Math.floor(W);
+
+  const H = 190;
+  canvas.style.width  = W + 'px';
+  canvas.style.height = H + 'px';
+  canvas.width  = W * dpr;
+  canvas.height = H * dpr;
+
+  const ctx = canvas.getContext('2d');
+  ctx.setTransform(1,0,0,1,0,0);
+  ctx.scale(dpr, dpr);
+
+  // Guard invalid data
+  if (!data||!data.length||!isFinite(maxVal)||maxVal<=0) {
+    ctx.clearRect(0,0,W,H);
+    ctx.fillStyle='#ddd'; ctx.font='11px JetBrains Mono'; ctx.textAlign='center';
+    ctx.fillText('No data to display', W/2, H/2); return;
+  }
+
+  const ml=74, mr=24, mt=28, mb=38;
+  const pw=W-ml-mr, ph=H-mt-mb;
+  const cy=mt+ph/2;
+  const sign=flipSign?-1:1;
+  ctx.clearRect(0,0,W,H);
+
+  // Background
+  ctx.fillStyle='#fdfcfa'; ctx.fillRect(ml,mt,pw,ph);
+
+  // Nice round Y ticks
+  const rawStep=maxVal/4;
+  const mag=Math.pow(10,Math.floor(Math.log10(rawStep||1)));
+  const niceArr=[1,2,2.5,5,10];
+  let step=(niceArr.find(s=>s*mag>=rawStep)||niceArr[niceArr.length-1])*mag;
+  const yTicks=[];
+  for(let v=0;v<=maxVal*1.001;v+=step){
+    yTicks.push(Math.round(v/step)*step);
+    if(v>0) yTicks.unshift(-Math.round(v/step)*step);
+  }
+  // dedupe and sort
+  const uniqueTicks=[...new Set(yTicks)].sort((a,b)=>a-b);
+
+  // Horizontal grid + Y labels
+  uniqueTicks.forEach(v=>{
+    const fy=v/maxVal;
+    const y=cy-fy*(ph/2);
+    if(y<mt-2||y>mt+ph+2) return;
+    ctx.strokeStyle=v===0?'#c0bdb4':'#e8e4dc';
+    ctx.lineWidth=v===0?1.5:1;
+    ctx.beginPath(); ctx.moveTo(ml,y); ctx.lineTo(ml+pw,y); ctx.stroke();
+    const decimals=Math.abs(v)<1&&v!==0?3:Math.abs(v)<10?2:1;
+    ctx.fillStyle=v===0?'#888':'#bbb';
+    ctx.font=(v===0?'bold ':'')+'9px JetBrains Mono';
+    ctx.textAlign='right';
+    ctx.fillText(v.toFixed(decimals), ml-6, y+3);
+  });
+
+  // Vertical grid
+  for(let i=0;i<=Math.ceil(L);i++){
+    const x=ml+(i/L)*pw;
+    if(x>ml+pw+1) break;
+    ctx.strokeStyle='#e8e4dc'; ctx.lineWidth=1;
+    ctx.beginPath(); ctx.moveTo(x,mt); ctx.lineTo(x,mt+ph); ctx.stroke();
+  }
+
+  // Fill
+  ctx.save(); ctx.beginPath(); ctx.rect(ml,mt,pw,ph); ctx.clip();
+  ctx.beginPath(); ctx.moveTo(ml,cy);
+  for(let i=0;i<=N;i++){
+    const x=ml+(i/N)*pw, v=isFinite(data[i])?data[i]:0;
+    ctx.lineTo(x, cy-sign*(v/maxVal)*(ph/2));
+  }
+  ctx.lineTo(ml+pw,cy); ctx.closePath();
+  const grad=ctx.createLinearGradient(0,mt,0,mt+ph);
+  grad.addColorStop(0,col+'66'); grad.addColorStop(0.5,col+'1a'); grad.addColorStop(1,col+'66');
+  ctx.fillStyle=grad; ctx.fill();
+
+  // Curve
+  ctx.strokeStyle=col; ctx.lineWidth=2.5; ctx.lineJoin='round'; ctx.lineCap='round';
+  ctx.shadowColor=col+'55'; ctx.shadowBlur=5;
+  ctx.beginPath();
+  for(let i=0;i<=N;i++){
+    const x=ml+(i/N)*pw, v=isFinite(data[i])?data[i]:0;
+    const y=cy-sign*(v/maxVal)*(ph/2);
+    i===0?ctx.moveTo(x,y):ctx.lineTo(x,y);
+  }
+  ctx.stroke(); ctx.shadowBlur=0; ctx.restore();
+
+  // Border
+  ctx.strokeStyle='#ccc'; ctx.lineWidth=1; ctx.strokeRect(ml,mt,pw,ph);
+
+  // Y label
+  ctx.save(); ctx.translate(14,cy); ctx.rotate(-Math.PI/2);
+  ctx.fillStyle='#777'; ctx.font='bold 9px JetBrains Mono'; ctx.textAlign='center';
+  ctx.fillText(ylabel,0,0); ctx.restore();
+
+  // X labels
+  ctx.fillStyle='#999'; ctx.font='9px JetBrains Mono'; ctx.textAlign='center';
+  for(let i=0;i<=Math.ceil(L);i++){
+    const x=ml+(i/L)*pw; if(x>ml+pw+1) break;
+    ctx.beginPath(); ctx.strokeStyle='#ccc'; ctx.lineWidth=1;
+    ctx.moveTo(x,mt+ph); ctx.lineTo(x,mt+ph+5); ctx.stroke();
+    ctx.fillText(i,x,mt+ph+17);
+  }
+  ctx.fillStyle='#bbb'; ctx.font='8px JetBrains Mono'; ctx.textAlign='left';
+  ctx.fillText('x (m)',ml+pw+4,mt+ph+17);
+
+  // Peak annotations
+  let maxI=0,minI=0;
+  for(let i=1;i<=N;i++){
+    if(!isFinite(data[i])) continue;
+    if(data[i]>data[maxI]) maxI=i;
+    if(data[i]<data[minI]) minI=i;
+  }
+  const toAnnot=new Set();
+  if(Math.abs(data[maxI])>maxVal*0.005) toAnnot.add(maxI);
+  if(minI!==maxI&&Math.abs(data[minI])>maxVal*0.005) toAnnot.add(minI);
+  toAnnot.forEach(pi=>{
+    const px2=ml+(pi/N)*pw, v=isFinite(data[pi])?data[pi]:0;
+    const py2=cy-sign*(v/maxVal)*(ph/2);
+    ctx.beginPath(); ctx.arc(px2,py2,5,0,Math.PI*2); ctx.fillStyle=col; ctx.fill();
+    ctx.beginPath(); ctx.arc(px2,py2,5,0,Math.PI*2); ctx.strokeStyle='white'; ctx.lineWidth=2; ctx.stroke();
+    const lbl=v.toFixed(3);
+    ctx.font='bold 10px JetBrains Mono';
+    const lw=ctx.measureText(lbl).width+16, lh=19;
+    const above=py2<cy;
+    const ly=above?py2-lh-10:py2+10;
+    const lx=Math.max(ml+lw/2+2,Math.min(ml+pw-lw/2-2,px2));
+    ctx.strokeStyle=col+'88'; ctx.lineWidth=1; ctx.setLineDash([2,2]);
+    ctx.beginPath(); ctx.moveTo(px2,above?py2-5:py2+5); ctx.lineTo(lx,above?ly+lh:ly); ctx.stroke();
+    ctx.setLineDash([]);
+    roundRect(ctx,lx-lw/2,ly,lw,lh,3); ctx.fillStyle=col; ctx.fill();
+    ctx.fillStyle='white'; ctx.textAlign='center'; ctx.fillText(lbl,lx,ly+lh-4);
+  });
+
+  // Zero crossings
+  ctx.strokeStyle='#d06028'; ctx.lineWidth=1.5; ctx.setLineDash([3,3]);
+  for(let i=1;i<=N;i++){
+    if(isFinite(data[i-1])&&isFinite(data[i])&&data[i-1]*data[i]<0){
+      const t=data[i-1]/(data[i-1]-data[i]);
+      const xz=ml+((i-1+t)/N)*pw;
+      ctx.beginPath(); ctx.moveTo(xz,mt); ctx.lineTo(xz,mt+ph); ctx.stroke();
+      ctx.setLineDash([]);
+      ctx.fillStyle='#d06028'; ctx.font='8px JetBrains Mono'; ctx.textAlign='center';
+      ctx.fillText(((i-1+t)*L/N).toFixed(2)+'m',xz,mt+ph+29);
+      ctx.setLineDash([3,3]);
+    }
+  }
+  ctx.setLineDash([]);
+
+  // Store layout metadata for crosshair
+  canvas._layout={ml,mr,mt,mb,pw,ph,cy,W,H,N,L,maxVal,col,flipSign,data};
+}
+
+function showErr(msg) {
+  document.getElementById('outputArea').innerHTML = `<div class="err-box">⚠ ${msg}</div>`;
+}
+
+// ═══════════════════════════════════════════════════════════
+//  TAB SWITCHING
+// ═══════════════════════════════════════════════════════════
+function switchRTab(tab) {
+  document.querySelectorAll('.rpanel-tab').forEach(b => b.classList.remove('active'));
+  document.getElementById('rtab-' + tab).classList.add('active');
+  document.getElementById('rtab-combo-content').style.display  = tab==='combo'   ? 'flex' : 'none';
+  document.getElementById('rtab-formula-content').style.display = tab==='formula' ? 'flex' : 'none';
+}
+
+// ═══════════════════════════════════════════════════════════
+//  LOAD COMBINATIONS
+// ═══════════════════════════════════════════════════════════
+const COMBOS = [
+  { id:'unfactored', name:'Unfactored (Service)',  expr:'1.0D + 1.0L',              f:{D:1.0,L:1.0,W:0.0,S:0.0,E:0.0} },
+  { id:'asce1',      name:'ASCE 7 — LC1',          expr:'1.4D',                     f:{D:1.4,L:0.0,W:0.0,S:0.0,E:0.0} },
+  { id:'asce2',      name:'ASCE 7 — LC2',          expr:'1.2D + 1.6L + 0.5S',       f:{D:1.2,L:1.6,W:0.0,S:0.5,E:0.0} },
+  { id:'asce3',      name:'ASCE 7 — LC3',          expr:'1.2D + 1.6S + L',          f:{D:1.2,L:1.0,W:0.0,S:1.6,E:0.0} },
+  { id:'asce4',      name:'ASCE 7 — LC4',          expr:'1.2D + 1.0W + L + 0.5S',   f:{D:1.2,L:1.0,W:1.0,S:0.5,E:0.0} },
+  { id:'asce5',      name:'ASCE 7 — LC5',          expr:'0.9D + 1.0W',              f:{D:0.9,L:0.0,W:1.0,S:0.0,E:0.0} },
+  { id:'asce6',      name:'ASCE 7 — LC6 (Seismic)',expr:'1.2D + 1.0E + L + 0.2S',   f:{D:1.2,L:1.0,W:0.0,S:0.2,E:1.0} },
+  { id:'asce7',      name:'ASCE 7 — LC7 (Seismic)',expr:'0.9D + 1.0E',              f:{D:0.9,L:0.0,W:0.0,S:0.0,E:1.0} },
+  { id:'ec1',        name:'Eurocode — Eq. 6.10a',  expr:'1.35D + 1.5L',             f:{D:1.35,L:1.5,W:0.0,S:0.0,E:0.0} },
+  { id:'ec2',        name:'Eurocode — Eq. 6.10b',  expr:'1.35D + 1.5W + 1.05L',     f:{D:1.35,L:1.05,W:1.5,S:0.0,E:0.0} },
+];
+
+let activeComboId = 'asce2';
+
+function buildComboList() {
+  const el = document.getElementById('comboList');
+  el.innerHTML = COMBOS.map(c => `
+    <div class="combo-card ${c.id===activeComboId?'active-combo':''}" id="cc-${c.id}">
+      <div class="combo-row" onclick="selectCombo('${c.id}')">
+        <div class="combo-check ${c.id===activeComboId?'on':''}">
+          ${c.id===activeComboId?'✓':''}
+        </div>
+        <div>
+          <div class="combo-name">${c.name}</div>
+          <div class="combo-expr">${c.expr}</div>
+        </div>
+      </div>
+      <div class="combo-edit" id="ce-${c.id}">
+        <div class="combo-factors">
+          ${['D','L','W','S','E'].map(cat=>`
+            <div class="factor-cell">
+              <div class="factor-lbl">${cat}</div>
+              <input class="factor-inp" id="cf-${c.id}-${cat}" value="${c.f[cat]}" type="number" step="0.05"
+                onchange="updateComboFactor('${c.id}','${cat}',this.value)">
+            </div>`).join('')}
+        </div>
+        <button class="analyze-combo-btn" onclick="analyzeCombo('${c.id}')">▶ RUN THIS COMBO</button>
+      </div>
+    </div>`).join('');
+}
+
+function selectCombo(id) {
+  activeComboId = id;
+  buildComboList();
+}
+
+function updateComboFactor(id, cat, val) {
+  const c = COMBOS.find(x=>x.id===id);
+  if (c) c.f[cat] = parseFloat(val)||0;
+}
+
+function getFactoredLoads(factors) {
+  // Apply load factors: multiply each load's magnitude by its category factor
+  return loads.map(ld => {
+    const f = factors[ld.cat||'D'] ?? 1.0;
+    return { ...ld, mag: ld.mag * f, label: ld.label };
+  }).filter(ld => {
+    const f = factors[ld.cat||'D'] ?? 1.0;
+    return f !== 0;
+  });
+}
+
+function analyzeCombo(id) {
+  const combo = COMBOS.find(c=>c.id===id);
+  if (!combo) return;
+  runAnalysis(getFactoredLoads(combo.f), combo.name, combo.expr);
+}
+
+function analyzeCustom() {
+  const factors = {};
+  ['D','L','W','S','E'].forEach(c => {
+    factors[c] = parseFloat(document.getElementById('cf-'+c).value)||0;
+  });
+  const name = document.getElementById('cf-name').value || 'Custom';
+  const expr = ['D','L','W','S','E']
+    .filter(c=>factors[c]!==0)
+    .map(c=>`${factors[c]}${c}`)
+    .join(' + ');
+  runAnalysis(getFactoredLoads(factors), name, expr);
+}
+
+// Override the old analyze() to use the active combo
+function analyze() {
+  if (!loads.length) {
+    // If no loads, run unfactored
+    runAnalysis(loads, 'Unfactored', '—');
+  } else {
+    const combo = COMBOS.find(c=>c.id===activeComboId);
+    if (combo) analyzeCombo(activeComboId);
+    else runAnalysis(loads, 'Unfactored', '1.0D + 1.0L');
+  }
+}
+
+// ─── CORE SOLVER (now takes a factored load set) ───────────
+function runAnalysis(factoredLoads, comboName, comboExpr) {
+  const L = parseFloat(document.getElementById('beamLen').value) || 6;
+  if (!supports.length) return showErr('No supports defined.');
+  if (!factoredLoads.length && !loads.length) return showErr('No loads defined.');
+
+  const fixedSups  = supports.filter(s=>s.type==='fixed');
+  const pinSups    = supports.filter(s=>s.type==='pin');
+  const rollerSups = supports.filter(s=>s.type==='roller');
+  const steps = [];
+  let reactions = {};
+
+  // Build load summary for step output
+  const catTotals = {};
+  ['D','L','W','S','E'].forEach(c => {
+    const sum = loads.filter(l=>(l.cat||'D')===c)
+      .reduce((a,l)=> a + (l.type==='udl'? Math.abs(l.mag)*(l.end-l.pos) : Math.abs(l.mag)), 0);
+    if (sum>0) catTotals[c] = sum;
+  });
+
+  steps.push({text:`Load Combination: ${comboName}`, eq: comboExpr});
+  steps.push({text:`Load categories present: ${Object.keys(catTotals).map(c=>`${c}=${catTotals[c].toFixed(2)}kN`).join(', ') || 'none'}`, eq:null});
+
+  // ── Cantilever ──
+  if (fixedSups.length===1 && supports.length===1) {
+    const F = fixedSups[0];
+    let totalV=0, momentF=0;
+    factoredLoads.forEach(ld => {
+      if (ld.type==='point')   { totalV+=ld.mag; momentF+=ld.mag*(ld.pos-F.pos); }
+      else if (ld.type==='udl'){ const Fv=ld.mag*(ld.end-ld.pos); totalV+=Fv; momentF+=Fv*((ld.pos+ld.end)/2-F.pos); }
+      else if (ld.type==='moment') { momentF+=ld.mag; }
+    });
+    const RF=-totalV, MF=-momentF;
+    reactions['R_Fixed(V)'] = RF; reactions['M_Fixed'] = MF;
+    steps.push({text:`Cantilever: Fixed support at x = ${F.pos} m`, eq:null});
+    steps.push({text:`ΣFy = 0 → R_F + (${totalV.toFixed(3)}) = 0`, eq:`R_F = ${RF.toFixed(3)} kN`});
+    steps.push({text:`ΣM_F = 0 → M_F + (${momentF.toFixed(3)}) = 0`, eq:`M_F = ${MF.toFixed(3)} kN·m`});
+    return buildOutput(L, reactions, steps, null, null, 0, 0, factoredLoads, comboName, comboExpr);
+  }
+
+  // ── Simply supported ──
+  const vertSups = [...pinSups, ...rollerSups].sort((a,b)=>a.pos-b.pos);
+  if (vertSups.length >= 2) {
+    const A = vertSups[0], B = vertSups[vertSups.length-1];
+    const dAB = B.pos - A.pos;
+    steps.push({text:`Support A (${A.type}) at x=${A.pos}m | Support B (${B.type}) at x=${B.pos}m`, eq:null});
+    steps.push({text:`Span A→B: d = ${dAB} m`, eq:null});
+
+    let totalV=0, momentAboutA=0, mDesc=[];
+    factoredLoads.forEach(ld => {
+      if (ld.type==='point') {
+        totalV += ld.mag;
+        const arm = ld.pos-A.pos;
+        momentAboutA += ld.mag*arm;
+        mDesc.push(`[${ld.cat}] ${ld.mag.toFixed(2)}kN×${arm.toFixed(2)}m`);
+      } else if (ld.type==='udl') {
+        const Fv=ld.mag*(ld.end-ld.pos), xc=(ld.pos+ld.end)/2, arm=xc-A.pos;
+        totalV+=Fv; momentAboutA+=Fv*arm;
+        mDesc.push(`[${ld.cat}] UDL ${Fv.toFixed(2)}kN×${arm.toFixed(2)}m`);
+      } else if (ld.type==='moment') {
+        momentAboutA+=ld.mag;
+        mDesc.push(`[${ld.cat}] M=${ld.mag.toFixed(2)}kN·m`);
+      }
+    });
+
+    steps.push({text:`ΣFy = 0: R_A + R_B = ${(-totalV).toFixed(3)} kN`, eq:null});
+    steps.push({text:`ΣM_A = 0: ${mDesc.join(' + ')}`, eq:null});
+    steps.push({text:`R_B × ${dAB} + (${momentAboutA.toFixed(3)}) = 0`, eq:`R_B = ${(-momentAboutA/dAB).toFixed(4)} kN`});
+
+    const RB=-momentAboutA/dAB, RA=-totalV-RB;
+    steps.push({text:`R_A = ${(-totalV).toFixed(3)} − R_B`, eq:`R_A = ${RA.toFixed(4)} kN`});
+    if (pinSups.length>0) { steps.push({text:`ΣFx = 0 → H_A = 0 kN`, eq:null}); reactions['H_A']=0; }
+    reactions['R_A']=RA; reactions['R_B']=RB;
+
+    const chk=RA+RB+totalV;
+    steps.push({text:`Verification: ${RA.toFixed(3)} + ${RB.toFixed(3)} + ${totalV.toFixed(3)} = ${chk.toFixed(4)}`, eq:Math.abs(chk)<0.001?'✓ OK':'✗ Error'});
+
+    return buildOutput(L, reactions, steps, A.pos, B.pos, RA, RB, factoredLoads, comboName, comboExpr);
+  }
+
+  showErr('Could not solve: use 1 Pin + 1 Roller, or 1 Fixed support.');
+}
+
+// ═══════════════════════════════════════════════════════════
+//  BUILD OUTPUT
+// ═══════════════════════════════════════════════════════════
+// Global data for crosshair + report
+let _diagData = null;
+
+function buildOutput(L, reactions, steps, posA, posB, RA, RB, factoredLoads, comboName, comboExpr) {
+  const usedLoads = factoredLoads || loads;
+  const N=1000, dx=L/N;
+  const V=new Array(N+1).fill(0), M=new Array(N+1).fill(0), Y=new Array(N+1).fill(0);
+
+  // ── Shear ──
+  for (let i=0;i<=N;i++) {
+    const x=i*dx; let shear=0;
+    if (posA!==null && x>posA) shear+=RA;
+    if (posB!==null && x>posB) shear+=RB;
+    const fix=supports.find(s=>s.type==='fixed');
+    if (fix && x>fix.pos) shear+=reactions['R_Fixed(V)']||0;
+    usedLoads.forEach(ld=>{
+      if (ld.type==='point'&&x>ld.pos) shear+=ld.mag;
+      else if (ld.type==='udl'){
+        if (x>=ld.end) shear+=ld.mag*(ld.end-ld.pos);
+        else if (x>ld.pos) shear+=ld.mag*(x-ld.pos);
+      }
+    });
+    V[i]=shear;
+  }
+
+  // ── Moment ──
+  for (let i=1;i<=N;i++){
+    const x=i*dx; M[i]=M[i-1]+V[i-1]*dx;
+    const fix=supports.find(s=>s.type==='fixed');
+    if (fix&&Math.abs(x-fix.pos)<dx/2) M[i]+=reactions['M_Fixed']||0;
+    usedLoads.forEach(ld=>{if(ld.type==='moment'&&Math.abs(x-ld.pos)<dx/2) M[i]+=ld.mag;});
+  }
+
+  // ── Deflection: integrate M twice, apply BCs ──
+  // EI in kN·m² :  E(GPa)*1e6 * I(cm⁴)*1e-8 = E*I*10^-2 kN·m²... 
+  // E [GPa] * I [cm⁴] → EI [kN·m²]: E*1e6 [kN/m²] * I*1e-8 [m⁴] = E*I*1e-2
+  const E_GPa = parseFloat(document.getElementById('eVal').value)||200;
+  const I_cm4 = parseFloat(document.getElementById('iVal').value)||8000;
+  const EI = E_GPa * I_cm4 * 1e-2; // kN·m²
+
+  // Double integrate M to get EI·y
+  const EIth = new Array(N+1).fill(0); // slope * EI
+  const EIy  = new Array(N+1).fill(0); // deflection * EI
+  for (let i=1;i<=N;i++) { EIth[i]=EIth[i-1]+M[i-1]*dx; }
+  for (let i=1;i<=N;i++) { EIy[i]=EIy[i-1]+EIth[i-1]*dx; }
+
+  // Apply BCs: y=0 at supports
+  if (posA!==null && posB!==null) {
+    const iA=Math.round(posA/dx), iB=Math.round(posB/dx);
+    const C1=(EIy[iB]-EIy[iA])/(posB-posA)*(-1)+(EIy[iA]/1);
+    // Correct: y(posA)=0 → constant C2=-EIy[iA] after adding C1*x
+    const C2=-EIy[iA]-C1*posA;
+    for (let i=0;i<=N;i++) Y[i]=(EIy[i]+C1*(i*dx)+C2)/EI*1000; // mm
+  } else {
+    // Cantilever: y=0, y'=0 at fixed end
+    for (let i=0;i<=N;i++) Y[i]=EIy[i]/EI*1000;
+  }
+
+  const maxV=Math.max(...V.map(Math.abs),0.001);
+  const maxM=Math.max(...M.map(Math.abs),0.001);
+  const maxY=Math.max(...Y.map(Math.abs),0.0001);
+
+  // Store globally for crosshair + report
+  _diagData = { V, M, Y, N, L, maxV, maxM, maxY, EI, comboName, comboExpr, reactions, steps, posA, posB, RA, RB };
+
+  // Build cards HTML
+  const catColors = {D:'#8ab4e8',L:'#6dcf8a',W:'#f0b840',S:'#70d4e8',E:'#f07060'};
+  const usedCats = ['D','L','W','S','E'].filter(c=>loads.some(l=>(l.cat||'D')===c));
+  const breakdownRows = usedCats.map(c=>{
+    const f = factoredLoads ? (
+      loads.filter(l=>(l.cat||'D')===c).reduce((a,l)=>a+Math.abs(l.mag*(l.type==='udl'?l.end-l.pos:1)),0) > 0 ?
+      factoredLoads.filter(l=>(l.cat||'D')===c).reduce((a,l)=>a+Math.abs(l.mag*(l.type==='udl'?l.end-l.pos:1)),0) /
+      loads.filter(l=>(l.cat||'D')===c).reduce((a,l)=>a+Math.abs(l.mag*(l.type==='udl'?l.end-l.pos:1)),0) : 0) : 1;
+    return `<div class="rx-row">
+      <span style="color:${catColors[c]};font-weight:700">${c}</span>
+      <span style="color:#666;font-size:9px">${isFinite(f)?'×'+f.toFixed(2):''}</span>
+      <span class="rx-val">${loads.filter(l=>(l.cat||'D')===c).length} load(s)</span>
+    </div>`;
+  }).join('');
+
+  const rxHTML=Object.entries(reactions).map(([k,v])=>
+    `<div class="rx-row"><span>${k}</span><span class="rx-val">${v.toFixed(4)} ${k.startsWith('M')?'kN·m':'kN'}</span></div>`
+  ).join('');
+
+  const stepsHTML=steps.map((s,i)=>
+    `<div class="step"><span class="step-n">${i+1}</span>${s.text}${s.eq?` <span class="hl-val">→ ${s.eq}</span>`:''}</div>`
+  ).join('');
+
+  // Critical points
+  let maxMIdx=0, maxVIdx=0, zeroVIdx=-1;
+  for(let i=1;i<=N;i++){
+    if(Math.abs(M[i])>Math.abs(M[maxMIdx])) maxMIdx=i;
+    if(Math.abs(V[i])>Math.abs(V[maxVIdx])) maxVIdx=i;
+    if(zeroVIdx<0&&V[i-1]*V[i]<0) zeroVIdx=i;
+  }
+  const critHTML=`
+    <div class="rx-row"><span>M_max</span><span class="rx-val">${M[maxMIdx].toFixed(3)} kN·m @ x=${(maxMIdx*L/N).toFixed(3)}m</span></div>
+    <div class="rx-row"><span>V_max</span><span class="rx-val">${V[maxVIdx].toFixed(3)} kN @ x=${(maxVIdx*L/N).toFixed(3)}m</span></div>
+    <div class="rx-row"><span>δ_max</span><span class="rx-val">${Y.reduce((a,v)=>Math.abs(v)>Math.abs(a)?v:a,0).toFixed(4)} mm</span></div>
+    <div class="rx-row"><span>EI</span><span class="rx-val">${EI.toFixed(0)} kN·m²</span></div>
+    ${zeroVIdx>0?`<div class="rx-row"><span>V=0 at</span><span class="rx-val">x ≈ ${(zeroVIdx*L/N).toFixed(3)} m</span></div>`:''}`;
+
+  document.getElementById('outputArea').innerHTML = `
+    <div class="combo-badge" style="margin-bottom:12px;">
+      <span>⚖</span> <span>${comboName}</span>
+      <span style="color:#555;font-weight:400;margin-left:4px">${comboExpr}</span>
+    </div>
+    <div class="out-grid">
+      <div class="card"><div class="card-hd">Reactions</div>${rxHTML}</div>
+      <div class="card">
+        <div class="card-hd">Critical Values</div>${critHTML}
+        ${usedCats.length?`<div style="margin-top:10px;border-top:1px solid var(--rule);padding-top:8px;"><div class="card-hd" style="margin-bottom:6px;">Load Breakdown</div>${breakdownRows}</div>`:''}
+      </div>
+      <div class="card card-full">
+        <div class="card-hd">Shear Force Diagram — V(x) [kN] <span style="font-weight:400;color:var(--faint);font-size:9px">· hover for values</span></div>
+        <div class="diag-wrap" id="sfd-wrap">
+          <canvas id="sfdC" class="diag-canvas" height="160" style="display:block;width:100%"></canvas>
+          <div class="crosshair-tooltip" id="tt-sfd"></div>
+        </div>
+      </div>
+      <div class="card card-full">
+        <div class="card-hd">Bending Moment Diagram — M(x) [kN·m] <span style="font-weight:400;color:var(--faint);font-size:9px">· hover for values</span></div>
+        <div class="diag-wrap" id="bmd-wrap">
+          <canvas id="bmdC" class="diag-canvas" height="160" style="display:block;width:100%"></canvas>
+          <div class="crosshair-tooltip" id="tt-bmd"></div>
+        </div>
+      </div>
+      <div class="card card-full">
+        <div class="card-hd">Deflection Diagram — y(x) [mm] <span style="font-weight:400;color:var(--faint);font-size:9px">· E=${E_GPa} GPa · I=${I_cm4} cm⁴ · EI=${EI.toFixed(0)} kN·m²</span></div>
+        <div class="diag-wrap" id="def-wrap">
+          <canvas id="defC" class="diag-canvas" height="160" style="display:block;width:100%"></canvas>
+          <div class="crosshair-tooltip" id="tt-def"></div>
+        </div>
+      </div>
+      <div class="card card-full">
+        <div class="card-hd">Step-by-Step Solution</div>
+        ${stepsHTML}
+      </div>
+    </div>`;
+
+  // Use double-RAF to ensure DOM is laid out before measuring widths
+  requestAnimationFrame(() => requestAnimationFrame(() => {
+    plotDiagram('sfdC', V, N, L, maxV, '#1b3a5e', 'V (kN)', false);
+    plotDiagram('bmdC', M, N, L, maxM, '#8b1a10', 'M (kN·m)', true);
+    plotDiagram('defC', Y, N, L, maxY, '#1a5c2a', 'y (mm)', true);
+    attachCrosshair();
+  }));
+}
+
+// ═══════════════════════════════════════════════════════════
+//  SYNCHRONIZED CROSSHAIR
+// ═══════════════════════════════════════════════════════════
+const DIAG_IDS = ['sfdC','bmdC','defC'];
+const TT_IDS   = ['tt-sfd','tt-bmd','tt-def'];
+
+function attachCrosshair() {
+  // Use overlay canvases for crosshair — never redraw the main canvas on mousemove
+  DIAG_IDS.forEach((cid, ci) => {
+    const mainC = document.getElementById(cid);
+    if (!mainC) return;
+    const wrap = mainC.parentElement;
+    if (!wrap) return;
+
+    // Create/reuse an overlay canvas
+    let ov = wrap.querySelector('.xhair-overlay');
+    if (!ov) {
+      ov = document.createElement('canvas');
+      ov.className = 'xhair-overlay';
+      ov.style.cssText = 'position:absolute;inset:0;pointer-events:none;';
+      wrap.style.position = 'relative';
+      wrap.appendChild(ov);
+    }
+    // Size overlay to match main canvas CSS size
+    const syncOverlay = () => {
+      ov.style.width  = mainC.style.width;
+      ov.style.height = mainC.style.height;
+      const dpr = window.devicePixelRatio||1;
+      ov.width  = mainC.width;
+      ov.height = mainC.height;
+    };
+    syncOverlay();
+
+    mainC.addEventListener('mousemove', e => {
+      syncOverlay();
+      onDiagMove(e, ci);
+    });
+    mainC.addEventListener('mouseleave', () => {
+      // Clear all overlays
+      document.querySelectorAll('.xhair-overlay').forEach(o=>{
+        const c=o.getContext('2d'); c.clearRect(0,0,o.width,o.height);
+      });
+      TT_IDS.forEach(id=>{ const t=document.getElementById(id); if(t) t.style.display='none'; });
+    });
+  });
+}
+
+function onDiagMove(e, sourceIdx) {
+  if (!_diagData) return;
+  const {V,M,Y,N,L,maxV,maxM,maxY} = _diagData;
+  const canvas = document.getElementById(DIAG_IDS[sourceIdx]);
+  if (!canvas || !canvas._layout) return;
+
+  const rect = canvas.getBoundingClientRect();
+  const {ml,pw,mt,ph,cy} = canvas._layout;
+  const mx = e.clientX - rect.left;
+  const frac = Math.max(0, Math.min(1, (mx - ml) / pw));
+  const xi = Math.min(N, Math.round(frac * N));
+  const x = frac * L;
+
+  // Draw crosshair on each overlay canvas
+  [
+    {cid:'sfdC', data:V, max:maxV, col:'#1b3a5e', flip:false},
+    {cid:'bmdC', data:M, max:maxM, col:'#8b1a10', flip:true},
+    {cid:'defC', data:Y, max:maxY, col:'#1a5c2a', flip:true},
+  ].forEach(({cid, data, max, col, flip}) => {
+    const mc = document.getElementById(cid); if(!mc||!mc._layout) return;
+    const ov = mc.parentElement.querySelector('.xhair-overlay'); if(!ov) return;
+    const dpr = window.devicePixelRatio||1;
+    const ctx = ov.getContext('2d');
+    ctx.clearRect(0,0,ov.width,ov.height);
+    ctx.save(); ctx.setTransform(1,0,0,1,0,0); ctx.scale(dpr,dpr);
+
+    const lay=mc._layout;
+    const cx2=lay.ml+frac*lay.pw;
+    const sign=flip?-1:1;
+    const val=isFinite(data[xi])?data[xi]:0;
+    const vy=lay.cy-sign*(val/max)*(lay.ph/2);
+
+    // Hairline
+    ctx.strokeStyle='rgba(60,60,60,0.3)'; ctx.lineWidth=1; ctx.setLineDash([4,3]);
+    ctx.beginPath(); ctx.moveTo(cx2,lay.mt); ctx.lineTo(cx2,lay.mt+lay.ph); ctx.stroke();
+    ctx.setLineDash([]);
+
+    // Value line
+    ctx.strokeStyle=col+'99'; ctx.lineWidth=1;
+    ctx.beginPath(); ctx.moveTo(lay.ml,vy); ctx.lineTo(lay.ml+lay.pw,vy); ctx.stroke();
+
+    // Dot
+    ctx.beginPath(); ctx.arc(cx2,vy,7,0,Math.PI*2);
+    ctx.fillStyle=col+'cc'; ctx.fill();
+    ctx.beginPath(); ctx.arc(cx2,vy,7,0,Math.PI*2);
+    ctx.strokeStyle='white'; ctx.lineWidth=2.5; ctx.stroke();
+
+    // x position tick at bottom
+    ctx.fillStyle=col; ctx.font='bold 9px JetBrains Mono'; ctx.textAlign='center';
+    ctx.fillText(x.toFixed(2)+'m', cx2, lay.mt+lay.ph+17);
+
+    ctx.restore();
+  });
+
+  // Tooltip (single, follows source canvas)
+  const tt = document.getElementById(TT_IDS[sourceIdx]);
+  if (!tt) return;
+  const vVal=isFinite(V[xi])?V[xi]:0, mVal=isFinite(M[xi])?M[xi]:0, yVal=isFinite(Y[xi])?Y[xi]:0;
+  tt.innerHTML = `
+    <div class="ct-x">x = ${x.toFixed(3)} m</div>
+    <div class="ct-v">V(x) = <strong>${vVal.toFixed(4)}</strong> kN</div>
+    <div class="ct-m">M(x) = <strong>${mVal.toFixed(4)}</strong> kN·m</div>
+    <div class="ct-y">y(x) = <strong>${yVal.toFixed(4)}</strong> mm</div>`;
+  tt.style.display = 'block';
+  const canvRect = canvas.getBoundingClientRect();
+  const ttW = 200;
+  let left = mx + 16;
+  if (left + ttW > canvRect.width - 10) left = mx - ttW - 16;
+  tt.style.left = left + 'px';
+  tt.style.top  = Math.max(4, e.clientY - canvRect.top - 50) + 'px';
+}
+
+function redrawDiag(cid) {
+  if (!_diagData) return;
+  const {V,M,Y,N,L,maxV,maxM,maxY} = _diagData;
+  const map = {
+    sfdC:[V,maxV,'#1b3a5e','V (kN)',false],
+    bmdC:[M,maxM,'#8b1a10','M (kN·m)',true],
+    defC:[Y,maxY,'#1a5c2a','y (mm)',true]
+  };
+  const entry = map[cid]; if(!entry) return;
+  plotDiagram(cid,...entry);
+}
+
+// ═══════════════════════════════════════════════════════════
+//  REPORT VIEW
+// ═══════════════════════════════════════════════════════════
+function openReport() {
+  if (!_diagData) return alert('Run analysis first.');
+  const {V,M,Y,N,L,maxV,maxM,maxY,comboName,comboExpr,reactions,steps,EI} = _diagData;
+
+  const now = new Date();
+  const dateStr = now.toLocaleDateString('en-GB',{day:'2-digit',month:'short',year:'numeric'});
+
+  // Critical values
+  let maxMIdx=0, maxVIdx=0, maxYIdx=0;
+  for(let i=1;i<=N;i++){
+    if(Math.abs(M[i])>Math.abs(M[maxMIdx])) maxMIdx=i;
+    if(Math.abs(V[i])>Math.abs(V[maxVIdx])) maxVIdx=i;
+    if(Math.abs(Y[i])>Math.abs(Y[maxYIdx])) maxYIdx=i;
+  }
+
+  // Reaction rows for table
+  const rxRows = Object.entries(reactions).map(([k,v])=>
+    `<tr><td><strong>${k}</strong></td><td>${v.toFixed(4)}</td><td>${k.startsWith('M')?'kN·m':'kN'}</td></tr>`
+  ).join('');
+
+  // Load rows for table
+  const loadRows = loads.map((l,i)=>`
+    <tr>
+      <td>${i+1}</td>
+      <td>${l.type}</td>
+      <td>${l.cat||'D'}</td>
+      <td>${l.pos} m${l.end?' – '+l.end+' m':''}</td>
+      <td>${Math.abs(l.mag).toFixed(2)} ${l.type==='udl'?'kN/m':'kN'}</td>
+    </tr>`).join('');
+
+  // Steps rows
+  const stepsRows = steps.map((s,i)=>
+    `<tr><td>${i+1}</td><td>${s.text}${s.eq?' → '+s.eq:''}</td></tr>`
+  ).join('');
+
+  const E_GPa = parseFloat(document.getElementById('eVal').value)||200;
+  const I_cm4 = parseFloat(document.getElementById('iVal').value)||8000;
+
+  document.getElementById('reportPage').innerHTML = `
+    <div class="report-titleblock">
+      <div class="report-title-left">
+        <div class="report-proj">Structural Engineering Report</div>
+        <div class="report-main-title">Beam Analysis</div>
+        <div class="report-subtitle">Load Combination: ${comboName} · ${comboExpr}</div>
+      </div>
+      <div class="report-title-right">
+        <div class="report-meta"><span class="report-meta-label">Date</span><span class="report-meta-val">${dateStr}</span></div>
+        <div class="report-meta"><span class="report-meta-label">Length</span><span class="report-meta-val">L = ${L} m</span></div>
+        <div class="report-meta"><span class="report-meta-label">E</span><span class="report-meta-val">${E_GPa} GPa</span></div>
+        <div class="report-meta"><span class="report-meta-label">I</span><span class="report-meta-val">${I_cm4} cm⁴</span></div>
+        <div class="report-meta"><span class="report-meta-label">EI</span><span class="report-meta-val">${EI.toFixed(0)} kN·m²</span></div>
+      </div>
+    </div>
+
+    <div class="report-section">
+      <div class="report-section-title">1. Beam Diagram</div>
+      <div class="report-beam-wrap"><canvas id="rptBeamC" height="200" style="width:100%;display:block"></canvas></div>
+    </div>
+
+    <div class="report-section">
+      <div class="report-section-title">2. Applied Loads</div>
+      <table class="report-table">
+        <tr><th>#</th><th>Type</th><th>Category</th><th>Position</th><th>Magnitude</th></tr>
+        ${loadRows}
+      </table>
+    </div>
+
+    <div class="report-section">
+      <div class="report-section-title">3. Support Reactions</div>
+      <table class="report-table">
+        <tr><th>Reaction</th><th>Value</th><th>Unit</th></tr>
+        ${rxRows}
+      </table>
+    </div>
+
+    <div class="report-section">
+      <div class="report-section-title">4. Critical Values</div>
+      <table class="report-table">
+        <tr><th>Quantity</th><th>Value</th><th>Location</th></tr>
+        <tr><td>V_max</td><td>${V[maxVIdx].toFixed(4)} kN</td><td>x = ${(maxVIdx*L/N).toFixed(3)} m</td></tr>
+        <tr><td>M_max</td><td>${M[maxMIdx].toFixed(4)} kN·m</td><td>x = ${(maxMIdx*L/N).toFixed(3)} m</td></tr>
+        <tr><td>δ_max</td><td>${Y[maxYIdx].toFixed(4)} mm</td><td>x = ${(maxYIdx*L/N).toFixed(3)} m</td></tr>
+      </table>
+    </div>
+
+    <div class="report-section">
+      <div class="report-section-title">5. Shear Force Diagram — V(x) [kN]</div>
+      <div class="report-diag-wrap"><canvas id="rptSfdC" height="180" style="width:100%;display:block"></canvas></div>
+    </div>
+
+    <div class="report-section">
+      <div class="report-section-title">6. Bending Moment Diagram — M(x) [kN·m]</div>
+      <div class="report-diag-wrap"><canvas id="rptBmdC" height="180" style="width:100%;display:block"></canvas></div>
+    </div>
+
+    <div class="report-section">
+      <div class="report-section-title">7. Deflection Diagram — y(x) [mm]</div>
+      <div class="report-diag-wrap"><canvas id="rptDefC" height="180" style="width:100%;display:block"></canvas></div>
+    </div>
+
+    <div class="report-section">
+      <div class="report-section-title">8. Equilibrium — Step-by-Step</div>
+      <table class="report-table">
+        <tr><th>#</th><th>Step</th></tr>
+        ${stepsRows}
+      </table>
+    </div>`;
+
+  document.getElementById('reportOverlay').classList.add('visible');
+
+  // Draw canvases in report with proper layout timing
+  requestAnimationFrame(() => requestAnimationFrame(() => {
+    const rbc = document.getElementById('rptBeamC');
+    if (rbc) {
+      const dpr = window.devicePixelRatio||1;
+      const rw = rbc.parentElement.getBoundingClientRect().width - 24;
+      rbc.width  = Math.round(rw * dpr);
+      rbc.height = Math.round(200 * dpr);
+      rbc.style.width  = rw+'px';
+      rbc.style.height = '200px';
+      drawBeamOnCanvas(rbc.getContext('2d'), rw, 200, dpr);
+    }
+    plotDiagram('rptSfdC', V, N, L, maxV, '#1b3a5e', 'V (kN)', false);
+    plotDiagram('rptBmdC', M, N, L, maxM, '#8b1a10', 'M (kN·m)', true);
+    plotDiagram('rptDefC', Y, N, L, maxY, '#1a5c2a', 'y (mm)', true);
+  }));
+}
+
+function closeReport() {
+  document.getElementById('reportOverlay').classList.remove('visible');
+}
+
+// Render beam onto any canvas context (used by report view)
+function drawBeamOnCanvas(ctx, W, cH, dpr) {
+  ctx.scale(dpr, dpr);
+  const L = parseFloat(document.getElementById('beamLen').value)||6;
+  const MX=70, bw=W-MX*2, cy=130, scale=bw/L;
+  const catCols={D:'#c03020',L:'#2d8a4e',W:'#c8860a',S:'#2080a0',E:'#8a2090'};
+
+  ctx.clearRect(0,0,W,cH);
+  // Grid
+  ctx.strokeStyle='#f0ede6'; ctx.lineWidth=1;
+  for(let i=0;i<=L;i++){const x=MX+i*scale;ctx.beginPath();ctx.moveTo(x,10);ctx.lineTo(x,cH-10);ctx.stroke();}
+
+  // Loads
+  const catOrder=['D','L','W','S','E'];
+  const laneH=34, laneBase=cy-14;
+  const presentCats=[...new Set(loads.map(l=>l.cat||'D'))].sort((a,b)=>catOrder.indexOf(a)-catOrder.indexOf(b));
+  const catLane={}; presentCats.forEach((c,i)=>catLane[c]=i);
+  const totalLanes=Math.max(presentCats.length,1);
+
+  loads.filter(l=>l.type==='udl').forEach(ld=>{
+    const col=catCols[ld.cat||'D'],lane=catLane[ld.cat||'D']??0;
+    const x1=MX+ld.pos*scale,x2=MX+ld.end*scale;
+    const topY=laneBase-(totalLanes-lane)*laneH, botY=cy-6;
+    drawUDLCanvas(ctx,x1,x2,topY,botY,ld.label,ld.cat||'D',col);
+  });
+
+  // Beam
+  ctx.shadowColor='rgba(0,0,0,.1)';ctx.shadowBlur=4;ctx.shadowOffsetY=2;
+  ctx.fillStyle='#2e2c28'; ctx.fillRect(MX,cy-6,bw,12);
+  ctx.shadowColor='transparent';
+  ctx.fillStyle='#1a1917'; ctx.fillRect(MX-2,cy-7,4,14); ctx.fillRect(MX+bw-2,cy-7,4,14);
+
+  loads.filter(l=>l.type==='point').forEach(ld=>{
+    const col=catCols[ld.cat||'D'],lane=catLane[ld.cat||'D']??0;
+    const topY=laneBase-(totalLanes-lane)*laneH+4;
+    drawPointLoadCanvas(ctx,MX+ld.pos*scale,cy,topY,ld.label,ld.cat||'D',col);
+  });
+  loads.filter(l=>l.type==='moment').forEach(ld=>{
+    drawMomentCanvas(ctx,MX+ld.pos*scale,cy,ld.mag,ld.label,catCols[ld.cat||'D']);
+  });
+  supports.forEach(s=>drawSupportCanvas(ctx,MX+s.pos*scale,cy,s.type));
+
+  // Dim line
+  ctx.strokeStyle='#bbb';ctx.lineWidth=1;ctx.setLineDash([5,4]);
+  ctx.beginPath();ctx.moveTo(MX,cy+36);ctx.lineTo(MX+bw,cy+36);ctx.stroke();
+  ctx.setLineDash([]);
+  ctx.fillStyle='#aaa';ctx.font='10px JetBrains Mono';ctx.textAlign='center';
+  ctx.fillText(`L = ${L} m`,MX+bw/2,cy+50);
+  ctx.fillStyle='#ccc';ctx.font='9px JetBrains Mono';
+  for(let i=0;i<=L;i++){ctx.textAlign='center';ctx.fillText(i,MX+i*scale,cy+28);}
+}
+
+// ═══════════════════════════════════════════════════════════
+//  INIT
+// ═══════════════════════════════════════════════════════════
+window.addEventListener('resize', () => {
+  drawBeam();
+  if (_diagData) {
+    const {V,M,Y,N,L,maxV,maxM,maxY} = _diagData;
+    requestAnimationFrame(()=>{
+      plotDiagram('sfdC',V,N,L,maxV,'#1b3a5e','V (kN)',false);
+      plotDiagram('bmdC',M,N,L,maxM,'#8b1a10','M (kN·m)',true);
+      plotDiagram('defC',Y,N,L,maxY,'#1a5c2a','y (mm)',true);
+      attachCrosshair();
+    });
+  }
+});
+document.getElementById('beamLen').addEventListener('input', drawBeam);
+buildComboList();
+drawBeam();
+</script>
+</body>
+</html>
