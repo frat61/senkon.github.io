@@ -1,0 +1,478 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Steel Beam Preliminary Design Tool</title>
+<style>
+@import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=JetBrains+Mono:wght@400;500;600&display=swap');
+:root {
+  --bg:#f5f6f8;--bg2:#fff;--bg3:#f0f1f4;--bg4:#e8eaef;
+  --border:#d4d7e0;--border2:#c0c4d0;
+  --text:#1a1d2b;--text2:#4a4f65;--text3:#7a7f95;
+  --accent:#2563eb;--accent-bg:rgba(37,99,235,0.08);
+  --green:#059669;--green-bg:rgba(5,150,105,0.08);
+  --red:#dc2626;--red-bg:rgba(220,38,38,0.06);
+  --orange:#d97706;--orange-bg:rgba(217,119,6,0.08);
+  --cat-D:#2563eb;--cat-L:#d97706;--cat-S:#059669;--cat-W:#dc2626;
+}
+*{margin:0;padding:0;box-sizing:border-box;}
+body{font-family:'Inter',sans-serif;background:var(--bg);color:var(--text);min-height:100vh;font-size:13px;}
+.header{background:var(--bg2);border-bottom:1px solid var(--border);padding:12px 20px;display:flex;align-items:center;justify-content:space-between;position:sticky;top:0;z-index:100;}
+.header h1{font-size:17px;font-weight:700;color:var(--accent);}
+.header .sub{font-size:10px;color:var(--text3);margin-top:1px;}
+.layout{display:grid;grid-template-columns:350px 1fr;min-height:calc(100vh - 50px);}
+.panel{background:var(--bg2);border-right:1px solid var(--border);padding:16px;overflow-y:auto;max-height:calc(100vh - 50px);}
+.results{padding:16px;overflow-y:auto;max-height:calc(100vh - 50px);}
+.sec-title{font-size:10px;font-weight:700;text-transform:uppercase;letter-spacing:1px;color:var(--text3);margin-bottom:8px;display:flex;align-items:center;gap:6px;}
+.sec-title .dot{width:5px;height:5px;border-radius:50%;background:var(--accent);}
+.card{background:var(--bg2);border:1px solid var(--border);border-radius:8px;padding:12px;margin-bottom:12px;}
+.row{display:grid;grid-template-columns:1fr 1fr;gap:8px;margin-bottom:8px;}
+.row.r3{grid-template-columns:1fr 1fr 1fr;}
+.row:last-child{margin-bottom:0;}
+label{display:block;font-size:10px;font-weight:600;color:var(--text2);margin-bottom:3px;text-transform:uppercase;letter-spacing:0.4px;}
+input,select{width:100%;padding:7px 9px;background:var(--bg3);border:1px solid var(--border);border-radius:6px;color:var(--text);font-family:'JetBrains Mono',monospace;font-size:12px;outline:none;}
+input:focus,select:focus{border-color:var(--accent);box-shadow:0 0 0 2px var(--accent-bg);}
+select{cursor:pointer;}
+.btn{padding:9px 16px;border:none;border-radius:8px;font-family:'Inter',sans-serif;font-weight:600;font-size:12px;cursor:pointer;display:inline-flex;align-items:center;gap:5px;transition:all .15s;}
+.btn-primary{background:var(--accent);color:#fff;width:100%;justify-content:center;padding:11px;font-size:13px;}
+.btn-primary:hover{background:#1d4ed8;}
+.btn-add{background:var(--accent-bg);color:var(--accent);border:1px dashed var(--accent);width:100%;justify-content:center;padding:6px;font-size:11px;margin-top:6px;}
+.btn-sm{padding:3px 7px;font-size:10px;border-radius:4px;}
+.btn-rm{background:var(--red-bg);color:var(--red);}
+.load-entry{background:var(--bg3);border:1px solid var(--border);border-radius:6px;padding:10px;margin-bottom:6px;}
+.load-hdr{display:flex;justify-content:space-between;align-items:center;margin-bottom:6px;}
+.tag{font-family:'JetBrains Mono',monospace;font-size:9px;font-weight:700;padding:2px 6px;border-radius:3px;text-transform:uppercase;}
+.tag.D{background:rgba(37,99,235,0.1);color:var(--cat-D);}
+.tag.L{background:rgba(217,119,6,0.1);color:var(--cat-L);}
+.tag.S{background:rgba(5,150,105,0.1);color:var(--cat-S);}
+.tag.W{background:rgba(220,38,38,0.1);color:var(--cat-W);}
+.sw-row{padding:8px 10px;display:flex;align-items:center;gap:8px;background:var(--bg2);border:1px solid var(--border);border-radius:8px;margin-bottom:12px;}
+.sw-row input[type=checkbox]{width:15px;height:15px;accent-color:var(--accent);}
+.sw-row label{margin:0;text-transform:none;font-size:12px;color:var(--text);font-weight:500;cursor:pointer;}
+.diagram-wrap{background:var(--bg2);border:1px solid var(--border);border-radius:8px;padding:10px;margin-bottom:12px;}
+.rec-card{background:linear-gradient(135deg,rgba(37,99,235,0.04),rgba(5,150,105,0.03));border:1px solid rgba(37,99,235,0.2);border-radius:10px;padding:16px;margin-bottom:12px;position:relative;}
+.rec-card::before{content:'';position:absolute;top:0;left:0;width:3px;height:100%;background:linear-gradient(180deg,var(--accent),var(--green));border-radius:3px 0 0 3px;}
+.rec-badge{font-family:'JetBrains Mono',monospace;font-size:9px;font-weight:700;text-transform:uppercase;letter-spacing:1px;color:var(--green);margin-bottom:6px;}
+.rec-name{font-size:22px;font-weight:700;margin-bottom:2px;}
+.rec-sub{font-size:11px;color:var(--text2);margin-bottom:12px;}
+.rec-grid{display:grid;grid-template-columns:repeat(4,1fr);gap:10px;}
+.rec-stat{text-align:center;}
+.rec-stat-lbl{font-size:9px;color:var(--text3);text-transform:uppercase;letter-spacing:0.4px;}
+.rec-stat-val{font-family:'JetBrains Mono',monospace;font-size:16px;font-weight:700;}
+.ubar-wrap{width:100%;height:5px;background:var(--bg4);border-radius:3px;margin-top:3px;overflow:hidden;}
+.ubar{height:100%;border-radius:3px;}
+.summary-cards{display:grid;grid-template-columns:repeat(4,1fr);gap:8px;margin-bottom:12px;}
+.scard{background:var(--bg2);border:1px solid var(--border);border-radius:8px;padding:10px;text-align:center;}
+.scard.hl{border-color:var(--accent);background:var(--accent-bg);}
+.scard-lbl{font-size:9px;font-weight:600;color:var(--text3);text-transform:uppercase;letter-spacing:0.5px;margin-bottom:3px;}
+.scard-val{font-family:'JetBrains Mono',monospace;font-size:20px;font-weight:700;color:var(--accent);}
+.scard-unit{font-family:'JetBrains Mono',monospace;font-size:10px;color:var(--text3);}
+.combo-wrap{background:var(--bg2);border:1px solid var(--border);border-radius:8px;padding:12px;margin-bottom:12px;}
+.combo-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(170px,1fr));gap:6px;margin-top:8px;}
+.combo-card{background:var(--bg3);border:1px solid var(--border);border-radius:6px;padding:8px;font-size:11px;}
+.combo-card.gov{border-color:var(--accent);background:var(--accent-bg);}
+.combo-lbl{font-family:'JetBrains Mono',monospace;font-size:10px;color:var(--text2);}
+.combo-val{font-family:'JetBrains Mono',monospace;font-size:14px;font-weight:600;}
+.tbl-wrap{background:var(--bg2);border:1px solid var(--border);border-radius:8px;overflow:hidden;margin-bottom:12px;}
+.tbl-hdr{padding:10px 12px;border-bottom:1px solid var(--border);display:flex;justify-content:space-between;align-items:center;}
+.tbl-hdr h3{font-size:13px;font-weight:700;}
+.tbl-cnt{font-family:'JetBrains Mono',monospace;font-size:10px;color:var(--text3);background:var(--bg3);padding:2px 6px;border-radius:3px;}
+table{width:100%;border-collapse:collapse;font-size:12px;}
+thead{background:var(--bg3);position:sticky;top:0;z-index:2;}
+th{padding:7px 8px;text-align:right;font-size:9px;font-weight:700;text-transform:uppercase;letter-spacing:0.5px;color:var(--text3);border-bottom:1px solid var(--border);white-space:nowrap;}
+th:first-child,th:nth-child(2){text-align:left;}
+td{padding:7px 8px;border-bottom:1px solid var(--bg4);font-family:'JetBrains Mono',monospace;font-size:11px;text-align:right;}
+td:first-child,td:nth-child(2){text-align:left;}
+tr{cursor:pointer;transition:background .1s;}
+tr:hover td{background:var(--bg3);}
+tr.sel td{background:var(--accent-bg);}
+.badge{display:inline-flex;padding:1px 5px;border-radius:3px;font-size:9px;font-weight:700;text-transform:uppercase;}
+.badge.ok{background:var(--green-bg);color:var(--green);}
+.badge.fail{background:var(--red-bg);color:var(--red);}
+.calc-wrap{background:var(--bg2);border:1px solid var(--border);border-radius:8px;padding:14px;margin-bottom:12px;}
+.calc-block{background:var(--bg3);border-radius:6px;padding:10px;margin-bottom:10px;font-family:'JetBrains Mono',monospace;font-size:11px;line-height:1.7;color:var(--text2);}
+.calc-block h4{font-family:'Inter',sans-serif;font-size:12px;font-weight:700;color:var(--text);margin-bottom:6px;}
+.calc-block .hl{background:var(--accent-bg);padding:5px 8px;border-radius:4px;margin-top:6px;}
+.empty{text-align:center;padding:40px;color:var(--text3);}
+.empty h3{font-size:15px;color:var(--text2);margin-bottom:4px;}
+.collapsible{cursor:pointer;user-select:none;}
+.combo-editor{display:none;margin-bottom:12px;}
+.combo-editor .ce-row{display:flex;gap:3px;align-items:center;margin-bottom:3px;font-size:10px;flex-wrap:wrap;}
+.combo-editor input{padding:3px 4px;font-size:10px;width:40px;}
+.combo-editor input.ce-name{width:100px;}
+@media(max-width:900px){.layout{grid-template-columns:1fr;}.panel{max-height:none;border-right:none;border-bottom:1px solid var(--border);}.results{max-height:none;}.summary-cards,.rec-grid{grid-template-columns:1fr 1fr;}}
+@media print{.panel,.header{display:none!important;}.layout{grid-template-columns:1fr;}.results{max-height:none;padding:8px;}}
+</style>
+</head>
+<body>
+<div class="header">
+  <div><h1>Steel Beam Preliminary Design</h1><div class="sub">ASCE 7 LRFD — Deflection, Bending & Shear</div></div>
+</div>
+<div class="layout">
+<div class="panel">
+  <div class="sec-title"><span class="dot"></span>Beam Properties</div>
+  <div class="card">
+    <div class="row"><div><label>Span (m)</label><input type="number" id="iSpan" value="6" step="0.1" min="0.1" oninput="drawBeam()"></div>
+    <div><label>Support Type</label><select id="iSup" onchange="drawBeam()"><option value="simply_supported">Simply Supported</option><option value="cantilever">Cantilever</option></select></div></div>
+    <div class="row"><div><label>Deflection Limit</label><select id="iDefl"><option value="240">L/240</option><option value="300">L/300</option><option value="360" selected>L/360</option><option value="480">L/480</option><option value="custom">Custom</option></select></div>
+    <div id="customDeflW" style="display:none"><label>Custom (L/?)</label><input type="number" id="iDeflC" value="400" min="1"></div></div>
+    <div class="row"><div><label>E Modulus (MPa)</label><input type="number" id="iE" value="210000" step="1000"></div>
+    <div><label>Steel Grade</label><select id="iFy"><option value="235">S235 / A36</option><option value="275" selected>S275 / A572-50</option><option value="355">S355 / A992</option><option value="460">S460</option></select></div></div>
+    <div class="row"><div><label>Section Database</label><select id="iDB"><option value="all">All Sections</option><option value="IPE">IPE</option><option value="HEA">HEA</option><option value="HEB">HEB</option><option value="UB">UB</option><option value="UC">UC</option><option value="W">W Shapes</option></select></div><div></div></div>
+  </div>
+  <div class="sec-title"><span class="dot" style="background:var(--orange)"></span>Applied Loads</div>
+  <div class="card"><div id="loadsCont"></div><button class="btn btn-add" onclick="addLoad()">+ Add Load</button></div>
+  <div class="sw-row"><input type="checkbox" id="iSW" checked><div><label for="iSW">Include beam self-weight</label><div style="font-size:9px;color:var(--text3)">Iterative — adds section weight as Dead (D)</div></div></div>
+  <div class="sec-title collapsible" onclick="toggleComboEditor()"><span class="dot" style="background:var(--red)"></span>Load Combinations (click to edit)</div>
+  <div class="combo-editor" id="comboEditor">
+    <div class="card" style="padding:8px"><div style="font-size:9px;font-weight:700;color:var(--text3);text-transform:uppercase;margin-bottom:4px">Service Combos (D,L,S,W)</div><div id="svcComboList"></div><button class="btn btn-add" onclick="addCombo('svc')" style="font-size:9px;padding:4px">+ Add</button></div>
+    <div class="card" style="padding:8px;margin-top:6px"><div style="font-size:9px;font-weight:700;color:var(--text3);text-transform:uppercase;margin-bottom:4px">LRFD Combos (D,L,S,W)</div><div id="lrfdComboList"></div><button class="btn btn-add" onclick="addCombo('lrfd')" style="font-size:9px;padding:4px">+ Add</button></div>
+    <button class="btn btn-sm" style="margin-top:4px;background:var(--bg3);color:var(--text2);border:1px solid var(--border);width:100%;justify-content:center;padding:5px" onclick="resetCombos()">Reset to ASCE 7 Defaults</button>
+  </div>
+  <button class="btn btn-primary" onclick="calculate()">Calculate & Design</button>
+</div>
+<div class="results" id="resPanel">
+  <div class="diagram-wrap"><svg id="beamSVG" viewBox="0 0 700 200" xmlns="http://www.w3.org/2000/svg"></svg></div>
+  <div class="empty" id="emptyMsg"><h3>Ready to Design</h3><p>Configure beam, add loads, then Calculate.</p></div>
+  <div id="resContent" style="display:none"></div>
+</div>
+</div>
+
+<script>
+// ===== STATE =====
+let ST={loads:[],lc:0};
+let lastResults=[],lastCalc=null,lastDDiv=360;
+let customSvc=null,customLrfd=null;
+
+// ===== SECTION DATABASE =====
+const SECTIONS=[
+{name:"IPE 80",type:"IPE",Iy:80.1,Wel:20.0,kg:6.0,Av:3.1},{name:"IPE 100",type:"IPE",Iy:171,Wel:34.2,kg:8.1,Av:4.1},{name:"IPE 120",type:"IPE",Iy:318,Wel:53.0,kg:10.4,Av:5.1},{name:"IPE 140",type:"IPE",Iy:541,Wel:77.3,kg:12.9,Av:6.4},{name:"IPE 160",type:"IPE",Iy:869,Wel:109,kg:15.8,Av:7.6},{name:"IPE 180",type:"IPE",Iy:1317,Wel:146,kg:18.8,Av:9.2},{name:"IPE 200",type:"IPE",Iy:1943,Wel:194,kg:22.4,Av:10.7},{name:"IPE 220",type:"IPE",Iy:2772,Wel:252,kg:26.2,Av:12.5},{name:"IPE 240",type:"IPE",Iy:3892,Wel:324,kg:30.7,Av:14.5},{name:"IPE 270",type:"IPE",Iy:5790,Wel:429,kg:36.1,Av:17.0},{name:"IPE 300",type:"IPE",Iy:8356,Wel:557,kg:42.2,Av:19.8},{name:"IPE 330",type:"IPE",Iy:11770,Wel:713,kg:49.1,Av:23.1},{name:"IPE 360",type:"IPE",Iy:16270,Wel:904,kg:57.1,Av:26.8},{name:"IPE 400",type:"IPE",Iy:23130,Wel:1160,kg:66.3,Av:30.6},{name:"IPE 450",type:"IPE",Iy:33740,Wel:1500,kg:77.6,Av:35.4},{name:"IPE 500",type:"IPE",Iy:48200,Wel:1930,kg:90.7,Av:41.4},{name:"IPE 550",type:"IPE",Iy:67120,Wel:2440,kg:106,Av:47.1},{name:"IPE 600",type:"IPE",Iy:92080,Wel:3070,kg:122,Av:54.1},
+{name:"HEA 100",type:"HEA",Iy:349,Wel:72.8,kg:16.7,Av:4.8},{name:"HEA 120",type:"HEA",Iy:606,Wel:106,kg:19.9,Av:5.7},{name:"HEA 140",type:"HEA",Iy:1033,Wel:155,kg:24.7,Av:7.2},{name:"HEA 160",type:"HEA",Iy:1673,Wel:220,kg:30.4,Av:8.6},{name:"HEA 180",type:"HEA",Iy:2510,Wel:294,kg:35.5,Av:10.2},{name:"HEA 200",type:"HEA",Iy:3692,Wel:389,kg:42.3,Av:12.0},{name:"HEA 220",type:"HEA",Iy:5410,Wel:515,kg:50.5,Av:14.4},{name:"HEA 240",type:"HEA",Iy:7763,Wel:675,kg:60.3,Av:16.6},{name:"HEA 260",type:"HEA",Iy:10450,Wel:836,kg:68.2,Av:18.5},{name:"HEA 280",type:"HEA",Iy:13670,Wel:1013,kg:76.4,Av:20.4},{name:"HEA 300",type:"HEA",Iy:18260,Wel:1260,kg:88.3,Av:23.5},{name:"HEA 320",type:"HEA",Iy:22930,Wel:1479,kg:97.6,Av:27.1},{name:"HEA 340",type:"HEA",Iy:27690,Wel:1678,kg:105,Av:29.7},{name:"HEA 360",type:"HEA",Iy:33090,Wel:1891,kg:112,Av:32.3},{name:"HEA 400",type:"HEA",Iy:45070,Wel:2311,kg:125,Av:37.5},{name:"HEA 450",type:"HEA",Iy:63720,Wel:2896,kg:140,Av:43.8},{name:"HEA 500",type:"HEA",Iy:86970,Wel:3550,kg:155,Av:50.0},{name:"HEA 550",type:"HEA",Iy:111900,Wel:4146,kg:166,Av:54.3},{name:"HEA 600",type:"HEA",Iy:141200,Wel:4787,kg:178,Av:58.8},
+{name:"HEB 100",type:"HEB",Iy:450,Wel:90.0,kg:20.4,Av:6.0},{name:"HEB 120",type:"HEB",Iy:864,Wel:144,kg:26.7,Av:7.7},{name:"HEB 140",type:"HEB",Iy:1509,Wel:216,kg:33.7,Av:9.8},{name:"HEB 160",type:"HEB",Iy:2492,Wel:311,kg:42.6,Av:12.6},{name:"HEB 180",type:"HEB",Iy:3831,Wel:426,kg:51.2,Av:15.2},{name:"HEB 200",type:"HEB",Iy:5696,Wel:570,kg:61.3,Av:18.0},{name:"HEB 220",type:"HEB",Iy:8091,Wel:736,kg:71.5,Av:21.2},{name:"HEB 240",type:"HEB",Iy:11260,Wel:938,kg:83.2,Av:24.7},{name:"HEB 260",type:"HEB",Iy:14920,Wel:1148,kg:93.0,Av:27.5},{name:"HEB 280",type:"HEB",Iy:19270,Wel:1376,kg:103,Av:30.6},{name:"HEB 300",type:"HEB",Iy:25170,Wel:1678,kg:117,Av:35.1},{name:"HEB 320",type:"HEB",Iy:30820,Wel:1926,kg:127,Av:39.4},{name:"HEB 340",type:"HEB",Iy:36660,Wel:2156,kg:134,Av:42.1},{name:"HEB 360",type:"HEB",Iy:43190,Wel:2400,kg:142,Av:45.0},{name:"HEB 400",type:"HEB",Iy:57680,Wel:2884,kg:155,Av:50.4},{name:"HEB 450",type:"HEB",Iy:79890,Wel:3551,kg:171,Av:57.6},{name:"HEB 500",type:"HEB",Iy:107200,Wel:4287,kg:187,Av:64.5},{name:"HEB 550",type:"HEB",Iy:136700,Wel:4971,kg:199,Av:69.5},{name:"HEB 600",type:"HEB",Iy:171000,Wel:5701,kg:212,Av:75.0},
+{name:"UB 127x76x13",type:"UB",Iy:473,Wel:75.0,kg:13.0,Av:5.1},{name:"UB 152x89x16",type:"UB",Iy:834,Wel:110,kg:16.0,Av:6.1},{name:"UB 178x102x19",type:"UB",Iy:1356,Wel:153,kg:19.0,Av:7.6},{name:"UB 203x102x23",type:"UB",Iy:2105,Wel:207,kg:23.0,Av:9.3},{name:"UB 203x133x25",type:"UB",Iy:2340,Wel:231,kg:25.1,Av:8.5},{name:"UB 203x133x30",type:"UB",Iy:2896,Wel:280,kg:30.0,Av:10.2},{name:"UB 254x102x25",type:"UB",Iy:3415,Wel:266,kg:25.2,Av:11.6},{name:"UB 254x102x28",type:"UB",Iy:4005,Wel:308,kg:28.3,Av:12.5},{name:"UB 254x146x31",type:"UB",Iy:4413,Wel:351,kg:31.1,Av:11.4},{name:"UB 254x146x37",type:"UB",Iy:5537,Wel:433,kg:37.0,Av:13.0},{name:"UB 254x146x43",type:"UB",Iy:6544,Wel:505,kg:43.0,Av:15.1},{name:"UB 305x102x25",type:"UB",Iy:4455,Wel:292,kg:24.8,Av:13.4},{name:"UB 305x102x28",type:"UB",Iy:5366,Wel:347,kg:28.2,Av:14.2},{name:"UB 305x102x33",type:"UB",Iy:6501,Wel:416,kg:32.8,Av:16.0},{name:"UB 305x127x37",type:"UB",Iy:7171,Wel:472,kg:37.0,Av:15.0},{name:"UB 305x127x42",type:"UB",Iy:8196,Wel:534,kg:41.9,Av:16.6},{name:"UB 305x127x48",type:"UB",Iy:9575,Wel:616,kg:48.1,Av:18.6},{name:"UB 305x165x40",type:"UB",Iy:8503,Wel:561,kg:40.3,Av:14.5},{name:"UB 305x165x46",type:"UB",Iy:9899,Wel:645,kg:46.1,Av:16.0},{name:"UB 305x165x54",type:"UB",Iy:11700,Wel:755,kg:54.0,Av:18.6},{name:"UB 356x127x33",type:"UB",Iy:8249,Wel:473,kg:33.1,Av:15.8},{name:"UB 356x127x39",type:"UB",Iy:10170,Wel:576,kg:39.1,Av:18.2},{name:"UB 356x171x45",type:"UB",Iy:12070,Wel:687,kg:45.0,Av:17.1},{name:"UB 356x171x51",type:"UB",Iy:14140,Wel:796,kg:51.0,Av:19.2},{name:"UB 356x171x57",type:"UB",Iy:16040,Wel:896,kg:57.0,Av:21.2},{name:"UB 356x171x67",type:"UB",Iy:19460,Wel:1071,kg:67.1,Av:24.5},{name:"UB 406x140x39",type:"UB",Iy:12510,Wel:629,kg:39.0,Av:19.5},{name:"UB 406x140x46",type:"UB",Iy:15690,Wel:778,kg:46.0,Av:22.5},{name:"UB 406x178x54",type:"UB",Iy:18720,Wel:931,kg:54.1,Av:21.5},{name:"UB 406x178x60",type:"UB",Iy:21600,Wel:1063,kg:60.1,Av:23.6},{name:"UB 406x178x67",type:"UB",Iy:24330,Wel:1186,kg:67.1,Av:26.0},{name:"UB 406x178x74",type:"UB",Iy:27310,Wel:1323,kg:74.2,Av:28.5},{name:"UB 457x152x52",type:"UB",Iy:21370,Wel:951,kg:52.3,Av:24.3},{name:"UB 457x152x60",type:"UB",Iy:25500,Wel:1122,kg:59.8,Av:27.5},{name:"UB 457x152x67",type:"UB",Iy:28930,Wel:1263,kg:67.2,Av:30.5},{name:"UB 457x152x74",type:"UB",Iy:32670,Wel:1414,kg:74.2,Av:33.5},{name:"UB 457x152x82",type:"UB",Iy:36590,Wel:1574,kg:82.1,Av:36.5},{name:"UB 457x191x67",type:"UB",Iy:29380,Wel:1296,kg:67.1,Av:27.0},{name:"UB 457x191x74",type:"UB",Iy:33320,Wel:1458,kg:74.3,Av:29.5},{name:"UB 457x191x82",type:"UB",Iy:37050,Wel:1611,kg:82.0,Av:32.2},{name:"UB 457x191x89",type:"UB",Iy:41020,Wel:1770,kg:89.3,Av:35.0},{name:"UB 457x191x98",type:"UB",Iy:45730,Wel:1957,kg:98.3,Av:38.3},{name:"UB 533x210x82",type:"UB",Iy:47540,Wel:1800,kg:82.2,Av:34.5},{name:"UB 533x210x92",type:"UB",Iy:55230,Wel:2072,kg:92.1,Av:38.0},{name:"UB 533x210x101",type:"UB",Iy:61520,Wel:2292,kg:101,Av:41.5},{name:"UB 533x210x109",type:"UB",Iy:66820,Wel:2477,kg:109,Av:44.5},{name:"UB 533x210x122",type:"UB",Iy:76040,Wel:2793,kg:122,Av:49.0},{name:"UB 610x229x101",type:"UB",Iy:75780,Wel:2515,kg:101,Av:42.0},{name:"UB 610x229x113",type:"UB",Iy:87320,Wel:2874,kg:113,Av:46.5},{name:"UB 610x229x125",type:"UB",Iy:98610,Wel:3221,kg:125,Av:51.0},{name:"UB 610x229x140",type:"UB",Iy:112000,Wel:3622,kg:140,Av:56.5},
+{name:"UC 152x152x23",type:"UC",Iy:1250,Wel:164,kg:23.0,Av:7.1},{name:"UC 152x152x30",type:"UC",Iy:1748,Wel:221,kg:30.0,Av:9.0},{name:"UC 152x152x37",type:"UC",Iy:2210,Wel:273,kg:37.0,Av:11.0},{name:"UC 203x203x46",type:"UC",Iy:4568,Wel:450,kg:46.1,Av:14.5},{name:"UC 203x203x52",type:"UC",Iy:5259,Wel:510,kg:52.0,Av:16.2},{name:"UC 203x203x60",type:"UC",Iy:6125,Wel:584,kg:60.0,Av:18.5},{name:"UC 203x203x71",type:"UC",Iy:7618,Wel:705,kg:71.1,Av:21.5},{name:"UC 203x203x86",type:"UC",Iy:9449,Wel:851,kg:86.1,Av:25.5},{name:"UC 254x254x73",type:"UC",Iy:11410,Wel:898,kg:73.1,Av:21.8},{name:"UC 254x254x89",type:"UC",Iy:14270,Wel:1096,kg:89.5,Av:26.0},{name:"UC 254x254x107",type:"UC",Iy:17510,Wel:1313,kg:107,Av:30.5},{name:"UC 305x305x97",type:"UC",Iy:22250,Wel:1445,kg:97.0,Av:30.0},{name:"UC 305x305x118",type:"UC",Iy:27670,Wel:1760,kg:118,Av:36.0},{name:"UC 305x305x137",type:"UC",Iy:32810,Wel:2048,kg:137,Av:41.5},{name:"UC 305x305x158",type:"UC",Iy:38750,Wel:2369,kg:158,Av:47.0},{name:"UC 356x368x129",type:"UC",Iy:40250,Wel:2264,kg:129,Av:38.5},{name:"UC 356x368x153",type:"UC",Iy:48590,Wel:2684,kg:153,Av:45.0},{name:"UC 356x368x177",type:"UC",Iy:57120,Wel:3103,kg:177,Av:51.5},{name:"UC 356x368x202",type:"UC",Iy:66260,Wel:3538,kg:202,Av:58.0},
+{name:"W6x9",type:"W",Iy:726,Wel:97,kg:13.4,Av:4.5},{name:"W6x15",type:"W",Iy:1417,Wel:186,kg:22.3,Av:6.8},{name:"W8x10",type:"W",Iy:1390,Wel:138,kg:14.9,Av:6.0},{name:"W8x13",type:"W",Iy:1870,Wel:184,kg:19.3,Av:7.2},{name:"W8x18",type:"W",Iy:2580,Wel:249,kg:26.8,Av:8.5},{name:"W8x21",type:"W",Iy:3100,Wel:295,kg:31.3,Av:9.8},{name:"W8x24",type:"W",Iy:3430,Wel:341,kg:35.7,Av:10.5},{name:"W8x31",type:"W",Iy:4700,Wel:463,kg:46.1,Av:13.0},{name:"W10x12",type:"W",Iy:2170,Wel:173,kg:17.9,Av:7.8},{name:"W10x15",type:"W",Iy:2820,Wel:222,kg:22.3,Av:9.0},{name:"W10x19",type:"W",Iy:3710,Wel:285,kg:28.3,Av:11.0},{name:"W10x22",type:"W",Iy:4230,Wel:333,kg:32.7,Av:11.5},{name:"W10x26",type:"W",Iy:5180,Wel:395,kg:38.7,Av:13.2},{name:"W10x30",type:"W",Iy:6140,Wel:462,kg:44.6,Av:15.0},{name:"W10x33",type:"W",Iy:6390,Wel:518,kg:49.1,Av:14.5},{name:"W10x45",type:"W",Iy:9060,Wel:705,kg:67.0,Av:19.0},{name:"W10x54",type:"W",Iy:10800,Wel:840,kg:80.3,Av:22.0},{name:"W10x60",type:"W",Iy:12200,Wel:938,kg:89.3,Av:24.5},{name:"W12x14",type:"W",Iy:3330,Wel:220,kg:20.8,Av:9.5},{name:"W12x16",type:"W",Iy:3900,Wel:256,kg:23.8,Av:10.5},{name:"W12x19",type:"W",Iy:4770,Wel:309,kg:28.3,Av:12.2},{name:"W12x22",type:"W",Iy:5690,Wel:365,kg:32.7,Av:13.8},{name:"W12x26",type:"W",Iy:6410,Wel:414,kg:38.7,Av:14.5},{name:"W12x30",type:"W",Iy:7620,Wel:487,kg:44.6,Av:16.2},{name:"W12x35",type:"W",Iy:9100,Wel:572,kg:52.1,Av:18.5},{name:"W12x40",type:"W",Iy:10900,Wel:717,kg:59.5,Av:19.5},{name:"W12x45",type:"W",Iy:12400,Wel:810,kg:67.0,Av:21.5},{name:"W12x50",type:"W",Iy:13900,Wel:897,kg:74.4,Av:23.5},{name:"W12x53",type:"W",Iy:14800,Wel:967,kg:78.9,Av:23.0},{name:"W12x58",type:"W",Iy:16500,Wel:1065,kg:86.3,Av:25.0},{name:"W12x65",type:"W",Iy:18400,Wel:1180,kg:96.7,Av:27.0},{name:"W12x72",type:"W",Iy:20700,Wel:1327,kg:107,Av:30.0},{name:"W12x87",type:"W",Iy:25500,Wel:1603,kg:129,Av:35.5},{name:"W12x96",type:"W",Iy:28700,Wel:1777,kg:143,Av:39.0},{name:"W14x22",type:"W",Iy:6640,Wel:380,kg:32.7,Av:14.5},{name:"W14x26",type:"W",Iy:8090,Wel:458,kg:38.7,Av:16.5},{name:"W14x30",type:"W",Iy:9310,Wel:529,kg:44.6,Av:17.0},{name:"W14x34",type:"W",Iy:10800,Wel:608,kg:50.6,Av:18.8},{name:"W14x38",type:"W",Iy:12300,Wel:687,kg:56.6,Av:20.5},{name:"W14x43",type:"W",Iy:14100,Wel:799,kg:64.0,Av:21.5},{name:"W14x48",type:"W",Iy:16100,Wel:907,kg:71.4,Av:23.5},{name:"W14x53",type:"W",Iy:17700,Wel:1003,kg:78.9,Av:24.0},{name:"W14x61",type:"W",Iy:20700,Wel:1163,kg:90.8,Av:27.5},{name:"W14x68",type:"W",Iy:23300,Wel:1302,kg:101,Av:30.0},{name:"W14x74",type:"W",Iy:25600,Wel:1422,kg:110,Av:32.5},{name:"W14x82",type:"W",Iy:28800,Wel:1587,kg:122,Av:35.5},{name:"W14x90",type:"W",Iy:32100,Wel:1803,kg:134,Av:36.0},{name:"W14x99",type:"W",Iy:35800,Wel:1995,kg:147,Av:39.5},{name:"W14x109",type:"W",Iy:40000,Wel:2198,kg:162,Av:43.0},{name:"W14x120",type:"W",Iy:44800,Wel:2434,kg:179,Av:47.0},{name:"W14x132",type:"W",Iy:50100,Wel:2686,kg:196,Av:51.0},{name:"W16x26",type:"W",Iy:10700,Wel:536,kg:38.7,Av:17.0},{name:"W16x31",type:"W",Iy:13100,Wel:650,kg:46.1,Av:19.5},{name:"W16x36",type:"W",Iy:15400,Wel:764,kg:53.6,Av:20.5},{name:"W16x40",type:"W",Iy:17400,Wel:855,kg:59.5,Av:22.5},{name:"W16x45",type:"W",Iy:19900,Wel:971,kg:67.0,Av:24.5},{name:"W16x50",type:"W",Iy:22600,Wel:1094,kg:74.4,Av:27.0},{name:"W16x57",type:"W",Iy:26100,Wel:1252,kg:84.8,Av:30.0},{name:"W16x67",type:"W",Iy:31000,Wel:1480,kg:99.7,Av:32.5},{name:"W16x77",type:"W",Iy:36400,Wel:1717,kg:115,Av:37.0},{name:"W16x89",type:"W",Iy:42700,Wel:2000,kg:132,Av:42.0},{name:"W16x100",type:"W",Iy:48600,Wel:2254,kg:149,Av:46.5},{name:"W18x35",type:"W",Iy:16600,Wel:738,kg:52.1,Av:22.0},{name:"W18x40",type:"W",Iy:19400,Wel:853,kg:59.5,Av:24.5},{name:"W18x46",type:"W",Iy:22900,Wel:998,kg:68.5,Av:27.5},{name:"W18x50",type:"W",Iy:25100,Wel:1099,kg:74.4,Av:28.0},{name:"W18x55",type:"W",Iy:28000,Wel:1217,kg:81.9,Av:30.5},{name:"W18x60",type:"W",Iy:31200,Wel:1348,kg:89.3,Av:33.0},{name:"W18x65",type:"W",Iy:34400,Wel:1476,kg:96.7,Av:35.5},{name:"W18x71",type:"W",Iy:37900,Wel:1616,kg:106,Av:38.0},{name:"W18x76",type:"W",Iy:41100,Wel:1787,kg:113,Av:38.5},{name:"W18x86",type:"W",Iy:47200,Wel:2022,kg:128,Av:43.0},{name:"W18x97",type:"W",Iy:54400,Wel:2305,kg:144,Av:48.0},{name:"W21x44",type:"W",Iy:29200,Wel:1112,kg:65.5,Av:27.5},{name:"W21x50",type:"W",Iy:33800,Wel:1278,kg:74.4,Av:30.5},{name:"W21x57",type:"W",Iy:39600,Wel:1480,kg:84.8,Av:34.0},{name:"W21x62",type:"W",Iy:43200,Wel:1621,kg:92.3,Av:35.5},{name:"W21x68",type:"W",Iy:48200,Wel:1795,kg:101,Av:38.5},{name:"W21x73",type:"W",Iy:52700,Wel:1951,kg:109,Av:41.0},{name:"W21x83",type:"W",Iy:60400,Wel:2219,kg:124,Av:46.0},{name:"W21x93",type:"W",Iy:69500,Wel:2532,kg:138,Av:51.0},{name:"W21x101",type:"W",Iy:76100,Wel:2758,kg:150,Av:55.0},{name:"W21x111",type:"W",Iy:85100,Wel:3055,kg:165,Av:60.0},{name:"W24x55",type:"W",Iy:45900,Wel:1532,kg:81.9,Av:33.5},{name:"W24x62",type:"W",Iy:52800,Wel:1752,kg:92.3,Av:37.0},{name:"W24x68",type:"W",Iy:58500,Wel:1941,kg:101,Av:38.5},{name:"W24x76",type:"W",Iy:66400,Wel:2188,kg:113,Av:42.5},{name:"W24x84",type:"W",Iy:75200,Wel:2458,kg:125,Av:46.5},{name:"W24x94",type:"W",Iy:85500,Wel:2772,kg:140,Av:51.5},{name:"W24x104",type:"W",Iy:95400,Wel:3118,kg:155,Av:53.0},{name:"W24x117",type:"W",Iy:109000,Wel:3533,kg:174,Av:59.0},{name:"W24x131",type:"W",Iy:124000,Wel:3982,kg:195,Av:65.5}
+];
+
+// ===== ASCE 7 DEFAULTS =====
+const DEF_SVC=[{name:"D",f:{D:1,L:0,S:0,W:0}},{name:"D+L",f:{D:1,L:1,S:0,W:0}},{name:"D+S",f:{D:1,L:0,S:1,W:0}},{name:"D+0.75L+0.75S",f:{D:1,L:.75,S:.75,W:0}},{name:"D+W",f:{D:1,L:0,S:0,W:1}},{name:"D+0.75L+0.75W",f:{D:1,L:.75,S:0,W:.75}}];
+const DEF_LRFD=[{name:"1.4D",f:{D:1.4,L:0,S:0,W:0}},{name:"1.2D+1.6L",f:{D:1.2,L:1.6,S:0,W:0}},{name:"1.2D+1.6S",f:{D:1.2,L:0,S:1.6,W:0}},{name:"1.2D+1.6L+0.5S",f:{D:1.2,L:1.6,S:.5,W:0}},{name:"1.2D+1.6S+0.5L",f:{D:1.2,L:.5,S:1.6,W:0}},{name:"1.2D+W+L+0.5S",f:{D:1.2,L:1,S:.5,W:1}},{name:"0.9D+W",f:{D:.9,L:0,S:0,W:1}}];
+function getSvc(){return customSvc||DEF_SVC.map(c=>({...c,f:{...c.f}}));}
+function getLrfd(){return customLrfd||DEF_LRFD.map(c=>({...c,f:{...c.f}}));}
+
+// ===== VERIFIED FORMULAS =====
+function getE(){return parseFloat(document.getElementById('iE').value)||210000;}
+function getFy(){return parseInt(document.getElementById('iFy').value)||275;}
+function getSup(){return document.getElementById('iSup').value;}
+
+// --- Deflection (returns mm) ---
+// Simply Supported: UDL: 5wL⁴/(384EI), Pt mid: PL³/(48EI), Pt any: Pa(3L²-4a²)/(48EI)
+// Cantilever: UDL: wL⁴/(8EI), Pt tip: PL³/(3EI), Pt any from fixed: Pa²(3L-a)/(6EI)
+function deflUDL(w,L,E,I,sup){
+  if(sup==='cantilever') return w*Math.pow(L,4)/(8*E*I);
+  return(5*w*Math.pow(L,4))/(384*E*I);
+}
+function deflPtMid(P,L,E,I,sup){
+  if(sup==='cantilever') return P*1000*Math.pow(L,3)/(3*E*I); // tip load
+  return(P*1000*Math.pow(L,3))/(48*E*I);
+}
+function deflPtAny(P,a,L,E,I,sup){
+  if(sup==='cantilever'){
+    // a = distance from fixed end, deflection at free end
+    return P*1000*a*a*(3*L-a)/(6*E*I);
+  }
+  const u=Math.min(a,L-a);
+  return(P*1000*u*(3*L*L-4*u*u))/(48*E*I);
+}
+
+// --- Moment (returns kNm) ---
+function momUDL(w,L,sup){
+  if(sup==='cantilever') return w*L*L/2; // at fixed end
+  return w*L*L/8;
+}
+function momPtMid(P,L,sup){
+  if(sup==='cantilever') return P*L; // tip load, moment at fixed end
+  return P*L/4;
+}
+function momPtAny(P,a,L,sup){
+  if(sup==='cantilever') return P*a; // moment at fixed end = P × a
+  return P*a*(L-a)/L;
+}
+
+// --- Shear (returns kN) ---
+function shrUDL(w,L,sup){
+  if(sup==='cantilever') return w*L;
+  return w*L/2;
+}
+function shrPtMid(P,sup){return sup==='cantilever'?P:P/2;}
+function shrPtAny(P,a,L,sup){
+  if(sup==='cantilever') return P;
+  return Math.max(P*(L-a)/L,P*a/L);
+}
+
+function cDefl(l,Lmm,E,I,sup){
+  if(l.type==='udl')return deflUDL(l.value,Lmm,E,I,sup);
+  if(l.type==='point_mid')return deflPtMid(l.value,Lmm,E,I,sup);
+  if(l.type==='point_any')return deflPtAny(l.value,l.pos*1000,Lmm,E,I,sup);return 0;}
+function cMom(l,Lm,sup){
+  if(l.type==='udl')return momUDL(l.value,Lm,sup);
+  if(l.type==='point_mid')return momPtMid(l.value,Lm,sup);
+  if(l.type==='point_any')return momPtAny(l.value,l.pos,Lm,sup);return 0;}
+function cShr(l,Lm,sup){
+  if(l.type==='udl')return shrUDL(l.value,Lm,sup);
+  if(l.type==='point_mid')return shrPtMid(l.value,sup);
+  if(l.type==='point_any')return shrPtAny(l.value,l.pos,Lm,sup);return 0;}
+
+function applyCombo(combo,loads,Lmm,Lm,E,I,sup){
+  let d=0,m=0,v=0;
+  loads.forEach(l=>{const f=combo.f[l.cat]||0;if(!f||!l.value)return;const fl={...l,value:l.value*f};d+=cDefl(fl,Lmm,E,I,sup);m+=cMom(fl,Lm,sup);v+=cShr(fl,Lm,sup);});
+  return{d,m,v};}
+
+// ===== UI: Loads =====
+const catColors={D:'#2563eb',L:'#d97706',S:'#059669',W:'#dc2626'};
+function addLoad(){ST.loads.push({id:ST.lc++,cat:'D',type:'udl',val:0,pos:0});renderLoads();drawBeam();}
+function rmLoad(id){ST.loads=ST.loads.filter(l=>l.id!==id);renderLoads();drawBeam();}
+function upLoad(id,p,v){const l=ST.loads.find(x=>x.id===id);if(l){l[p]=v;renderLoads();drawBeam();}}
+function renderLoads(){
+  document.getElementById('loadsCont').innerHTML=ST.loads.map(l=>`<div class="load-entry"><div class="load-hdr"><span class="tag ${l.cat}">${l.cat} - ${l.cat==='D'?'Dead':l.cat==='L'?'Live':l.cat==='S'?'Snow':'Wind'}</span><button class="btn btn-sm btn-rm" onclick="rmLoad(${l.id})">✕</button></div>
+  <div class="row r3"><div><label>Category</label><select onchange="upLoad(${l.id},'cat',this.value)"><option value="D" ${l.cat==='D'?'selected':''}>D - Dead</option><option value="L" ${l.cat==='L'?'selected':''}>L - Live</option><option value="S" ${l.cat==='S'?'selected':''}>S - Snow</option><option value="W" ${l.cat==='W'?'selected':''}>W - Wind</option></select></div>
+  <div><label>Type</label><select onchange="upLoad(${l.id},'type',this.value)"><option value="udl" ${l.type==='udl'?'selected':''}>UDL</option><option value="point_mid" ${l.type==='point_mid'?'selected':''}>Point (mid)</option><option value="point_any" ${l.type==='point_any'?'selected':''}>Point (pos)</option></select></div>
+  <div><label>${l.type==='udl'?'kN/m':'kN'}</label><input type="number" value="${l.val}" step="0.1" min="0" onchange="upLoad(${l.id},'val',parseFloat(this.value)||0)"></div></div>
+  ${l.type==='point_any'?`<div class="row"><div><label>Position (m)</label><input type="number" value="${l.pos}" step="0.1" min="0" onchange="upLoad(${l.id},'pos',parseFloat(this.value)||0)"></div><div></div></div>`:''}</div>`).join('');}
+
+// ===== UI: Beam Diagram =====
+function drawBeam(){
+  const svg=document.getElementById('beamSVG');
+  const span=parseFloat(document.getElementById('iSpan').value)||6;
+  const sup=getSup();
+  const W=700,pad=50,beamY=110,bL=W-2*pad;
+  let s=`<style>text{font-family:'JetBrains Mono',monospace;font-size:10px;fill:#7a7f95}</style>`;
+  s+=`<line x1="${pad}" y1="${beamY}" x2="${pad+bL}" y2="${beamY}" stroke="#2563eb" stroke-width="3"/>`;
+
+  if(sup==='cantilever'){
+    // Fixed support at left
+    s+=`<line x1="${pad}" y1="${beamY-16}" x2="${pad}" y2="${beamY+16}" stroke="#2563eb" stroke-width="3"/>`;
+    for(let i=-14;i<=14;i+=6) s+=`<line x1="${pad}" y1="${beamY+i}" x2="${pad-9}" y2="${beamY+i+5}" stroke="#2563eb" stroke-width="1"/>`;
+    // Deflected shape - cantilever
+    let pts=[];for(let i=0;i<=30;i++){const t=i/30;pts.push(`${pad+t*bL},${beamY+t*t*20+4}`);}
+    s+=`<polyline points="${pts.join(' ')}" fill="none" stroke="#059669" stroke-width="1.2" stroke-dasharray="4,3" opacity="0.5"/>`;
+  } else {
+    // Pin support left
+    s+=`<polygon points="${pad-9},${beamY+16} ${pad+9},${beamY+16} ${pad},${beamY}" fill="#e8eaef" stroke="#2563eb" stroke-width="1.5"/>`;
+    s+=`<line x1="${pad-12}" y1="${beamY+18}" x2="${pad+12}" y2="${beamY+18}" stroke="#2563eb" stroke-width="1.5"/>`;
+    // Roller support right
+    s+=`<polygon points="${pad+bL-9},${beamY+12} ${pad+bL+9},${beamY+12} ${pad+bL},${beamY}" fill="#e8eaef" stroke="#2563eb" stroke-width="1.5"/>`;
+    s+=`<circle cx="${pad+bL}" cy="${beamY+16}" r="4" fill="#e8eaef" stroke="#2563eb" stroke-width="1.5"/>`;
+    s+=`<line x1="${pad+bL-12}" y1="${beamY+22}" x2="${pad+bL+12}" y2="${beamY+22}" stroke="#2563eb" stroke-width="1.5"/>`;
+    // Deflected shape - simply supported
+    let pts=[];for(let i=0;i<=30;i++){const t=i/30;pts.push(`${pad+t*bL},${beamY+Math.sin(Math.PI*t)*16+5}`);}
+    s+=`<polyline points="${pts.join(' ')}" fill="none" stroke="#059669" stroke-width="1.2" stroke-dasharray="4,3" opacity="0.5"/>`;
+  }
+
+  // Span dimension
+  s+=`<line x1="${pad}" y1="${beamY+32}" x2="${pad+bL}" y2="${beamY+32}" stroke="#c0c4d0" stroke-width="0.8"/>`;
+  s+=`<line x1="${pad}" y1="${beamY+27}" x2="${pad}" y2="${beamY+37}" stroke="#c0c4d0" stroke-width="0.8"/>`;
+  s+=`<line x1="${pad+bL}" y1="${beamY+27}" x2="${pad+bL}" y2="${beamY+37}" stroke="#c0c4d0" stroke-width="0.8"/>`;
+  s+=`<text x="${pad+bL/2}" y="${beamY+48}" text-anchor="middle">${span} m</text>`;
+  // Loads
+  const grp={};
+  ST.loads.forEach(l=>{if(l.val<=0)return;const k=l.cat+'_'+l.type;if(!grp[k])grp[k]={cat:l.cat,type:l.type,loads:[l]};else grp[k].loads.push(l);});
+  let li=0;
+  Object.values(grp).forEach(g=>{
+    const col=catColors[g.cat];const yOff=beamY-35-li*30;const tv=g.loads.reduce((s,l)=>s+l.val,0);
+    if(g.type==='udl'){
+      const nA=10,sp=bL/(nA-1);
+      for(let i=0;i<nA;i++){const x=pad+sp*i;s+=`<line x1="${x}" y1="${yOff+12}" x2="${x}" y2="${beamY-3}" stroke="${col}" stroke-width="1" opacity="0.6"/><polygon points="${x-2},${beamY-4} ${x+2},${beamY-4} ${x},${beamY-1}" fill="${col}"/>`;}
+      s+=`<line x1="${pad}" y1="${yOff+12}" x2="${pad+bL}" y2="${yOff+12}" stroke="${col}" stroke-width="1"/>`;
+      s+=`<text x="${pad+bL/2}" y="${yOff+6}" text-anchor="middle" fill="${col}" font-size="9" font-weight="600">${tv} kN/m (${g.cat})</text>`;
+    } else {
+      g.loads.forEach(l=>{let x=l.type==='point_mid'?pad+bL/2:pad+(l.pos/span)*bL;x=Math.max(pad,Math.min(pad+bL,x));
+      s+=`<line x1="${x}" y1="${yOff}" x2="${x}" y2="${beamY-3}" stroke="${col}" stroke-width="1.5"/><polygon points="${x-3},${beamY-5} ${x+3},${beamY-5} ${x},${beamY}" fill="${col}"/>`;
+      s+=`<text x="${x}" y="${yOff-5}" text-anchor="middle" fill="${col}" font-size="9" font-weight="600">${l.val} kN (${l.cat})</text>`;});
+    }
+    li++;
+  });
+  const neededH=Math.max(200,160+li*30);
+  svg.setAttribute('viewBox',`0 0 ${W} ${neededH}`);
+  svg.innerHTML=s;
+}
+
+// ===== UI: Combo Editor =====
+function toggleComboEditor(){const el=document.getElementById('comboEditor');el.style.display=el.style.display==='none'?'block':'none';}
+function renderComboEditor(){
+  const svc=customSvc||DEF_SVC.map(c=>({...c,f:{...c.f}}));
+  const lrfd=customLrfd||DEF_LRFD.map(c=>({...c,f:{...c.f}}));
+  const mkList=(combos,t)=>combos.map((c,i)=>`<div class="ce-row"><input class="ce-name" value="${c.name}" onchange="updCombo('${t}',${i},'name',this.value)"> D:<input type="number" step="0.05" value="${c.f.D}" onchange="updCombo('${t}',${i},'D',this.value)"> L:<input type="number" step="0.05" value="${c.f.L}" onchange="updCombo('${t}',${i},'L',this.value)"> S:<input type="number" step="0.05" value="${c.f.S}" onchange="updCombo('${t}',${i},'S',this.value)"> W:<input type="number" step="0.05" value="${c.f.W}" onchange="updCombo('${t}',${i},'W',this.value)"> <button class="btn btn-sm btn-rm" onclick="rmCombo('${t}',${i})">✕</button></div>`).join('');
+  document.getElementById('svcComboList').innerHTML=mkList(svc,'svc');
+  document.getElementById('lrfdComboList').innerHTML=mkList(lrfd,'lrfd');
+}
+function ensureCombos(){if(!customSvc)customSvc=DEF_SVC.map(c=>({...c,f:{...c.f}}));if(!customLrfd)customLrfd=DEF_LRFD.map(c=>({...c,f:{...c.f}}));}
+function updCombo(t,i,k,v){ensureCombos();const arr=t==='svc'?customSvc:customLrfd;if(k==='name')arr[i].name=v;else arr[i].f[k]=parseFloat(v)||0;}
+function rmCombo(t,i){ensureCombos();(t==='svc'?customSvc:customLrfd).splice(i,1);renderComboEditor();}
+function addCombo(t){ensureCombos();(t==='svc'?customSvc:customLrfd).push({name:'Custom',f:{D:1,L:0,S:0,W:0}});renderComboEditor();}
+function resetCombos(){customSvc=null;customLrfd=null;renderComboEditor();}
+
+// ===== UI: Deflection limit =====
+document.getElementById('iDefl').addEventListener('change',function(){document.getElementById('customDeflW').style.display=this.value==='custom'?'flex':'none';});
+
+// ===== UTILITY =====
+function uCol(v){return v<=50?'var(--green)':v<=80?'var(--orange)':'var(--red)';}
+function uBar(v){return `<div class="ubar-wrap"><div class="ubar" style="width:${Math.min(v,100)}%;background:${uCol(v)}"></div></div>`;}
+
+// ===== MAIN CALCULATE =====
+function calculate(){
+  const span=parseFloat(document.getElementById('iSpan').value);
+  const dSel=document.getElementById('iDefl').value;
+  const dDiv=dSel==='custom'?parseFloat(document.getElementById('iDeflC').value):parseFloat(dSel);
+  const E=getE(),fy=getFy();
+  const dbF=document.getElementById('iDB').value;
+  const inclSW=document.getElementById('iSW').checked;
+  const sup=getSup();
+  if(!span||span<=0){alert('Enter a valid span.');return;}
+  if(ST.loads.length===0||ST.loads.every(l=>l.val<=0)){alert('Add at least one load with value > 0.');return;}
+  const Lm=span,Lmm=span*1000,dLim=Lmm/dDiv;
+  const userLoads=ST.loads.filter(l=>l.val>0).map(l=>({cat:l.cat,type:l.type,value:l.val,pos:l.pos}));
+  let secs=SECTIONS;if(dbF!=='all')secs=secs.filter(s=>s.type===dbF);
+  const sorted=[...secs].sort((a,b)=>a.kg-b.kg);
+  const svcC=getSvc(),lrfdC=getLrfd();
+  const results=[];
+  sorted.forEach(sec=>{
+    const I=sec.Iy*1e4,W=sec.Wel*1e3;
+    const sw=inclSW?(sec.kg*9.81/1000):0;
+    const loads=[...userLoads];if(inclSW)loads.push({cat:'D',type:'udl',value:sw,pos:0});
+    // Governing service (max deflection)
+    let maxD=0;svcC.forEach(c=>{const r=applyCombo(c,loads,Lmm,Lm,E,I,sup);if(r.d>maxD)maxD=r.d;});
+    // Governing LRFD (max M, max V)
+    let maxM=0,maxV=0;lrfdC.forEach(c=>{const r=applyCombo(c,loads,Lmm,Lm,E,I,sup);if(r.m>maxM)maxM=r.m;if(r.v>maxV)maxV=r.v;});
+    const sigma=(maxM*1e6)/W;
+    const Vrd=(sec.Av*100*fy)/(Math.sqrt(3)*1000);
+    const dUtil=maxD/dLim*100,bUtil=sigma/fy*100,sUtil=maxV/Vrd*100;
+    results.push({...sec,sw,maxD,maxM,maxV,sigma,Vrd,dUtil,bUtil,sUtil,
+      dOK:maxD<=dLim,bOK:sigma<=fy,sOK:maxV<=Vrd,loads});
+  });
+  lastResults=results;lastDDiv=dDiv;
+  lastCalc={Lm,Lmm,dLim,dDiv,E,fy,inclSW,userLoads,svcC,lrfdC,sup};
+  renderResults();
+}
+
+// ===== RENDER RESULTS =====
+function renderResults(){
+  const R=lastResults,C=lastCalc;if(!R.length){return;}
+  const el=document.getElementById('resContent');
+  document.getElementById('emptyMsg').style.display='none';
+  el.style.display='block';
+  let h='';
+  // Rec card
+  h+=`<div class="rec-card" id="recCard"></div>`;
+  // Summary
+  const best=R[0];
+  h+=`<div class="summary-cards">
+    <div class="scard hl"><div class="scard-lbl">Defl Limit</div><div class="scard-val">${(C.dLim).toFixed(1)}</div><div class="scard-unit">mm (L/${C.dDiv})</div></div>
+    <div class="scard"><div class="scard-lbl">E Modulus</div><div class="scard-val">${(C.E/1000).toFixed(0)}k</div><div class="scard-unit">MPa</div></div>
+    <div class="scard"><div class="scard-lbl">Steel Grade</div><div class="scard-val">${C.fy}</div><div class="scard-unit">MPa</div></div>
+    <div class="scard"><div class="scard-lbl">Sections</div><div class="scard-val">${R.length}</div><div class="scard-unit">found</div></div>
+  </div>`;
+  // Table
+  h+=`<div class="tbl-wrap"><div class="tbl-hdr"><h3>Results — click row to inspect</h3><span class="tbl-cnt">${R.length} sections</span></div>
+  <div style="overflow-x:auto;max-height:500px;overflow-y:auto"><table><thead><tr><th>#</th><th>Section</th><th>Type</th><th>Iy cm⁴</th><th>Wel cm³</th><th>kg/m</th><th>SW</th><th>δ mm</th><th>Defl%</th><th>Bend%</th><th>Shear%</th><th>Status</th></tr></thead>
+  <tbody id="resTbody">${R.map((s,i)=>{
+    const allOK=s.dOK&&s.bOK&&s.sOK;
+    return `<tr class="${i===0?'sel':''}" onclick="selectSec(${i})">
+    <td>${i+1}</td><td><strong>${s.name}</strong></td><td><span class="tag ${s.type==='W'?'D':s.type.charAt(0)}" style="background:rgba(37,99,235,0.06);color:var(--accent)">${s.type}</span></td>
+    <td>${s.Iy}</td><td>${s.Wel}</td><td>${s.kg}</td><td>${s.sw.toFixed(4)}</td>
+    <td>${s.maxD.toFixed(2)}</td>
+    <td style="color:${uCol(s.dUtil)};font-weight:600">${s.dUtil.toFixed(0)}%</td>
+    <td><span style="color:${uCol(s.bUtil)};font-weight:600">${s.bUtil.toFixed(0)}%</span> <span class="badge ${s.bOK?'ok':'fail'}">${s.bOK?'OK':'FAIL'}</span></td>
+    <td><span style="color:${uCol(s.sUtil)};font-weight:600">${s.sUtil.toFixed(0)}%</span> <span class="badge ${s.sOK?'ok':'fail'}">${s.sOK?'OK':'FAIL'}</span></td>
+    <td>${allOK?'<span class="badge ok">ALL OK</span>':'<span class="badge fail">FAIL</span>'}</td></tr>`}).join('')}
+  </tbody></table></div></div>`;
+  // Calc container
+  h+=`<div id="calcCont"></div>`;
+  el.innerHTML=h;
+  selectSec(0);
+}
+
+// ===== SELECT SECTION =====
+function selectSec(idx){
+  const s=lastResults[idx];if(!s)return;const C=lastCalc;
+  const isFirst=idx===0;
+  // Update rec card
+  const card=document.getElementById('recCard');
+  card.innerHTML=`<div class="rec-badge">${isFirst?'★ Recommended — Lightest':'Selected: #'+(idx+1)}</div>
+  <div class="rec-name">${s.name}</div>
+  <div class="rec-sub">${s.type} — ${s.kg} kg/m — Iy: ${s.Iy} cm⁴ — Wel: ${s.Wel} cm³${C.inclSW?' — SW: '+s.sw.toFixed(4)+' kN/m':''}</div>
+  <div class="rec-grid">
+    <div class="rec-stat"><div class="rec-stat-lbl">Deflection</div><div class="rec-stat-val" style="color:${uCol(s.dUtil)}">${s.dUtil.toFixed(0)}%</div>${uBar(s.dUtil)}</div>
+    <div class="rec-stat"><div class="rec-stat-lbl">Bending</div><div class="rec-stat-val" style="color:${uCol(s.bUtil)}">${s.bUtil.toFixed(0)}%</div>${uBar(s.bUtil)}</div>
+    <div class="rec-stat"><div class="rec-stat-lbl">Shear</div><div class="rec-stat-val" style="color:${uCol(s.sUtil)}">${s.sUtil.toFixed(0)}%</div>${uBar(s.sUtil)}</div>
+    <div class="rec-stat"><div class="rec-stat-lbl">Actual δ</div><div class="rec-stat-val">${s.maxD.toFixed(2)}</div><div style="font-size:9px;color:var(--text3)">mm (L/${C.dDiv})</div></div>
+  </div>`;
+  // Highlight row
+  document.querySelectorAll('#resTbody tr').forEach((r,i)=>r.classList.toggle('sel',i===idx));
+  // Build calc summary
+  buildCalc(idx);
+  card.scrollIntoView({behavior:'smooth',block:'nearest'});
+}
+
+// ===== DETAILED CALC SUMMARY =====
+function buildCalc(idx){
+  const cont=document.getElementById('calcCont');if(!cont)return;
+  const s=lastResults[idx],C=lastCalc;
+  const loads=s.loads; // includes SW for this section
+  const svcC=C.svcC,lrfdC=C.lrfdC;
+  const I=s.Iy*1e4,W=s.Wel*1e3;
+  const Lmm=C.Lmm,Lm=C.Lm,E=C.E,fy=C.fy,dDiv=C.dDiv,sup=C.sup;
+  const supLabel=sup==='cantilever'?'Cantilever':'Simply Supported';
+  const secLabel=idx===0?`${s.name} (Lightest)`:`${s.name} (#${idx+1})`;
+
+  // Per-combo breakdown
+  let svcHTML='';
+  let govSD=0,govSN='';
+  svcC.forEach(c=>{const r=applyCombo(c,loads,Lmm,Lm,E,I,sup);const isG=r.d>govSD;if(isG){govSD=r.d;govSN=c.name;}
+    svcHTML+=`<div class="combo-card${isG?' gov':''}"><div class="combo-lbl">${c.name}${isG?' ★':''}</div><div class="combo-val">${r.d.toFixed(2)} <span style="font-size:9px;color:var(--text3)">mm</span></div></div>`;});
+
+  let lrfdHTML='';
+  let govLM=0,govLMN='',govLV=0,govLVN='';
+  lrfdC.forEach(c=>{const r=applyCombo(c,loads,Lmm,Lm,E,I,sup);if(r.m>govLM){govLM=r.m;govLMN=c.name;}if(r.v>govLV){govLV=r.v;govLVN=c.name;}
+    lrfdHTML+=`<div class="combo-card${c.name===govLMN?' gov':''}"><div class="combo-lbl">${c.name}</div><div class="combo-val">${r.m.toFixed(1)} <span style="font-size:9px;color:var(--text3)">kNm</span></div></div>`;});
+
+  // Load summary
+  let loadHTML='';
+  loads.forEach((l,i)=>{const isSW=C.inclSW&&i===loads.length-1;const lbl=isSW?'Self-Weight':`Load ${i+1}`;
+    loadHTML+=`<div style="padding:3px 0;border-bottom:1px solid var(--bg4)">${lbl}: <span style="color:${catColors[l.cat]};font-weight:600">${l.cat}</span> — ${l.type.toUpperCase()} — <strong>${l.value.toFixed(l.value<1?4:2)} ${l.type==='udl'?'kN/m':'kN'}</strong>${l.type==='point_any'?' @ '+l.pos+'m':''}</div>`;});
+
+  // Verification
+  const Vrd=(s.Av*100*fy)/(Math.sqrt(3)*1000);
+  const sigma=(govLM*1e6)/W;
+
+  cont.innerHTML=`<div class="calc-wrap">
+  <div class="sec-title collapsible" onclick="document.getElementById('calcBody').style.display=document.getElementById('calcBody').style.display==='none'?'block':'none'"><span class="dot" style="background:var(--accent)"></span>Detailed Calculation — ${secLabel}</div>
+  <div id="calcBody">
+    <div class="calc-block"><h4>① Input</h4>
+    Support: <strong>${supLabel}</strong>, L = ${Lm} m = ${Lmm} mm<br>
+    E = ${E.toLocaleString('en-US')} MPa, fy = ${fy} MPa<br>
+    Deflection limit: L/${dDiv} = ${(Lmm/dDiv).toFixed(2)} mm</div>
+
+    <div class="calc-block"><h4>② Applied Loads — ${s.name}</h4>${loadHTML}</div>
+
+    <div class="calc-block"><h4>③ Service Combinations (Deflection)</h4>
+    <div class="combo-grid">${svcHTML}</div>
+    <div class="hl">Governing: <strong>${govSN}</strong> → δ = <strong>${govSD.toFixed(2)} mm</strong> vs limit ${(Lmm/dDiv).toFixed(2)} mm → <strong style="color:${s.dOK?'var(--green)':'var(--red)'}">${s.dOK?'OK':'FAIL'} (${s.dUtil.toFixed(1)}%)</strong></div></div>
+
+    <div class="calc-block"><h4>④ LRFD Combinations (Strength)</h4>
+    <div class="combo-grid">${lrfdHTML}</div>
+    <div class="hl">Governing M: <strong>${govLMN}</strong> → M = <strong>${govLM.toFixed(2)} kNm</strong><br>
+    σ = M/Wel = ${govLM.toFixed(2)}×10⁶ / ${W.toFixed(0)} = <strong>${sigma.toFixed(1)} MPa</strong> vs fy = ${fy} → <strong style="color:${s.bOK?'var(--green)':'var(--red)'}">${s.bOK?'OK':'FAIL'} (${s.bUtil.toFixed(0)}%)</strong><br>
+    Governing V: <strong>${govLVN}</strong> → V = <strong>${govLV.toFixed(2)} kN</strong><br>
+    V_Rd = Av·fy/√3 = ${s.Av}×100×${fy}/√3/1000 = <strong>${Vrd.toFixed(1)} kN</strong> → <strong style="color:${s.sOK?'var(--green)':'var(--red)'}">${s.sOK?'OK':'FAIL'} (${s.sUtil.toFixed(0)}%)</strong></div></div>
+  </div></div>`;
+}
+
+// ===== INIT =====
+addLoad();ST.loads[0].cat='D';ST.loads[0].val=10;
+addLoad();ST.loads[1].cat='L';ST.loads[1].val=15;
+renderLoads();drawBeam();renderComboEditor();
+</script>
+</body>
+</html>
