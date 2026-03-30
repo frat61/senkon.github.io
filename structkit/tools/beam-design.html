@@ -102,6 +102,26 @@ tr.sel td{background:var(--accent-bg);}
 .combo-editor input{padding:3px 4px;font-size:10px;width:40px;}
 .combo-editor input.ce-name{width:100px;}
 @media(max-width:900px){.layout{grid-template-columns:1fr;}.panel{max-height:none;border-right:none;border-bottom:1px solid var(--border);}.results{max-height:none;}.summary-cards,.rec-grid{grid-template-columns:1fr 1fr;}}
+@media(max-width:480px){
+  body{font-size:14px;}
+  .header{padding:10px 14px;}
+  .header h1{font-size:15px;}
+  .panel,.results{padding:12px;}
+  input,select{padding:10px;font-size:13px;border-radius:8px;}
+  label{font-size:11px;margin-bottom:4px;}
+  .row{gap:8px;margin-bottom:10px;}
+  .row.r3{grid-template-columns:1fr 1fr;gap:8px;}
+  .btn-primary{padding:14px;font-size:14px;border-radius:10px;}
+  .btn-add{padding:10px;font-size:12px;}
+  .load-entry{padding:12px;}
+  .card{padding:14px;}
+  .rec-name{font-size:20px;}
+  .rec-grid{grid-template-columns:1fr 1fr;}
+  .summary-cards{grid-template-columns:1fr;}
+  .sec-title{font-size:11px;}
+  .diagram-wrap canvas{height:180px;}
+  .tag{font-size:10px;padding:3px 8px;}
+}
 @media print{.panel,.header{display:none!important;}.layout{grid-template-columns:1fr;}.results{max-height:none;padding:8px;}}
 </style>
 </head>

@@ -7,130 +7,163 @@
 <meta name="apple-mobile-web-app-capable" content="yes">
 <meta name="apple-mobile-web-app-status-bar-style" content="default">
 <link rel="manifest" href="manifest.json">
-<title>StructKit — Senkon</title>
+<title>StructKit — Senkon Engineering</title>
 <style>
 @import url('https://fonts.googleapis.com/css2?family=DM+Sans:wght@400;500;600;700&family=JetBrains+Mono:wght@400;500;600&family=Outfit:wght@400;500;600;700;800&display=swap');
 
 :root {
-  --shell-bg: #f0f2f5;
-  --shell-bg2: #ffffff;
-  --shell-border: #dfe2e8;
-  --shell-text: #1a1d26;
-  --shell-text2: #6b7280;
-  --shell-accent: #2952b3;
-  --shell-accent2: #0a9e7e;
+  --bg: #f0f2f5;
+  --bg2: #ffffff;
+  --border: #dfe2e8;
+  --text: #1a1d26;
+  --text2: #6b7280;
+  --accent: #2952b3;
+  --accent2: #0a9e7e;
   --sidebar-w: 270px;
 }
 
 * { margin:0; padding:0; box-sizing:border-box; }
+body { font-family:'DM Sans',sans-serif; background:var(--bg); color:var(--text); height:100vh; overflow:hidden; display:flex; }
 
-body {
-  font-family: 'DM Sans', sans-serif;
-  background: var(--shell-bg);
-  color: var(--shell-text);
-  height: 100vh;
-  overflow: hidden;
-  display: flex;
-}
-
+/* ===== SIDEBAR ===== */
 .sidebar {
-  width: var(--sidebar-w);
-  min-width: var(--sidebar-w);
-  background: var(--shell-bg2);
-  border-right: 1px solid var(--shell-border);
-  display: flex;
-  flex-direction: column;
-  height: 100vh;
-  transition: margin-left 0.3s;
-  z-index: 50;
-  box-shadow: 1px 0 6px rgba(0,0,0,0.04);
+  width:var(--sidebar-w); min-width:var(--sidebar-w);
+  background:var(--bg2); border-right:1px solid var(--border);
+  display:flex; flex-direction:column; height:100vh;
+  transition:margin-left 0.3s; z-index:50;
+  box-shadow:1px 0 6px rgba(0,0,0,0.04);
 }
-.sidebar.collapsed { margin-left: calc(-1 * var(--sidebar-w)); }
+.sidebar.collapsed { margin-left:calc(-1 * var(--sidebar-w)); }
 
 .sidebar-header {
-  padding: 16px 18px 14px;
-  border-bottom: 1px solid var(--shell-border);
+  padding:14px 16px 12px; border-bottom:1px solid var(--border); cursor:pointer;
 }
-.logo { display: flex; align-items: center; gap: 12px; }
-.logo-img { width: 42px; height: 42px; border-radius: 10px; object-fit: contain; }
-.logo-text { font-family: 'Outfit', sans-serif; font-size: 18px; font-weight: 800; letter-spacing: -0.5px; color: var(--shell-text); }
-.logo-text span { color: var(--shell-accent); }
-.logo-sub { font-size: 9px; color: var(--shell-text2); text-transform: uppercase; letter-spacing: 1.5px; margin-top: 1px; font-weight: 600; }
+.logo { display:flex; align-items:center; gap:10px; }
+.logo-img { width:38px; height:38px; border-radius:8px; object-fit:contain; }
+.logo-text { font-family:'Outfit',sans-serif; font-size:17px; font-weight:800; letter-spacing:-0.5px; }
+.logo-text span { color:var(--accent); }
+.logo-sub { font-size:8px; color:var(--text2); text-transform:uppercase; letter-spacing:1.5px; font-weight:600; margin-top:1px; }
 
-.sidebar-section { padding: 16px 16px 6px; font-size: 9px; font-weight: 700; text-transform: uppercase; letter-spacing: 1.5px; color: var(--shell-text2); }
-.sidebar-nav { flex: 1; overflow-y: auto; padding: 4px 10px; }
+.sidebar-section { padding:14px 14px 5px; font-size:9px; font-weight:700; text-transform:uppercase; letter-spacing:1.5px; color:var(--text2); }
+.sidebar-nav { flex:1; overflow-y:auto; padding:4px 8px; }
 
 .nav-item {
-  display: flex; align-items: center; gap: 10px;
-  padding: 10px 12px; border-radius: 10px; cursor: pointer;
-  transition: all 0.15s; margin-bottom: 2px;
-  font-size: 13px; font-weight: 500; color: var(--shell-text);
-  text-decoration: none; position: relative;
+  display:flex; align-items:center; gap:9px; padding:9px 10px;
+  border-radius:8px; cursor:pointer; transition:all 0.15s; margin-bottom:1px;
+  font-size:13px; font-weight:500; color:var(--text); position:relative;
 }
-.nav-item:hover { background: rgba(41,82,179,0.05); }
-.nav-item.active { background: rgba(41,82,179,0.08); color: var(--shell-accent); }
-.nav-item.active::before {
-  content: ''; position: absolute; left: 0; top: 50%; transform: translateY(-50%);
-  width: 3px; height: 20px; background: var(--shell-accent); border-radius: 0 3px 3px 0;
+.nav-item:hover { background:rgba(41,82,179,0.05); }
+.nav-item.active { background:rgba(41,82,179,0.08); color:var(--accent); }
+.nav-item.active::before { content:''; position:absolute; left:0; top:50%; transform:translateY(-50%); width:3px; height:18px; background:var(--accent); border-radius:0 3px 3px 0; }
+
+.nav-icon { width:30px; height:30px; background:var(--bg); border:1px solid var(--border); border-radius:7px; display:flex; align-items:center; justify-content:center; font-size:14px; flex-shrink:0; }
+.nav-item.active .nav-icon { border-color:rgba(41,82,179,0.25); background:rgba(41,82,179,0.06); }
+.nav-label { flex:1; min-width:0; }
+.nav-label .title { font-weight:600; font-size:12px; white-space:nowrap; overflow:hidden; text-overflow:ellipsis; }
+.nav-label .desc { font-size:9px; color:var(--text2); white-space:nowrap; overflow:hidden; text-overflow:ellipsis; }
+
+.nav-badge { font-family:'JetBrains Mono',monospace; font-size:7px; font-weight:700; padding:2px 5px; border-radius:3px; text-transform:uppercase; letter-spacing:0.5px; }
+.badge-live { background:rgba(10,158,126,0.10); color:var(--accent2); }
+.badge-soon { background:rgba(0,0,0,0.04); color:var(--text2); }
+
+.sidebar-footer { padding:10px 14px; border-top:1px solid var(--border); font-size:9px; color:var(--text2); display:flex; flex-direction:column; gap:6px; }
+.install-btn { display:none; padding:7px 10px; background:rgba(41,82,179,0.06); border:1px solid rgba(41,82,179,0.15); border-radius:7px; color:var(--accent); font-family:'DM Sans',sans-serif; font-size:11px; font-weight:600; cursor:pointer; text-align:center; }
+.install-btn:hover { background:rgba(41,82,179,0.10); }
+
+/* ===== MAIN ===== */
+.main { flex:1; display:flex; flex-direction:column; height:100vh; min-width:0; }
+.topbar { display:none; padding:8px 12px; background:var(--bg2); border-bottom:1px solid var(--border); align-items:center; gap:10px; }
+.menu-btn { width:36px; height:36px; background:none; border:1px solid var(--border); border-radius:8px; color:var(--text); font-size:18px; cursor:pointer; display:flex; align-items:center; justify-content:center; }
+.content-frame { flex:1; border:none; width:100%; height:100%; background:#fff; }
+
+/* ===== HOMEPAGE ===== */
+.homepage {
+  flex:1; overflow-y:auto; background:var(--bg);
 }
-
-.nav-icon {
-  width: 32px; height: 32px; background: var(--shell-bg);
-  border: 1px solid var(--shell-border); border-radius: 8px;
-  display: flex; align-items: center; justify-content: center;
-  font-size: 15px; flex-shrink: 0;
+.home-hero {
+  text-align:center; padding:50px 24px 40px;
+  background:linear-gradient(180deg, #fff 0%, var(--bg) 100%);
 }
-.nav-item.active .nav-icon { border-color: rgba(41,82,179,0.25); background: rgba(41,82,179,0.06); }
+.home-hero img { width:100px; height:100px; object-fit:contain; margin-bottom:16px; }
+.home-hero h1 { font-family:'Outfit',sans-serif; font-size:32px; font-weight:800; letter-spacing:-0.5px; margin-bottom:4px; }
+.home-hero h1 span { color:var(--accent); }
+.home-hero .tagline { font-size:15px; color:var(--text2); max-width:500px; margin:0 auto 6px; line-height:1.6; }
+.home-hero .tagline-tr { font-size:13px; color:var(--text2); opacity:0.7; font-style:italic; max-width:500px; margin:0 auto; }
 
-.nav-label { flex: 1; min-width: 0; }
-.nav-label .title { font-weight: 600; font-size: 13px; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
-.nav-label .desc { font-size: 10px; color: var(--shell-text2); white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
-
-.nav-badge { font-family: 'JetBrains Mono', monospace; font-size: 8px; font-weight: 700; padding: 2px 6px; border-radius: 4px; text-transform: uppercase; letter-spacing: 0.5px; }
-.badge-live { background: rgba(10,158,126,0.10); color: var(--shell-accent2); }
-.badge-soon { background: rgba(0,0,0,0.04); color: var(--shell-text2); }
-
-.sidebar-footer { padding: 12px 14px; border-top: 1px solid var(--shell-border); font-size: 10px; color: var(--shell-text2); display: flex; flex-direction: column; gap: 8px; }
-.install-btn {
-  display: none; padding: 8px 12px;
-  background: rgba(41,82,179,0.06); border: 1px solid rgba(41,82,179,0.15);
-  border-radius: 8px; color: var(--shell-accent);
-  font-family: 'DM Sans', sans-serif; font-size: 12px; font-weight: 600;
-  cursor: pointer; text-align: center; transition: all 0.15s;
+/* About strip */
+.home-about {
+  max-width:900px; margin:0 auto; padding:0 24px 30px;
+  display:grid; grid-template-columns:1fr 1fr 1fr; gap:16px;
 }
-.install-btn:hover { background: rgba(41,82,179,0.10); }
+.about-card {
+  background:var(--bg2); border:1px solid var(--border); border-radius:12px;
+  padding:20px; text-align:center;
+  box-shadow:0 1px 4px rgba(0,0,0,0.04);
+}
+.about-card .ac-icon { font-size:28px; margin-bottom:8px; }
+.about-card .ac-title { font-weight:700; font-size:13px; margin-bottom:4px; }
+.about-card .ac-desc { font-size:11px; color:var(--text2); line-height:1.5; }
+.about-card .ac-desc-tr { font-size:10px; color:var(--text2); opacity:0.6; font-style:italic; margin-top:3px; line-height:1.4; }
 
-.main { flex: 1; display: flex; flex-direction: column; height: 100vh; min-width: 0; }
-.topbar { display: none; padding: 8px 12px; background: var(--shell-bg2); border-bottom: 1px solid var(--shell-border); align-items: center; gap: 10px; }
-.menu-btn { width: 36px; height: 36px; background: none; border: 1px solid var(--shell-border); border-radius: 8px; color: var(--shell-text); font-size: 18px; cursor: pointer; display: flex; align-items: center; justify-content: center; }
-.content-frame { flex: 1; border: none; width: 100%; height: 100%; background: #fff; }
+/* Tools section */
+.home-section-title {
+  max-width:900px; margin:0 auto; padding:10px 24px 12px;
+  font-family:'Outfit',sans-serif; font-size:11px; font-weight:700;
+  text-transform:uppercase; letter-spacing:1.5px; color:var(--text2);
+  display:flex; align-items:center; gap:10px;
+}
+.home-section-title::after { content:''; flex:1; height:1px; background:var(--border); }
 
-.welcome { flex: 1; display: flex; flex-direction: column; align-items: center; justify-content: center; padding: 40px; background: var(--shell-bg); gap: 14px; }
-.welcome-logo { width: 90px; height: 90px; object-fit: contain; animation: float 3s ease-in-out infinite; }
-@keyframes float { 0%, 100% { transform: translateY(0); } 50% { transform: translateY(-6px); } }
-.welcome h2 { font-family: 'Outfit', sans-serif; font-size: 26px; font-weight: 800; letter-spacing: -0.5px; }
-.welcome h2 span { color: var(--shell-accent); }
-.welcome p { color: var(--shell-text2); font-size: 14px; text-align: center; max-width: 420px; line-height: 1.6; }
+.home-tools {
+  max-width:900px; margin:0 auto; padding:0 24px 20px;
+  display:grid; grid-template-columns:repeat(auto-fit, minmax(220px,1fr)); gap:12px;
+}
+.tool-card {
+  background:var(--bg2); border:1px solid var(--border); border-radius:12px;
+  padding:20px; cursor:pointer; transition:all 0.2s;
+  box-shadow:0 1px 4px rgba(0,0,0,0.04); position:relative; overflow:hidden;
+}
+.tool-card:hover { border-color:var(--accent); transform:translateY(-2px); box-shadow:0 8px 24px rgba(41,82,179,0.08); }
+.tool-card .tc-badge { position:absolute; top:12px; right:12px; font-family:'JetBrains Mono',monospace; font-size:8px; font-weight:700; padding:2px 6px; border-radius:3px; text-transform:uppercase; }
+.tool-card .tc-badge.live { background:rgba(10,158,126,0.10); color:var(--accent2); }
+.tool-card .tc-badge.soon { background:rgba(0,0,0,0.04); color:var(--text2); }
+.tool-card .tc-icon { font-size:26px; margin-bottom:10px; }
+.tool-card .tc-title { font-weight:700; font-size:14px; margin-bottom:4px; }
+.tool-card .tc-desc { font-size:11px; color:var(--text2); line-height:1.5; }
+.tool-card.disabled { opacity:0.4; cursor:default; }
+.tool-card.disabled:hover { border-color:var(--border); transform:none; box-shadow:0 1px 4px rgba(0,0,0,0.04); }
 
-.welcome-tools { display: grid; grid-template-columns: repeat(auto-fit, minmax(200px, 1fr)); gap: 12px; margin-top: 20px; max-width: 900px; width: 100%; }
-.welcome-card { background: var(--shell-bg2); border: 1px solid var(--shell-border); border-radius: 12px; padding: 18px; cursor: pointer; transition: all 0.2s; box-shadow: 0 1px 4px rgba(0,0,0,0.04); }
-.welcome-card:hover { border-color: var(--shell-accent); transform: translateY(-2px); box-shadow: 0 8px 24px rgba(41,82,179,0.08); }
-.welcome-card .wc-icon { font-size: 28px; margin-bottom: 10px; }
-.welcome-card .wc-title { font-weight: 700; font-size: 14px; margin-bottom: 4px; }
-.welcome-card .wc-desc { font-size: 11px; color: var(--shell-text2); line-height: 1.5; }
-.welcome-card.disabled { opacity: 0.4; cursor: default; }
-.welcome-card.disabled:hover { border-color: var(--shell-border); transform: none; box-shadow: 0 1px 4px rgba(0,0,0,0.04); }
+/* Contact strip */
+.home-contact {
+  max-width:900px; margin:0 auto; padding:10px 24px 40px;
+  display:flex; justify-content:center; gap:24px; flex-wrap:wrap;
+  font-size:12px; color:var(--text2);
+}
+.home-contact a { color:var(--accent); text-decoration:none; font-weight:600; }
+.home-contact a:hover { text-decoration:underline; }
+.contact-item { display:flex; align-items:center; gap:6px; }
 
-::-webkit-scrollbar { width: 5px; }
-::-webkit-scrollbar-track { background: transparent; }
-::-webkit-scrollbar-thumb { background: #c5c9d2; border-radius: 3px; }
+/* ===== SCROLLBAR ===== */
+::-webkit-scrollbar { width:5px; }
+::-webkit-scrollbar-track { background:transparent; }
+::-webkit-scrollbar-thumb { background:#c5c9d2; border-radius:3px; }
 
-@media (max-width: 768px) {
-  .sidebar { position: fixed; left: 0; top: 0; height: 100vh; box-shadow: 4px 0 24px rgba(0,0,0,0.12); }
-  .sidebar.collapsed { margin-left: calc(-1 * var(--sidebar-w)); }
-  .topbar { display: flex; }
-  .overlay { display: none; position: fixed; inset: 0; background: rgba(0,0,0,0.3); z-index: 40; }
-  .overlay.show { display: block; }
+/* ===== MOBILE ===== */
+@media (max-width:768px) {
+  .sidebar { position:fixed; left:0; top:0; height:100vh; box-shadow:4px 0 24px rgba(0,0,0,0.12); }
+  .sidebar.collapsed { margin-left:calc(-1 * var(--sidebar-w)); }
+  .topbar { display:flex; }
+  .overlay { display:none; position:fixed; inset:0; background:rgba(0,0,0,0.3); z-index:40; }
+  .overlay.show { display:block; }
+
+  .home-hero { padding:30px 20px 24px; }
+  .home-hero img { width:70px; height:70px; }
+  .home-hero h1 { font-size:24px; }
+  .home-hero .tagline { font-size:13px; }
+  .home-about { grid-template-columns:1fr; padding:0 16px 20px; gap:10px; }
+  .home-tools { grid-template-columns:1fr; padding:0 16px 16px; }
+  .home-section-title { padding:8px 16px 10px; }
+  .home-contact { padding:8px 16px 30px; gap:16px; flex-direction:column; align-items:center; }
 }
 </style>
 </head>
@@ -139,7 +172,7 @@ body {
 <div class="overlay" id="overlay" onclick="toggleSidebar()"></div>
 
 <nav class="sidebar" id="sidebar">
-  <div class="sidebar-header">
+  <div class="sidebar-header" onclick="goHome()">
     <div class="logo">
       <img class="logo-img" src="senkonlogo.png" alt="Senkon">
       <div>
@@ -151,144 +184,173 @@ body {
 
   <div class="sidebar-nav">
     <div class="sidebar-section">Steel Design</div>
-
     <div class="nav-item" onclick="loadTool('beam-design','Beam Preliminary Design')">
       <div class="nav-icon">⬡</div>
-      <div class="nav-label">
-        <div class="title">Beam Design</div>
-        <div class="desc">Section selection by deflection</div>
-      </div>
+      <div class="nav-label"><div class="title">Beam Design</div><div class="desc">Section selection by deflection</div></div>
       <span class="nav-badge badge-live">Live</span>
     </div>
-
     <div class="nav-item" onclick="loadTool('beam-analyzer','Beam Analyzer')">
       <div class="nav-icon">📐</div>
-      <div class="nav-label">
-        <div class="title">Beam Analyzer</div>
-        <div class="desc">Support conditions & diagrams</div>
-      </div>
+      <div class="nav-label"><div class="title">Beam Analyzer</div><div class="desc">Support conditions & diagrams</div></div>
       <span class="nav-badge badge-live">Live</span>
     </div>
-
     <div class="nav-item disabled" style="opacity:0.4;cursor:default">
       <div class="nav-icon">◈</div>
-      <div class="nav-label">
-        <div class="title">Column Design</div>
-        <div class="desc">Axial + buckling check</div>
-      </div>
+      <div class="nav-label"><div class="title">Column Design</div><div class="desc">Axial + buckling check</div></div>
       <span class="nav-badge badge-soon">Soon</span>
     </div>
-
     <div class="nav-item disabled" style="opacity:0.4;cursor:default">
       <div class="nav-icon">⬢</div>
-      <div class="nav-label">
-        <div class="title">Connection Design</div>
-        <div class="desc">Bolted & welded joints</div>
-      </div>
+      <div class="nav-label"><div class="title">Connection Design</div><div class="desc">Bolted & welded joints</div></div>
       <span class="nav-badge badge-soon">Soon</span>
     </div>
 
     <div class="sidebar-section">Concrete Design</div>
-
     <div class="nav-item" onclick="loadTool('punching-shear','Slab Punching Shear — ACI 318')">
       <div class="nav-icon">▦</div>
-      <div class="nav-label">
-        <div class="title">Punching Shear</div>
-        <div class="desc">Slab punching design — ACI 318-08</div>
-      </div>
+      <div class="nav-label"><div class="title">Punching Shear</div><div class="desc">Slab punching — ACI 318-08</div></div>
       <span class="nav-badge badge-live">Live</span>
     </div>
-
     <div class="nav-item disabled" style="opacity:0.4;cursor:default">
       <div class="nav-icon">▣</div>
-      <div class="nav-label">
-        <div class="title">RC Beam Design</div>
-        <div class="desc">Reinforced concrete beam</div>
-      </div>
+      <div class="nav-label"><div class="title">RC Beam Design</div><div class="desc">Reinforced concrete beam</div></div>
       <span class="nav-badge badge-soon">Soon</span>
     </div>
-
     <div class="nav-item disabled" style="opacity:0.4;cursor:default">
       <div class="nav-icon">▤</div>
-      <div class="nav-label">
-        <div class="title">RC Column Design</div>
-        <div class="desc">Interaction diagram</div>
-      </div>
+      <div class="nav-label"><div class="title">RC Column Design</div><div class="desc">Interaction diagram</div></div>
       <span class="nav-badge badge-soon">Soon</span>
     </div>
 
     <div class="sidebar-section">Utilities</div>
-
     <div class="nav-item disabled" style="opacity:0.4;cursor:default">
       <div class="nav-icon">◎</div>
-      <div class="nav-label">
-        <div class="title">Unit Converter</div>
-        <div class="desc">Engineering unit conversion</div>
-      </div>
+      <div class="nav-label"><div class="title">Unit Converter</div><div class="desc">Engineering unit conversion</div></div>
       <span class="nav-badge badge-soon">Soon</span>
     </div>
-
     <div class="nav-item disabled" style="opacity:0.4;cursor:default">
       <div class="nav-icon">☰</div>
-      <div class="nav-label">
-        <div class="title">Section Properties</div>
-        <div class="desc">Database & lookup</div>
-      </div>
+      <div class="nav-label"><div class="title">Section Properties</div><div class="desc">Database & lookup</div></div>
       <span class="nav-badge badge-soon">Soon</span>
     </div>
   </div>
 
   <div class="sidebar-footer">
     <button class="install-btn" id="installBtn" onclick="installApp()">⬇ Install StructKit</button>
-    <div style="text-align:center">StructKit v1.1 — Senkon Engineering</div>
+    <div style="text-align:center">StructKit v1.1 — Senkon</div>
   </div>
 </nav>
 
 <div class="main">
   <div class="topbar" id="topbar">
     <button class="menu-btn" onclick="toggleSidebar()">☰</button>
-    <span id="topTitle" style="font-weight:600;font-size:14px">StructKit</span>
+    <span id="topTitle" style="font-weight:600;font-size:14px;cursor:pointer" onclick="goHome()">StructKit</span>
   </div>
 
-  <div class="welcome" id="welcomeScreen">
-    <img class="welcome-logo" src="senkonlogo.png" alt="Senkon">
-    <h2>Struct<span>Kit</span></h2>
-    <p>Your personal structural engineering toolkit. Select a tool from the sidebar or click below to get started.</p>
-    <div class="welcome-tools">
-      <div class="welcome-card" onclick="loadTool('beam-design','Beam Preliminary Design')">
-        <div class="wc-icon">⬡</div>
-        <div class="wc-title">Steel Beam Design</div>
-        <div class="wc-desc">Preliminary section selection based on deflection, bending & shear. ASCE 7 LRFD combinations.</div>
+  <!-- HOMEPAGE -->
+  <div class="homepage" id="homePage">
+    <div class="home-hero">
+      <img src="senkonlogo.png" alt="Senkon">
+      <h1>Struct<span>Kit</span></h1>
+      <div class="tagline">Structural engineering tools by Senkon — for steel, concrete, seismic evaluation & complex building design.</div>
+      <div class="tagline-tr">Senkon Mühendislik yapısal analiz ve tasarım araçları — çelik, betonarme, deprem değerlendirmesi ve karmaşık bina projeleri.</div>
+    </div>
+
+    <div class="home-about">
+      <div class="about-card">
+        <div class="ac-icon">🏗️</div>
+        <div class="ac-title">Steel & RC Structures</div>
+        <div class="ac-desc">Design and analysis of steel and reinforced concrete structures for complex projects.</div>
+        <div class="ac-desc-tr">Karmaşık projeler için çelik ve betonarme yapı tasarımı ve analizi.</div>
       </div>
-      <div class="welcome-card" onclick="loadTool('beam-analyzer','Beam Analyzer')">
-        <div class="wc-icon">📐</div>
-        <div class="wc-title">Beam Analyzer</div>
-        <div class="wc-desc">Multiple support conditions, interactive diagrams, shear & moment analysis with load combinations.</div>
+      <div class="about-card">
+        <div class="ac-icon">🔬</div>
+        <div class="ac-title">Seismic Evaluation</div>
+        <div class="ac-desc">Earthquake assessment and retrofit design for existing buildings.</div>
+        <div class="ac-desc-tr">Mevcut binalar için deprem değerlendirmesi ve güçlendirme tasarımı.</div>
       </div>
-      <div class="welcome-card" onclick="loadTool('punching-shear','Slab Punching Shear — ACI 318')">
-        <div class="wc-icon">▦</div>
-        <div class="wc-title">Punching Shear</div>
-        <div class="wc-desc">Slab punching shear design per ACI 318-08 with step-by-step calculation report.</div>
+      <div class="about-card">
+        <div class="ac-icon">✈️</div>
+        <div class="ac-title">Complex Buildings</div>
+        <div class="ac-desc">Airports, commercial, industrial and large-scale infrastructure projects.</div>
+        <div class="ac-desc-tr">Havalimanları, ticari, endüstriyel ve büyük ölçekli altyapı projeleri.</div>
       </div>
-      <div class="welcome-card disabled">
-        <div class="wc-icon">◈</div>
-        <div class="wc-title">Column Design</div>
-        <div class="wc-desc">Coming soon — axial capacity with buckling analysis.</div>
+    </div>
+
+    <div class="home-section-title">Engineering Tools / Mühendislik Araçları</div>
+
+    <div class="home-tools">
+      <div class="tool-card" onclick="loadTool('beam-design','Beam Preliminary Design')">
+        <span class="tc-badge live">Live</span>
+        <div class="tc-icon">⬡</div>
+        <div class="tc-title">Steel Beam Design</div>
+        <div class="tc-desc">Preliminary section selection — deflection, bending & shear with ASCE 7 LRFD combinations.</div>
       </div>
+      <div class="tool-card" onclick="loadTool('beam-analyzer','Beam Analyzer')">
+        <span class="tc-badge live">Live</span>
+        <div class="tc-icon">📐</div>
+        <div class="tc-title">Beam Analyzer</div>
+        <div class="tc-desc">Multiple support conditions, SFD/BMD diagrams, load combinations.</div>
+      </div>
+      <div class="tool-card" onclick="loadTool('punching-shear','Slab Punching Shear — ACI 318')">
+        <span class="tc-badge live">Live</span>
+        <div class="tc-icon">▦</div>
+        <div class="tc-title">Punching Shear</div>
+        <div class="tc-desc">Slab punching shear design per ACI 318-08 with calculation report.</div>
+      </div>
+      <div class="tool-card disabled">
+        <span class="tc-badge soon">Soon</span>
+        <div class="tc-icon">◈</div>
+        <div class="tc-title">Column Design</div>
+        <div class="tc-desc">Axial capacity with buckling analysis.</div>
+      </div>
+      <div class="tool-card disabled">
+        <span class="tc-badge soon">Soon</span>
+        <div class="tc-icon">▣</div>
+        <div class="tc-title">RC Beam Design</div>
+        <div class="tc-desc">Reinforced concrete beam design.</div>
+      </div>
+      <div class="tool-card disabled">
+        <span class="tc-badge soon">Soon</span>
+        <div class="tc-icon">◎</div>
+        <div class="tc-title">Unit Converter</div>
+        <div class="tc-desc">Engineering unit conversion tool.</div>
+      </div>
+    </div>
+
+    <div class="home-section-title">Contact / İletişim</div>
+
+    <div class="home-contact">
+      <div class="contact-item">✉️ <a href="mailto:firatsenturk@senkonmuhendislik.com">firatsenturk@senkonmuhendislik.com</a></div>
+      <div class="contact-item">📞 <a href="tel:+905309250461">0530 925 04 61</a></div>
+      <div class="contact-item">🌐 <a href="https://senkon.github.io/structkit/" target="_blank">senkon.github.io/structkit</a></div>
     </div>
   </div>
 
+  <!-- Tool iframe -->
   <iframe class="content-frame" id="toolFrame" style="display:none" sandbox="allow-scripts allow-same-origin"></iframe>
 </div>
 
 <script>
+function goHome() {
+  document.querySelectorAll('.nav-item').forEach(n => n.classList.remove('active'));
+  document.getElementById('homePage').style.display = '';
+  document.getElementById('toolFrame').style.display = 'none';
+  document.getElementById('toolFrame').src = '';
+  document.getElementById('topTitle').textContent = 'StructKit';
+  if (window.innerWidth <= 768) {
+    const sb = document.getElementById('sidebar');
+    if (!sb.classList.contains('collapsed')) toggleSidebar();
+  }
+}
+
 function loadTool(toolId, title) {
   document.querySelectorAll('.nav-item').forEach(n => n.classList.remove('active'));
   const clicked = event?.currentTarget;
   if (clicked && !clicked.classList.contains('disabled')) clicked.classList.add('active');
   else document.querySelector(`.nav-item[onclick*="${toolId}"]`)?.classList.add('active');
 
-  document.getElementById('welcomeScreen').style.display = 'none';
+  document.getElementById('homePage').style.display = 'none';
   const frame = document.getElementById('toolFrame');
   frame.style.display = 'block';
   frame.src = `tools/${toolId}.html`;
@@ -304,23 +366,10 @@ function toggleSidebar() {
 if (window.innerWidth <= 768) document.getElementById('sidebar').classList.add('collapsed');
 
 let deferredPrompt;
-window.addEventListener('beforeinstallprompt', (e) => {
-  e.preventDefault(); deferredPrompt = e;
-  document.getElementById('installBtn').style.display = 'block';
-});
-function installApp() {
-  if (!deferredPrompt) return;
-  deferredPrompt.prompt();
-  deferredPrompt.userChoice.then(r => {
-    if (r.outcome === 'accepted') document.getElementById('installBtn').style.display = 'none';
-    deferredPrompt = null;
-  });
-}
+window.addEventListener('beforeinstallprompt', (e) => { e.preventDefault(); deferredPrompt = e; document.getElementById('installBtn').style.display = 'block'; });
+function installApp() { if (!deferredPrompt) return; deferredPrompt.prompt(); deferredPrompt.userChoice.then(r => { if (r.outcome==='accepted') document.getElementById('installBtn').style.display='none'; deferredPrompt=null; }); }
 window.addEventListener('appinstalled', () => document.getElementById('installBtn').style.display = 'none');
-
-if ('serviceWorker' in navigator) {
-  navigator.serviceWorker.register('sw.js').catch(e => console.log('SW fail:', e));
-}
+if ('serviceWorker' in navigator) navigator.serviceWorker.register('sw.js').catch(e => console.log('SW fail:', e));
 </script>
 </body>
 </html>
