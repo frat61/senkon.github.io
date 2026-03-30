@@ -211,6 +211,11 @@ body { font-family:'DM Sans',sans-serif; background:var(--bg); color:var(--text)
       <div class="nav-label"><div class="title">Punching Shear</div><div class="desc">Slab punching — ACI 318-08</div></div>
       <span class="nav-badge badge-live">Live</span>
     </div>
+    <div class="nav-item" onclick="loadTool('foundation-rft','Foundation Reinforcement Design')">
+      <div class="nav-icon">▧</div>
+      <div class="nav-label"><div class="title">Foundation RFT</div><div class="desc">Temel donatı hesabı — TS500</div></div>
+      <span class="nav-badge badge-live">Live</span>
+    </div>
     <div class="nav-item disabled" style="opacity:0.4;cursor:default">
       <div class="nav-icon">▣</div>
       <div class="nav-label"><div class="title">RC Beam Design</div><div class="desc">Reinforced concrete beam</div></div>
@@ -297,6 +302,12 @@ body { font-family:'DM Sans',sans-serif; background:var(--bg); color:var(--text)
         <div class="tc-icon">▦</div>
         <div class="tc-title">Punching Shear</div>
         <div class="tc-desc">Slab punching shear design per ACI 318-08 with calculation report.</div>
+      </div>
+      <div class="tool-card" onclick="loadTool('foundation-rft','Foundation Reinforcement Design')">
+        <span class="tc-badge live">Live</span>
+        <div class="tc-icon">▧</div>
+        <div class="tc-title">Foundation RFT</div>
+        <div class="tc-desc">Temel donatı hesabı — flexural capacity for 4 directions per TS500.</div>
       </div>
       <div class="tool-card disabled">
         <span class="tc-badge soon">Soon</span>

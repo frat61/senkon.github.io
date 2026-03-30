@@ -1,0 +1,472 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Foundation Reinforcement Design</title>
+<style>
+@import url('https://fonts.googleapis.com/css2?family=DM+Sans:wght@300;400;500;600;700&family=JetBrains+Mono:wght@400;500;600&family=Outfit:wght@400;500;600;700;800&display=swap');
+
+:root {
+  --bg:#f0f2f5;--bg2:#ffffff;--card:#ffffff;--card2:#f8f9fb;
+  --input-bg:#f5f6f8;--border:#dfe2e8;--border-focus:#3b6de0;
+  --text:#1a1d26;--text2:#5f6577;--muted:#8b90a0;
+  --accent:#3b6de0;--accent-glow:rgba(59,109,224,0.10);
+  --teal:#0a9e7e;--teal-glow:rgba(10,158,126,0.08);
+  --red:#d9394c;--red-glow:rgba(217,57,76,0.06);
+  --warn:#c8850a;--warn-glow:rgba(200,133,10,0.06);
+  --pass-bg:rgba(10,158,126,0.06);--fail-bg:rgba(217,57,76,0.05);
+  --radius:12px;--radius-sm:8px;
+}
+*{margin:0;padding:0;box-sizing:border-box;}
+html{font-size:14px;}
+body{font-family:'DM Sans',sans-serif;background:var(--bg);color:var(--text);min-height:100vh;line-height:1.55;}
+
+.header{background:var(--bg2);border-bottom:1px solid var(--border);padding:14px 24px;display:flex;align-items:center;justify-content:space-between;position:sticky;top:0;z-index:100;box-shadow:0 1px 4px rgba(0,0,0,0.06);}
+.header h1{font-family:'Outfit',sans-serif;font-weight:700;font-size:18px;background:linear-gradient(135deg,#3b6de0,#0a9e7e);-webkit-background-clip:text;-webkit-text-fill-color:transparent;}
+.header .code-ref{font-family:'JetBrains Mono',monospace;font-size:11px;color:var(--text2);background:var(--card);padding:4px 10px;border-radius:6px;border:1px solid var(--border);}
+
+.container{max-width:1400px;margin:0 auto;padding:20px;display:grid;grid-template-columns:1fr 1fr;gap:20px;}
+
+.panel{background:var(--card);border:1px solid var(--border);border-radius:var(--radius);overflow:hidden;box-shadow:0 2px 8px rgba(0,0,0,0.05);}
+.panel-title{font-family:'Outfit',sans-serif;font-weight:600;font-size:13px;text-transform:uppercase;letter-spacing:1.2px;color:var(--text2);padding:14px 18px 10px;border-bottom:1px solid var(--border);display:flex;align-items:center;gap:8px;}
+.panel-title .dot{width:7px;height:7px;border-radius:50%;background:var(--accent);}
+.panel-body{padding:16px 18px;}
+
+.input-section{margin-bottom:16px;}
+.input-section-label{font-size:11px;font-weight:600;text-transform:uppercase;letter-spacing:1px;color:var(--accent);margin-bottom:10px;display:flex;align-items:center;gap:6px;}
+.input-section-label::before{content:'';width:14px;height:1px;background:var(--accent);opacity:0.5;}
+
+.input-row{display:grid;grid-template-columns:1fr 1fr;gap:10px;margin-bottom:8px;}
+.input-row.triple{grid-template-columns:1fr 1fr 1fr;}
+.input-row.quad{grid-template-columns:1fr 1fr 1fr 1fr;}
+.input-row.single{grid-template-columns:1fr;}
+
+.field{display:flex;flex-direction:column;gap:4px;}
+.field label{font-size:11px;color:var(--text2);font-weight:500;display:flex;align-items:center;gap:4px;}
+.field label .unit{font-family:'JetBrains Mono',monospace;font-size:10px;color:var(--muted);}
+.field input,.field select{background:var(--input-bg);border:1px solid var(--border);border-radius:var(--radius-sm);color:var(--text);padding:8px 10px;font-family:'JetBrains Mono',monospace;font-size:13px;outline:none;transition:border-color 0.2s;}
+.field input:focus,.field select:focus{border-color:var(--border-focus);box-shadow:0 0 0 3px var(--accent-glow);}
+.field select{cursor:pointer;appearance:none;background-image:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='12' height='12' viewBox='0 0 24 24' fill='none' stroke='%238b90a0' stroke-width='2'%3E%3Cpath d='M6 9l6 6 6-6'/%3E%3C/svg%3E");background-repeat:no-repeat;background-position:right 10px center;padding-right:28px;}
+
+.calc-btn{width:100%;padding:12px;background:linear-gradient(135deg,#3b6de0,#0a9e7e);color:#fff;border:none;border-radius:var(--radius-sm);font-family:'Outfit',sans-serif;font-weight:700;font-size:14px;cursor:pointer;letter-spacing:0.5px;transition:opacity 0.2s;margin-top:8px;}
+.calc-btn:hover{opacity:0.9;}
+
+/* Results */
+.results-grid{display:flex;flex-direction:column;gap:16px;}
+.dir-card{background:var(--bg2);border:1px solid var(--border);border-radius:var(--radius);padding:16px;box-shadow:0 1px 4px rgba(0,0,0,0.04);}
+.dir-card.pass{border-color:var(--teal);background:var(--pass-bg);}
+.dir-card.fail{border-color:var(--red);background:var(--fail-bg);}
+
+.dir-header{display:flex;align-items:center;justify-content:space-between;margin-bottom:10px;}
+.dir-title{font-family:'Outfit',sans-serif;font-weight:700;font-size:14px;display:flex;align-items:center;gap:8px;}
+.dir-badge{font-family:'JetBrains Mono',monospace;font-size:9px;font-weight:700;padding:3px 8px;border-radius:4px;text-transform:uppercase;}
+.dir-badge.pass{background:rgba(10,158,126,0.12);color:var(--teal);}
+.dir-badge.fail{background:rgba(217,57,76,0.10);color:var(--red);}
+
+.dir-grid{display:grid;grid-template-columns:1fr 1fr;gap:6px 16px;}
+.dg-row{display:flex;justify-content:space-between;align-items:center;padding:4px 0;border-bottom:1px solid rgba(223,226,232,0.5);}
+.dg-row:last-child{border-bottom:none;}
+.dg-label{font-size:12px;color:var(--text2);}
+.dg-value{font-family:'JetBrains Mono',monospace;font-size:12px;font-weight:600;}
+.dg-value.ok{color:var(--teal);}
+.dg-value.no{color:var(--red);}
+.dg-value.accent{color:var(--accent);}
+
+.rebar-summary{margin-top:8px;padding:8px 12px;background:var(--card2);border:1px solid var(--border);border-radius:var(--radius-sm);font-size:12px;font-weight:600;}
+
+.sep{height:1px;background:var(--border);margin:12px 0;}
+
+/* Report */
+.report-btn{background:var(--input-bg);border:1px solid var(--border);color:var(--text2);padding:5px 12px;border-radius:6px;font-size:12px;font-weight:600;cursor:pointer;font-family:'DM Sans',sans-serif;transition:all 0.15s;}
+.report-btn:hover{background:var(--card2);border-color:var(--accent);color:var(--text);}
+
+.report{font-family:'DM Sans',sans-serif;font-size:13px;line-height:1.7;color:var(--text);}
+.report h2{font-family:'Outfit',sans-serif;font-size:16px;font-weight:700;margin:0 0 4px;padding-bottom:6px;border-bottom:2px solid var(--accent);}
+.report h3{font-family:'Outfit',sans-serif;font-size:13px;font-weight:700;color:var(--accent);margin:18px 0 8px;text-transform:uppercase;letter-spacing:0.8px;}
+.report table{width:100%;border-collapse:collapse;margin:8px 0 14px;}
+.report table th{text-align:left;font-size:11px;font-weight:600;color:var(--text2);text-transform:uppercase;letter-spacing:0.5px;padding:6px 10px;border-bottom:2px solid var(--border);background:var(--card2);}
+.report table td{padding:6px 10px;border-bottom:1px solid var(--border);font-size:12px;}
+.report table td:nth-child(2){font-family:'JetBrains Mono',monospace;font-weight:600;font-size:12px;}
+.report .r-eq{background:var(--card2);border:1px solid var(--border);border-radius:8px;padding:10px 14px;margin:8px 0;font-family:'JetBrains Mono',monospace;font-size:12px;line-height:1.8;}
+.report .r-eq .eq-label{font-family:'DM Sans',sans-serif;font-size:10px;font-weight:600;color:var(--accent);text-transform:uppercase;letter-spacing:0.5px;display:block;margin-bottom:2px;}
+.report .r-result{border-radius:8px;padding:10px 14px;margin:10px 0;font-weight:600;}
+.report .r-result.pass{background:var(--pass-bg);border:1px solid rgba(10,158,126,0.2);color:var(--teal);}
+.report .r-result.fail{background:var(--fail-bg);border:1px solid rgba(217,57,76,0.2);color:var(--red);}
+
+@media print{
+  body{background:#fff!important;font-size:11px;}
+  .header,.panel:first-child,.calc-btn,.report-btn{display:none!important;}
+  .container{display:block!important;padding:0!important;}
+  #reportSection{display:block!important;margin:0!important;}
+  #reportSection .panel{border:none!important;box-shadow:none!important;}
+  :root{--text:#000;--text2:#444;--muted:#666;--accent:#2952b3;--border:#ccc;--card2:#f5f5f5;--teal:#057a5f;--red:#b91c30;}
+}
+
+@media(max-width:900px){.container{grid-template-columns:1fr;}}
+@media(max-width:480px){
+  html{font-size:13px;}
+  .header{padding:12px 16px;}
+  .header h1{font-size:16px;}
+  .container{padding:10px;gap:12px;}
+  .panel-body{padding:14px;}
+  .field input,.field select{padding:11px 10px;font-size:14px;border-radius:10px;}
+  .field label{font-size:12px;}
+  .input-row{gap:10px;margin-bottom:10px;}
+  .input-row.triple,.input-row.quad{grid-template-columns:1fr 1fr;}
+  .calc-btn{padding:14px;font-size:15px;border-radius:10px;}
+  .dir-grid{grid-template-columns:1fr;}
+  .report .r-eq{font-size:11px;overflow-x:auto;word-break:break-word;}
+}
+</style>
+</head>
+<body>
+
+<div class="header">
+  <h1>Foundation Reinforcement Design</h1>
+  <span class="code-ref">Temel Donatı Hesabı — TS500</span>
+</div>
+
+<div class="container">
+  <!-- LEFT: INPUTS -->
+  <div>
+    <div class="panel">
+      <div class="panel-title"><span class="dot"></span>Input Parameters / Girdi</div>
+      <div class="panel-body">
+
+        <div class="input-section">
+          <div class="input-section-label">Material / Malzeme</div>
+          <div class="input-row">
+            <div class="field">
+              <label>Concrete / Beton</label>
+              <select id="conc">
+                <option value="C20">C20</option>
+                <option value="C25">C25</option>
+                <option value="C30" selected>C30</option>
+                <option value="C35">C35</option>
+                <option value="C40">C40</option>
+                <option value="C45">C45</option>
+                <option value="C50">C50</option>
+              </select>
+            </div>
+            <div class="field">
+              <label>Reinforcement / Donatı</label>
+              <select id="rebar">
+                <option value="S220">S220</option>
+                <option value="S420" selected>S420</option>
+                <option value="S500">S500</option>
+              </select>
+            </div>
+          </div>
+        </div>
+
+        <div class="input-section">
+          <div class="input-section-label">Section / Kesit</div>
+          <div class="input-row triple">
+            <div class="field">
+              <label>Height, h <span class="unit">(cm)</span></label>
+              <input type="number" id="h" value="55" min="20" step="5">
+            </div>
+            <div class="field">
+              <label>Cover, cc <span class="unit">(cm)</span></label>
+              <input type="number" id="cc" value="5" min="2" step="0.5">
+            </div>
+            <div class="field">
+              <label>Width, b <span class="unit">(cm)</span></label>
+              <input type="number" id="bw" value="100" min="10" step="10">
+            </div>
+          </div>
+        </div>
+
+        <div class="input-section">
+          <div class="input-section-label">Moments / Etkiler <span class="unit">(t·m)</span></div>
+          <div class="input-row">
+            <div class="field">
+              <label>Mx — Bottom / Alt</label>
+              <input type="number" id="MxBot" value="50" min="0" step="1">
+            </div>
+            <div class="field">
+              <label>Mx — Top / Üst</label>
+              <input type="number" id="MxTop" value="50" min="0" step="1">
+            </div>
+          </div>
+          <div class="input-row">
+            <div class="field">
+              <label>My — Bottom / Alt</label>
+              <input type="number" id="MyBot" value="50" min="0" step="1">
+            </div>
+            <div class="field">
+              <label>My — Top / Üst</label>
+              <input type="number" id="MyTop" value="50" min="0" step="1">
+            </div>
+          </div>
+        </div>
+
+        <div class="input-section">
+          <div class="input-section-label">Reinforcement Layout / Donatı Düzeni</div>
+          <div id="rebarInputs"></div>
+        </div>
+
+        <button class="calc-btn" onclick="calculate()">Calculate / Hesapla</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- RIGHT: RESULTS -->
+  <div>
+    <div class="results-grid" id="results"></div>
+
+    <div id="reportSection" style="display:none;margin-top:20px;">
+      <div class="panel">
+        <div class="panel-title" style="justify-content:space-between;">
+          <span style="display:flex;align-items:center;gap:8px;"><span class="dot"></span>Calculation Report / Hesap Raporu</span>
+          <div style="display:flex;gap:8px;">
+            <button class="report-btn" onclick="copyReport()">📋 Copy</button>
+            <button class="report-btn" onclick="window.print()">🖨 Print</button>
+          </div>
+        </div>
+        <div class="panel-body" id="reportContent"></div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<script>
+// ===== DATA TABLES =====
+const concData = {
+  C20:{fck:20,fcd:13.33,fctk:1.6,fctd:1.0,Ec:28000},
+  C25:{fck:25,fcd:16.67,fctk:1.8,fctd:1.15,Ec:23000},
+  C30:{fck:30,fcd:20.00,fctk:1.9,fctd:1.25,Ec:32000},
+  C35:{fck:35,fcd:23.33,fctk:2.1,fctd:1.35,Ec:33000},
+  C40:{fck:40,fcd:26.67,fctk:2.2,fctd:1.45,Ec:34000},
+  C45:{fck:45,fcd:30.00,fctk:2.3,fctd:1.55,Ec:36000},
+  C50:{fck:50,fcd:33.33,fctk:2.5,fctd:1.65,Ec:37000}
+};
+const rebarData = {
+  S220:{fyk:220,fyd:191,Es:200000},
+  S420:{fyk:420,fyd:365,Es:200000},
+  S500:{fyk:500,fyd:435,Es:200000}
+};
+const diaDefs = [8,10,12,14,16,18,20,22,25,32];
+const spaceDefs = [10,12.5,15,17.5,20,22.5,25,30];
+
+const dirs = [
+  {id:'mxBot',label:'Mx — Bottom / Alt',mId:'MxBot'},
+  {id:'mxTop',label:'Mx — Top / Üst',mId:'MxTop'},
+  {id:'myBot',label:'My — Bottom / Alt',mId:'MyBot'},
+  {id:'myTop',label:'My — Top / Üst',mId:'MyTop'}
+];
+
+// Build rebar input rows
+function buildRebarInputs() {
+  const c = document.getElementById('rebarInputs');
+  c.innerHTML = dirs.map(d => `
+    <div style="margin-bottom:10px;">
+      <div style="font-size:11px;font-weight:600;color:var(--text2);margin-bottom:5px;">${d.label}</div>
+      <div class="input-row quad">
+        <div class="field"><label>Main Φ</label>
+          <select id="${d.id}_d1">${diaDefs.map(v=>`<option value="${v}" ${v===14?'selected':''}>${v}</option>`).join('')}</select>
+        </div>
+        <div class="field"><label>Spacing <span class="unit">(cm)</span></label>
+          <select id="${d.id}_s1">${spaceDefs.map(v=>`<option value="${v}" ${v===20?'selected':''}>${v}</option>`).join('')}</select>
+        </div>
+        <div class="field"><label>Add. Φ</label>
+          <select id="${d.id}_d2"><option value="0">—</option>${diaDefs.map(v=>`<option value="${v}">${v}</option>`).join('')}</select>
+        </div>
+        <div class="field"><label>Spacing <span class="unit">(cm)</span></label>
+          <select id="${d.id}_s2"><option value="0">—</option>${spaceDefs.map(v=>`<option value="${v}">${v}</option>`).join('')}</select>
+        </div>
+      </div>
+    </div>
+  `).join('');
+}
+buildRebarInputs();
+
+// ===== CALCULATION =====
+function fmt(v, d=2) { return typeof v==='number' ? v.toFixed(d) : v; }
+
+function calcDirection(M_tm, h, cc, bw, fcd, fyd, d1, s1, d2, s2) {
+  const d = h - cc; // cm
+  const d_mm = d * 10;
+  const b_mm = bw * 10;
+
+  // Required As
+  const M_Nmm = M_tm * 9.81 * 1e6;
+
+  // Compression block depth a (from quadratic)
+  const disc = (d_mm)**2 - 2 * M_Nmm / (0.85 * fcd * b_mm);
+  const a = disc >= 0 ? d_mm - Math.sqrt(disc) : d_mm;
+  const c = a / 0.85; // neutral axis depth (approx with k1=0.85)
+
+  // Required As
+  const As_req = M_Nmm / (fyd * (d_mm - a / 2)) / 100; // cm2
+
+  // Minimum As
+  const As_min = 0.0018 * bw * h; // cm2
+
+  // Governing
+  const As_gov = Math.max(As_req, As_min);
+
+  // Provided reinforcement
+  const A1 = s1 > 0 ? (bw / s1) * (d1 / 10) ** 2 * Math.PI / 4 : 0;
+  const A2 = (d2 > 0 && s2 > 0) ? (bw / s2) * (d2 / 10) ** 2 * Math.PI / 4 : 0;
+  const As_prov = A1 + A2;
+
+  // Recalculate a for provided reinforcement
+  const a_prov = As_prov * (fyd / 10) / (0.85 * (fcd / 10) * bw); // cm
+  const c_prov = a_prov / 0.85;
+
+  // Ductility checks
+  const eps_su = c_prov > 0 ? ((d - c_prov) / c_prov) * 0.003 : 999;
+  const c_over_d = d > 0 ? c_prov / d : 0;
+  const eps_ok = eps_su >= 0.005;
+  const cd_ok = c_over_d < 0.375;
+
+  // Capacity
+  const Mr_Nmm = As_prov * 100 * fyd * (d_mm - a_prov * 5);
+  const Mr_tm = Mr_Nmm / 9.81 / 1e6;
+
+  // Mr from minimum
+  const a_min = As_min * (fyd / 10) / (0.85 * (fcd / 10) * bw);
+  const Mr_min_Nmm = As_min * 100 * fyd * (d_mm - a_min * 5);
+  const Mr_min = Mr_min_Nmm / 9.81 / 1e6;
+
+  const capacity_ok = Mr_tm >= M_tm;
+  const overall_ok = capacity_ok && eps_ok && cd_ok && As_prov >= As_gov;
+
+  return {
+    d, d_mm, a: a/10, c: c/10, // in cm
+    As_req, As_min, As_gov,
+    A1, A2, As_prov,
+    a_prov, c_prov,
+    eps_su, c_over_d, eps_ok, cd_ok,
+    Mr_tm, Mr_min, M_tm,
+    capacity_ok, overall_ok,
+    d1, s1, d2, s2
+  };
+}
+
+function calculate() {
+  const conc = document.getElementById('conc').value;
+  const rebar = document.getElementById('rebar').value;
+  const h = +document.getElementById('h').value;
+  const cc = +document.getElementById('cc').value;
+  const bw = +document.getElementById('bw').value;
+  const fcd = concData[conc].fcd;
+  const fyd = rebarData[rebar].fyd;
+  const fctd = concData[conc].fctd;
+
+  let results = [];
+  let html = '';
+
+  dirs.forEach(dir => {
+    const M = +document.getElementById(dir.mId).value;
+    const d1 = +document.getElementById(dir.id+'_d1').value;
+    const s1 = +document.getElementById(dir.id+'_s1').value;
+    const d2 = +document.getElementById(dir.id+'_d2').value;
+    const s2 = +document.getElementById(dir.id+'_s2').value;
+
+    const r = calcDirection(M, h, cc, bw, fcd, fyd, d1, s1, d2, s2);
+    r.label = dir.label;
+    results.push(r);
+
+    const pctCap = r.Mr_tm > 0 && r.M_tm > 0 ? (r.M_tm / r.Mr_tm * 100) : 0;
+
+    html += `
+      <div class="dir-card ${r.overall_ok ? 'pass' : 'fail'}">
+        <div class="dir-header">
+          <div class="dir-title">${dir.label}</div>
+          <span class="dir-badge ${r.overall_ok ? 'pass' : 'fail'}">${r.overall_ok ? '✓ OK' : '✗ FAIL'}</span>
+        </div>
+        <div class="dir-grid">
+          <div class="dg-row"><span class="dg-label">M applied</span><span class="dg-value">${fmt(r.M_tm)} t·m</span></div>
+          <div class="dg-row"><span class="dg-label">d (effective)</span><span class="dg-value">${fmt(r.d,1)} cm</span></div>
+          <div class="dg-row"><span class="dg-label">As required</span><span class="dg-value">${fmt(r.As_req)} cm²</span></div>
+          <div class="dg-row"><span class="dg-label">As minimum</span><span class="dg-value">${fmt(r.As_min)} cm²</span></div>
+          <div class="dg-row"><span class="dg-label">As governing</span><span class="dg-value accent">${fmt(r.As_gov)} cm²</span></div>
+          <div class="dg-row"><span class="dg-label">As provided</span><span class="dg-value ${r.As_prov >= r.As_gov ? 'ok' : 'no'}">${fmt(r.As_prov)} cm²</span></div>
+          <div class="dg-row"><span class="dg-label">εsu</span><span class="dg-value ${r.eps_ok ? 'ok' : 'no'}">${fmt(r.eps_su,4)} ${r.eps_ok ? '≥ 0.005 ✓' : '< 0.005 ✗'}</span></div>
+          <div class="dg-row"><span class="dg-label">c/d</span><span class="dg-value ${r.cd_ok ? 'ok' : 'no'}">${fmt(r.c_over_d,4)} ${r.cd_ok ? '< 0.375 ✓' : '≥ 0.375 ✗'}</span></div>
+          <div class="dg-row"><span class="dg-label"><strong>Mr (capacity)</strong></span><span class="dg-value ${r.capacity_ok ? 'ok' : 'no'}"><strong>${fmt(r.Mr_tm)} t·m</strong></span></div>
+          <div class="dg-row"><span class="dg-label">Utilization</span><span class="dg-value" style="color:${pctCap>100?'var(--red)':pctCap>80?'var(--warn)':'var(--teal)'}">${fmt(pctCap,1)}%</span></div>
+        </div>
+        <div class="rebar-summary">
+          Φ${r.d1}/${r.s1} = ${fmt(r.A1)} cm²${r.A2 > 0 ? ` + Φ${r.d2}/${r.s2} = ${fmt(r.A2)} cm²` : ''} → <strong>${fmt(r.As_prov)} cm²</strong>
+        </div>
+      </div>`;
+  });
+
+  document.getElementById('results').innerHTML = html;
+
+  // ===== REPORT =====
+  let repDirs = '';
+  results.forEach(r => {
+    repDirs += `
+      <h3>${r.label}</h3>
+      <table>
+        <tr><th>Parameter</th><th>Value</th><th>Check</th></tr>
+        <tr><td>Applied moment, M</td><td>${fmt(r.M_tm)} t·m</td><td></td></tr>
+        <tr><td>Effective depth, d</td><td>${fmt(r.d,1)} cm</td><td></td></tr>
+        <tr><td>As required</td><td>${fmt(r.As_req)} cm²</td><td></td></tr>
+        <tr><td>As minimum (0.0018·b·h)</td><td>${fmt(r.As_min)} cm²</td><td></td></tr>
+        <tr><td>As governing</td><td>${fmt(r.As_gov)} cm²</td><td></td></tr>
+        <tr><td>As provided (Φ${r.d1}/${r.s1}${r.A2>0?' + Φ'+r.d2+'/'+r.s2:''})</td><td>${fmt(r.As_prov)} cm²</td><td>${r.As_prov>=r.As_gov?'≥ As,gov ✓':'< As,gov ✗'}</td></tr>
+        <tr><td>Compression block, a</td><td>${fmt(r.a_prov)} cm</td><td></td></tr>
+        <tr><td>Neutral axis, c</td><td>${fmt(r.c_prov)} cm</td><td></td></tr>
+        <tr><td>εsu</td><td>${fmt(r.eps_su,4)}</td><td>${r.eps_ok?'≥ 0.005 ✓':'< 0.005 ✗'}</td></tr>
+        <tr><td>c/d</td><td>${fmt(r.c_over_d,4)}</td><td>${r.cd_ok?'< 0.375 ✓':'≥ 0.375 ✗'}</td></tr>
+        <tr><td><strong>Mr (capacity)</strong></td><td><strong>${fmt(r.Mr_tm)} t·m</strong></td><td>${r.capacity_ok?'≥ M ✓':'< M ✗'}</td></tr>
+      </table>
+      <div class="r-result ${r.overall_ok?'pass':'fail'}">
+        ${r.overall_ok ? '✓ Adequate — Mr = '+fmt(r.Mr_tm)+' t·m ≥ M = '+fmt(r.M_tm)+' t·m' : '✗ Inadequate — Revise reinforcement'}
+      </div>`;
+  });
+
+  const reportHTML = `
+    <div class="report">
+      <h2>Foundation Reinforcement Design / Temel Donatı Hesabı</h2>
+      <h3>Input Data / Girdi</h3>
+      <table>
+        <tr><th>Parameter</th><th>Value</th><th>Unit</th></tr>
+        <tr><td>Concrete / Beton</td><td>${conc}</td><td>fcd = ${fmt(fcd)} MPa</td></tr>
+        <tr><td>Reinforcement / Donatı</td><td>${rebar}</td><td>fyd = ${fmt(fyd,0)} MPa</td></tr>
+        <tr><td>Height, h</td><td>${h}</td><td>cm</td></tr>
+        <tr><td>Cover, cc</td><td>${cc}</td><td>cm</td></tr>
+        <tr><td>Width, b</td><td>${bw}</td><td>cm</td></tr>
+        <tr><td>d = h − cc</td><td>${h-cc}</td><td>cm</td></tr>
+      </table>
+      <table>
+        <tr><th>Direction</th><th>Moment (t·m)</th></tr>
+        ${dirs.map(d => `<tr><td>${d.label}</td><td>${document.getElementById(d.mId).value}</td></tr>`).join('')}
+      </table>
+      ${repDirs}
+    </div>`;
+
+  document.getElementById('reportSection').style.display = 'block';
+  document.getElementById('reportContent').innerHTML = reportHTML;
+}
+
+function copyReport() {
+  const el = document.getElementById('reportContent');
+  const range = document.createRange();
+  range.selectNodeContents(el);
+  const sel = window.getSelection();
+  sel.removeAllRanges();
+  sel.addRange(range);
+  document.execCommand('copy');
+  sel.removeAllRanges();
+  const btn = event.target.closest('.report-btn');
+  const orig = btn.innerHTML;
+  btn.innerHTML = '✓ Copied';
+  setTimeout(() => btn.innerHTML = orig, 1500);
+}
+
+// Auto-calc
+calculate();
+document.querySelectorAll('input,select').forEach(el => {
+  el.addEventListener('input', calculate);
+  el.addEventListener('change', calculate);
+});
+</script>
+</body>
+</html>
