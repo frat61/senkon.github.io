@@ -1,0 +1,1235 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Slab Punching Shear Design — ACI 318-08</title>
+<style>
+@import url('https://fonts.googleapis.com/css2?family=DM+Sans:wght@300;400;500;600;700&family=JetBrains+Mono:wght@400;500;600&family=Outfit:wght@400;500;600;700;800&display=swap');
+
+:root {
+  --bg: #f0f2f5;
+  --bg2: #ffffff;
+  --card: #ffffff;
+  --card2: #f8f9fb;
+  --input-bg: #f5f6f8;
+  --border: #dfe2e8;
+  --border-focus: #3b6de0;
+  --text: #1a1d26;
+  --text2: #5f6577;
+  --muted: #8b90a0;
+  --accent: #3b6de0;
+  --accent-glow: rgba(59,109,224,0.10);
+  --teal: #0a9e7e;
+  --teal-glow: rgba(10,158,126,0.08);
+  --red: #d9394c;
+  --red-glow: rgba(217,57,76,0.06);
+  --warn: #c8850a;
+  --warn-glow: rgba(200,133,10,0.06);
+  --pass-bg: rgba(10,158,126,0.06);
+  --fail-bg: rgba(217,57,76,0.05);
+  --radius: 12px;
+  --radius-sm: 8px;
+}
+
+* { margin:0; padding:0; box-sizing:border-box; }
+html { font-size: 14px; }
+body {
+  font-family: 'DM Sans', sans-serif;
+  background: var(--bg);
+  color: var(--text);
+  min-height: 100vh;
+  line-height: 1.55;
+}
+
+/* ===== HEADER ===== */
+.header {
+  background: var(--bg2);
+  border-bottom: 1px solid var(--border);
+  padding: 14px 24px;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  position: sticky; top: 0; z-index: 100;
+  box-shadow: 0 1px 4px rgba(0,0,0,0.06);
+}
+.header h1 {
+  font-family: 'Outfit', sans-serif;
+  font-weight: 700; font-size: 18px;
+  background: linear-gradient(135deg, #3b6de0, #0a9e7e);
+  -webkit-background-clip: text; -webkit-text-fill-color: transparent;
+}
+.header .code-ref {
+  font-family: 'JetBrains Mono', monospace;
+  font-size: 11px; color: var(--text2);
+  background: var(--card); padding: 4px 10px;
+  border-radius: 6px; border: 1px solid var(--border);
+}
+
+/* ===== LAYOUT ===== */
+.container {
+  max-width: 1400px; margin: 0 auto;
+  padding: 20px;
+  display: grid;
+  grid-template-columns: 380px 1fr;
+  gap: 20px;
+}
+
+@media (max-width: 900px) {
+  .container { grid-template-columns: 1fr; }
+}
+
+/* ===== PANELS ===== */
+.panel {
+  background: var(--card);
+  border: 1px solid var(--border);
+  border-radius: var(--radius);
+  overflow: hidden;
+  box-shadow: 0 2px 8px rgba(0,0,0,0.05);
+}
+.panel-title {
+  font-family: 'Outfit', sans-serif;
+  font-weight: 600; font-size: 13px;
+  text-transform: uppercase; letter-spacing: 1.2px;
+  color: var(--text2);
+  padding: 14px 18px 10px;
+  border-bottom: 1px solid var(--border);
+  display: flex; align-items: center; gap: 8px;
+}
+.panel-title .dot {
+  width: 7px; height: 7px; border-radius: 50%;
+  background: var(--accent);
+}
+.panel-body { padding: 16px 18px; }
+
+/* ===== INPUT GROUPS ===== */
+.input-section {
+  margin-bottom: 16px;
+}
+.input-section-label {
+  font-size: 11px; font-weight: 600;
+  text-transform: uppercase; letter-spacing: 1px;
+  color: var(--accent); margin-bottom: 10px;
+  display: flex; align-items: center; gap: 6px;
+}
+.input-section-label::before {
+  content: ''; width: 14px; height: 1px;
+  background: var(--accent); opacity: 0.5;
+}
+
+.input-row {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 10px;
+  margin-bottom: 8px;
+}
+.input-row.triple {
+  grid-template-columns: 1fr 1fr 1fr;
+}
+.input-row.single {
+  grid-template-columns: 1fr;
+}
+
+.field {
+  display: flex; flex-direction: column; gap: 4px;
+}
+.field label {
+  font-size: 11px; color: var(--text2);
+  font-weight: 500; display: flex; align-items: center; gap: 4px;
+}
+.field label .unit {
+  font-family: 'JetBrains Mono', monospace;
+  font-size: 10px; color: var(--muted);
+}
+.field input, .field select {
+  background: var(--input-bg);
+  border: 1px solid var(--border);
+  border-radius: var(--radius-sm);
+  color: var(--text); padding: 8px 10px;
+  font-family: 'JetBrains Mono', monospace;
+  font-size: 13px; outline: none;
+  transition: border-color 0.2s;
+}
+.field input:focus, .field select:focus {
+  border-color: var(--border-focus);
+  box-shadow: 0 0 0 3px var(--accent-glow);
+}
+.field select {
+  cursor: pointer;
+  appearance: none;
+  background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='12' height='12' viewBox='0 0 24 24' fill='none' stroke='%238b8fa3' stroke-width='2'%3E%3Cpath d='M6 9l6 6 6-6'/%3E%3C/svg%3E");
+  background-repeat: no-repeat;
+  background-position: right 10px center;
+  padding-right: 28px;
+}
+
+/* ===== RESULTS ===== */
+.results-grid {
+  display: flex; flex-direction: column; gap: 16px;
+}
+
+.result-card {
+  background: var(--bg2);
+  border: 1px solid var(--border);
+  border-radius: var(--radius);
+  padding: 14px 16px;
+}
+.result-card.highlight {
+  border-color: var(--accent);
+  box-shadow: 0 0 20px var(--accent-glow);
+}
+.result-card.pass {
+  border-color: var(--teal);
+  background: var(--pass-bg);
+}
+.result-card.fail {
+  border-color: var(--red);
+  background: var(--fail-bg);
+}
+.result-card.warn {
+  border-color: var(--warn);
+  background: var(--warn-glow);
+}
+
+.rc-header {
+  font-size: 11px; font-weight: 600;
+  text-transform: uppercase; letter-spacing: 1px;
+  color: var(--text2); margin-bottom: 10px;
+  display: flex; align-items: center; gap: 6px;
+}
+.rc-header .step {
+  font-family: 'JetBrains Mono', monospace;
+  font-size: 10px; background: var(--accent);
+  color: #fff; padding: 2px 6px; border-radius: 4px;
+  font-weight: 700;
+}
+
+.rc-row {
+  display: flex; justify-content: space-between;
+  align-items: center; padding: 5px 0;
+  border-bottom: 1px solid rgba(223,226,232,0.6);
+}
+.rc-row:last-child { border-bottom: none; }
+.rc-label {
+  font-size: 12px; color: var(--text2);
+}
+.rc-value {
+  font-family: 'JetBrains Mono', monospace;
+  font-size: 13px; font-weight: 600; color: var(--text);
+}
+.rc-value.accent { color: var(--accent); }
+.rc-value.teal { color: var(--teal); }
+.rc-value.red { color: var(--red); }
+.rc-value.warn { color: var(--warn); }
+
+.verdict-box {
+  margin-top: 10px; padding: 10px 14px;
+  border-radius: var(--radius-sm);
+  font-size: 12px; font-weight: 600;
+  display: flex; align-items: center; gap: 8px;
+}
+.verdict-box.pass { background: var(--pass-bg); color: var(--teal); border: 1px solid rgba(0,212,170,0.2); }
+.verdict-box.fail { background: var(--fail-bg); color: var(--red); border: 1px solid rgba(255,74,110,0.2); }
+.verdict-box.warn { background: var(--warn-glow); color: var(--warn); border: 1px solid rgba(255,184,74,0.2); }
+
+.verdict-icon { font-size: 16px; }
+
+/* ===== DIAGRAM ===== */
+.diagram-container {
+  background: var(--bg2);
+  border: 1px solid var(--border);
+  border-radius: var(--radius);
+  padding: 16px;
+  margin-bottom: 16px;
+}
+.diagram-container canvas {
+  width: 100%; height: auto;
+  border-radius: var(--radius-sm);
+}
+
+/* ===== ACI REF BADGES ===== */
+.aci-ref {
+  font-family: 'JetBrains Mono', monospace;
+  font-size: 9px; color: var(--accent);
+  background: rgba(59,109,224,0.08);
+  padding: 2px 6px; border-radius: 4px;
+  white-space: nowrap;
+}
+
+/* ===== SCROLLBAR ===== */
+::-webkit-scrollbar { width: 6px; }
+::-webkit-scrollbar-track { background: var(--bg); }
+::-webkit-scrollbar-thumb { background: #c5c9d2; border-radius: 3px; }
+
+/* ===== BUTTON ===== */
+.calc-btn {
+  width: 100%; padding: 12px;
+  background: linear-gradient(135deg, #3b6de0, #0a9e7e);
+  color: #fff; border: none; border-radius: var(--radius-sm);
+  font-family: 'Outfit', sans-serif;
+  font-weight: 700; font-size: 14px;
+  cursor: pointer; letter-spacing: 0.5px;
+  transition: opacity 0.2s, transform 0.1s;
+  margin-top: 8px;
+}
+.calc-btn:hover { opacity: 0.9; }
+.calc-btn:active { transform: scale(0.98); }
+
+/* ===== SEPARATOR ===== */
+.sep {
+  height: 1px; background: var(--border);
+  margin: 14px 0;
+}
+
+/* ===== RFT DETAIL ===== */
+.rft-detail {
+  font-size: 12px; color: var(--text2);
+  padding: 6px 0; line-height: 1.6;
+}
+.rft-detail strong { color: var(--text); }
+
+/* ===== UTILIZATION BAR ===== */
+.util-bar-wrap {
+  margin: 8px 0;
+}
+.util-bar-label {
+  display: flex; justify-content: space-between;
+  font-size: 11px; font-weight: 600; margin-bottom: 4px;
+}
+.util-bar-label .pct {
+  font-family: 'JetBrains Mono', monospace;
+  font-size: 13px; font-weight: 700;
+}
+.util-bar {
+  height: 10px; border-radius: 5px;
+  background: rgba(0,0,0,0.06);
+  overflow: hidden; position: relative;
+}
+.util-bar-fill {
+  height: 100%; border-radius: 5px;
+  transition: width 0.4s ease;
+}
+.util-bar-fill.green { background: linear-gradient(90deg, #0a9e7e, #0dbf96); }
+.util-bar-fill.amber { background: linear-gradient(90deg, #c8850a, #e6a420); }
+.util-bar-fill.red   { background: linear-gradient(90deg, #b91c30, #e04058); }
+
+/* ===== RFT SECTION ANIM ===== */
+#rftInputSection {
+  transition: all 0.3s ease;
+  overflow: hidden;
+  border-top: 1px dashed var(--border);
+  padding-top: 12px;
+  margin-top: 4px;
+}
+
+/* ===== REPORT ===== */
+.report-btn {
+  background: var(--input-bg); border: 1px solid var(--border);
+  color: var(--text2); padding: 5px 12px; border-radius: 6px;
+  font-size: 12px; font-weight: 600; cursor: pointer;
+  font-family: 'DM Sans', sans-serif;
+  transition: background 0.15s, border-color 0.15s;
+}
+.report-btn:hover { background: var(--card2); border-color: var(--accent); color: var(--text); }
+
+.report {
+  font-family: 'DM Sans', sans-serif;
+  font-size: 13px; line-height: 1.7;
+  color: var(--text);
+}
+.report h2 {
+  font-family: 'Outfit', sans-serif;
+  font-size: 16px; font-weight: 700;
+  color: var(--text); margin: 0 0 4px;
+  padding-bottom: 6px;
+  border-bottom: 2px solid var(--accent);
+}
+.report h3 {
+  font-family: 'Outfit', sans-serif;
+  font-size: 13px; font-weight: 700;
+  color: var(--accent); margin: 18px 0 8px;
+  text-transform: uppercase; letter-spacing: 0.8px;
+}
+.report .r-subtitle {
+  font-size: 11px; color: var(--text2); margin-bottom: 14px;
+}
+.report table {
+  width: 100%; border-collapse: collapse; margin: 8px 0 14px;
+}
+.report table th {
+  text-align: left; font-size: 11px; font-weight: 600;
+  color: var(--text2); text-transform: uppercase; letter-spacing: 0.5px;
+  padding: 6px 10px; border-bottom: 2px solid var(--border);
+  background: var(--card2);
+}
+.report table td {
+  padding: 6px 10px; border-bottom: 1px solid var(--border);
+  font-size: 12.5px;
+}
+.report table td:first-child { color: var(--text2); }
+.report table td:nth-child(2) {
+  font-family: 'JetBrains Mono', monospace;
+  font-weight: 600; font-size: 12px;
+}
+.report table td.formula {
+  font-family: 'JetBrains Mono', monospace;
+  font-size: 11px; color: var(--muted);
+}
+.report table td.ref {
+  font-family: 'JetBrains Mono', monospace;
+  font-size: 10px; color: var(--accent);
+}
+.report .r-eq {
+  background: var(--card2); border: 1px solid var(--border);
+  border-radius: 8px; padding: 10px 14px; margin: 8px 0;
+  font-family: 'JetBrains Mono', monospace;
+  font-size: 12px; line-height: 1.8;
+  color: var(--text);
+}
+.report .r-eq .eq-label {
+  font-family: 'DM Sans', sans-serif;
+  font-size: 10px; font-weight: 600;
+  color: var(--accent); text-transform: uppercase;
+  letter-spacing: 0.5px; display: block; margin-bottom: 2px;
+}
+.report .r-eq .eq-ref {
+  float: right; font-size: 10px; color: var(--accent);
+  background: rgba(59,109,224,0.08); padding: 1px 6px;
+  border-radius: 3px;
+}
+.report .r-result {
+  background: var(--pass-bg); border: 1px solid rgba(10,158,126,0.2);
+  border-radius: 8px; padding: 10px 14px; margin: 10px 0;
+  font-weight: 600;
+}
+.report .r-result.fail {
+  background: var(--fail-bg); border-color: rgba(217,57,76,0.2);
+  color: var(--red);
+}
+.report .r-result.warn {
+  background: var(--warn-glow); border-color: rgba(200,133,10,0.2);
+  color: var(--warn);
+}
+.report .r-result.pass { color: var(--teal); }
+
+.report .r-verdict {
+  font-size: 14px; font-weight: 700;
+  padding: 12px 16px; border-radius: 8px;
+  margin: 12px 0; text-align: center;
+}
+.report .r-verdict.pass { background: var(--pass-bg); color: var(--teal); border: 2px solid var(--teal); }
+.report .r-verdict.fail { background: var(--fail-bg); color: var(--red); border: 2px solid var(--red); }
+.report .r-verdict.warn { background: var(--warn-glow); color: var(--warn); border: 2px solid var(--warn); }
+
+/* ===== PRINT ===== */
+@media print {
+  body { background: #fff !important; color: #000 !important; font-size: 11px; }
+  .header, .panel:first-child, .diagram-container, .results-grid, .report-btn, .calc-btn { display: none !important; }
+  .container { display: block !important; max-width: 100% !important; padding: 0 !important; }
+  #reportSection { display: block !important; margin: 0 !important; }
+  #reportSection .panel { border: none !important; box-shadow: none !important; }
+  .report h2 { border-color: #000; }
+  .report h3 { color: #333; }
+  .report table th { background: #f0f0f0 !important; }
+  .report table td { border-color: #ccc; }
+  .report .r-eq { background: #f8f8f8 !important; border-color: #ddd; }
+  .report .r-result, .report .r-verdict { border-width: 1px; }
+  :root { --text: #000; --text2: #444; --muted: #666; --accent: #2952b3; --border: #ccc;
+    --card2: #f5f5f5; --teal: #057a5f; --red: #b91c30; --warn: #8a6000; }
+}
+</style>
+</head>
+<body>
+
+<div class="header">
+  <h1>Slab Punching Shear Design</h1>
+  <span class="code-ref">ACI 318M-08 §11.11</span>
+</div>
+
+<div class="container">
+  <!-- LEFT: INPUTS -->
+  <div>
+    <div class="panel">
+      <div class="panel-title"><span class="dot"></span>Input Parameters</div>
+      <div class="panel-body">
+
+        <div class="input-section">
+          <div class="input-section-label">Slab Properties</div>
+          <div class="input-row">
+            <div class="field">
+              <label>Slab Thickness, t <span class="unit">(mm)</span></label>
+              <input type="number" id="t" value="400" min="100" step="10">
+            </div>
+            <div class="field">
+              <label>Cover <span class="unit">(mm)</span></label>
+              <input type="number" id="cover" value="30" min="15" step="5">
+            </div>
+          </div>
+        </div>
+
+        <div class="input-section">
+          <div class="input-section-label">Material Properties</div>
+          <div class="input-row triple">
+            <div class="field">
+              <label>f'c <span class="unit">(MPa)</span></label>
+              <input type="number" id="fc" value="30" min="20" step="5">
+            </div>
+            <div class="field">
+              <label>fy <span class="unit">(MPa)</span></label>
+              <input type="number" id="fy" value="420" min="240" step="20">
+            </div>
+            <div class="field">
+              <label>fyt <span class="unit">(MPa)</span></label>
+              <input type="number" id="fyt" value="420" min="240" step="20">
+            </div>
+          </div>
+        </div>
+
+        <div class="input-section">
+          <div class="input-section-label">Column Dimensions</div>
+          <div class="input-row">
+            <div class="field">
+              <label>c₁ Depth <span class="unit">(mm)</span></label>
+              <input type="number" id="c1" value="400" min="100" step="25">
+            </div>
+            <div class="field">
+              <label>c₂ Width <span class="unit">(mm)</span></label>
+              <input type="number" id="c2" value="400" min="100" step="25">
+            </div>
+          </div>
+          <div class="input-row single" style="margin-top:4px;">
+            <div class="field">
+              <label>Column Position</label>
+              <select id="colPos">
+                <option value="interior">Interior Column</option>
+                <option value="edge-width">Edge Column — width side</option>
+                <option value="edge-depth">Edge Column — depth side</option>
+                <option value="corner">Corner Column</option>
+              </select>
+            </div>
+          </div>
+        </div>
+
+        <div class="input-section">
+          <div class="input-section-label">Applied Loads</div>
+          <div class="input-row">
+            <div class="field">
+              <label>Vu <span class="unit">(kN)</span></label>
+              <input type="number" id="Vu" value="500" min="0" step="10">
+            </div>
+            <div class="field">
+              <label>bo subtracted <span class="unit">(mm)</span></label>
+              <input type="number" id="bo_sub" value="0" min="0" step="10">
+            </div>
+          </div>
+          <div class="input-row">
+            <div class="field">
+              <label>Mu₁ — about axis 1 <span class="unit">(kN·m)</span></label>
+              <input type="number" id="Mu1" value="0" min="0" step="1">
+            </div>
+            <div class="field">
+              <label>Mu₂ — about axis 2 <span class="unit">(kN·m)</span></label>
+              <input type="number" id="Mu2" value="0" min="0" step="1">
+            </div>
+          </div>
+        </div>
+
+        <div id="rftInputSection" class="input-section" style="display:none;">
+          <div class="input-section-label" id="rftSectionLabel">Shear Reinforcement Required</div>
+          <div class="input-row triple">
+            <div class="field">
+              <label>Stirrup Ø <span class="unit">(mm)</span></label>
+              <select id="stDia">
+                <option value="8">8</option>
+                <option value="10">10</option>
+                <option value="12" selected>12</option>
+                <option value="14">14</option>
+                <option value="16">16</option>
+              </select>
+            </div>
+            <div class="field">
+              <label>Spacing, s <span class="unit">(mm)</span></label>
+              <input type="number" id="stS" value="150" min="50" step="10">
+            </div>
+            <div class="field">
+              <label>No. of legs</label>
+              <input type="number" id="stLegs" value="24" min="2" step="2">
+            </div>
+          </div>
+        </div>
+
+        <button class="calc-btn" onclick="calculate()">Calculate Punching Shear</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- RIGHT: RESULTS -->
+  <div>
+    <!-- Diagram -->
+    <div class="diagram-container">
+      <canvas id="diagCanvas" width="800" height="380" style="width:800px;height:380px;max-width:100%;"></canvas>
+    </div>
+
+    <div class="results-grid" id="results">
+      <!-- Populated by JS -->
+    </div>
+
+    <!-- REPORT SECTION -->
+    <div id="reportSection" style="display:none; margin-top:20px;">
+      <div class="panel" style="border: 1px solid var(--border);">
+        <div class="panel-title" style="justify-content:space-between;">
+          <span style="display:flex;align-items:center;gap:8px;"><span class="dot" style="background:var(--accent);"></span>Calculation Report</span>
+          <div style="display:flex;gap:8px;">
+            <button class="report-btn" onclick="copyReport()">📋 Copy</button>
+            <button class="report-btn" onclick="printReport()">🖨 Print</button>
+          </div>
+        </div>
+        <div class="panel-body" id="reportContent">
+          <!-- Populated by JS -->
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<script>
+// ===== REBAR DATA =====
+const rebarArea = {6:29,8:51,10:79,12:114,14:154,16:201,18:255,20:314,22:380,25:491,32:804};
+
+// ===== COLUMN POSITION CONFIG =====
+// Case A = edge-depth, B = interior, C = edge-width, D = corner
+function getCaseFromPos(pos) {
+  return {
+    'edge-depth': 'A',
+    'interior': 'B',
+    'edge-width': 'C',
+    'corner': 'D'
+  }[pos];
+}
+
+function getAlphaS(caseId) {
+  return {'A':30,'B':40,'C':30,'D':20}[caseId];
+}
+
+function getNumSides(caseId) {
+  return {'A':3,'B':4,'C':3,'D':2}[caseId];
+}
+
+// ===== MAIN CALCULATION =====
+function calculate() {
+  // Read inputs
+  const t = +document.getElementById('t').value;
+  const cover = +document.getElementById('cover').value;
+  const fc = +document.getElementById('fc').value;
+  const fy = +document.getElementById('fy').value;
+  const fyt = +document.getElementById('fyt').value;
+  const c1 = +document.getElementById('c1').value;
+  const c2 = +document.getElementById('c2').value;
+  const colPos = document.getElementById('colPos').value;
+  const Vu = +document.getElementById('Vu').value;
+  const bo_sub = +document.getElementById('bo_sub').value;
+  const Mu1 = +document.getElementById('Mu1').value;
+  const Mu2 = +document.getElementById('Mu2').value;
+  const stDia = +document.getElementById('stDia').value;
+  const stS = +document.getElementById('stS').value;
+  const stLegs = +document.getElementById('stLegs').value;
+
+  const caseId = getCaseFromPos(colPos);
+  const alphaS = getAlphaS(caseId);
+  const phi = 0.75; // ACI 9.3.2.3
+  const d = t - cover - 10; // effective depth (assuming avg rebar offset of 10mm)
+  const beta = Math.max(c1, c2) / Math.min(c1, c2);
+
+  // ===== STEP A: Critical section & Vc =====
+  let b1, b2;
+  if (caseId === 'A' || caseId === 'B') b1 = c1 + d;
+  else b1 = c1 + d / 2;
+  if (caseId === 'B' || caseId === 'C') b2 = c2 + d;
+  else b2 = c2 + d / 2;
+
+  // Actually refine per excel:
+  // A: b1=c1+d, b2=c2+d/2
+  // B: b1=c1+d, b2=c2+d
+  // C: b1=c1+d/2, b2=c2+d
+  // D: b1=c1+d/2, b2=c2+d/2
+  if (caseId === 'A') { b1 = c1 + d; b2 = c2 + d / 2; }
+  else if (caseId === 'B') { b1 = c1 + d; b2 = c2 + d; }
+  else if (caseId === 'C') { b1 = c1 + d / 2; b2 = c2 + d; }
+  else { b1 = c1 + d / 2; b2 = c2 + d / 2; }
+
+  let bo;
+  if (caseId === 'A') bo = b1 + 2 * b2;
+  else if (caseId === 'B') bo = 2 * (b1 + b2);
+  else if (caseId === 'C') bo = 2 * b1 + b2;
+  else bo = b1 + b2;
+  bo -= bo_sub;
+
+  // Three Vc equations (ACI 11.11.2.1)
+  const sqrtFc = Math.sqrt(fc);
+  const Vc_a = 0.17 * (1 + 2 / beta) * sqrtFc;      // 11.11.2.1.a
+  const Vc_b = 0.083 * (alphaS * d / bo + 2) * sqrtFc; // 11.11.2.1.b
+  const Vc_c = 0.33 * sqrtFc;                           // 11.11.2.1.c
+  const Vc_min = Math.min(Vc_a, Vc_b, Vc_c);
+  const phiVc = Vc_min * phi; // MPa
+
+  // ===== STEP B: Unbalanced moment =====
+  const gamma_f1 = 1 / (1 + (2 / 3) * Math.sqrt(b1 / b2));
+  const gamma_f2 = 1 / (1 + (2 / 3) * Math.sqrt(b2 / b1));
+  const gamma_v1 = 1 - gamma_f1;
+  const gamma_v2 = 1 - gamma_f2;
+
+  // Jc per case (PCA Notes Fig 16-13)
+  let Jc1, Jc2;
+  if (caseId === 'A') {
+    Jc1 = (b1 * d * (b1 + 6 * b2) + d ** 3) / 6;
+    Jc2 = (b2 * d * (b2 + 6 * b1) + d ** 3) / 6;
+  } else if (caseId === 'B') {
+    Jc1 = (b1 * d * (b1 + 3 * b2) + d ** 3) / 3;
+    Jc2 = (b2 * d * (b2 + 3 * b1) + d ** 3) / 3;
+  } else if (caseId === 'C') {
+    Jc1 = (2 * b1 ** 2 * d * (b1 + 2 * b2) + d ** 3 * (2 * b1 + b2)) / (6 * b1);
+    Jc2 = (2 * b2 ** 2 * d * (b2 + 2 * b1) + d ** 3 * (2 * b2 + b1)) / (6 * b2);
+  } else {
+    Jc1 = (b1 ** 2 * d * (b1 + 4 * b2) + d ** 3 * (b1 + b2)) / (6 * b1);
+    Jc2 = (b2 ** 2 * d * (b2 + 4 * b1) + d ** 3 * (b2 + b1)) / (6 * b2);
+  }
+
+  // Jc distances (cAB = distance from centroid to face)
+  // For Jc we use half-dimensions for the critical section
+  let cAB1 = b1 / 2, cAB2 = b2 / 2;
+
+  // ===== STEP C: Total punching stress =====
+  const phiVn_max = phi * 0.5 * sqrtFc; // ACI 11.11.5.2
+  const vu = (Vu * 1000) / (bo * d) + gamma_v1 * (Mu1 * 1e6) / Jc1 + gamma_v2 * (Mu2 * 1e6) / Jc2;
+
+  const checkMax = vu <= phiVn_max;
+  const checkVc = vu <= phiVc;
+
+  let verdict = '';
+  let verdictClass = '';
+  if (!checkMax) {
+    verdict = 'vu > Φvn,max → Use Drop Panel or increase slab thickness';
+    verdictClass = 'fail';
+  } else if (!checkVc) {
+    verdict = 'vu > ΦVc → Shear reinforcement required';
+    verdictClass = 'warn';
+  } else {
+    verdict = 'vu ≤ ΦVc → No shear reinforcement needed';
+    verdictClass = 'pass';
+  }
+
+  // ===== STEP D: Shear reinforcement =====
+  const vs_max = 0.66 * sqrtFc; // ACI 11.4.7.9
+  let vs = 0, Av = 0, AvPerLeg = 0, stBarArea = rebarArea[stDia] || 0;
+  let Smax = d / 2;
+  let sValid = stS <= Smax;
+  let rftVerdict = '';
+  let extensionDist = 0;
+  const numSides = getNumSides(caseId);
+
+  if (!checkMax) {
+    vs = null; Av = null; AvPerLeg = null;
+    rftVerdict = 'N/A — Drop panel required';
+  } else if (!checkVc) {
+    vs = Math.min((vu - phi * 0.17 * sqrtFc) / phi, vs_max);
+    Av = vs * bo * stS / fyt;
+    AvPerLeg = Av / stLegs;
+    extensionDist = ((vu * bo * d / (0.17 * phi * d * sqrtFc)) - 2 * (c1 + c2)) / (4 * Math.SQRT2);
+
+    if (d < 150 || d < 16 * stDia) {
+      rftVerdict = `Shear RFT not valid: d < ${d < 150 ? '150mm' : '16×Ø'} (ACI 11.11.3)`;
+    } else if (stBarArea < AvPerLeg) {
+      rftVerdict = 'Increase rebar Ø, reduce spacing, or add more legs';
+    } else {
+      rftVerdict = `Use ${stLegs} legs T${stDia} @ ${stS}mm distributed on all sides`;
+    }
+  } else {
+    rftVerdict = 'No shear reinforcement required';
+  }
+
+  // ===== RENDER RESULTS =====
+  const fmt = (v, dec=2) => v === null ? 'N/A' : (typeof v === 'number' ? v.toFixed(dec) : v);
+
+  // Utilization percentages
+  const pctVc = phiVc > 0 ? (vu / phiVc * 100) : 0;
+  const pctMax = phiVn_max > 0 ? (vu / phiVn_max * 100) : 0;
+  const barClass = (pct) => pct > 100 ? 'red' : pct > 75 ? 'amber' : 'green';
+  const barW = (pct) => Math.min(pct, 100);
+
+  // Show/hide RFT inputs
+  const rftSection = document.getElementById('rftInputSection');
+  if (!checkVc && checkMax) {
+    rftSection.style.display = 'block';
+  } else {
+    rftSection.style.display = 'none';
+  }
+
+  document.getElementById('results').innerHTML = `
+    <!-- STEP A -->
+    <div class="result-card highlight">
+      <div class="rc-header"><span class="step">A</span> Critical Section & Concrete Shear Capacity</div>
+      <div class="rc-row"><span class="rc-label">Effective depth, d</span><span class="rc-value">${fmt(d,0)} mm</span></div>
+      <div class="rc-row"><span class="rc-label">Column ratio, β = c₁/c₂</span><span class="rc-value">${fmt(beta)}</span></div>
+      <div class="rc-row"><span class="rc-label">αs (${colPos.replace('-',' ')})</span><span class="rc-value">${alphaS}</span></div>
+      <div class="rc-row"><span class="rc-label">b₁</span><span class="rc-value">${fmt(b1,0)} mm</span></div>
+      <div class="rc-row"><span class="rc-label">b₂</span><span class="rc-value">${fmt(b2,0)} mm</span></div>
+      <div class="rc-row"><span class="rc-label">Perimeter, bo</span><span class="rc-value accent">${fmt(bo,0)} mm</span></div>
+      <div class="sep"></div>
+      <div class="rc-row"><span class="rc-label">Vc (β check) <span class="aci-ref">11.11.2.1.a</span></span><span class="rc-value">${fmt(Vc_a)} MPa</span></div>
+      <div class="rc-row"><span class="rc-label">Vc (αs·d/bo check) <span class="aci-ref">11.11.2.1.b</span></span><span class="rc-value">${fmt(Vc_b)} MPa</span></div>
+      <div class="rc-row"><span class="rc-label">Vc (upper limit) <span class="aci-ref">11.11.2.1.c</span></span><span class="rc-value">${fmt(Vc_c)} MPa</span></div>
+      <div class="rc-row"><span class="rc-label">Φ (shear) <span class="aci-ref">9.3.2.3</span></span><span class="rc-value">${phi}</span></div>
+      <div class="rc-row"><span class="rc-label"><strong>ΦVc = Φ × min(Vc)</strong></span><span class="rc-value teal">${fmt(phiVc)} MPa</span></div>
+    </div>
+
+    <!-- STEP B -->
+    <div class="result-card">
+      <div class="rc-header"><span class="step">B</span> Unbalanced Moment Transfer</div>
+      <div class="rc-row"><span class="rc-label">γf₁ (flexure, axis 1) <span class="aci-ref">13.5.3.2</span></span><span class="rc-value">${fmt(gamma_f1,4)}</span></div>
+      <div class="rc-row"><span class="rc-label">γf₂ (flexure, axis 2)</span><span class="rc-value">${fmt(gamma_f2,4)}</span></div>
+      <div class="rc-row"><span class="rc-label">γv₁ (shear, axis 1) <span class="aci-ref">11.11.7.1</span></span><span class="rc-value">${fmt(gamma_v1,4)}</span></div>
+      <div class="rc-row"><span class="rc-label">γv₂ (shear, axis 2)</span><span class="rc-value">${fmt(gamma_v2,4)}</span></div>
+      <div class="sep"></div>
+      <div class="rc-row"><span class="rc-label">Jc₁ <span class="aci-ref">PCA Fig.16-13</span></span><span class="rc-value">${(Jc1/1e6).toFixed(2)} ×10⁶ mm³</span></div>
+      <div class="rc-row"><span class="rc-label">Jc₂</span><span class="rc-value">${(Jc2/1e6).toFixed(2)} ×10⁶ mm³</span></div>
+    </div>
+
+    <!-- STEP C -->
+    <div class="result-card ${verdictClass}">
+      <div class="rc-header"><span class="step">C</span> Punching Stress Check</div>
+      <div class="rc-row"><span class="rc-label">Φvn,max = Φ×0.5√f'c <span class="aci-ref">11.11.5.2</span></span><span class="rc-value">${fmt(phiVn_max)} MPa</span></div>
+      <div class="rc-row"><span class="rc-label">ΦVc</span><span class="rc-value teal">${fmt(phiVc)} MPa</span></div>
+      <div class="rc-row"><span class="rc-label"><strong>vu (total)</strong></span><span class="rc-value ${vu > phiVn_max ? 'red' : vu > phiVc ? 'warn' : 'teal'}">${fmt(vu)} MPa</span></div>
+
+      <div class="util-bar-wrap">
+        <div class="util-bar-label">
+          <span style="color:var(--text2)">vu / ΦVc</span>
+          <span class="pct" style="color:${pctVc > 100 ? 'var(--red)' : pctVc > 75 ? 'var(--warn)' : 'var(--teal)'}">${fmt(pctVc,1)}%</span>
+        </div>
+        <div class="util-bar"><div class="util-bar-fill ${barClass(pctVc)}" style="width:${barW(pctVc)}%"></div></div>
+      </div>
+      <div class="util-bar-wrap">
+        <div class="util-bar-label">
+          <span style="color:var(--text2)">vu / Φvn,max</span>
+          <span class="pct" style="color:${pctMax > 100 ? 'var(--red)' : pctMax > 75 ? 'var(--warn)' : 'var(--teal)'}">${fmt(pctMax,1)}%</span>
+        </div>
+        <div class="util-bar"><div class="util-bar-fill ${barClass(pctMax)}" style="width:${barW(pctMax)}%"></div></div>
+      </div>
+
+      <div class="verdict-box ${verdictClass}">
+        <span class="verdict-icon">${verdictClass === 'pass' ? '✓' : verdictClass === 'warn' ? '⚠' : '✗'}</span>
+        ${verdict}
+      </div>
+    </div>
+
+    <!-- STEP D -->
+    ${!checkVc || !checkMax ? `
+    <div class="result-card ${!checkMax ? 'fail' : ''}">
+      <div class="rc-header"><span class="step">D</span> Shear Reinforcement Design</div>
+      ${!checkMax ? `
+        <div class="verdict-box fail"><span class="verdict-icon">✗</span>vu exceeds Φvn,max — Drop panel or increased thickness required. Shear reinforcement cannot resolve this.</div>
+      ` : `
+        <div class="rc-row"><span class="rc-label">vs (required) <span class="aci-ref">11.11.7.2</span></span><span class="rc-value">${fmt(vs)} MPa</span></div>
+        <div class="rc-row"><span class="rc-label">vs,max = 0.66√f'c <span class="aci-ref">11.4.7.9</span></span><span class="rc-value">${fmt(vs_max)} MPa</span></div>
+        <div class="rc-row"><span class="rc-label">Av (total) required</span><span class="rc-value">${fmt(Av)} mm²</span></div>
+        <div class="rc-row"><span class="rc-label">Av per leg</span><span class="rc-value">${fmt(AvPerLeg)} mm²</span></div>
+        <div class="rc-row"><span class="rc-label">Bar area (T${stDia})</span><span class="rc-value">${stBarArea} mm²</span></div>
+        <div class="rc-row"><span class="rc-label">Spacing check: s ≤ d/2 = ${fmt(Smax,0)}mm <span class="aci-ref">11.11.3.3</span></span><span class="rc-value ${sValid ? 'teal' : 'red'}">${sValid ? 'OK' : 'NOT VALID'}</span></div>
+        <div class="rc-row"><span class="rc-label">No. of sides</span><span class="rc-value">${numSides}</span></div>
+        <div class="rc-row"><span class="rc-label">Extension distance from face</span><span class="rc-value">${extensionDist > 0 ? fmt(extensionDist,0) + ' mm' : '—'}</span></div>
+        <div class="verdict-box ${stBarArea >= AvPerLeg && sValid && d >= 150 ? 'pass' : 'fail'}">
+          <span class="verdict-icon">${stBarArea >= AvPerLeg && sValid && d >= 150 ? '✓' : '⚠'}</span>
+          ${rftVerdict}
+        </div>
+      `}
+    </div>
+    ` : ''}
+  `;
+
+  // Draw diagram
+  drawDiagram(c1, c2, d, b1, b2, bo, caseId, vu, phiVc, phiVn_max);
+
+  // ===== GENERATE REPORT =====
+  const posLabel = document.getElementById('colPos').selectedOptions[0].text;
+  const boFormulas = {
+    'A': `b₁ + 2·b₂ = ${fmt(b1,0)} + 2×${fmt(b2,0)}`,
+    'B': `2·(b₁ + b₂) = 2×(${fmt(b1,0)} + ${fmt(b2,0)})`,
+    'C': `2·b₁ + b₂ = 2×${fmt(b1,0)} + ${fmt(b2,0)}`,
+    'D': `b₁ + b₂ = ${fmt(b1,0)} + ${fmt(b2,0)}`
+  };
+  const b1Formulas = {
+    'A': `c₁ + d = ${c1} + ${fmt(d,0)}`,
+    'B': `c₁ + d = ${c1} + ${fmt(d,0)}`,
+    'C': `c₁ + d/2 = ${c1} + ${fmt(d/2,0)}`,
+    'D': `c₁ + d/2 = ${c1} + ${fmt(d/2,0)}`
+  };
+  const b2Formulas = {
+    'A': `c₂ + d/2 = ${c2} + ${fmt(d/2,0)}`,
+    'B': `c₂ + d = ${c2} + ${fmt(d,0)}`,
+    'C': `c₂ + d = ${c2} + ${fmt(d,0)}`,
+    'D': `c₂ + d/2 = ${c2} + ${fmt(d/2,0)}`
+  };
+
+  const vuDirect = (Vu * 1000) / (bo * d);
+  const vuM1 = Jc1 > 0 ? gamma_v1 * (Mu1 * 1e6) / Jc1 : 0;
+  const vuM2 = Jc2 > 0 ? gamma_v2 * (Mu2 * 1e6) / Jc2 : 0;
+
+  let stepD_html = '';
+  if (!checkMax) {
+    stepD_html = `<div class="r-verdict fail">vu exceeds Φvn,max — Shear reinforcement alone is insufficient.<br>Use drop panel or increase slab thickness.</div>`;
+  } else if (!checkVc) {
+    stepD_html = `
+      <div class="r-eq">
+        <span class="eq-ref">ACI 11.11.7.2</span>
+        <span class="eq-label">Required shear stress carried by reinforcement</span>
+        vs = (vu − Φ·0.17·√f'c) / Φ = (${fmt(vu)} − ${phi}×0.17×√${fc}) / ${phi} = <strong>${fmt(vs)} MPa</strong>
+      </div>
+      <div class="r-eq">
+        <span class="eq-ref">ACI 11.4.7.9</span>
+        <span class="eq-label">Maximum vs</span>
+        vs,max = 0.66·√f'c = 0.66×√${fc} = <strong>${fmt(vs_max)} MPa</strong>
+        ${vs > vs_max ? '  → <strong style="color:var(--red)">vs > vs,max — NOT OK</strong>' : '  → vs ≤ vs,max ✓'}
+      </div>
+      <table>
+        <tr><th>Parameter</th><th>Value</th><th>Formula / Note</th></tr>
+        <tr><td>Av (total required)</td><td>${fmt(Av)} mm²</td><td>vs × bo × s / fyt = ${fmt(vs)}×${fmt(bo,0)}×${stS}/${fyt}</td></tr>
+        <tr><td>No. of stirrup legs</td><td>${stLegs}</td><td>Distributed on ${numSides} sides</td></tr>
+        <tr><td>Av per leg</td><td>${fmt(AvPerLeg)} mm²</td><td>Av / n = ${fmt(Av)} / ${stLegs}</td></tr>
+        <tr><td>Bar area (T${stDia})</td><td>${stBarArea} mm²</td><td>${stBarArea >= AvPerLeg ? '≥ Av/leg ✓' : '< Av/leg ✗'}</td></tr>
+        <tr><td>Spacing, s</td><td>${stS} mm</td><td>s,max = d/2 = ${fmt(Smax,0)} mm → ${sValid ? 'OK ✓' : 'NOT OK ✗'}</td></tr>
+        <tr><td>Extension distance</td><td>${extensionDist > 0 ? fmt(extensionDist,0)+' mm' : '—'}</td><td>From column face, each side</td></tr>
+      </table>
+      <div class="r-verdict ${stBarArea >= AvPerLeg && sValid && d >= 150 ? 'pass' : 'fail'}">
+        ${rftVerdict}
+      </div>`;
+  } else {
+    stepD_html = `<div class="r-verdict pass">No shear reinforcement is required.</div>`;
+  }
+
+  const reportHTML = `
+    <div class="report">
+      <h2>Punching Shear Check — ACI 318M-08 §11.11</h2>
+      <div class="r-subtitle">Column: ${posLabel} (Case ${caseId}) &nbsp;|&nbsp; ${c1}×${c2} mm &nbsp;|&nbsp; Slab t = ${t} mm</div>
+
+      <h3>Input Data</h3>
+      <table>
+        <tr><th>Parameter</th><th>Value</th><th>Unit</th></tr>
+        <tr><td>Slab thickness, t</td><td>${t}</td><td>mm</td></tr>
+        <tr><td>Cover</td><td>${cover}</td><td>mm</td></tr>
+        <tr><td>Effective depth, d = t − cover − 10</td><td>${fmt(d,0)}</td><td>mm</td></tr>
+        <tr><td>f'c</td><td>${fc}</td><td>MPa</td></tr>
+        <tr><td>fy</td><td>${fy}</td><td>MPa</td></tr>
+        <tr><td>fyt</td><td>${fyt}</td><td>MPa</td></tr>
+        <tr><td>Column c₁ (depth)</td><td>${c1}</td><td>mm</td></tr>
+        <tr><td>Column c₂ (width)</td><td>${c2}</td><td>mm</td></tr>
+        <tr><td>Column position</td><td colspan="2">${posLabel} (Case ${caseId}, αs = ${alphaS})</td></tr>
+        <tr><td>Vu</td><td>${Vu}</td><td>kN</td></tr>
+        <tr><td>Mu₁</td><td>${Mu1}</td><td>kN·m</td></tr>
+        <tr><td>Mu₂</td><td>${Mu2}</td><td>kN·m</td></tr>
+      </table>
+
+      <h3>Step A — Concrete Punching Shear Capacity (ΦVc)</h3>
+      <table>
+        <tr><th>Parameter</th><th>Value</th><th>Calculation</th></tr>
+        <tr><td>β (column ratio)</td><td>${fmt(beta)}</td><td>max(c₁,c₂)/min(c₁,c₂) = ${Math.max(c1,c2)}/${Math.min(c1,c2)}</td></tr>
+        <tr><td>b₁</td><td>${fmt(b1,0)} mm</td><td>${b1Formulas[caseId]}</td></tr>
+        <tr><td>b₂</td><td>${fmt(b2,0)} mm</td><td>${b2Formulas[caseId]}</td></tr>
+        <tr><td>bo</td><td>${fmt(bo,0)} mm</td><td>${boFormulas[caseId]}${bo_sub > 0 ? ' − '+bo_sub : ''}</td></tr>
+      </table>
+      <div class="r-eq">
+        <span class="eq-ref">ACI 11.11.2.1.a</span>
+        <span class="eq-label">Equation (a) — Column aspect ratio</span>
+        Vc = 0.17·(1 + 2/β)·√f'c = 0.17×(1 + 2/${fmt(beta)})×√${fc} = <strong>${fmt(Vc_a)} MPa</strong>
+      </div>
+      <div class="r-eq">
+        <span class="eq-ref">ACI 11.11.2.1.b</span>
+        <span class="eq-label">Equation (b) — Perimeter-to-depth ratio</span>
+        Vc = 0.083·(αs·d/bo + 2)·√f'c = 0.083×(${alphaS}×${fmt(d,0)}/${fmt(bo,0)} + 2)×√${fc} = <strong>${fmt(Vc_b)} MPa</strong>
+      </div>
+      <div class="r-eq">
+        <span class="eq-ref">ACI 11.11.2.1.c</span>
+        <span class="eq-label">Equation (c) — Upper limit</span>
+        Vc = 0.33·√f'c = 0.33×√${fc} = <strong>${fmt(Vc_c)} MPa</strong>
+      </div>
+      <div class="r-result pass">
+        Vc = min(${fmt(Vc_a)}, ${fmt(Vc_b)}, ${fmt(Vc_c)}) = ${fmt(Vc_min)} MPa<br>
+        <strong>ΦVc = ${phi} × ${fmt(Vc_min)} = ${fmt(phiVc)} MPa</strong> &nbsp; (Φ = ${phi}, ACI 9.3.2.3)
+      </div>
+
+      <h3>Step B — Unbalanced Moment Transfer</h3>
+      <div class="r-eq">
+        <span class="eq-ref">ACI 13.5.3.2</span>
+        <span class="eq-label">Fraction of moment transferred by flexure</span>
+        γf₁ = 1 / (1 + ⅔·√(b₁/b₂)) = 1 / (1 + ⅔×√(${fmt(b1,0)}/${fmt(b2,0)})) = <strong>${fmt(gamma_f1,4)}</strong><br>
+        γf₂ = 1 / (1 + ⅔·√(b₂/b₁)) = 1 / (1 + ⅔×√(${fmt(b2,0)}/${fmt(b1,0)})) = <strong>${fmt(gamma_f2,4)}</strong>
+      </div>
+      <div class="r-eq">
+        <span class="eq-ref">ACI 11.11.7.1</span>
+        <span class="eq-label">Fraction of moment transferred by shear</span>
+        γv₁ = 1 − γf₁ = 1 − ${fmt(gamma_f1,4)} = <strong>${fmt(gamma_v1,4)}</strong><br>
+        γv₂ = 1 − γf₂ = 1 − ${fmt(gamma_f2,4)} = <strong>${fmt(gamma_v2,4)}</strong>
+      </div>
+      <div class="r-eq">
+        <span class="eq-ref">PCA Notes Fig. 16-13</span>
+        <span class="eq-label">Property of critical section (Jc)</span>
+        Jc₁ = <strong>${(Jc1/1e6).toFixed(2)} × 10⁶ mm³</strong><br>
+        Jc₂ = <strong>${(Jc2/1e6).toFixed(2)} × 10⁶ mm³</strong>
+      </div>
+
+      <h3>Step C — Punching Stress Check</h3>
+      <div class="r-eq">
+        <span class="eq-ref">ACI 11.11.5.2</span>
+        <span class="eq-label">Maximum allowable shear stress</span>
+        Φvn,max = Φ·0.5·√f'c = ${phi}×0.5×√${fc} = <strong>${fmt(phiVn_max)} MPa</strong>
+      </div>
+      <div class="r-eq">
+        <span class="eq-label">Total factored punching stress</span>
+        vu = Vu/(bo·d) + γv₁·Mu₁/Jc₁ + γv₂·Mu₂/Jc₂<br>
+        vu = ${Vu}×10³ / (${fmt(bo,0)}×${fmt(d,0)}) + ${fmt(gamma_v1,4)}×${Mu1}×10⁶ / ${(Jc1/1e6).toFixed(2)}×10⁶ + ${fmt(gamma_v2,4)}×${Mu2}×10⁶ / ${(Jc2/1e6).toFixed(2)}×10⁶<br>
+        vu = ${fmt(vuDirect)} + ${fmt(vuM1)} + ${fmt(vuM2)}<br>
+        <strong>vu = ${fmt(vu)} MPa</strong>
+      </div>
+      <div class="r-result ${verdictClass}">
+        vu = ${fmt(vu)} MPa &nbsp; ${vu <= phiVc ? '≤' : '>'} &nbsp; ΦVc = ${fmt(phiVc)} MPa &nbsp;&nbsp; <strong>(vu/ΦVc = ${fmt(pctVc,1)}%)</strong><br>
+        vu = ${fmt(vu)} MPa &nbsp; ${vu <= phiVn_max ? '≤' : '>'} &nbsp; Φvn,max = ${fmt(phiVn_max)} MPa &nbsp;&nbsp; <strong>(vu/Φvn,max = ${fmt(pctMax,1)}%)</strong>
+      </div>
+      <div class="r-verdict ${verdictClass}">
+        ${verdict}
+      </div>
+
+      <h3>Step D — Shear Reinforcement</h3>
+      ${stepD_html}
+    </div>
+  `;
+
+  document.getElementById('reportSection').style.display = 'block';
+  document.getElementById('reportContent').innerHTML = reportHTML;
+}
+
+// ===== DIAGRAM =====
+function drawDiagram(c1, c2, d, b1, b2, bo, caseId, vu, phiVc, phiVn_max) {
+  const canvas = document.getElementById('diagCanvas');
+  const dpr = window.devicePixelRatio || 1;
+  const rect = canvas.getBoundingClientRect();
+  canvas.width = rect.width * dpr;
+  canvas.height = rect.height * dpr;
+  const ctx = canvas.getContext('2d');
+  ctx.scale(dpr, dpr);
+  const W = rect.width, H = rect.height;
+  ctx.clearRect(0, 0, W, H);
+
+  // Background
+  ctx.fillStyle = '#eaecf2';
+  ctx.fillRect(0, 0, W, H);
+
+  const cx = W / 2, cy = H / 2;
+  // Scale to fit
+  const maxDim = Math.max(b1, b2, c1 + d * 2, c2 + d * 2);
+  const scale = Math.min((W - 160) / maxDim, (H - 120) / maxDim) * 0.8;
+
+  const sc1 = c1 * scale, sc2 = c2 * scale;
+  const sb1 = b1 * scale, sb2 = b2 * scale;
+  const sd = d * scale / 2;
+
+  // Draw slab area (faint)
+  ctx.fillStyle = 'rgba(59,109,224,0.05)';
+  ctx.fillRect(40, 40, W - 80, H - 80);
+
+  // Column (filled)
+  ctx.fillStyle = 'rgba(30,70,180,0.18)';
+  ctx.strokeStyle = '#2952b3';
+  ctx.lineWidth = 2.5;
+  ctx.fillRect(cx - sc1 / 2, cy - sc2 / 2, sc1, sc2);
+  ctx.strokeRect(cx - sc1 / 2, cy - sc2 / 2, sc1, sc2);
+
+  // Label column
+  ctx.fillStyle = '#1e3a8a';
+  ctx.font = '700 13px "JetBrains Mono"';
+  ctx.textAlign = 'center';
+  ctx.fillText(`${c1}×${c2}`, cx, cy + 4);
+
+  // Critical perimeter (dashed)
+  ctx.setLineDash([8, 5]);
+  ctx.strokeStyle = '#068060';
+  ctx.lineWidth = 2.5;
+
+  // Draw critical perimeter based on case
+  let perimPath = [];
+  if (caseId === 'B') {
+    // Interior: full rectangle
+    ctx.strokeRect(cx - sb1 / 2, cy - sb2 / 2, sb1, sb2);
+  } else if (caseId === 'A') {
+    // Edge-depth: 3 sides, open on top (c1 direction)
+    ctx.beginPath();
+    ctx.moveTo(cx - sb1 / 2, cy - sb2 / 2);
+    ctx.lineTo(cx - sb1 / 2, cy + sb2 / 2);
+    ctx.lineTo(cx + sb1 / 2, cy + sb2 / 2);
+    ctx.lineTo(cx + sb1 / 2, cy - sb2 / 2);
+    ctx.stroke();
+    // Slab edge indicator
+    ctx.setLineDash([]);
+    ctx.strokeStyle = '#b91c30';
+    ctx.lineWidth = 3.5;
+    ctx.beginPath();
+    ctx.moveTo(cx - sb1 / 2 - 20, cy - sb2 / 2 - sd);
+    ctx.lineTo(cx + sb1 / 2 + 20, cy - sb2 / 2 - sd);
+    ctx.stroke();
+    ctx.fillStyle = '#b91c30';
+    ctx.font = '700 11px "DM Sans"';
+    ctx.fillText('SLAB EDGE', cx, cy - sb2 / 2 - sd - 8);
+  } else if (caseId === 'C') {
+    // Edge-width: 3 sides, open on left (c2 direction)
+    ctx.beginPath();
+    ctx.moveTo(cx - sb1 / 2, cy - sb2 / 2);
+    ctx.lineTo(cx + sb1 / 2, cy - sb2 / 2);
+    ctx.lineTo(cx + sb1 / 2, cy + sb2 / 2);
+    ctx.lineTo(cx - sb1 / 2, cy + sb2 / 2);
+    ctx.stroke();
+    ctx.setLineDash([]);
+    ctx.strokeStyle = '#b91c30';
+    ctx.lineWidth = 3.5;
+    ctx.beginPath();
+    ctx.moveTo(cx - sb1 / 2 - sd, cy - sb2 / 2 - 20);
+    ctx.lineTo(cx - sb1 / 2 - sd, cy + sb2 / 2 + 20);
+    ctx.stroke();
+    ctx.fillStyle = '#b91c30';
+    ctx.font = '700 11px "DM Sans"';
+    ctx.save();
+    ctx.translate(cx - sb1 / 2 - sd - 10, cy);
+    ctx.rotate(-Math.PI / 2);
+    ctx.fillText('SLAB EDGE', 0, 0);
+    ctx.restore();
+  } else {
+    // Corner: 2 sides
+    ctx.beginPath();
+    ctx.moveTo(cx - sb1 / 2, cy + sb2 / 2);
+    ctx.lineTo(cx + sb1 / 2, cy + sb2 / 2);
+    ctx.lineTo(cx + sb1 / 2, cy - sb2 / 2);
+    ctx.stroke();
+    ctx.setLineDash([]);
+    ctx.strokeStyle = '#b91c30';
+    ctx.lineWidth = 3.5;
+    // Top edge
+    ctx.beginPath();
+    ctx.moveTo(cx - sb1 / 2 - 20, cy - sb2 / 2 - sd);
+    ctx.lineTo(cx + sb1 / 2 + 20, cy - sb2 / 2 - sd);
+    ctx.stroke();
+    // Left edge
+    ctx.beginPath();
+    ctx.moveTo(cx - sb1 / 2 - sd, cy - sb2 / 2 - 20);
+    ctx.lineTo(cx - sb1 / 2 - sd, cy + sb2 / 2 + 20);
+    ctx.stroke();
+    ctx.fillStyle = '#b91c30';
+    ctx.font = '700 11px "DM Sans"';
+    ctx.fillText('SLAB EDGE', cx, cy - sb2 / 2 - sd - 8);
+  }
+
+  ctx.setLineDash([]);
+
+  // Dimension lines
+  ctx.strokeStyle = 'rgba(0,0,0,0.25)';
+  ctx.lineWidth = 1.5;
+  ctx.fillStyle = 'rgba(0,0,0,0.6)';
+  ctx.font = '600 12px "JetBrains Mono"';
+
+  // b1 dimension (horizontal)
+  const dimY = cy + Math.max(sb2, sc2) / 2 + 35;
+  ctx.beginPath();
+  ctx.moveTo(cx - sb1 / 2, dimY);
+  ctx.lineTo(cx + sb1 / 2, dimY);
+  ctx.stroke();
+  ctx.fillStyle = '#057a5f';
+  ctx.fillText(`b₁ = ${b1}`, cx, dimY - 6);
+
+  // b2 dimension (vertical)
+  const dimX = cx + Math.max(sb1, sc1) / 2 + 40;
+  ctx.beginPath();
+  ctx.moveTo(dimX, cy - sb2 / 2);
+  ctx.lineTo(dimX, cy + sb2 / 2);
+  ctx.stroke();
+  ctx.save();
+  ctx.translate(dimX + 6, cy);
+  ctx.rotate(-Math.PI / 2);
+  ctx.fillText(`b₂ = ${b2}`, 0, 0);
+  ctx.restore();
+
+  // d/2 annotation
+  ctx.fillStyle = 'rgba(0,0,0,0.45)';
+  ctx.font = '500 11px "JetBrains Mono"';
+  const dOffX = cx + sc1 / 2 + (sb1 / 2 - sc1 / 2) / 2;
+  ctx.fillText('d/2', dOffX, cy + sc2 / 2 + 16);
+
+  // Legend
+  ctx.fillStyle = '#2952b3';
+  ctx.fillRect(20, H - 50, 12, 12);
+  ctx.fillStyle = 'rgba(0,0,0,0.6)';
+  ctx.font = '500 12px "DM Sans"';
+  ctx.textAlign = 'left';
+  ctx.fillText('Column', 38, H - 40);
+
+  ctx.strokeStyle = '#068060';
+  ctx.setLineDash([8, 5]);
+  ctx.lineWidth = 2.5;
+  ctx.beginPath(); ctx.moveTo(100, H - 44); ctx.lineTo(135, H - 44); ctx.stroke();
+  ctx.setLineDash([]);
+  ctx.fillText('Critical perimeter (d/2)', 142, H - 40);
+
+  // Stress ratio bar
+  const barX = W - 200, barY = 20, barW = 180, barH = 18;
+  ctx.fillStyle = 'rgba(0,0,0,0.08)';
+  ctx.beginPath();
+  ctx.roundRect(barX, barY, barW, barH, 4);
+  ctx.fill();
+  const ratio = Math.min(vu / phiVn_max, 1);
+  const ratioColor = vu > phiVn_max ? '#b91c30' : vu > phiVc ? '#a06c00' : '#068060';
+  ctx.fillStyle = ratioColor;
+  ctx.beginPath();
+  ctx.roundRect(barX, barY, barW * ratio, barH, 4);
+  ctx.fill();
+  ctx.fillStyle = '#1a1d26';
+  ctx.font = '700 11px "JetBrains Mono"';
+  ctx.textAlign = 'right';
+  ctx.fillText(`vu/Φvn,max = ${(ratio * 100).toFixed(0)}%`, barX + barW, barY + barH + 16);
+
+  // Case label
+  ctx.textAlign = 'left';
+  ctx.fillStyle = 'rgba(0,0,0,0.55)';
+  ctx.font = '600 12px "DM Sans"';
+  ctx.fillText(`Case ${caseId} — ${document.getElementById('colPos').selectedOptions[0].text}`, 20, 28);
+  ctx.fillText(`bo = ${bo} mm`, 20, 46);
+}
+
+// Initial calculation
+calculate();
+
+// Auto-recalculate on any input change
+document.querySelectorAll('input, select').forEach(el => {
+  el.addEventListener('input', calculate);
+  el.addEventListener('change', calculate);
+});
+
+// ===== COPY REPORT =====
+function copyReport() {
+  const el = document.getElementById('reportContent');
+  const range = document.createRange();
+  range.selectNodeContents(el);
+  const sel = window.getSelection();
+  sel.removeAllRanges();
+  sel.addRange(range);
+  document.execCommand('copy');
+  sel.removeAllRanges();
+  const btn = event.target.closest('.report-btn');
+  const orig = btn.innerHTML;
+  btn.innerHTML = '✓ Copied';
+  btn.style.borderColor = 'var(--teal)';
+  btn.style.color = 'var(--teal)';
+  setTimeout(() => { btn.innerHTML = orig; btn.style.borderColor = ''; btn.style.color = ''; }, 1500);
+}
+
+// ===== PRINT REPORT =====
+function printReport() {
+  window.print();
+}
+</script>
+</body>
+</html>
