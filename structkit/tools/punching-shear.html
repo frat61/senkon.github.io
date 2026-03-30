@@ -76,14 +76,15 @@ body {
 }
 
 @media (max-width: 900px) {
-  .container { grid-template-columns: 1fr; }
+  .container { grid-template-columns: 1fr; padding: 16px; }
+  .panel { width: 100%; }
 }
 
 @media (max-width: 480px) {
   html { font-size: 13px; }
   .header { padding: 12px 16px; }
   .header h1 { font-size: 16px; }
-  .container { padding: 12px; gap: 12px; }
+  .container { padding: 10px; gap: 12px; }
   .panel-body { padding: 14px; }
   .panel-title { padding: 12px 14px 8px; font-size: 11px; }
   .field input, .field select { padding: 11px 10px; font-size: 14px; border-radius: 10px; }
@@ -92,13 +93,14 @@ body {
   .input-row.triple { grid-template-columns: 1fr 1fr; }
   .calc-btn { padding: 14px; font-size: 15px; border-radius: 10px; }
   .result-card { padding: 14px; }
-  .rc-row { padding: 6px 0; }
+  .rc-row { padding: 6px 0; flex-wrap: wrap; gap: 2px; }
   .rc-label { font-size: 12px; }
   .rc-value { font-size: 13px; }
   .verdict-box { padding: 12px; font-size: 13px; }
-  .diagram-container canvas { height: 260px !important; }
-  .report table { font-size: 11px; }
-  .report .r-eq { font-size: 11px; padding: 10px; overflow-x: auto; }
+  .diagram-container { padding: 8px; }
+  .diagram-container canvas { height: 260px !important; width: 100% !important; }
+  .report table { font-size: 11px; display: block; overflow-x: auto; }
+  .report .r-eq { font-size: 11px; padding: 10px; overflow-x: auto; word-break: break-word; }
   .report h3 { font-size: 12px; }
   .util-bar-label .pct { font-size: 14px; }
 }
