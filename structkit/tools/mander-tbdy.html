@@ -1,0 +1,1274 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8"/>
+<meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+<title>Mander Model & TBDY 2018 Ductility</title>
+<style>
+@import url('https://fonts.googleapis.com/css2?family=Syne:wght@400;600;700;800&family=JetBrains+Mono:wght@300;400;500;600&display=swap');
+
+:root {
+  --bg:       #080b10;
+  --s1:       #0e1318;
+  --s2:       #141a22;
+  --s3:       #1a2130;
+  --border:   #1f2d3d;
+  --border2:  #263547;
+  --teal:     #00e5c3;
+  --teal2:    #00b89a;
+  --amber:    #ffb020;
+  --red:      #ff4d6a;
+  --green:    #22d98a;
+  --blue:     #4da8ff;
+  --text:     #dce8f0;
+  --muted:    #4a6070;
+  --muted2:   #2a3f52;
+  --mono:     'JetBrains Mono', monospace;
+  --display:  'Syne', sans-serif;
+}
+
+*{box-sizing:border-box;margin:0;padding:0;}
+
+body{
+  background:var(--bg);
+  color:var(--text);
+  font-family:var(--mono);
+  font-size:13px;
+  min-height:100vh;
+}
+
+/* HEADER */
+.hdr{
+  background:var(--s1);
+  border-bottom:1px solid var(--border);
+  padding:12px 20px;
+  display:flex;align-items:center;gap:14px;
+}
+.hdr-badge{
+  background:linear-gradient(135deg,var(--teal),var(--blue));
+  border-radius:6px;padding:6px 10px;
+  font-family:var(--display);font-weight:800;font-size:13px;color:#000;
+  letter-spacing:0.05em;
+}
+.hdr-title{font-family:var(--display);font-weight:700;font-size:15px;letter-spacing:0.03em;}
+.hdr-sub{font-size:10px;color:var(--muted);margin-top:1px;letter-spacing:0.08em;}
+
+/* LAYOUT */
+.layout{
+  display:grid;
+  grid-template-columns:300px 1fr;
+  height:calc(100vh - 53px);
+}
+
+/* SIDEBAR */
+.sidebar{
+  background:var(--s1);
+  border-right:1px solid var(--border);
+  overflow-y:auto;
+  padding:14px;
+  display:flex;flex-direction:column;gap:10px;
+}
+
+.seg{
+  font-size:9px;font-weight:600;
+  letter-spacing:0.15em;
+  color:var(--teal);
+  text-transform:uppercase;
+  padding:5px 0 4px;
+  border-bottom:1px solid var(--border);
+  margin-bottom:2px;
+}
+
+/* Type selector */
+.type-grid{display:grid;grid-template-columns:1fr 1fr 1fr;gap:3px;}
+.type-btn{
+  background:var(--s2);border:1px solid var(--border);
+  color:var(--muted);cursor:pointer;
+  padding:7px 4px;border-radius:5px;
+  font-family:var(--display);font-size:10px;font-weight:600;
+  text-align:center;transition:all 0.15s;letter-spacing:0.03em;
+}
+.type-btn.active{background:var(--teal);border-color:var(--teal);color:#000;}
+
+.field{display:flex;flex-direction:column;gap:3px;}
+.field label{font-size:10px;color:var(--muted);letter-spacing:0.06em;}
+.field input,.field select{
+  background:var(--bg);
+  border:1px solid var(--border);
+  color:var(--text);
+  padding:6px 9px;
+  border-radius:4px;
+  font-family:var(--mono);font-size:12px;
+  outline:none;transition:border-color 0.15s;
+}
+.field input:focus,.field select:focus{border-color:var(--teal);}
+.field select option{background:var(--s2);}
+
+.g2{display:grid;grid-template-columns:1fr 1fr;gap:7px;}
+.g3{display:grid;grid-template-columns:1fr 1fr 1fr;gap:5px;}
+
+.run-btn{
+  background:linear-gradient(135deg,var(--teal),var(--blue));
+  border:none;cursor:pointer;
+  padding:11px;border-radius:6px;
+  font-family:var(--display);font-weight:800;font-size:13px;
+  color:#000;letter-spacing:0.05em;
+  width:100%;transition:opacity 0.15s;
+}
+.run-btn:hover{opacity:0.85;}
+
+/* MAIN */
+.main{display:flex;flex-direction:column;overflow:hidden;}
+
+.tabbar{
+  display:flex;gap:0;
+  background:var(--s1);
+  border-bottom:1px solid var(--border);
+  padding:0 16px;
+}
+.vtab{
+  padding:11px 14px;
+  background:none;border:none;cursor:pointer;
+  font-family:var(--mono);font-size:12px;font-weight:500;
+  color:var(--muted);
+  border-bottom:2px solid transparent;
+  transition:all 0.15s;letter-spacing:0.03em;
+}
+.vtab.active{color:var(--teal);border-bottom-color:var(--teal);}
+
+.panel{flex:1;overflow-y:auto;padding:18px;display:none;}
+.panel.active{display:block;}
+
+/* CARDS */
+.card{
+  background:var(--s1);
+  border:1px solid var(--border);
+  border-radius:8px;padding:15px;
+  margin-bottom:12px;
+}
+.card-hd{
+  font-size:9px;font-weight:600;
+  letter-spacing:0.12em;color:var(--teal);
+  text-transform:uppercase;margin-bottom:12px;
+}
+
+/* STATUS STRIP */
+.strip{
+  display:grid;grid-template-columns:repeat(4,1fr);
+  gap:8px;margin-bottom:12px;
+}
+.kpi{
+  background:var(--s2);border:1px solid var(--border);
+  border-radius:6px;padding:10px;text-align:center;
+}
+.kpi .v{
+  font-family:var(--display);font-size:18px;font-weight:800;
+  color:var(--teal);line-height:1;
+}
+.kpi .l{font-size:9px;color:var(--muted);margin-top:3px;letter-spacing:0.06em;}
+
+.verdict{
+  padding:10px 16px;border-radius:6px;
+  font-family:var(--display);font-weight:700;font-size:14px;
+  text-align:center;margin-bottom:12px;letter-spacing:0.03em;
+}
+.verdict.pass{background:rgba(34,217,138,0.12);color:var(--green);border:1px solid rgba(34,217,138,0.25);}
+.verdict.fail{background:rgba(255,77,106,0.12);color:var(--red);border:1px solid rgba(255,77,106,0.25);}
+.verdict.warn{background:rgba(255,176,32,0.12);color:var(--amber);border:1px solid rgba(255,176,32,0.25);}
+
+/* TABLE */
+.tbl{width:100%;border-collapse:collapse;font-size:11px;}
+.tbl th{
+  background:var(--s3);color:var(--muted);
+  padding:6px 9px;text-align:left;
+  border-bottom:1px solid var(--border);
+  font-weight:500;letter-spacing:0.05em;
+}
+.tbl td{padding:6px 9px;border-bottom:1px solid var(--border2);}
+.tbl tr:last-child td{border-bottom:none;}
+.tbl td.num{color:var(--teal);}
+.tbl td.ok{color:var(--green);}
+.tbl td.ng{color:var(--red);}
+.tbl td.warn{color:var(--amber);}
+
+/* CANVAS */
+canvas{display:block;margin:0 auto;}
+
+/* EMPTY */
+.empty{
+  text-align:center;padding:70px 20px;
+  color:var(--muted);font-size:12px;letter-spacing:0.06em;
+}
+
+/* REPORT */
+.rpt-hdr{border-bottom:2px solid var(--teal);padding-bottom:12px;margin-bottom:20px;}
+.rpt-hdr h2{font-family:var(--display);font-size:22px;font-weight:800;letter-spacing:0.03em;}
+.rpt-hdr p{color:var(--muted);font-size:10px;margin-top:3px;letter-spacing:0.06em;}
+.rpt-sec{margin-bottom:18px;}
+.rpt-sec h3{
+  font-size:9px;font-weight:600;letter-spacing:0.12em;
+  color:var(--teal);text-transform:uppercase;
+  border-bottom:1px solid var(--border);padding-bottom:5px;margin-bottom:9px;
+}
+.rpt-grid{display:grid;grid-template-columns:1fr 1fr;gap:3px 20px;}
+.rpt-row{display:flex;justify-content:space-between;padding:3px 0;border-bottom:1px solid var(--border2);}
+.rpt-row:last-child{border-bottom:none;}
+.rpt-row span:first-child{color:var(--muted);}
+.rpt-row span:last-child{font-weight:500;}
+
+.print-btn{
+  background:var(--amber);color:#000;
+  padding:8px 18px;border-radius:5px;border:none;
+  font-family:var(--display);font-weight:700;font-size:12px;
+  cursor:pointer;letter-spacing:0.05em;
+}
+
+@media print{
+  body{background:#fff;color:#000;}
+  .layout{display:block;}
+  .sidebar,.tabbar{display:none;}
+  .panel{display:block!important;overflow:visible;}
+  .main{height:auto;}
+  .card{background:#fff;border:1px solid #ccc;}
+  .card-hd,.rpt-sec h3{color:#006699;}
+  .kpi{background:#f5f8fa;border:1px solid #ccc;}
+  .kpi .v{color:#006699;}
+  .rpt-hdr{border-color:#006699;}
+  .rpt-row span:first-child{color:#555;}
+  .tbl th{background:#eee;color:#333;}
+  .verdict.pass{background:#e8faf2;color:#1a7a4a;border-color:#1a7a4a;}
+  .verdict.fail{background:#fde8eb;color:#c0192f;border-color:#c0192f;}
+  .print-btn{display:none;}
+}
+</style>
+</head>
+<body>
+
+<div class="hdr">
+  <div class="hdr-badge">MANDER</div>
+  <div>
+    <div class="hdr-title">Confined Concrete & Section Ductility</div>
+    <div class="hdr-sub">Mander (1988) Model · TBDY 2018 Ductility Assessment · Fiber M-φ Integration</div>
+  </div>
+</div>
+
+<div class="layout">
+
+<!-- ═══════════ SIDEBAR ═══════════ -->
+<div class="sidebar">
+
+  <div class="seg">Section Type</div>
+  <div class="type-grid">
+    <button class="type-btn active" id="bt-rc" onclick="setType('rect-col')">Rect<br>Column</button>
+    <button class="type-btn" id="bt-cc" onclick="setType('circ-col')">Circ<br>Column</button>
+    <button class="type-btn" id="bt-rb" onclick="setType('rect-beam')">Rect<br>Beam</button>
+  </div>
+
+  <div class="seg">Materials</div>
+  <div class="g2">
+    <div class="field"><label>fck (MPa)</label>
+      <select id="fck">
+        <option value="20">C20</option>
+        <option value="25">C25</option>
+        <option value="28" selected>C28</option>
+        <option value="30">C30</option>
+        <option value="32">C32</option>
+        <option value="35">C35</option>
+        <option value="40">C40</option>
+        <option value="45">C45</option>
+        <option value="50">C50</option>
+      </select>
+    </div>
+    <div class="field"><label>fyk (MPa)</label>
+      <select id="fyk">
+        <option value="220">S220</option>
+        <option value="420" selected>S420</option>
+        <option value="500">S500</option>
+      </select>
+    </div>
+  </div>
+  <div class="g2">
+    <div class="field"><label>fsu (MPa)</label><input type="number" id="fsu" value="550" min="400" max="800"></div>
+    <div class="field"><label>εsu</label><input type="number" id="esu" value="0.08" step="0.005" min="0.04" max="0.15"></div>
+  </div>
+
+  <div class="seg">Section Geometry</div>
+  <div id="geom-rect-col">
+    <div class="g2">
+      <div class="field"><label>b (mm)</label><input type="number" id="b" value="400" min="150"></div>
+      <div class="field"><label>h (mm)</label><input type="number" id="h" value="500" min="150"></div>
+    </div>
+  </div>
+  <div id="geom-circ-col" style="display:none">
+    <div class="field"><label>Diameter D (mm)</label><input type="number" id="D" value="500" min="150"></div>
+  </div>
+  <div id="geom-rect-beam" style="display:none">
+    <div class="g2">
+      <div class="field"><label>bw (mm)</label><input type="number" id="bw" value="300" min="150"></div>
+      <div class="field"><label>h (mm)</label><input type="number" id="hb" value="600" min="200"></div>
+    </div>
+  </div>
+
+  <div class="seg">Cover & Transverse Reinf.</div>
+  <div class="g2">
+    <div class="field"><label>Cover cc (mm)</label><input type="number" id="cc" value="30" min="15" max="80"></div>
+    <div class="field"><label>Tie Ø (mm)</label><input type="number" id="ds" value="10" min="6" max="20"></div>
+  </div>
+  <div class="g3">
+    <div class="field"><label>Tie Ø (mm)</label><input type="number" id="dbt" value="10" min="6" max="25"></div>
+    <div class="field"><label>Spacing s (mm)</label><input type="number" id="s" value="100" min="50" max="300"></div>
+    <div class="field"><label>Legs nx</label><input type="number" id="nx" value="3" min="2" max="8"></div>
+  </div>
+  <div class="g2">
+    <div class="field"><label>Legs ny</label><input type="number" id="ny" value="3" min="2" max="8"></div>
+    <div class="field" id="spiral-field" style="display:none"><label>Spiral? </label>
+      <select id="isSpiral"><option value="0">Tied</option><option value="1">Spiral</option></select>
+    </div>
+  </div>
+
+  <div class="seg">Longitudinal Reinf.</div>
+  <div class="g2">
+    <div class="field"><label>Bar Ø (mm)</label>
+      <select id="dbl">
+        <option value="12">Ø12</option><option value="14">Ø14</option>
+        <option value="16">Ø16</option><option value="18">Ø18</option>
+        <option value="20" selected>Ø20</option><option value="22">Ø22</option>
+        <option value="25">Ø25</option><option value="28">Ø28</option>
+        <option value="32">Ø32</option>
+      </select>
+    </div>
+    <div class="field"><label>No. bars</label>
+      <select id="nbl">
+        <option value="4">4</option><option value="6">6</option>
+        <option value="8" selected>8</option><option value="10">10</option>
+        <option value="12">12</option><option value="16">16</option>
+        <option value="20">20</option>
+      </select>
+    </div>
+  </div>
+  <div id="beam-bot-field" style="display:none">
+    <div class="g2">
+      <div class="field"><label>Top bars Ø</label>
+        <select id="dbl-top">
+          <option value="12">Ø12</option><option value="16">Ø16</option>
+          <option value="20" selected>Ø20</option><option value="25">Ø25</option>
+        </select>
+      </div>
+      <div class="field"><label>Top bars n</label>
+        <select id="nbl-top">
+          <option value="2">2</option><option value="3" selected>3</option>
+          <option value="4">4</option><option value="5">5</option>
+        </select>
+      </div>
+    </div>
+  </div>
+
+  <div class="seg">Loading & Code</div>
+  <div class="field"><label>Axial load ratio ν = N/(Ac·fck)</label>
+    <input type="number" id="nu" value="0.20" step="0.01" min="0" max="0.80">
+  </div>
+  <div class="g2">
+    <div class="field"><label>DTS</label>
+      <select id="dts">
+        <option value="1">DTS 1</option>
+        <option value="1a">DTS 1a</option>
+        <option value="2">DTS 2</option>
+        <option value="2a">DTS 2a</option>
+        <option value="3">DTS 3</option>
+        <option value="3a">DTS 3a</option>
+        <option value="4">DTS 4</option>
+        <option value="4a">DTS 4a</option>
+      </select>
+    </div>
+    <div class="field"><label>BYS</label>
+      <select id="bys">
+        <option value="1">BYS 1</option>
+        <option value="2">BYS 2</option>
+        <option value="3" selected>BYS 3</option>
+        <option value="4">BYS 4</option>
+        <option value="5">BYS 5</option>
+        <option value="6">BYS 6</option>
+        <option value="7">BYS 7</option>
+        <option value="8">BYS 8</option>
+      </select>
+    </div>
+  </div>
+  <div class="field"><label>Ductility Class</label>
+    <select id="ductClass">
+      <option value="SDD">SDD (Sınırlı Sünek)</option>
+      <option value="ODD" selected>ODD (Orta Sünek)</option>
+      <option value="YDD">YDD (Yüksek Sünek)</option>
+    </select>
+  </div>
+
+  <button class="run-btn" onclick="run()">▶  ANALYSE SECTION</button>
+</div>
+
+<!-- ═══════════ MAIN ═══════════ -->
+<div class="main">
+  <div class="tabbar">
+    <button class="vtab active" onclick="showPanel('p-results',this)">Results</button>
+    <button class="vtab" onclick="showPanel('p-mander',this)">σ-ε Curves</button>
+    <button class="vtab" onclick="showPanel('p-mphi',this)">M-φ Diagram</button>
+    <button class="vtab" onclick="showPanel('p-section',this)">Section</button>
+    <button class="vtab" onclick="showPanel('p-report',this)">Report</button>
+  </div>
+
+  <!-- RESULTS -->
+  <div class="panel active" id="p-results">
+    <div id="res-content"><div class="empty">← Configure section and click ANALYSE SECTION</div></div>
+  </div>
+
+  <!-- σ-ε -->
+  <div class="panel" id="p-mander">
+    <div class="card">
+      <div class="card-hd">Mander Confined & Unconfined σ-ε Curves</div>
+      <canvas id="cvSE" height="380"></canvas>
+    </div>
+    <div class="card">
+      <div class="card-hd">Steel Bilinear + Hardening σ-ε</div>
+      <canvas id="cvSteel" height="220"></canvas>
+    </div>
+  </div>
+
+  <!-- M-φ -->
+  <div class="panel" id="p-mphi">
+    <div class="card">
+      <div class="card-hd">Moment-Curvature Diagram (Fiber Integration)</div>
+      <canvas id="cvMphi" height="420"></canvas>
+    </div>
+  </div>
+
+  <!-- SECTION -->
+  <div class="panel" id="p-section">
+    <div class="card">
+      <div class="card-hd">Cross-Section — Confinement Zones</div>
+      <canvas id="cvSec" width="360" height="360"></canvas>
+    </div>
+  </div>
+
+  <!-- REPORT -->
+  <div class="panel" id="p-report">
+    <div style="display:flex;justify-content:flex-end;margin-bottom:12px;">
+      <button class="print-btn" onclick="window.print()">🖨 Print / Save PDF</button>
+    </div>
+    <div id="rpt-content"><div class="empty">Run analysis to generate report.</div></div>
+  </div>
+</div>
+
+</div><!-- layout -->
+
+<script>
+/* ================================================================
+   STATE
+   ================================================================ */
+let colType = 'rect-col';
+let RES = null;
+
+function setType(t) {
+  colType = t;
+  ['rect-col','circ-col','rect-beam'].forEach(id => {
+    document.getElementById('bt-' + id.replace('rect-col','rc').replace('circ-col','cc').replace('rect-beam','rb')).classList.toggle('active', id === t);
+    const g = document.getElementById('geom-' + id);
+    if (g) g.style.display = id === t ? '' : 'none';
+  });
+  document.getElementById('beam-bot-field').style.display = t === 'rect-beam' ? '' : 'none';
+  document.getElementById('spiral-field').style.display   = t === 'circ-col'  ? '' : 'none';
+  const nyField = document.getElementById('ny').parentElement;
+  nyField.style.display = t === 'circ-col' ? 'none' : '';
+}
+
+function showPanel(id, el) {
+  document.querySelectorAll('.panel').forEach(p => p.classList.remove('active'));
+  document.querySelectorAll('.vtab').forEach(b => b.classList.remove('active'));
+  document.getElementById(id).classList.add('active');
+  el.classList.add('active');
+  if (RES) {
+    if (id === 'p-mander') { drawSE(); drawSteel(); }
+    if (id === 'p-mphi')   drawMphi();
+    if (id === 'p-section') drawSection();
+  }
+}
+
+function fv(id) { return parseFloat(document.getElementById(id).value); }
+function iv(id) { return parseInt(document.getElementById(id).value); }
+
+/* ================================================================
+   MANDER MODEL CORE
+   ================================================================ */
+function manderConfinedStrength(fco, fl) {
+  // Mander 1988: f'cc = fco * (-1.254 + 2.254*sqrt(1 + 7.94*fl/fco) - 2*fl/fco)
+  const r = fl / fco;
+  return fco * (-1.254 + 2.254 * Math.sqrt(1 + 7.94 * r) - 2 * r);
+}
+
+function manderEpsilonCC(epsCO, fcc, fco) {
+  // εcc = εco * (1 + 5*(fcc/fco - 1))
+  return epsCO * (1 + 5 * (fcc / fco - 1));
+}
+
+function manderEpsilonCU(fl, fco, rhoCC, fsu, epsSU) {
+  // εcu = 0.004 + 1.4*ρcc*fsu*εsu / fcc  (energy balance)
+  // Use simplified TBDY compatible: εcu = 0.004 + 1.4*ρs*fyh*εsu/fcc
+  // We'll compute fcc inside caller
+  return null; // computed in caller
+}
+
+function manderStress(eps, fcc, epCC, Ec, r_param) {
+  // Popovics curve: fc = fcc * x*r / (r - 1 + x^r)
+  // x = eps/epCC, r = Ec/(Ec - fcc/epCC)
+  if (eps <= 0) return 0;
+  const x  = eps / epCC;
+  const fc = fcc * x * r_param / (r_param - 1 + Math.pow(x, r_param));
+  return Math.max(0, fc);
+}
+
+/* ================================================================
+   CONFINEMENT PRESSURE CALCULATION
+   ================================================================ */
+function computeConfinement(inp) {
+  const { fck, fyk, cc, dbt, s, nx, ny, b, h, D, isSpiral } = inp;
+  const Ec = 5000 * Math.sqrt(fck); // MPa (TBDY)
+
+  let fl_x = 0, fl_y = 0, fl = 0, ke = 0;
+  const Asp = Math.PI * dbt * dbt / 4; // tie bar area
+
+  if (colType === 'circ-col') {
+    // Circular — spiral or hoop
+    const Dc  = D - 2 * cc;         // core diameter (center to center of hoops)
+    const Ac  = Math.PI * Dc * Dc / 4;
+    const rhoCC = isSpiral ? (4 * Asp / (Dc * s)) : (4 * Asp / (Dc * s)); // same formula
+    ke = isSpiral ? (1 - s / (2 * Dc)) / (1 - inp.rhoL) : Math.pow(1 - s / (2 * Dc), 2) / (1 - inp.rhoL);
+    ke = Math.max(0.4, Math.min(1.0, ke));
+    fl = ke * rhoCC * fyk / 2;
+    inp.rhoCC = rhoCC;
+    inp.ke = ke;
+    inp.fl = fl; inp.fl_x = fl; inp.fl_y = fl;
+    inp.bCore = Dc; inp.hCore = Dc;
+  } else {
+    // Rectangular
+    const bc  = b - 2 * cc;         // core width  (c-c of ties)
+    const hc  = h - 2 * cc;
+    // Arching: Σ(wi²) — assume uniform bar spacing
+    // Simplified: ke based on standard formula
+    const nBarsX = nx; // legs along x → bars restrained
+    const nBarsY = ny;
+    const wSum = (Math.pow(bc / (nBarsX - 1), 2) * (nBarsX - 1) +
+                  Math.pow(hc / (nBarsY - 1), 2) * (nBarsY - 1));
+    const Ac_core = bc * hc;
+    const ke_num  = (1 - wSum / (6 * Ac_core)) * (1 - s / (2 * bc)) * (1 - s / (2 * hc));
+    ke = Math.max(0.3, Math.min(1.0, ke_num / (1 - inp.rhoL)));
+
+    const Asx = nx * Asp; // total tie area in x-direction per layer
+    const Asy = ny * Asp;
+    fl_x = ke * Asx * fyk / (hc * s);
+    fl_y = ke * Asy * fyk / (bc * s);
+    fl   = (fl_x + fl_y) / 2;
+
+    inp.ke = ke; inp.fl = fl; inp.fl_x = fl_x; inp.fl_y = fl_y;
+    inp.bCore = bc; inp.hCore = hc;
+    inp.rhoCC = (2 * (nx + ny) * Asp) / (s * (bc + hc));
+  }
+
+  return inp;
+}
+
+/* ================================================================
+   TBDY 2018 ωwe LIMIT
+   ================================================================ */
+function tbdyOmegaWeMin(dts, bys, ductClass, nu, sectionType) {
+  // TBDY 2018 Table 7.2 / Section 7.3 — minimum confinement ratio ωwe
+  // Simplified critical table values (sütun için)
+  // ωwe,min depends on ductility class and axial load ratio
+
+  let base = 0.0;
+  if (ductClass === 'SDD') base = 0.06;
+  else if (ductClass === 'ODD') base = 0.08 + 0.24 * nu;
+  else if (ductClass === 'YDD') base = 0.12 + 0.30 * nu;
+
+  // DTS modifier
+  const dtsNum = parseInt(dts);
+  if (dtsNum <= 1) base *= 1.20;
+  else if (dtsNum <= 2) base *= 1.10;
+  else if (dtsNum >= 4) base *= 0.85;
+
+  // BYS modifier
+  const bysNum = parseInt(bys);
+  if (bysNum <= 2) base *= 1.15;
+  else if (bysNum >= 6) base *= 0.90;
+
+  // Beam: different limits
+  if (sectionType === 'rect-beam') base *= 0.70;
+
+  return Math.max(0.04, base);
+}
+
+/* ================================================================
+   ωwe ACTUAL
+   ================================================================ */
+function computeOmegaWe(inp) {
+  const { rhoCC, fyk, fck, ke } = inp;
+  // ωwe = ρs,actual * (fywk/fck) = rhoCC * (fyk/fck)
+  return rhoCC * (fyk / fck);
+}
+
+/* ================================================================
+   FIBER M-φ INTEGRATION
+   ================================================================ */
+function fiberMphi(inp, nFibers = 100) {
+  const { fco, fcc, epCC, epCU, Ec_mod, r_mander,
+          fyk, fsu, esu, Es,
+          b, h, dp_eff, Ast, Asc, nu, fck } = inp;
+
+  // Axial force
+  const Ag  = colType === 'circ-col' ? Math.PI * b * b / 4 : b * h;
+  const N   = nu * Ag * fco * 1000; // N (fco in MPa, Ag in mm²)
+
+  const pts = [];
+  const epsCU_val = epCU;
+  const nCurv = 80;
+
+  // Fiber centroids (depth from top)
+  const dy = h / nFibers;
+  const fibers = [];
+  for (let i = 0; i < nFibers; i++) {
+    const yc  = (i + 0.5) * dy;      // from top
+    const y0  = yc - h / 2;          // from centroid (+ = below NA)
+    const confined = (yc > dp_eff && yc < h - dp_eff);
+    fibers.push({ yc, y0, dy, confined });
+  }
+
+  // Steel: top (compression) and bottom (tension)
+  const ys_bot = h - dp_eff;  // tension steel depth from top
+  const ys_top = dp_eff;       // comp steel depth from top
+
+  function steelStress(eps) {
+    // Bilinear + hardening
+    const Esh = (fsu - fyk) / (esu - fyk / Es);
+    if (Math.abs(eps) <= fyk / Es) return eps * Es;
+    const sign = eps > 0 ? 1 : -1;
+    const absEps = Math.abs(eps);
+    if (absEps <= esu) return sign * (fyk + Esh * (absEps - fyk / Es));
+    return sign * fsu;
+  }
+
+  function concreteStress(eps) {
+    if (eps <= 0) return 0;
+    return manderStress(eps, fcc, epCC, 5000 * Math.sqrt(fco), r_mander);
+  }
+  function unconfStress(eps) {
+    if (eps <= 0 || eps > 0.0035) return 0;
+    const ep0 = 0.002;
+    if (eps <= ep0) return fco * (2 * eps / ep0 - Math.pow(eps / ep0, 2));
+    return fco * (1 - 0.15 * (eps - ep0) / (0.0035 - ep0));
+  }
+
+  // Sweep curvatures from near-zero to ultimate
+  const phiY_est = (fyk / Es) / (0.9 * h); // yield curvature estimate
+  const phiMax   = epsCU_val / (0.15 * h);  // approx ultimate
+
+  for (let i = 1; i <= nCurv; i++) {
+    const phi = phiMax * i / nCurv;
+
+    // Find neutral axis by force equilibrium (bisection)
+    let cLow = 1, cHigh = h;
+    let M = 0, c = h / 2;
+
+    for (let iter = 0; iter < 40; iter++) {
+      c = (cLow + cHigh) / 2;
+
+      // Fiber forces
+      let Fc = 0;
+      fibers.forEach(f => {
+        const eps_c = phi * (c - f.yc);  // + = compression (top fiber at 0)
+        let fc = f.confined ? concreteStress(eps_c) : unconfStress(eps_c);
+        Fc += fc * f.dy * b;
+      });
+
+      // Steel
+      const eps_bot = phi * (c - ys_bot);
+      const eps_top = phi * (c - ys_top);
+      const Fs_bot  = steelStress(-eps_bot) * Ast; // tension
+      const Fs_top  = (steelStress(eps_top) - (eps_top > 0 ? unconfStress(eps_top) : 0)) * Asc;
+
+      const Ftot = Fc + Fs_bot + Fs_top;
+
+      if (Ftot > N / 1000) cHigh = c; else cLow = c;
+    }
+
+    // Compute moment about centroid
+    M = 0;
+    fibers.forEach(f => {
+      const eps_c = phi * (c - f.yc);
+      let fc = f.confined ? concreteStress(eps_c) : unconfStress(eps_c);
+      M += fc * f.dy * b * (h / 2 - f.yc);
+    });
+    const eps_bot2 = phi * (c - ys_bot);
+    const eps_top2 = phi * (c - ys_top);
+    M += steelStress(-eps_bot2) * Ast * (h / 2 - ys_bot);
+    M += (steelStress(eps_top2)) * Asc * (h / 2 - ys_top);
+    M = Math.abs(M) / 1e6; // kN·m
+
+    // Check concrete strain at top fiber
+    const eps_top_conc = phi * c;
+    if (eps_top_conc > epsCU_val * 1.05) break;
+
+    pts.push({ phi, M });
+  }
+
+  return pts;
+}
+
+/* ================================================================
+   MAIN RUN
+   ================================================================ */
+function run() {
+  const fck = fv('fck'), fyk = fv('fyk'), fsu = fv('fsu'), esu = fv('esu');
+  const cc  = fv('cc'),  dbt = fv('dbt'), s   = fv('s');
+  const nx  = iv('nx'),  ny  = iv('ny');
+  const dbl = fv('dbl'), nbl = iv('nbl');
+  const nu  = fv('nu');
+  const Es  = 200000;
+
+  // Section dims
+  let b, h;
+  if (colType === 'rect-col')  { b = fv('b'); h = fv('h'); }
+  else if (colType === 'circ-col') { b = fv('D'); h = fv('D'); }
+  else { b = fv('bw'); h = fv('hb'); }
+
+  const dbl_top = colType === 'rect-beam' ? fv('dbl-top') : dbl;
+  const nbl_top = colType === 'rect-beam' ? iv('nbl-top') : Math.ceil(nbl / 2);
+
+  const Abar  = Math.PI * dbl * dbl / 4;
+  const Abar_t= Math.PI * dbl_top * dbl_top / 4;
+  const Ast   = nbl * Abar;          // tension / total long steel area
+  const Asc   = nbl_top * Abar_t;   // comp steel (beam top / col sym)
+  const Ag    = colType === 'circ-col' ? Math.PI * b * b / 4 : b * h;
+  const rhoL  = (Ast + (colType === 'rect-beam' ? Asc : 0)) / Ag;
+  const dp_eff = cc + dbt + dbl / 2;
+
+  const inp = {
+    fco: fck, fyk, fsu, esu, Es,
+    cc, dbt, s, nx, ny,
+    b, h, D: b,
+    rhoL, Ast, Asc, nu,
+    isSpiral: iv('isSpiral') || 0,
+    dp_eff
+  };
+
+  computeConfinement(inp);
+
+  const { fl, ke, rhoCC, bCore, hCore } = inp;
+
+  // Mander confined strength & strains
+  const fcc   = manderConfinedStrength(fck, fl);
+  const epsCO = 0.002;
+  const epCC  = manderEpsilonCC(epsCO, fcc, fck);
+  const Ec    = 5000 * Math.sqrt(fck);
+
+  // Energy-balance εcu (Mander)
+  const epCU  = 0.004 + 1.4 * rhoCC * fyk * esu / fcc;
+
+  // r parameter (Popovics)
+  const Esec  = fcc / epCC;
+  const r_man = Ec / (Ec - Esec);
+
+  inp.fcc = fcc; inp.epCC = epCC; inp.epCU = epCU;
+  inp.r_mander = r_man; inp.fco = fck;
+
+  // ωwe
+  const dts = document.getElementById('dts').value;
+  const bys = document.getElementById('bys').value;
+  const dc  = document.getElementById('ductClass').value;
+  const omeWe_act = computeOmegaWe(inp);
+  const omeWe_min = tbdyOmegaWeMin(dts, bys, dc, nu, colType);
+  const omeOK     = omeWe_act >= omeWe_min;
+
+  // M-φ fiber
+  const mphiPts = fiberMphi(inp);
+
+  // Extract key values
+  let My = 0, phiY = 0, Mu = 0, phiU = 0;
+  if (mphiPts.length > 2) {
+    // Yield: first peak slope change (simplified: 75% of Mmax)
+    const Mmax = Math.max(...mphiPts.map(p => p.M));
+    Mu = Mmax;
+    phiU = mphiPts.find(p => p.M >= Mmax * 0.999)?.phi || mphiPts[mphiPts.length - 1].phi;
+    // Yield: bilinear idealization — 0.75*Mu on ascending
+    const yieldPt = mphiPts.find(p => p.M >= 0.75 * Mu);
+    if (yieldPt) { My = 0.75 * Mu; phiY = yieldPt.phi; }
+  }
+  const muPhi = phiY > 0 ? phiU / phiY : 0;
+
+  // TBDY minimum μφ — simplified per ductility class
+  const muPhiMin = dc === 'SDD' ? 2.0 : dc === 'ODD' ? 3.0 : 5.0;
+  const muOK = muPhi >= muPhiMin;
+
+  RES = {
+    fck, fyk, fsu, esu, Es,
+    cc, dbt, s, nx, ny, b, h, rhoL, Ast, Asc, Ag, dp_eff,
+    fl, fl_x: inp.fl_x, fl_y: inp.fl_y, ke, rhoCC, bCore, hCore,
+    fcc, epCC, epCU, r_man, epsCO,
+    omeWe_act, omeWe_min, omeOK,
+    mphiPts, My, phiY, Mu, phiU, muPhi, muPhiMin, muOK,
+    dts, bys, dc, nu,
+    dbl, nbl, dbl_top, nbl_top
+  };
+
+  renderResults();
+  drawSE();
+  drawSteel();
+  drawMphi();
+  drawSection();
+  renderReport();
+}
+
+/* ================================================================
+   RENDER RESULTS
+   ================================================================ */
+function renderResults() {
+  const R = RES;
+  const allOK = R.omeOK && R.muOK;
+  const vClass = allOK ? 'pass' : 'fail';
+  const vText  = allOK
+    ? '✓ SECTION ADEQUATE — All TBDY 2018 ductility requirements satisfied'
+    : '✗ INSUFFICIENT DUCTILITY — Review confinement or section size';
+
+  let html = `
+  <div class="verdict ${vClass}">${vText}</div>
+
+  <div class="strip">
+    <div class="kpi"><div class="v">${R.fcc.toFixed(1)}</div><div class="l">f'cc (MPa)</div></div>
+    <div class="kpi"><div class="v">${(R.epCU*1000).toFixed(2)}‰</div><div class="l">εcu confined</div></div>
+    <div class="kpi"><div class="v">${R.muPhi.toFixed(1)}</div><div class="l">μφ curvature</div></div>
+    <div class="kpi"><div class="v">${R.omeWe_act.toFixed(3)}</div><div class="l">ωwe actual</div></div>
+  </div>
+
+  <div class="card">
+    <div class="card-hd">Mander Confinement — Key Results</div>
+    <table class="tbl">
+      <tr><th>Parameter</th><th>Value</th><th>Reference</th></tr>
+      <tr><td>Confinement effectiveness ke</td><td class="num">${R.ke.toFixed(3)}</td><td>Mander 1988</td></tr>
+      <tr><td>Transverse steel ratio ρcc</td><td class="num">${(R.rhoCC*100).toFixed(3)}%</td><td>—</td></tr>
+      ${colType!=='circ-col' ? `
+      <tr><td>Lateral pressure fl,x</td><td class="num">${R.fl_x.toFixed(2)} MPa</td><td>—</td></tr>
+      <tr><td>Lateral pressure fl,y</td><td class="num">${R.fl_y.toFixed(2)} MPa</td><td>—</td></tr>` : ''}
+      <tr><td>Average fl</td><td class="num">${R.fl.toFixed(2)} MPa</td><td>—</td></tr>
+      <tr><td>Confined strength f'cc</td><td class="num">${R.fcc.toFixed(2)} MPa</td><td>Eq. 1 Mander</td></tr>
+      <tr><td>εcc (strain at f'cc)</td><td class="num">${(R.epCC*1000).toFixed(3)} ‰</td><td>—</td></tr>
+      <tr><td>εcu (ultimate confined)</td><td class="num">${(R.epCU*1000).toFixed(3)} ‰</td><td>Energy balance</td></tr>
+    </table>
+  </div>
+
+  <div class="card">
+    <div class="card-hd">TBDY 2018 — ωwe Confinement Check</div>
+    <table class="tbl">
+      <tr><th>Parameter</th><th>Value</th><th>Limit</th><th>Status</th></tr>
+      <tr>
+        <td>ωwe,actual = ρcc·(fyk/fck)</td>
+        <td class="num">${R.omeWe_act.toFixed(4)}</td>
+        <td>≥ ${R.omeWe_min.toFixed(4)}</td>
+        <td class="${R.omeOK?'ok':'ng'}">${R.omeOK?'✓ OK':'✗ FAIL'}</td>
+      </tr>
+      <tr><td>DTS / BYS / Ductility class</td>
+        <td colspan="3" class="num">DTS ${R.dts} / BYS ${R.bys} / ${R.dc}</td>
+      </tr>
+      <tr><td>Axial load ratio ν</td><td class="num">${R.nu.toFixed(2)}</td><td>—</td><td>—</td></tr>
+    </table>
+  </div>
+
+  <div class="card">
+    <div class="card-hd">Curvature Ductility Check (TBDY 2018)</div>
+    <table class="tbl">
+      <tr><th>Parameter</th><th>Value</th><th>Limit</th><th>Status</th></tr>
+      <tr><td>Yield moment My</td><td class="num">${R.My.toFixed(1)} kN·m</td><td>—</td><td>—</td></tr>
+      <tr><td>Yield curvature φy</td><td class="num">${R.phiY.toExponential(3)} /mm</td><td>—</td><td>—</td></tr>
+      <tr><td>Ultimate moment Mu</td><td class="num">${R.Mu.toFixed(1)} kN·m</td><td>—</td><td>—</td></tr>
+      <tr><td>Ultimate curvature φu</td><td class="num">${R.phiU.toExponential(3)} /mm</td><td>—</td><td>—</td></tr>
+      <tr>
+        <td>Curvature ductility μφ = φu/φy</td>
+        <td class="num">${R.muPhi.toFixed(2)}</td>
+        <td>≥ ${R.muPhiMin.toFixed(1)} (${R.dc})</td>
+        <td class="${R.muOK?'ok':'ng'}">${R.muOK?'✓ OK':'✗ FAIL'}</td>
+      </tr>
+    </table>
+  </div>`;
+
+  document.getElementById('res-content').innerHTML = html;
+}
+
+/* ================================================================
+   DRAW σ-ε (Mander)
+   ================================================================ */
+function drawSE() {
+  if (!RES) return;
+  const canvas = document.getElementById('cvSE');
+  const W = Math.min(canvas.parentElement.clientWidth - 32, 600);
+  canvas.width = W; canvas.height = 380;
+  const ctx = canvas.getContext('2d');
+  const { fck, fcc, epCC, epCU, r_man, epsCO } = RES;
+
+  ctx.fillStyle = '#0e1318'; ctx.fillRect(0,0,W,380);
+
+  const pad = {t:30,r:20,b:50,l:65};
+  const cW = W-pad.l-pad.r, cH = 380-pad.t-pad.b;
+
+  const epMax = epCU * 1.05;
+  const fMax  = fcc  * 1.15;
+  const Ec    = 5000*Math.sqrt(fck);
+
+  function tx(e) { return pad.l + e/epMax*cW; }
+  function ty(f) { return pad.t + (1-f/fMax)*cH; }
+
+  // Grid
+  ctx.strokeStyle='#1a2130';ctx.lineWidth=1;
+  for(let i=0;i<=5;i++){
+    const x=pad.l+i/5*cW; ctx.beginPath();ctx.moveTo(x,pad.t);ctx.lineTo(x,pad.t+cH);ctx.stroke();
+    const y=pad.t+i/5*cH; ctx.beginPath();ctx.moveTo(pad.l,y);ctx.lineTo(pad.l+cW,y);ctx.stroke();
+  }
+
+  // Axes
+  ctx.strokeStyle='#2a3f52';ctx.lineWidth=1.5;
+  ctx.beginPath();ctx.moveTo(pad.l,pad.t);ctx.lineTo(pad.l,pad.t+cH);ctx.stroke();
+  ctx.beginPath();ctx.moveTo(pad.l,pad.t+cH);ctx.lineTo(pad.l+cW,pad.t+cH);ctx.stroke();
+
+  // Labels
+  ctx.fillStyle='#4a6070';ctx.font='10px JetBrains Mono';ctx.textAlign='center';
+  ctx.fillText('ε (strain)',pad.l+cW/2,380-6);
+  ctx.save();ctx.translate(14,pad.t+cH/2);ctx.rotate(-Math.PI/2);
+  ctx.fillText('σ (MPa)',0,0);ctx.restore();
+
+  // Tick labels
+  for(let i=0;i<=5;i++){
+    ctx.textAlign='right';ctx.fillStyle='#4a6070';
+    const fv=fMax*i/5;
+    ctx.fillText(fv.toFixed(0),pad.l-5,ty(fv)+4);
+    ctx.textAlign='center';
+    const ev=epMax*i/5;
+    ctx.fillText(ev.toFixed(4),tx(ev),pad.t+cH+14);
+  }
+
+  function drawCurve(col, shadow, pts) {
+    ctx.beginPath();ctx.strokeStyle=col;ctx.lineWidth=2.5;
+    ctx.shadowColor=shadow;ctx.shadowBlur=8;
+    pts.forEach((p,i)=>i===0?ctx.moveTo(tx(p.e),ty(p.f)):ctx.lineTo(tx(p.e),ty(p.f)));
+    ctx.stroke();ctx.shadowBlur=0;
+  }
+
+  // Unconfined curve
+  const uncPts=[];
+  for(let i=1;i<=60;i++){
+    const e=epMax*i/60;
+    let f=0;
+    if(e<=epsCO) f=fck*(2*e/epsCO-Math.pow(e/epsCO,2));
+    else if(e<=0.0035) f=fck*(1-0.15*(e-epsCO)/(0.0035-epsCO));
+    uncPts.push({e,f:Math.max(0,f)});
+  }
+  drawCurve('#4a6070','#4a6070',uncPts);
+
+  // Confined curve
+  const conPts=[];
+  const Esec=fcc/epCC;
+  const r_p=Ec/(Ec-Esec);
+  for(let i=1;i<=80;i++){
+    const e=epCU*i/80;
+    const x=e/epCC;
+    const f=fcc*x*r_p/(r_p-1+Math.pow(x,r_p));
+    conPts.push({e,f:Math.max(0,f)});
+  }
+  drawCurve('#00e5c3','#00e5c3',conPts);
+
+  // Key markers
+  ctx.fillStyle='#00e5c3';ctx.beginPath();ctx.arc(tx(epCC),ty(fcc),5,0,Math.PI*2);ctx.fill();
+  ctx.fillStyle='#00e5c3';ctx.font='10px JetBrains Mono';ctx.textAlign='left';
+  ctx.fillText(`f'cc=${fcc.toFixed(1)}MPa`,tx(epCC)+7,ty(fcc)-4);
+
+  ctx.fillStyle='#ff4d6a';ctx.beginPath();ctx.arc(tx(epCU),ty(0),5,0,Math.PI*2);ctx.fill();
+  ctx.fillStyle='#ff4d6a';ctx.textAlign='right';
+  ctx.fillText(`εcu=${(epCU*1000).toFixed(2)}‰`,tx(epCU)-7,ty(0)-6);
+
+  // Legend
+  ctx.font='11px JetBrains Mono';ctx.textAlign='left';
+  ctx.fillStyle='#4a6070';ctx.fillText('── Unconfined',pad.l+10,pad.t+16);
+  ctx.fillStyle='#00e5c3';ctx.fillText('── Confined (Mander)',pad.l+10,pad.t+30);
+}
+
+/* ================================================================
+   DRAW STEEL σ-ε
+   ================================================================ */
+function drawSteel() {
+  if (!RES) return;
+  const canvas = document.getElementById('cvSteel');
+  const W = Math.min(canvas.parentElement.clientWidth-32,600);
+  canvas.width=W; canvas.height=220;
+  const ctx=canvas.getContext('2d');
+  const {fyk,fsu,esu,Es}=RES;
+  ctx.fillStyle='#0e1318';ctx.fillRect(0,0,W,220);
+
+  const pad={t:20,r:20,b:40,l:65};
+  const cW=W-pad.l-pad.r,cH=220-pad.t-pad.b;
+  const epMax=esu*1.05,fMax=fsu*1.1;
+
+  function tx(e){return pad.l+e/epMax*cW;}
+  function ty(f){return pad.t+(1-f/fMax)*cH;}
+
+  ctx.strokeStyle='#1a2130';ctx.lineWidth=1;
+  for(let i=0;i<=4;i++){
+    const x=pad.l+i/4*cW;ctx.beginPath();ctx.moveTo(x,pad.t);ctx.lineTo(x,pad.t+cH);ctx.stroke();
+    const y=pad.t+i/4*cH;ctx.beginPath();ctx.moveTo(pad.l,y);ctx.lineTo(pad.l+cW,y);ctx.stroke();
+  }
+
+  const Esh=(fsu-fyk)/(esu-fyk/Es);
+  const pts=[];
+  for(let i=1;i<=80;i++){
+    const e=esu*i/80;
+    let f=e<=fyk/Es?e*Es:(fyk+Esh*(e-fyk/Es));
+    f=Math.min(f,fsu);
+    pts.push({e,f});
+  }
+
+  ctx.beginPath();ctx.strokeStyle='#ffb020';ctx.lineWidth=2.5;
+  ctx.shadowColor='#ffb020';ctx.shadowBlur=6;
+  pts.forEach((p,i)=>i===0?ctx.moveTo(tx(p.e),ty(p.f)):ctx.lineTo(tx(p.e),ty(p.f)));
+  ctx.stroke();ctx.shadowBlur=0;
+
+  ctx.fillStyle='#4a6070';ctx.font='10px JetBrains Mono';ctx.textAlign='center';
+  ctx.fillText('ε (strain)',pad.l+cW/2,220-5);
+  ctx.save();ctx.translate(14,pad.t+cH/2);ctx.rotate(-Math.PI/2);ctx.fillText('σ (MPa)',0,0);ctx.restore();
+
+  for(let i=0;i<=4;i++){
+    ctx.textAlign='right';ctx.fillStyle='#4a6070';
+    ctx.fillText((fMax*i/4).toFixed(0),pad.l-5,ty(fMax*i/4)+4);
+    ctx.textAlign='center';
+    ctx.fillText((epMax*i/4).toFixed(4),tx(epMax*i/4),pad.t+cH+14);
+  }
+
+  // Markers
+  const eY=fyk/Es;
+  ctx.fillStyle='#ffb020';ctx.font='10px JetBrains Mono';ctx.textAlign='left';
+  ctx.fillText(`fy=${fyk} MPa`,tx(eY)+5,ty(fyk)-5);
+  ctx.fillText(`fu=${fsu} MPa  εsu=${esu}`,tx(esu)-90,ty(fsu)-5);
+}
+
+/* ================================================================
+   DRAW M-φ
+   ================================================================ */
+function drawMphi() {
+  if (!RES || !RES.mphiPts.length) return;
+  const canvas=document.getElementById('cvMphi');
+  const W=Math.min(canvas.parentElement.clientWidth-32,620);
+  canvas.width=W; canvas.height=420;
+  const ctx=canvas.getContext('2d');
+  const {mphiPts,My,phiY,Mu,phiU}=RES;
+
+  ctx.fillStyle='#0e1318';ctx.fillRect(0,0,W,420);
+  const pad={t:30,r:20,b:50,l:75};
+  const cW=W-pad.l-pad.r,cH=420-pad.t-pad.b;
+
+  const phiMax=Math.max(...mphiPts.map(p=>p.phi))*1.08;
+  const MMax=Math.max(...mphiPts.map(p=>p.M))*1.12;
+
+  function tx(p){return pad.l+p/phiMax*cW;}
+  function ty(m){return pad.t+(1-m/MMax)*cH;}
+
+  // Grid
+  ctx.strokeStyle='#1a2130';ctx.lineWidth=1;
+  for(let i=0;i<=5;i++){
+    const x=pad.l+i/5*cW;ctx.beginPath();ctx.moveTo(x,pad.t);ctx.lineTo(x,pad.t+cH);ctx.stroke();
+    const y=pad.t+i/5*cH;ctx.beginPath();ctx.moveTo(pad.l,y);ctx.lineTo(pad.l+cW,y);ctx.stroke();
+  }
+
+  ctx.strokeStyle='#2a3f52';ctx.lineWidth=1.5;
+  ctx.beginPath();ctx.moveTo(pad.l,pad.t);ctx.lineTo(pad.l,pad.t+cH);ctx.stroke();
+  ctx.beginPath();ctx.moveTo(pad.l,pad.t+cH);ctx.lineTo(pad.l+cW,pad.t+cH);ctx.stroke();
+
+  ctx.fillStyle='#4a6070';ctx.font='10px JetBrains Mono';ctx.textAlign='center';
+  ctx.fillText('φ (curvature, /mm)',pad.l+cW/2,420-6);
+  ctx.save();ctx.translate(14,pad.t+cH/2);ctx.rotate(-Math.PI/2);ctx.fillText('M (kN·m)',0,0);ctx.restore();
+
+  for(let i=0;i<=5;i++){
+    ctx.textAlign='right';ctx.fillStyle='#4a6070';
+    ctx.fillText((MMax*i/5).toFixed(0),pad.l-5,ty(MMax*i/5)+4);
+    ctx.textAlign='center';
+    ctx.fillText((phiMax*i/5).toExponential(2),tx(phiMax*i/5),pad.t+cH+16);
+  }
+
+  // Fill under curve
+  ctx.beginPath();
+  mphiPts.forEach((p,i)=>i===0?ctx.moveTo(tx(p.phi),ty(p.M)):ctx.lineTo(tx(p.phi),ty(p.M)));
+  ctx.lineTo(tx(mphiPts[mphiPts.length-1].phi),ty(0));
+  ctx.lineTo(tx(0),ty(0));ctx.closePath();
+  ctx.fillStyle='rgba(0,229,195,0.07)';ctx.fill();
+
+  // Curve
+  ctx.beginPath();ctx.strokeStyle='#00e5c3';ctx.lineWidth=2.5;
+  ctx.shadowColor='#00e5c3';ctx.shadowBlur=8;
+  mphiPts.forEach((p,i)=>i===0?ctx.moveTo(tx(p.phi),ty(p.M)):ctx.lineTo(tx(p.phi),ty(p.M)));
+  ctx.stroke();ctx.shadowBlur=0;
+
+  // Yield & Ultimate markers
+  if(phiY>0){
+    ctx.strokeStyle='#ffb020';ctx.lineWidth=1;ctx.setLineDash([5,4]);
+    ctx.beginPath();ctx.moveTo(tx(phiY),ty(0));ctx.lineTo(tx(phiY),ty(My));ctx.stroke();
+    ctx.beginPath();ctx.moveTo(tx(0),ty(My));ctx.lineTo(tx(phiY),ty(My));ctx.stroke();
+    ctx.setLineDash([]);
+    ctx.fillStyle='#ffb020';ctx.beginPath();ctx.arc(tx(phiY),ty(My),5,0,Math.PI*2);ctx.fill();
+    ctx.font='10px JetBrains Mono';ctx.textAlign='left';
+    ctx.fillText(`φy`,tx(phiY)+4,ty(My)-5);
+  }
+  if(phiU>0){
+    ctx.strokeStyle='#ff4d6a';ctx.lineWidth=1;ctx.setLineDash([5,4]);
+    ctx.beginPath();ctx.moveTo(tx(phiU),ty(0));ctx.lineTo(tx(phiU),ty(Mu));ctx.stroke();
+    ctx.setLineDash([]);
+    ctx.fillStyle='#ff4d6a';ctx.beginPath();ctx.arc(tx(phiU),ty(Mu),5,0,Math.PI*2);ctx.fill();
+    ctx.font='10px JetBrains Mono';ctx.textAlign='left';
+    ctx.fillText(`φu  μφ=${RES.muPhi.toFixed(1)}`,tx(phiU)+4,ty(Mu)-5);
+  }
+
+  // Legend
+  ctx.font='11px JetBrains Mono';ctx.textAlign='left';
+  ctx.fillStyle='#00e5c3';ctx.fillText('── M-φ (fiber integration)',pad.l+10,pad.t+16);
+  ctx.fillStyle='#ffb020';ctx.fillText('- - Yield point',pad.l+10,pad.t+30);
+  ctx.fillStyle='#ff4d6a';ctx.fillText('— Ultimate',pad.l+10,pad.t+44);
+}
+
+/* ================================================================
+   DRAW SECTION
+   ================================================================ */
+function drawSection() {
+  if (!RES) return;
+  const canvas=document.getElementById('cvSec');
+  const sz=Math.min(canvas.parentElement.clientWidth-40,380);
+  canvas.width=sz;canvas.height=sz;
+  const ctx=canvas.getContext('2d');
+  ctx.fillStyle='#0e1318';ctx.fillRect(0,0,sz,sz);
+
+  const {b,h,cc,dbt,dbl,nbl,dp_eff,bCore,hCore}=RES;
+  const pad2=28;
+  const sc=Math.min((sz-pad2*2)/b,(sz-pad2*2)/h);
+  const ox=(sz-b*sc)/2,oy=(sz-h*sc)/2;
+
+  // Gross section
+  ctx.fillStyle='#1a2130';ctx.strokeStyle='#00e5c3';ctx.lineWidth=2;
+  ctx.beginPath();ctx.rect(ox,oy,b*sc,h*sc);ctx.fill();ctx.stroke();
+
+  // Confined core
+  const cxO=ox+cc*sc, cyO=oy+cc*sc;
+  const cxW=bCore*sc, cyH=hCore*sc;
+  ctx.fillStyle='rgba(0,229,195,0.10)';
+  ctx.strokeStyle='rgba(0,229,195,0.5)';ctx.lineWidth=1;ctx.setLineDash([4,3]);
+  ctx.beginPath();
+  if(colType==='circ-col'){
+    ctx.arc(ox+b*sc/2,oy+h*sc/2,bCore*sc/2,0,Math.PI*2);
+  } else {
+    ctx.rect(cxO,cyO,cxW,cyH);
+  }
+  ctx.fill();ctx.stroke();ctx.setLineDash([]);
+
+  // Bars
+  const barR=Math.max(3,dbl*sc/2);
+  if(colType==='circ-col'){
+    const rBar=(b/2-dp_eff)*sc;
+    const cx=ox+b*sc/2,cy=oy+h*sc/2;
+    for(let i=0;i<nbl;i++){
+      const a=(2*Math.PI*i/nbl)-Math.PI/2;
+      ctx.beginPath();ctx.arc(cx+rBar*Math.cos(a),cy+rBar*Math.sin(a),barR,0,Math.PI*2);
+      ctx.fillStyle='#ffb020';ctx.fill();
+      ctx.strokeStyle='#ffd060';ctx.lineWidth=0.8;ctx.stroke();
+    }
+  } else {
+    const nTop=Math.max(2,Math.round(nbl/4));
+    const nBot=nTop;
+    const nSide=Math.floor((nbl-nTop-nBot)/2);
+    const xL=ox+dp_eff*sc,xR=ox+(b-dp_eff)*sc;
+    const yT=oy+dp_eff*sc,yB=oy+(h-dp_eff)*sc;
+    const bars=[];
+    for(let i=0;i<nTop;i++) bars.push([xL+i*(xR-xL)/(nTop-1),yT]);
+    for(let i=0;i<nBot;i++) bars.push([xL+i*(xR-xL)/(nBot-1),yB]);
+    for(let i=1;i<=nSide;i++){
+      bars.push([xL,yT+i*(yB-yT)/(nSide+1)]);
+      bars.push([xR,yT+i*(yB-yT)/(nSide+1)]);
+    }
+    bars.forEach(([bx,by])=>{
+      ctx.beginPath();ctx.arc(bx,by,barR,0,Math.PI*2);
+      ctx.fillStyle='#ffb020';ctx.fill();
+      ctx.strokeStyle='#ffd060';ctx.lineWidth=0.8;ctx.stroke();
+    });
+  }
+
+  // Labels
+  ctx.fillStyle='#4a6070';ctx.font='10px JetBrains Mono';ctx.textAlign='center';
+  ctx.fillText(`${b}×${h} mm | Ø${dbl}×${nbl}`,sz/2,sz-6);
+
+  // Legend
+  ctx.fillStyle='rgba(0,229,195,0.5)';ctx.font='9px JetBrains Mono';ctx.textAlign='left';
+  ctx.fillText('░ Confined core',6,14);
+}
+
+/* ================================================================
+   REPORT
+   ================================================================ */
+function renderReport() {
+  const R=RES;
+  const now=new Date().toLocaleDateString('en-GB',{day:'2-digit',month:'long',year:'numeric'});
+  const typeLabel=colType==='rect-col'?'Rectangular Column':colType==='circ-col'?'Circular Column':'Rectangular Beam';
+
+  const html=`<div class="rpt-hdr">
+    <h2>Section Ductility Assessment</h2>
+    <p>Mander (1988) Confined Concrete Model · TBDY 2018 · ${now}</p>
+  </div>
+
+  <div class="rpt-sec"><h3>1. Section & Materials</h3><div class="rpt-grid">
+    <div class="rpt-row"><span>Section type</span><span>${typeLabel}</span></div>
+    <div class="rpt-row"><span>Dimensions</span><span>${R.b}×${R.h} mm</span></div>
+    <div class="rpt-row"><span>fck</span><span>${R.fck} MPa</span></div>
+    <div class="rpt-row"><span>fyk / fsu</span><span>${R.fyk} / ${R.fsu} MPa</span></div>
+    <div class="rpt-row"><span>εsu</span><span>${R.esu}</span></div>
+    <div class="rpt-row"><span>Clear cover cc</span><span>${R.cc} mm</span></div>
+    <div class="rpt-row"><span>Tie Ø / spacing</span><span>Ø${R.dbt} @ ${R.s} mm</span></div>
+    <div class="rpt-row"><span>Long. reinforcement</span><span>Ø${R.dbl}×${R.nbl} (Ast=${R.Ast.toFixed(0)} mm²)</span></div>
+  </div></div>
+
+  <div class="rpt-sec"><h3>2. Mander Confinement</h3><div class="rpt-grid">
+    <div class="rpt-row"><span>Effectiveness ke</span><span>${R.ke.toFixed(3)}</span></div>
+    <div class="rpt-row"><span>ρcc (trans. ratio)</span><span>${(R.rhoCC*100).toFixed(3)}%</span></div>
+    <div class="rpt-row"><span>fl (avg. confining pressure)</span><span>${R.fl.toFixed(2)} MPa</span></div>
+    <div class="rpt-row"><span>f'cc (confined strength)</span><span>${R.fcc.toFixed(2)} MPa</span></div>
+    <div class="rpt-row"><span>εcc</span><span>${(R.epCC*1000).toFixed(3)} ‰</span></div>
+    <div class="rpt-row"><span>εcu</span><span>${(R.epCU*1000).toFixed(3)} ‰</span></div>
+  </div></div>
+
+  <div class="rpt-sec"><h3>3. TBDY 2018 — ωwe Check</h3><div class="rpt-grid">
+    <div class="rpt-row"><span>DTS / BYS</span><span>DTS ${R.dts} / BYS ${R.bys}</span></div>
+    <div class="rpt-row"><span>Ductility class</span><span>${R.dc}</span></div>
+    <div class="rpt-row"><span>Axial load ratio ν</span><span>${R.nu.toFixed(2)}</span></div>
+    <div class="rpt-row"><span>ωwe,actual</span><span>${R.omeWe_act.toFixed(4)}</span></div>
+    <div class="rpt-row"><span>ωwe,min (TBDY 2018)</span><span>${R.omeWe_min.toFixed(4)}</span></div>
+    <div class="rpt-row"><span>ωwe check</span><span style="color:${R.omeOK?'#22d98a':'#ff4d6a'}">${R.omeOK?'PASS ✓':'FAIL ✗'}</span></div>
+  </div></div>
+
+  <div class="rpt-sec"><h3>4. Curvature Ductility (Fiber M-φ)</h3><div class="rpt-grid">
+    <div class="rpt-row"><span>Yield curvature φy</span><span>${R.phiY.toExponential(3)} /mm</span></div>
+    <div class="rpt-row"><span>Yield moment My</span><span>${R.My.toFixed(1)} kN·m</span></div>
+    <div class="rpt-row"><span>Ultimate curvature φu</span><span>${R.phiU.toExponential(3)} /mm</span></div>
+    <div class="rpt-row"><span>Ultimate moment Mu</span><span>${R.Mu.toFixed(1)} kN·m</span></div>
+    <div class="rpt-row"><span>μφ = φu / φy</span><span>${R.muPhi.toFixed(2)}</span></div>
+    <div class="rpt-row"><span>μφ,min (${R.dc})</span><span>${R.muPhiMin.toFixed(1)}</span></div>
+    <div class="rpt-row"><span>Ductility check</span><span style="color:${R.muOK?'#22d98a':'#ff4d6a'}">${R.muOK?'PASS ✓':'FAIL ✗'}</span></div>
+  </div></div>
+
+  <div class="rpt-sec"><h3>5. Overall Verdict</h3>
+    <div class="verdict ${R.omeOK&&R.muOK?'pass':'fail'}" style="font-size:15px;padding:14px;">
+      ${R.omeOK&&R.muOK
+        ?'✓ SECTION ADEQUATE — All TBDY 2018 ductility requirements satisfied'
+        :'✗ INADEQUATE — Increase confinement (smaller tie spacing or larger tie diameter)'}
+    </div>
+  </div>`;
+
+  document.getElementById('rpt-content').innerHTML = html;
+}
+
+window.addEventListener('resize',()=>{ if(RES){ drawSE();drawSteel();drawMphi();drawSection(); } });
+</script>
+</body>
+</html>

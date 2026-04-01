@@ -1,0 +1,1390 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>WindCalc Pro — ASCE 7-10 & EN 1991-1-4</title>
+<link href="https://fonts.googleapis.com/css2?family=IBM+Plex+Mono:wght@400;500;600&family=Fraunces:ital,opsz,wght@0,9..144,300;0,9..144,700;0,9..144,900;1,9..144,300&family=Figtree:wght@400;500;600;700&display=swap" rel="stylesheet">
+<style>
+:root {
+  --bg: #f2f4f8;
+  --surface: #ffffff;
+  --surface2: #f7f8fb;
+  --surface3: #eef0f6;
+  --border: #e0e4ef;
+  --border2: #cdd3e3;
+  --ink: #0d1526;
+  --ink2: #3d4a62;
+  --ink3: #7b8aaa;
+  --ink4: #b0bbd4;
+  --blue: #1a4fd6;
+  --blue2: #3b6ef5;
+  --blue-bg: #eff3ff;
+  --teal: #0a7d8c;
+  --teal2: #1ca8bc;
+  --teal-bg: #edfafc;
+  --amber: #b45309;
+  --amber2: #f59e0b;
+  --amber-bg: #fffbeb;
+  --green: #15803d;
+  --green-bg: #f0fdf4;
+  --red: #b91c1c;
+  --red-bg: #fef2f2;
+  --r: 8px;
+  --shadow-sm: 0 1px 3px rgba(13,21,38,0.07), 0 1px 2px rgba(13,21,38,0.04);
+  --shadow: 0 4px 16px rgba(13,21,38,0.08), 0 2px 4px rgba(13,21,38,0.04);
+  --shadow-lg: 0 12px 40px rgba(13,21,38,0.10), 0 4px 8px rgba(13,21,38,0.05);
+}
+*{box-sizing:border-box;margin:0;padding:0;}
+html{font-size:14px;}
+body{font-family:'Figtree',sans-serif;background:var(--bg);color:var(--ink);min-height:100vh;}
+
+/* ── LAYOUT ─────────────────────────────────────────────────────────── */
+.app{display:grid;grid-template-columns:300px 1fr;grid-template-rows:auto 1fr;min-height:100vh;}
+.topbar{grid-column:1/-1;display:flex;align-items:center;gap:0;background:var(--surface);border-bottom:1.5px solid var(--border);height:54px;padding:0 20px;gap:16px;box-shadow:var(--shadow-sm);}
+.sidebar{background:var(--surface);border-right:1.5px solid var(--border);overflow-y:auto;padding:0 0 24px;}
+.main{overflow-y:auto;padding:24px;}
+
+/* ── TOPBAR ──────────────────────────────────────────────────────────── */
+.logo-text{font-family:'Fraunces',serif;font-weight:900;font-size:20px;letter-spacing:-0.5px;color:var(--ink);}
+.logo-text span{color:var(--blue);}
+.logo-divider{width:1.5px;height:24px;background:var(--border);margin:0 4px;}
+.logo-sub{font-family:'IBM Plex Mono',monospace;font-size:10px;color:var(--ink3);letter-spacing:0.5px;text-transform:uppercase;}
+.topbar-spacer{flex:1;}
+.std-tabs{display:flex;gap:3px;background:var(--surface3);border:1px solid var(--border);border-radius:7px;padding:3px;}
+.std-tab{padding:5px 14px;border:none;border-radius:5px;font-family:'IBM Plex Mono',monospace;font-size:11px;font-weight:600;cursor:pointer;background:transparent;color:var(--ink3);letter-spacing:0.3px;transition:all .15s;}
+.std-tab.active-asce{background:var(--blue);color:#fff;box-shadow:0 1px 4px rgba(26,79,214,0.3);}
+.std-tab.active-euro{background:var(--teal);color:#fff;box-shadow:0 1px 4px rgba(10,125,140,0.3);}
+.std-tab.active-both{background:var(--ink);color:#fff;box-shadow:0 1px 4px rgba(13,21,38,0.25);}
+.std-tab:not(.active-asce):not(.active-euro):not(.active-both):hover{background:var(--border);color:var(--ink2);}
+
+/* ── SIDEBAR ─────────────────────────────────────────────────────────── */
+.sidebar-section{padding:14px 16px 0;}
+.sidebar-label{font-family:'IBM Plex Mono',monospace;font-size:9px;text-transform:uppercase;letter-spacing:1.2px;color:var(--ink4);margin-bottom:8px;padding-left:2px;}
+.struct-grid{display:grid;grid-template-columns:1fr 1fr;gap:6px;margin-bottom:14px;}
+.struct-btn{border:1.5px solid var(--border);border-radius:7px;background:var(--surface);padding:10px 8px 8px;cursor:pointer;transition:all .15s;text-align:center;display:flex;flex-direction:column;align-items:center;gap:5px;}
+.struct-btn:hover{border-color:var(--blue2);background:var(--blue-bg);}
+.struct-btn.active{border-color:var(--blue);background:var(--blue-bg);box-shadow:0 0 0 3px rgba(26,79,214,0.1);}
+.struct-icon{font-size:22px;line-height:1;}
+.struct-name{font-family:'IBM Plex Mono',monospace;font-size:9px;font-weight:600;color:var(--ink2);text-transform:uppercase;letter-spacing:0.3px;line-height:1.3;}
+.struct-btn.active .struct-name{color:var(--blue);}
+
+/* Input form */
+.form-section{padding:0 16px 12px;border-bottom:1px solid var(--border);}
+.form-section:last-child{border-bottom:none;}
+.form-heading{font-family:'IBM Plex Mono',monospace;font-size:9px;text-transform:uppercase;letter-spacing:1.2px;color:var(--ink4);margin:12px 0 8px;padding-left:2px;}
+.field{margin-bottom:7px;}
+.field>label{display:flex;justify-content:space-between;align-items:baseline;font-size:11.5px;color:var(--ink2);margin-bottom:3px;font-weight:500;}
+.field>label span{font-family:'IBM Plex Mono',monospace;font-size:9.5px;color:var(--ink4);}
+.input-wrap{display:flex;gap:4px;}
+.input-wrap input,.input-wrap select,.field input,.field select{
+  width:100%;background:var(--surface2);border:1.5px solid var(--border2);
+  border-radius:6px;color:var(--ink);font-family:'IBM Plex Mono',monospace;
+  font-size:12px;padding:6px 10px;outline:none;transition:all .12s;-webkit-appearance:none;
+}
+.input-wrap input:focus,.input-wrap select:focus,.field input:focus,.field select:focus{
+  border-color:var(--blue);background:#fff;box-shadow:0 0 0 3px rgba(26,79,214,0.1);
+}
+.unit-tag{flex-shrink:0;background:var(--surface3);border:1.5px solid var(--border2);border-radius:6px;padding:6px 8px;font-family:'IBM Plex Mono',monospace;font-size:10px;color:var(--ink3);white-space:nowrap;}
+.field select{background-image:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='10' height='6'%3E%3Cpath d='M0 0l5 6 5-6z' fill='%237b8aaa'/%3E%3C/svg%3E");background-repeat:no-repeat;background-position:right 10px center;padding-right:26px;cursor:pointer;}
+
+.calc-btn{width:100%;margin-top:12px;padding:10px;border:none;border-radius:7px;font-family:'Fraunces',serif;font-weight:700;font-size:14px;cursor:pointer;transition:all .15s;letter-spacing:0.3px;}
+.calc-btn.asce{background:var(--blue);color:#fff;box-shadow:0 2px 8px rgba(26,79,214,0.3);}
+.calc-btn.asce:hover{background:#1340b0;transform:translateY(-1px);box-shadow:0 4px 16px rgba(26,79,214,0.35);}
+.calc-btn.euro{background:var(--teal);color:#fff;box-shadow:0 2px 8px rgba(10,125,140,0.3);}
+.calc-btn.euro:hover{background:#076878;transform:translateY(-1px);}
+.calc-btn.both{background:var(--ink);color:#fff;box-shadow:0 2px 8px rgba(13,21,38,0.25);}
+.calc-btn.both:hover{background:#1a2540;transform:translateY(-1px);}
+
+/* ── MAIN RESULTS ────────────────────────────────────────────────────── */
+.results-placeholder{display:flex;flex-direction:column;align-items:center;justify-content:center;min-height:400px;gap:12px;color:var(--ink3);}
+.results-placeholder .big-icon{font-size:56px;opacity:.35;}
+.results-placeholder h2{font-family:'Fraunces',serif;font-size:20px;font-weight:700;color:var(--ink2);}
+.results-placeholder p{font-size:13px;color:var(--ink3);text-align:center;max-width:340px;line-height:1.6;}
+
+/* Cards */
+.results-header{display:flex;align-items:center;gap:12px;margin-bottom:18px;flex-wrap:wrap;}
+.results-title{font-family:'Fraunces',serif;font-size:22px;font-weight:900;letter-spacing:-0.5px;color:var(--ink);}
+.results-title span{color:var(--blue);}
+.results-title em{color:var(--teal);font-style:normal;}
+.badge-row{display:flex;gap:6px;flex-wrap:wrap;}
+.badge{font-family:'IBM Plex Mono',monospace;font-size:10px;padding:3px 8px;border-radius:4px;border:1px solid;letter-spacing:0.3px;font-weight:600;}
+.badge-asce{border-color:var(--blue);color:var(--blue);background:var(--blue-bg);}
+.badge-euro{border-color:var(--teal);color:var(--teal);background:var(--teal-bg);}
+.badge-struct{border-color:var(--ink3);color:var(--ink2);background:var(--surface3);}
+
+.kpi-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(155px,1fr));gap:10px;margin-bottom:18px;}
+.kpi{background:var(--surface);border:1.5px solid var(--border);border-radius:var(--r);padding:12px 14px;position:relative;overflow:hidden;box-shadow:var(--shadow-sm);}
+.kpi::before{content:'';position:absolute;top:0;left:0;right:0;height:3px;}
+.kpi.blue::before{background:linear-gradient(90deg,var(--blue),var(--blue2));}
+.kpi.teal::before{background:linear-gradient(90deg,var(--teal),var(--teal2));}
+.kpi.amber::before{background:linear-gradient(90deg,var(--amber),var(--amber2));}
+.kpi.green::before{background:linear-gradient(90deg,var(--green),#22c55e);}
+.kpi.red::before{background:linear-gradient(90deg,var(--red),#f87171);}
+.kpi-label{font-family:'IBM Plex Mono',monospace;font-size:9px;text-transform:uppercase;letter-spacing:0.8px;color:var(--ink3);margin-bottom:5px;}
+.kpi-val{font-family:'Fraunces',serif;font-size:24px;font-weight:900;letter-spacing:-0.5px;line-height:1;}
+.kpi-val.blue{color:var(--blue);}
+.kpi-val.teal{color:var(--teal);}
+.kpi-val.amber{color:var(--amber);}
+.kpi-val.green{color:var(--green);}
+.kpi-val.red{color:var(--red);}
+.kpi-sub{font-family:'IBM Plex Mono',monospace;font-size:9px;color:var(--ink4);margin-top:4px;}
+
+/* Tabs for output sections */
+.output-tabs{display:flex;gap:0;border-bottom:2px solid var(--border);margin-bottom:18px;overflow-x:auto;}
+.output-tab{padding:9px 16px;border:none;background:transparent;font-family:'Figtree',sans-serif;font-size:12px;font-weight:600;color:var(--ink3);cursor:pointer;border-bottom:2px solid transparent;margin-bottom:-2px;white-space:nowrap;transition:all .12s;}
+.output-tab:hover{color:var(--ink2);}
+.output-tab.active{color:var(--blue);border-bottom-color:var(--blue);}
+
+.tab-panel{display:none;}
+.tab-panel.active{display:block;}
+
+/* Section cards */
+.sec{background:var(--surface);border:1.5px solid var(--border);border-radius:var(--r);overflow:hidden;margin-bottom:14px;box-shadow:var(--shadow-sm);}
+.sec-head{padding:10px 16px;background:var(--surface2);border-bottom:1px solid var(--border);display:flex;align-items:center;gap:8px;}
+.sec-head-title{font-family:'IBM Plex Mono',monospace;font-size:10px;text-transform:uppercase;letter-spacing:0.8px;color:var(--ink3);font-weight:600;}
+.sec-head-tag{font-family:'IBM Plex Mono',monospace;font-size:9px;padding:2px 6px;border-radius:3px;background:var(--blue-bg);color:var(--blue);border:1px solid rgba(26,79,214,0.2);}
+.sec-head-tag.teal{background:var(--teal-bg);color:var(--teal);border-color:rgba(10,125,140,0.2);}
+.sec-body{padding:14px 16px;}
+
+/* Tables */
+.wtable{width:100%;border-collapse:collapse;font-family:'IBM Plex Mono',monospace;font-size:11.5px;}
+.wtable th{padding:7px 12px;text-align:left;font-size:9.5px;text-transform:uppercase;letter-spacing:0.7px;color:var(--ink4);border-bottom:2px solid var(--border);background:var(--surface2);font-weight:600;}
+.wtable td{padding:7px 12px;border-bottom:1px solid var(--border);color:var(--ink2);}
+.wtable tr:last-child td{border-bottom:none;}
+.wtable tr:hover td{background:rgba(26,79,214,0.025);}
+.wtable .pos{color:var(--green);font-weight:600;}
+.wtable .neg{color:var(--red);font-weight:600;}
+.wtable .neutral{color:var(--amber);font-weight:600;}
+.wtable .row-label{color:var(--ink);font-weight:500;}
+.wtable .row-sub{color:var(--ink3);font-size:10px;}
+
+/* Formula box */
+.fbox{background:var(--surface2);border:1.5px solid var(--border);border-left:3px solid var(--blue);border-radius:var(--r);padding:12px 14px;margin-bottom:12px;font-family:'IBM Plex Mono',monospace;font-size:11.5px;line-height:1.9;color:var(--ink2);}
+.fbox.teal{border-left-color:var(--teal);}
+.fbox strong{color:var(--ink);font-size:11px;font-weight:600;}
+.fbox .feq{color:var(--blue);display:block;font-size:10.5px;}
+.fbox.teal .feq{color:var(--teal);}
+.fbox .fsub{color:var(--ink3);font-size:10px;}
+
+/* Zone diagram */
+.zone-diagram{background:var(--surface2);border:1.5px solid var(--border);border-radius:var(--r);overflow:hidden;margin-bottom:14px;}
+.zone-diagram svg{width:100%;display:block;}
+
+/* Comparison grid */
+.cmp-grid{display:grid;grid-template-columns:1fr 1fr;gap:12px;margin-bottom:14px;}
+.cmp-card{background:var(--surface);border:1.5px solid var(--border);border-radius:var(--r);padding:14px;box-shadow:var(--shadow-sm);}
+.cmp-card.asce-card{border-top:3px solid var(--blue);}
+.cmp-card.euro-card{border-top:3px solid var(--teal);}
+.cmp-card h4{font-family:'Fraunces',serif;font-size:14px;font-weight:700;margin-bottom:10px;padding-bottom:8px;border-bottom:1px solid var(--border);}
+.cmp-card h4.asce-h{color:var(--blue);}
+.cmp-card h4.euro-h{color:var(--teal);}
+
+/* Scrollbar */
+::-webkit-scrollbar{width:5px;height:5px;}
+::-webkit-scrollbar-track{background:transparent;}
+::-webkit-scrollbar-thumb{background:var(--border2);border-radius:3px;}
+
+@media(max-width:900px){
+  .app{grid-template-columns:1fr;}
+  .sidebar{border-right:none;border-bottom:1.5px solid var(--border);}
+  .cmp-grid{grid-template-columns:1fr;}
+}
+</style>
+</head>
+<body>
+<div class="app">
+
+<!-- TOPBAR -->
+<div class="topbar">
+  <div class="logo-text">Wind<span>Calc</span></div>
+  <div class="logo-divider"></div>
+  <div class="logo-sub">Structural Wind Pressure Calculator</div>
+  <div class="topbar-spacer"></div>
+  <div class="std-tabs" id="std-tabs">
+    <button class="std-tab active-asce" onclick="setStd('asce',this)">ASCE 7-10</button>
+    <button class="std-tab" onclick="setStd('euro',this)">EN 1991-1-4</button>
+    <button class="std-tab" onclick="setStd('both',this)">Compare</button>
+  </div>
+</div>
+
+<!-- SIDEBAR -->
+<div class="sidebar">
+  <div class="sidebar-section">
+    <div class="sidebar-label" style="margin-top:14px;">Structure Type</div>
+    <div class="struct-grid">
+      <button class="struct-btn active" onclick="setStruct('enclosed',this)">
+        <div class="struct-icon">🏢</div>
+        <div class="struct-name">Enclosed<br>Building</div>
+      </button>
+      <button class="struct-btn" onclick="setStruct('canopy',this)">
+        <div class="struct-icon">⛺</div>
+        <div class="struct-name">Open<br>Canopy</div>
+      </button>
+      <button class="struct-btn" onclick="setStruct('gable',this)">
+        <div class="struct-icon">🏠</div>
+        <div class="struct-name">Gable<br>Roof</div>
+      </button>
+      <button class="struct-btn" onclick="setStruct('cylinder',this)">
+        <div class="struct-icon">🛢️</div>
+        <div class="struct-name">Cylindrical<br>Structure</div>
+      </button>
+      <button class="struct-btn" onclick="setStruct('tower',this)">
+        <div class="struct-icon">📡</div>
+        <div class="struct-name">Trussed<br>Tower</div>
+      </button>
+    </div>
+  </div>
+
+  <!-- ENCLOSED BUILDING INPUTS -->
+  <div id="form-enclosed" class="form-section">
+    <div class="form-heading">Geometry</div>
+    <div class="field"><label>Width B (⊥ wind) <span>m</span></label><div class="input-wrap"><input type="number" id="e_B" value="30" step="0.5"><div class="unit-tag">m</div></div></div>
+    <div class="field"><label>Length L (‖ wind) <span>m</span></label><div class="input-wrap"><input type="number" id="e_L" value="50" step="0.5"><div class="unit-tag">m</div></div></div>
+    <div class="field"><label>Eave Height h<sub>e</sub> <span>m</span></label><div class="input-wrap"><input type="number" id="e_he" value="8" step="0.1"><div class="unit-tag">m</div></div></div>
+    <div class="field"><label>Ridge Height h<sub>r</sub> <span>m</span></label><div class="input-wrap"><input type="number" id="e_hr" value="10" step="0.1"><div class="unit-tag">m</div></div></div>
+    <div class="form-heading">Site & Wind</div>
+    <div class="field"><label>Basic Wind Speed V <span>km/h</span></label><div class="input-wrap"><input type="number" id="e_V" value="180" step="5"><div class="unit-tag">km/h</div></div></div>
+    <div class="field"><label>Exposure Category</label><select id="e_exp"><option value="B">B — Urban/Suburban</option><option value="C" selected>C — Open Terrain</option><option value="D">D — Coastal/Flat</option></select></div>
+    <div class="field"><label>Risk Category</label><select id="e_risk"><option value="1">I — Low hazard</option><option value="2" selected>II — Standard</option><option value="3">III — Substantial</option><option value="4">IV — Essential</option></select></div>
+    <div class="field"><label>Enclosure</label><select id="e_enc"><option value="enclosed" selected>Enclosed</option><option value="partial">Partially Enclosed</option></select></div>
+    <div class="field"><label>Kzt (Topographic) <span>—</span></label><div class="input-wrap"><input type="number" id="e_Kzt" value="1.0" step="0.01" min="1"><div class="unit-tag">—</div></div></div>
+    <!-- EC extra -->
+    <div id="ec-enc-extra" style="display:none;">
+      <div class="form-heading" style="color:var(--teal);">Eurocode Extras</div>
+      <div class="field"><label>v<sub>b,0</sub> (10-min mean) <span>m/s</span></label><div class="input-wrap"><input type="number" id="e_vb0" value="28" step="1"><div class="unit-tag">m/s</div></div></div>
+      <div class="field"><label>Terrain Category</label><select id="e_tc"><option value="0">0 — Sea/Coast</option><option value="I">I — Open flat</option><option value="II" selected>II — Low veg.</option><option value="III">III — Suburban</option><option value="IV">IV — Urban</option></select></div>
+    </div>
+  </div>
+
+  <!-- CANOPY INPUTS -->
+  <div id="form-canopy" class="form-section" style="display:none;">
+    <div class="form-heading">Open Canopy Geometry</div>
+    <div class="field"><label>Width W <span>m</span></label><div class="input-wrap"><input type="number" id="c_W" value="20" step="0.5"><div class="unit-tag">m</div></div></div>
+    <div class="field"><label>Length L <span>m</span></label><div class="input-wrap"><input type="number" id="c_L" value="30" step="0.5"><div class="unit-tag">m</div></div></div>
+    <div class="field"><label>Height above ground h <span>m</span></label><div class="input-wrap"><input type="number" id="c_h" value="6" step="0.1"><div class="unit-tag">m</div></div></div>
+    <div class="field"><label>Roof slope θ <span>°</span></label><div class="input-wrap"><input type="number" id="c_theta" value="10" step="1" min="0" max="45"><div class="unit-tag">°</div></div></div>
+    <div class="field"><label>Blockage ratio φ <span>0–1</span></label><div class="input-wrap"><input type="number" id="c_phi" value="0" step="0.05" min="0" max="1"><div class="unit-tag">—</div></div></div>
+    <div class="form-heading">Wind</div>
+    <div class="field"><label>Wind Speed V <span>km/h</span></label><div class="input-wrap"><input type="number" id="c_V" value="180" step="5"><div class="unit-tag">km/h</div></div></div>
+    <div class="field"><label>Exposure</label><select id="c_exp"><option value="B">B</option><option value="C" selected>C</option><option value="D">D</option></select></div>
+  </div>
+
+  <!-- GABLE INPUTS -->
+  <div id="form-gable" class="form-section" style="display:none;">
+    <div class="form-heading">Gable/Duopitch Geometry</div>
+    <div class="field"><label>Width B <span>m</span></label><div class="input-wrap"><input type="number" id="g_B" value="20" step="0.5"><div class="unit-tag">m</div></div></div>
+    <div class="field"><label>Length L <span>m</span></label><div class="input-wrap"><input type="number" id="g_L" value="40" step="0.5"><div class="unit-tag">m</div></div></div>
+    <div class="field"><label>Eave Height h<sub>e</sub> <span>m</span></label><div class="input-wrap"><input type="number" id="g_he" value="4" step="0.1"><div class="unit-tag">m</div></div></div>
+    <div class="field"><label>Ridge Height h<sub>r</sub> <span>m</span></label><div class="input-wrap"><input type="number" id="g_hr" value="8" step="0.1"><div class="unit-tag">m</div></div></div>
+    <div class="form-heading">Wind</div>
+    <div class="field"><label>Wind Speed V <span>km/h</span></label><div class="input-wrap"><input type="number" id="g_V" value="180" step="5"><div class="unit-tag">km/h</div></div></div>
+    <div class="field"><label>Exposure</label><select id="g_exp"><option value="B">B</option><option value="C" selected>C</option><option value="D">D</option></select></div>
+    <div class="field"><label>Enclosure</label><select id="g_enc"><option value="enclosed" selected>Enclosed</option><option value="partial">Partially Enclosed</option></select></div>
+  </div>
+
+  <!-- CYLINDER INPUTS -->
+  <div id="form-cylinder" class="form-section" style="display:none;">
+    <div class="form-heading">Cylindrical Structure</div>
+    <div class="field"><label>Diameter D <span>m</span></label><div class="input-wrap"><input type="number" id="cyl_D" value="10" step="0.5"><div class="unit-tag">m</div></div></div>
+    <div class="field"><label>Height H <span>m</span></label><div class="input-wrap"><input type="number" id="cyl_H" value="20" step="0.5"><div class="unit-tag">m</div></div></div>
+    <div class="field"><label>Surface Roughness D/t</label><select id="cyl_surf"><option value="smooth" selected>Smooth (steel)</option><option value="moderate">Moderate</option><option value="rough">Rough (concrete)</option></select></div>
+    <div class="form-heading">Wind</div>
+    <div class="field"><label>Wind Speed V <span>km/h</span></label><div class="input-wrap"><input type="number" id="cyl_V" value="180" step="5"><div class="unit-tag">km/h</div></div></div>
+    <div class="field"><label>Exposure</label><select id="cyl_exp"><option value="B">B</option><option value="C" selected>C</option><option value="D">D</option></select></div>
+    <div class="field"><label>Type</label><select id="cyl_type"><option value="ground" selected>Ground-mounted tank</option><option value="elevated">Elevated tank</option><option value="stack">Chimney / Stack</option></select></div>
+  </div>
+
+  <!-- TOWER INPUTS -->
+  <div id="form-tower" class="form-section" style="display:none;">
+    <div class="form-heading">Trussed Tower / Lattice</div>
+    <div class="field"><label>Tower Height H <span>m</span></label><div class="input-wrap"><input type="number" id="t_H" value="30" step="1"><div class="unit-tag">m</div></div></div>
+    <div class="field"><label>Base Width b<sub>0</sub> <span>m</span></label><div class="input-wrap"><input type="number" id="t_b0" value="4" step="0.5"><div class="unit-tag">m</div></div></div>
+    <div class="field"><label>Top Width b<sub>t</sub> <span>m</span></label><div class="input-wrap"><input type="number" id="t_bt" value="2" step="0.5"><div class="unit-tag">m</div></div></div>
+    <div class="field"><label>Solidity Ratio ε <span>0.1–0.5</span></label><div class="input-wrap"><input type="number" id="t_eps" value="0.25" step="0.01" min="0.1" max="0.5"><div class="unit-tag">—</div></div></div>
+    <div class="field"><label>Cross-section</label><select id="t_cs"><option value="square" selected>Square</option><option value="triangle">Triangular</option></select></div>
+    <div class="form-heading">Wind</div>
+    <div class="field"><label>Wind Speed V <span>km/h</span></label><div class="input-wrap"><input type="number" id="t_V" value="180" step="5"><div class="unit-tag">km/h</div></div></div>
+    <div class="field"><label>Exposure</label><select id="t_exp"><option value="B">B</option><option value="C" selected>C</option><option value="D">D</option></select></div>
+  </div>
+
+  <div class="form-section">
+    <button class="calc-btn asce" id="main-calc-btn" onclick="calculate()">▶  Calculate</button>
+  </div>
+</div>
+
+<!-- MAIN -->
+<div class="main" id="main-panel">
+  <div class="results-placeholder" id="placeholder">
+    <div class="big-icon">🌬️</div>
+    <h2>Ready to Calculate</h2>
+    <p>Select a structure type, fill in the parameters, choose a standard, and press Calculate.</p>
+  </div>
+  <div id="results-root" style="display:none;"></div>
+</div>
+
+</div><!-- .app -->
+
+<script>
+// ═══════════════════════════════════════════════════════
+// STATE
+// ═══════════════════════════════════════════════════════
+let currentStd = 'asce';
+let currentStruct = 'enclosed';
+
+function setStd(s, btn) {
+  currentStd = s;
+  document.querySelectorAll('.std-tab').forEach(b => b.className = 'std-tab');
+  btn.classList.add('active-'+s);
+  const cb = document.getElementById('main-calc-btn');
+  cb.className = 'calc-btn ' + (s === 'both' ? 'both' : s);
+  // Show/hide euro extras for enclosed
+  const ee = document.getElementById('ec-enc-extra');
+  if (ee) ee.style.display = (s !== 'asce') ? 'block' : 'none';
+}
+
+function setStruct(s, btn) {
+  currentStruct = s;
+  document.querySelectorAll('.struct-btn').forEach(b => b.classList.remove('active'));
+  btn.classList.add('active');
+  ['enclosed','canopy','gable','cylinder','tower'].forEach(t => {
+    const f = document.getElementById('form-'+t);
+    if (f) f.style.display = t === s ? 'block' : 'none';
+  });
+}
+
+function setOutputTab(tabId) {
+  document.querySelectorAll('.output-tab').forEach(t => t.classList.remove('active'));
+  document.querySelectorAll('.tab-panel').forEach(p => p.classList.remove('active'));
+  document.getElementById('tab-'+tabId).classList.add('active');
+  document.getElementById('panel-'+tabId).classList.add('active');
+}
+
+// ═══════════════════════════════════════════════════════
+// ASCE 7-10 CORE FUNCTIONS
+// ═══════════════════════════════════════════════════════
+const EXP = {
+  B: {alpha:7.0,  zg:365.76, a:1/7,  b:0.84, c:0.45, l:97.54,  eps:1/3,  zmin:9.14,  Kr:0.84},
+  C: {alpha:9.5,  zg:274.32, a:1/9.5,b:0.65, c:0.20, l:152.4,  eps:1/8,  zmin:4.57,  Kr:0.65},
+  D: {alpha:11.5, zg:213.36, a:1/11.5,b:0.80,c:0.15, l:198.12, eps:1/12, zmin:2.13,  Kr:0.80}
+};
+
+function Kz(z, exp) {
+  const p = EXP[exp], zu = Math.max(z, p.zmin);
+  return 2.01 * Math.pow(zu / p.zg, 2 * p.a);
+}
+
+function qz_kPa(z, V_kmh, exp, Kzt=1, Kd=0.85) {
+  const V = V_kmh / 3.6;
+  return 0.613 * Kz(z, exp) * Kzt * Kd * V * V / 1000;
+}
+
+function Gf(h, V_ms, exp) {
+  const p = EXP[exp];
+  const Lz = p.l * Math.pow(h/10, p.eps);
+  const Iz = p.c * Math.pow(10/Math.max(h, p.zmin), 1/6);
+  const Q2 = 1/(1 + 0.63 * Math.pow(2*h/Lz, 0.63));
+  const n1 = 75 * V_ms / h;
+  const N1 = n1 * Lz / V_ms;
+  const Rn = 7.47*N1 / Math.pow(1+10.3*N1, 5/3);
+  const eta = 4.6*n1*h/V_ms;
+  const Rh = 1/eta - 1/(2*eta*eta)*(1-Math.exp(-2*eta));
+  const etaB = 4.6*n1*h/V_ms;
+  const RB = 1/etaB - 1/(2*etaB*etaB)*(1-Math.exp(-2*etaB));
+  const R2 = Math.PI/(4*0.02)*Rn*Rh*RB;
+  const gf = 0.925*(1+1.7*Iz*Math.sqrt(9.04*Q2+11.56*R2))/(1+1.7*3.4*Iz);
+  return Math.max(gf, 0.85);
+}
+
+function CpLW(LB) {
+  if (LB<=1) return -0.5;
+  if (LB<=2) return -0.5+(LB-1)*0.1;
+  if (LB<=4) return -0.3;
+  return -0.2;
+}
+
+// ═══════════════════════════════════════════════════════
+// EUROCODE CORE
+// ═══════════════════════════════════════════════════════
+const TERRAIN = {
+  '0': {z0:0.003,zmin:1},
+  'I': {z0:0.01, zmin:1},
+  'II':{z0:0.05, zmin:2},
+  'III':{z0:0.3, zmin:5},
+  'IV':{z0:1.0,  zmin:10}
+};
+const z0II = 0.05;
+
+function qp_EC(z, vb, tc) {
+  const t = TERRAIN[tc];
+  const zu = Math.max(z, t.zmin);
+  const kr = 0.19*Math.pow(t.z0/z0II, 0.07);
+  const cr = kr*Math.log(zu/t.z0);
+  const Iv = 1/(Math.log(zu/t.z0));
+  const vm = cr * vb;
+  return 0.5*1.25*vm*vm*(1+7*Iv)/1000; // kN/m²
+}
+
+function CpeD(hd) { return hd>=1?0.8:(hd>=0.25?0.7+0.1*(hd-0.25)/0.75:0.7); }
+function CpeE(hd) {
+  if (hd>=1) return -0.7;
+  if (hd>=0.25) return -0.5-0.2*(hd-0.25)/0.75;
+  return -0.5;
+}
+
+// ═══════════════════════════════════════════════════════
+// STRUCTURE CALCULATORS
+// ═══════════════════════════════════════════════════════
+
+// ── 1. ENCLOSED BUILDING ─────────────────────────────
+function calcEnclosed() {
+  const B   = +document.getElementById('e_B').value;
+  const L   = +document.getElementById('e_L').value;
+  const he  = +document.getElementById('e_he').value;
+  const hr  = +document.getElementById('e_hr').value;
+  const V   = +document.getElementById('e_V').value;
+  const exp = document.getElementById('e_exp').value;
+  const enc = document.getElementById('e_enc').value;
+  const Kzt = +document.getElementById('e_Kzt').value;
+  const Kd  = 0.85;
+  const GCpi = enc==='enclosed' ? 0.18 : 0.55;
+  const h   = he;
+  const V_ms = V/3.6;
+  const gf  = Gf(h, V_ms, exp);
+  const qh  = qz_kPa(h, V, exp, Kzt, Kd);
+  const LB  = L/B;
+  const Cp_WW = 0.8, Cp_LW = CpLW(LB), Cp_SW = -0.7;
+  const theta = Math.atan((hr-he)/(B/2))*180/Math.PI;
+
+  // Height profile
+  const hProfile = [];
+  for(let z=0; z<=h; z+=Math.max(h/12,0.5)) hProfile.push(parseFloat(z.toFixed(2)));
+  if(!hProfile.includes(h)) hProfile.push(h);
+  hProfile.sort((a,b)=>a-b);
+  const profile = hProfile.map(z=>({
+    z, Kz:Kz(z,exp).toFixed(4),
+    qz:(qz_kPa(z,V,exp,Kzt,Kd)).toFixed(4),
+    pWW:( qz_kPa(z,V,exp,Kzt,Kd)*gf*Cp_WW ).toFixed(4),
+    pLW:( qh*gf*Cp_LW ).toFixed(4),
+    pSW:( qh*gf*Cp_SW ).toFixed(4)
+  }));
+
+  // Roof Cp (ASCE Fig 27.4-1)
+  const hL = h/L;
+  let CpRoofWW_min, CpRoofWW_max;
+  if (theta < 10) { CpRoofWW_min = -0.9; CpRoofWW_max = -0.18; }
+  else if (theta < 20) { CpRoofWW_min = -0.9; CpRoofWW_max = -0.18; }
+  else if (theta < 27) { CpRoofWW_min = -0.7; CpRoofWW_max = 0; }
+  else { CpRoofWW_min = -0.4; CpRoofWW_max = 0.3; }
+  const CpRoofLW = -0.6;
+
+  // Net pressures (Table 27.4-1)
+  const net_WW_wall  = qh*gf*Cp_WW - qh*(-GCpi); // max = add +GCpi
+  const net_LW_wall  = qh*gf*Cp_LW - qh*(GCpi);
+  const net_SW_wall  = qh*gf*Cp_SW - qh*(GCpi);
+  const net_roof_min = qh*gf*CpRoofWW_min - qh*(GCpi);
+  const net_roof_max = qh*gf*CpRoofWW_max + qh*(GCpi);
+
+  // C&C zone pressures (simplified — low-rise: h≤18m, else ASCE 27.6)
+  const a = Math.min(0.1*Math.min(B,L), 0.4*h, 0.04*Math.min(B,L));
+  const area_1 = a*a;
+  const GCp_corner = -2.0, GCp_edge = -1.7, GCp_interior = -1.1;
+  const GCp_wall_corner = 1.0, GCp_wall_edge = -1.2, GCp_wall_int = 0.8;
+
+  return { type:'enclosed', B,L,he,hr,h,V,exp,enc,Kzt,Kd,GCpi,gf,qh,LB,
+    Cp_WW,Cp_LW,Cp_SW,theta, profile, CpRoofWW_min,CpRoofWW_max,CpRoofLW,
+    net_WW_wall,net_LW_wall,net_SW_wall,net_roof_min,net_roof_max,
+    a, GCp_corner,GCp_edge,GCp_interior,
+    GCp_wall_corner,GCp_wall_edge,GCp_wall_int };
+}
+
+// ── 2. OPEN CANOPY (ASCE Fig 27.4-3/4) ──────────────
+function calcCanopy() {
+  const W   = +document.getElementById('c_W').value;
+  const L   = +document.getElementById('c_L').value;
+  const h   = +document.getElementById('c_h').value;
+  const theta = +document.getElementById('c_theta').value;
+  const phi = +document.getElementById('c_phi').value;
+  const V   = +document.getElementById('c_V').value;
+  const exp = document.getElementById('c_exp').value;
+  const Kd  = 0.85, Kzt = 1.0;
+  const V_ms = V/3.6;
+  const gf  = Gf(h, V_ms, exp);
+  const qh  = qz_kPa(h, V, exp, Kzt, Kd);
+
+  // Net pressure coefficients for open canopy (ASCE Table 27.4-4)
+  // Monoslope, wind parallel and normal to ridge
+  // Simplified: max uplift/downforce per blockage
+  const phiFactor = 1 - 0.5*phi;
+
+  let CNmax_uplift, CNmax_down;
+  if (theta <= 7.5) { CNmax_uplift = -0.8*phiFactor; CNmax_down = 0.5*phiFactor; }
+  else if (theta <= 15) { CNmax_uplift = -1.0*phiFactor; CNmax_down = 0.8*phiFactor; }
+  else if (theta <= 22.5) { CNmax_uplift = -1.2*phiFactor; CNmax_down = 1.0*phiFactor; }
+  else if (theta <= 30) { CNmax_uplift = -1.3*phiFactor; CNmax_down = 1.2*phiFactor; }
+  else { CNmax_uplift = -1.4*phiFactor; CNmax_down = 1.3*phiFactor; }
+
+  const p_uplift = qh * gf * CNmax_uplift;
+  const p_down   = qh * gf * CNmax_down;
+  const Fz_uplift = p_uplift * W * L; // kN (total)
+  const Fz_down   = p_down   * W * L;
+
+  // Zone pressures
+  const zones = [
+    {zone:'A (uplift)',  CN: CNmax_uplift, p:(qh*gf*CNmax_uplift).toFixed(4)},
+    {zone:'B (downward)',CN: CNmax_down,   p:(qh*gf*CNmax_down).toFixed(4)},
+  ];
+
+  return {type:'canopy',W,L,h,theta,phi,V,exp,Kd,Kzt,gf,qh,
+    CNmax_uplift,CNmax_down,p_uplift,p_down,Fz_uplift,Fz_down,zones};
+}
+
+// ── 3. GABLE ROOF (ASCE Fig 27.4-1/2) ───────────────
+function calcGable() {
+  const B   = +document.getElementById('g_B').value;
+  const L   = +document.getElementById('g_L').value;
+  const he  = +document.getElementById('g_he').value;
+  const hr  = +document.getElementById('g_hr').value;
+  const V   = +document.getElementById('g_V').value;
+  const exp = document.getElementById('g_exp').value;
+  const enc = document.getElementById('g_enc').value;
+  const Kd  = 0.85, Kzt = 1.0;
+  const GCpi = enc==='enclosed'?0.18:0.55;
+  const h   = he;
+  const V_ms = V/3.6;
+  const gf  = Gf(h, V_ms, exp);
+  const qh  = qz_kPa(h, V, exp, Kzt, Kd);
+  const LB  = L/B;
+  const theta = Math.atan((hr-he)/(B/2))*180/Math.PI;
+
+  // Gable roof Cp by angle bands (ASCE Fig 27.4-1)
+  function getRoofCp(angle) {
+    // Returns {WW_min, WW_max, LW}
+    if (angle < 10) return {WW_min:-0.9, WW_max:-0.18, LW:-0.5};
+    if (angle < 15) return {WW_min:-0.9, WW_max:-0.18, LW:-0.5};
+    if (angle < 20) return {WW_min:-0.7, WW_max:0,     LW:-0.5};
+    if (angle < 27) return {WW_min:-0.7, WW_max:0.2,   LW:-0.5};
+    if (angle < 30) return {WW_min:-0.4, WW_max:0.3,   LW:-0.3};
+    if (angle < 35) return {WW_min:-0.3, WW_max:0.4,   LW:-0.2};
+    if (angle < 45) return {WW_min:-0.2, WW_max:0.4,   LW:-0.2};
+    return {WW_min:0, WW_max:0.4, LW:-0.2};
+  }
+  const {WW_min,WW_max,LW} = getRoofCp(theta);
+
+  const pWW_min = qh*gf*WW_min - qh*GCpi;
+  const pWW_max = qh*gf*WW_max + qh*GCpi;
+  const pLW_min = qh*gf*LW - qh*GCpi;
+
+  const Cp_WW_wall = 0.8, Cp_LW_wall = CpLW(LB), Cp_SW = -0.7;
+  const pWW_wall  = qh*gf*Cp_WW_wall + qh*GCpi;
+  const pLW_wall  = qh*gf*Cp_LW_wall - qh*GCpi;
+  const pSW_wall  = qh*gf*Cp_SW - qh*GCpi;
+
+  // Wind parallel to ridge (EndWall zones)
+  const pParWW = qh*gf*(-0.9) - qh*GCpi;
+  const pParLW = qh*gf*(-0.5) - qh*GCpi;
+
+  return {type:'gable',B,L,he,hr,h,V,exp,enc,Kd,Kzt,GCpi,gf,qh,LB,theta,
+    WW_min,WW_max,LW,
+    pWW_min,pWW_max,pLW_min,
+    Cp_WW_wall,Cp_LW_wall,Cp_SW,
+    pWW_wall,pLW_wall,pSW_wall,pParWW,pParLW};
+}
+
+// ── 4. CYLINDER (ASCE §29.4) ─────────────────────────
+function calcCylinder() {
+  const D   = +document.getElementById('cyl_D').value;
+  const H   = +document.getElementById('cyl_H').value;
+  const V   = +document.getElementById('cyl_V').value;
+  const exp = document.getElementById('cyl_exp').value;
+  const surf= document.getElementById('cyl_surf').value;
+  const type= document.getElementById('cyl_type').value;
+  const Kd  = 0.95, Kzt = 1.0;
+  const V_ms = V/3.6;
+  const h   = H;
+  const gf  = Gf(h, V_ms, exp);
+  const qz  = qz_kPa(h, V, exp, Kzt, Kd);
+
+  // Force coefficient Cf (ASCE Table 29.4-1)
+  // D²/qz: use qz in Pa for check
+  const qz_Pa = qz*1000;
+  const D2q = D*D*qz_Pa;
+  let Cf;
+  if(D2q<0.9) Cf=0.7;
+  else if(D2q<3.75) Cf=0.5;
+  else if(D2q<9) Cf=0.45;
+  else Cf=0.45;
+  if(surf==='rough') Cf *= 1.15;
+  if(surf==='moderate') Cf *= 1.05;
+
+  // H/D ratio adjustment
+  const HD = H/D;
+  let Cfh = Cf;
+  if(HD<1) Cfh=Cf*0.7;
+  else if(HD<2) Cfh=Cf*0.75;
+  else if(HD<4) Cfh=Cf*0.8;
+  else if(HD<7) Cfh=Cf*0.9;
+  else if(HD<10) Cfh=Cf*1.0;
+  else if(HD<20) Cfh=Cf*1.05;
+  else Cfh=Cf*1.1;
+
+  const Af = D * H; // projected area
+  const F  = qz * gf * Cfh * Af; // base shear kN
+
+  // Pressure distribution (simplified): windward +qz*Cf, leeward -qz*Cf*0.4
+  const pWind = qz * gf * Cfh;
+  const pWake = -qz * gf * Cfh * 0.4;
+
+  // Height profile
+  const ht = [];
+  for(let z=0;z<=H;z+=Math.max(H/10,1)) ht.push(parseFloat(z.toFixed(1)));
+  if(!ht.includes(H)) ht.push(H);
+  ht.sort((a,b)=>a-b);
+  const profile = ht.map(z=>({
+    z,
+    qz_z:(qz_kPa(z,V,exp,Kzt,Kd)).toFixed(4),
+    p:(qz_kPa(z,V,exp,Kzt,Kd)*gf*Cfh).toFixed(4)
+  }));
+
+  return {type:'cylinder',D,H,V,exp,surf,Kd,Kzt,gf,qz,Cf,Cfh,HD,Af,F,pWind,pWake,profile};
+}
+
+// ── 5. TRUSSED TOWER (ASCE §29.5) ───────────────────
+function calcTower() {
+  const H   = +document.getElementById('t_H').value;
+  const b0  = +document.getElementById('t_b0').value;
+  const bt  = +document.getElementById('t_bt').value;
+  const eps = +document.getElementById('t_eps').value;
+  const cs  = document.getElementById('t_cs').value;
+  const V   = +document.getElementById('t_V').value;
+  const exp = document.getElementById('t_exp').value;
+  const Kd  = 0.85, Kzt = 1.0;
+  const V_ms = V/3.6;
+  const h   = H;
+  const gf  = Gf(h, V_ms, exp);
+
+  // Force coefficient for lattice tower (ASCE Table 29.5-2)
+  // Cf = 4ε² − 5.9ε + 4 (square) or 3.4ε² − 4.7ε + 3.4 (triangle)
+  let Cf;
+  if(cs==='square') Cf = 4*eps*eps - 5.9*eps + 4.0;
+  else              Cf = 3.4*eps*eps - 4.7*eps + 3.4;
+  Cf = Math.max(Cf, 1.3);
+
+  // Segment analysis
+  const nSeg = 10;
+  const segments = [];
+  let totalF = 0;
+  for(let i=0;i<nSeg;i++) {
+    const z1 = i*H/nSeg, z2 = (i+1)*H/nSeg;
+    const zmid = (z1+z2)/2;
+    const bz = b0 + (bt-b0)*zmid/H; // interpolated width
+    const Az = bz*eps*(z2-z1); // effective projected area
+    const qz_seg = qz_kPa(zmid,V,exp,Kzt,Kd);
+    const Fz = qz_seg * gf * Cf * Az;
+    totalF += Fz;
+    segments.push({z1:z1.toFixed(1),z2:z2.toFixed(1),bz:bz.toFixed(2),
+      qz:qz_seg.toFixed(4),Fz:Fz.toFixed(3)});
+  }
+
+  const Mb = segments.reduce((acc,s,i)=>{
+    const zmid = (parseFloat(s.z1)+parseFloat(s.z2))/2;
+    return acc + parseFloat(s.Fz)*zmid;
+  },0);
+
+  return {type:'tower',H,b0,bt,eps,cs,V,exp,Kd,Kzt,gf,Cf,nSeg,segments,totalF,Mb};
+}
+
+// ═══════════════════════════════════════════════════════
+// EUROCODE CALC
+// ═══════════════════════════════════════════════════════
+function calcEnclosedEC() {
+  const B   = +document.getElementById('e_B').value;
+  const L   = +document.getElementById('e_L').value;
+  const he  = +document.getElementById('e_he').value;
+  const hr  = +document.getElementById('e_hr').value;
+  const vb0 = +document.getElementById('e_vb0').value;
+  const tc  = document.getElementById('e_tc').value;
+  const h   = he;
+  const hd  = h/L;
+  const t   = TERRAIN[tc];
+
+  const kr = 0.19*Math.pow(t.z0/z0II,0.07);
+  const ze = Math.max(h, t.zmin);
+  const cr = kr*Math.log(ze/t.z0);
+  const Iv = 1/Math.log(ze/t.z0);
+  const vb = vb0;
+  const vm = cr*vb;
+  const qp = 0.5*1.25*vm*vm*(1+7*Iv)/1000;
+  const qb = 0.5*1.25*vb*vb/1000;
+
+  const CpD = CpeD(hd), CpE = CpeE(hd);
+  const CpA = -1.2, CpB = -0.8, CpC = -0.5;
+  const Cpi_pos=0.2, Cpi_neg=-0.3;
+
+  const we_D  = qp*CpD, we_E = qp*CpE;
+  const wnet_D_max = qp*(CpD-Cpi_neg);
+  const wnet_E_min = qp*(CpE-Cpi_pos);
+  const wnet_A = qp*(CpA-Cpi_pos);
+  const wnet_B = qp*(CpB-Cpi_pos);
+
+  // Roof: flat (Table 7.2)
+  const Cp_F=-1.8,Cp_G=-1.2,Cp_H=-0.7,Cp_I_pos=0.2,Cp_I_neg=-0.2;
+  const wRoofF = qp*Cp_F, wRoofG = qp*Cp_G, wRoofH = qp*Cp_H;
+
+  return {vb0,tc,h,hd,ze,cr,Iv,vm,qb,qp,CpD,CpE,CpA,CpB,
+    we_D,we_E,wnet_D_max,wnet_E_min,wnet_A,wnet_B,
+    Cp_F,Cp_G,Cp_H,wRoofF,wRoofG,wRoofH,Cpi_pos,Cpi_neg};
+}
+
+// ═══════════════════════════════════════════════════════
+// RENDER
+// ═══════════════════════════════════════════════════════
+function calculate() {
+  let asce_r, ec_r;
+  try {
+    if (currentStruct === 'enclosed') { asce_r = calcEnclosed(); if(currentStd!=='asce') ec_r = calcEnclosedEC(); }
+    else if (currentStruct === 'canopy')   asce_r = calcCanopy();
+    else if (currentStruct === 'gable')    asce_r = calcGable();
+    else if (currentStruct === 'cylinder') asce_r = calcCylinder();
+    else if (currentStruct === 'tower')    asce_r = calcTower();
+  } catch(e) { alert('Calculation error: '+e.message); return; }
+
+  document.getElementById('placeholder').style.display = 'none';
+  const root = document.getElementById('results-root');
+  root.style.display = 'block';
+
+  if (currentStd === 'both' && ec_r) root.innerHTML = renderBoth(asce_r, ec_r);
+  else if (currentStd === 'euro' && ec_r) root.innerHTML = renderEuroOnly(ec_r, asce_r);
+  else root.innerHTML = renderASCE(asce_r);
+}
+
+// ─ ASCE RENDER ───────────────────────────────────────
+function renderASCE(r) {
+  if (r.type === 'enclosed') return renderEnclosedASCE(r);
+  if (r.type === 'canopy')   return renderCanopyASCE(r);
+  if (r.type === 'gable')    return renderGableASCE(r);
+  if (r.type === 'cylinder') return renderCylinderASCE(r);
+  if (r.type === 'tower')    return renderTowerASCE(r);
+}
+
+function structLabel(t) {
+  return {enclosed:'Enclosed Building',canopy:'Open Canopy',gable:'Gable Roof',
+    cylinder:'Cylindrical Structure',tower:'Trussed Tower'}[t]||t;
+}
+
+function renderEnclosedASCE(r) {
+  return `
+  <div class="results-header">
+    <div class="results-title">Enclosed Building — <span>ASCE 7-10</span></div>
+    <div class="badge-row">
+      <div class="badge badge-asce">ASCE 7-10 MWFRS</div>
+      <div class="badge badge-struct">Exp. ${r.exp}</div>
+      <div class="badge badge-struct">${r.enc}</div>
+      <div class="badge badge-struct">θ = ${r.theta.toFixed(1)}°</div>
+    </div>
+  </div>
+
+  <div class="kpi-grid">
+    <div class="kpi blue"><div class="kpi-label">Vel. Pressure q<sub>h</sub></div><div class="kpi-val blue">${r.qh.toFixed(3)}</div><div class="kpi-sub">kN/m² at h=${r.h}m</div></div>
+    <div class="kpi blue"><div class="kpi-label">Gust Factor G<sub>f</sub></div><div class="kpi-val blue">${r.gf.toFixed(4)}</div><div class="kpi-sub">Eq. 26.9-10</div></div>
+    <div class="kpi amber"><div class="kpi-label">WW Wall Max</div><div class="kpi-val amber">+${r.net_WW_wall.toFixed(3)}</div><div class="kpi-sub">kN/m² net</div></div>
+    <div class="kpi red"><div class="kpi-label">LW Wall Max</div><div class="kpi-val red">${r.net_LW_wall.toFixed(3)}</div><div class="kpi-sub">kN/m² net</div></div>
+    <div class="kpi red"><div class="kpi-label">Roof (min)</div><div class="kpi-val red">${r.net_roof_min.toFixed(3)}</div><div class="kpi-sub">kN/m² net uplift</div></div>
+    <div class="kpi blue"><div class="kpi-label">GC<sub>pi</sub></div><div class="kpi-val blue">±${r.GCpi}</div><div class="kpi-sub">internal</div></div>
+  </div>
+
+  <div class="output-tabs">
+    <button class="output-tab active" id="tab-walls"      onclick="setOutputTab('walls')">Walls</button>
+    <button class="output-tab"        id="tab-roof"       onclick="setOutputTab('roof')">Roof Zones</button>
+    <button class="output-tab"        id="tab-net"        onclick="setOutputTab('net')">Net Design</button>
+    <button class="output-tab"        id="tab-cc"         onclick="setOutputTab('cc')">C&C</button>
+    <button class="output-tab"        id="tab-profile"    onclick="setOutputTab('profile')">Height Profile</button>
+    <button class="output-tab"        id="tab-diagram"    onclick="setOutputTab('diagram')">Diagram</button>
+    <button class="output-tab"        id="tab-formulas"   onclick="setOutputTab('formulas')">Formulas</button>
+  </div>
+
+  <!-- WALLS -->
+  <div class="tab-panel active" id="panel-walls">
+    <div class="sec">
+      <div class="sec-head"><div class="sec-head-title">External Wall Pressure Coefficients C<sub>p</sub> — Fig. 27.4-1</div><div class="sec-head-tag">ASCE 7-10</div></div>
+      <div class="sec-body">
+        <div class="fbox">
+          <strong>Wind Normal to Ridge (γ = 0°)</strong>
+          <span class="feq">p = q<sub>z</sub>·G·C<sub>p</sub> − q<sub>i</sub>·(GC<sub>pi</sub>)  [Eq. 27.4-1]</span>
+          <span class="fsub">K<sub>d</sub> = ${r.Kd} | K<sub>zt</sub> = ${r.Kzt} | K<sub>z</sub>@h = ${Kz(r.h,r.exp).toFixed(4)} | q<sub>h</sub> = ${r.qh.toFixed(3)} kN/m²</span>
+        </div>
+        <table class="wtable">
+          <thead><tr><th>Surface</th><th>C<sub>p</sub></th><th>q<sub>h</sub>·G·C<sub>p</sub> (kN/m²)</th><th>Reference</th></tr></thead>
+          <tbody>
+            <tr><td class="row-label">Windward Wall</td><td class="pos">+${r.Cp_WW}</td><td class="pos">+${(r.qh*r.gf*r.Cp_WW).toFixed(4)}</td><td>Fig. 27.4-1</td></tr>
+            <tr><td class="row-label">Leeward Wall <span class="row-sub">(L/B=${r.LB.toFixed(2)})</span></td><td class="neg">${r.Cp_LW.toFixed(3)}</td><td class="neg">${(r.qh*r.gf*r.Cp_LW).toFixed(4)}</td><td>Fig. 27.4-2</td></tr>
+            <tr><td class="row-label">Side Wall</td><td class="neg">${r.Cp_SW}</td><td class="neg">${(r.qh*r.gf*r.Cp_SW).toFixed(4)}</td><td>Fig. 27.4-3</td></tr>
+          </tbody>
+        </table>
+      </div>
+    </div>
+  </div>
+
+  <!-- ROOF -->
+  <div class="tab-panel" id="panel-roof">
+    <div class="sec">
+      <div class="sec-head"><div class="sec-head-title">External Roof Pressure Coefficients C<sub>p</sub> — Fig. 27.4-1 (θ = ${r.theta.toFixed(1)}°)</div><div class="sec-head-tag">ASCE 7-10</div></div>
+      <div class="sec-body">
+        <div class="fbox">
+          <strong>Wind Normal to Ridge</strong>
+          <span class="feq">Windward slope: C<sub>p,min</sub> = ${r.CpRoofWW_min} | C<sub>p,max</sub> = ${r.CpRoofWW_max}</span>
+          <span class="feq">Leeward slope:  C<sub>p</sub> = ${r.CpRoofLW}</span>
+          <span class="fsub">h/L = ${(r.h/r.L).toFixed(3)}</span>
+        </div>
+        <table class="wtable">
+          <thead><tr><th>Zone</th><th>C<sub>p</sub></th><th>q<sub>h</sub>·G·C<sub>p</sub> (kN/m²)</th><th>Case</th></tr></thead>
+          <tbody>
+            <tr><td>Windward Roof — Min</td><td class="neg">${r.CpRoofWW_min}</td><td class="neg">${(r.qh*r.gf*r.CpRoofWW_min).toFixed(4)}</td><td>Max Uplift</td></tr>
+            <tr><td>Windward Roof — Max</td><td class="${r.CpRoofWW_max>=0?'pos':'neg'}">${r.CpRoofWW_max>=0?'+':''}${r.CpRoofWW_max}</td><td class="${r.CpRoofWW_max>=0?'pos':'neg'}">${(r.qh*r.gf*r.CpRoofWW_max).toFixed(4)}</td><td>Min Uplift</td></tr>
+            <tr><td>Leeward Roof</td><td class="neg">${r.CpRoofLW}</td><td class="neg">${(r.qh*r.gf*r.CpRoofLW).toFixed(4)}</td><td>—</td></tr>
+          </tbody>
+        </table>
+      </div>
+    </div>
+  </div>
+
+  <!-- NET DESIGN -->
+  <div class="tab-panel" id="panel-net">
+    <div class="sec">
+      <div class="sec-head"><div class="sec-head-title">Net Design Wind Pressures (External ∓ Internal) — Eq. 27.4-1</div><div class="sec-head-tag">ASCE 7-10</div></div>
+      <div class="sec-body">
+        <div class="fbox">
+          <strong>Net Pressure: p = q<sub>z</sub>·G·C<sub>p</sub> − q<sub>i</sub>·(GC<sub>pi</sub>)</strong>
+          <span class="feq">Case 1: +GC<sub>pi</sub> = +${r.GCpi} → most negative net (suction)</span>
+          <span class="feq">Case 2: −GC<sub>pi</sub> = −${r.GCpi} → most positive net</span>
+          <span class="fsub">q<sub>i</sub> = q<sub>h</sub> = ${r.qh.toFixed(3)} kN/m²</span>
+        </div>
+        <table class="wtable">
+          <thead><tr><th>Surface</th><th>Case</th><th>External (kN/m²)</th><th>Internal±(kN/m²)</th><th>Net (kN/m²)</th></tr></thead>
+          <tbody>
+            <tr><td>WW Wall</td><td>Max +ve</td><td class="pos">+${(r.qh*r.gf*r.Cp_WW).toFixed(4)}</td><td class="pos">+${(r.qh*r.GCpi).toFixed(4)}</td><td class="pos">+${r.net_WW_wall.toFixed(4)}</td></tr>
+            <tr><td>LW Wall</td><td>Max −ve</td><td class="neg">${(r.qh*r.gf*r.Cp_LW).toFixed(4)}</td><td class="neg">−${(r.qh*r.GCpi).toFixed(4)}</td><td class="neg">${r.net_LW_wall.toFixed(4)}</td></tr>
+            <tr><td>Side Wall</td><td>Max −ve</td><td class="neg">${(r.qh*r.gf*r.Cp_SW).toFixed(4)}</td><td class="neg">−${(r.qh*r.GCpi).toFixed(4)}</td><td class="neg">${r.net_SW_wall.toFixed(4)}</td></tr>
+            <tr><td>WW Roof</td><td>Max uplift</td><td class="neg">${(r.qh*r.gf*r.CpRoofWW_min).toFixed(4)}</td><td class="neg">−${(r.qh*r.GCpi).toFixed(4)}</td><td class="neg">${r.net_roof_min.toFixed(4)}</td></tr>
+            <tr><td>WW Roof</td><td>Max down</td><td class="${r.CpRoofWW_max>=0?'pos':'neg'}">${(r.qh*r.gf*r.CpRoofWW_max).toFixed(4)}</td><td class="pos">+${(r.qh*r.GCpi).toFixed(4)}</td><td class="${r.net_roof_max>=0?'pos':'neg'}">${r.net_roof_max.toFixed(4)}</td></tr>
+            <tr><td>LW Roof</td><td>Max uplift</td><td class="neg">${(r.qh*r.gf*r.CpRoofLW).toFixed(4)}</td><td class="neg">−${(r.qh*r.GCpi).toFixed(4)}</td><td class="neg">${(r.qh*r.gf*r.CpRoofLW-r.qh*r.GCpi).toFixed(4)}</td></tr>
+          </tbody>
+        </table>
+      </div>
+    </div>
+  </div>
+
+  <!-- C&C -->
+  <div class="tab-panel" id="panel-cc">
+    <div class="sec">
+      <div class="sec-head"><div class="sec-head-title">Components & Cladding (C&C) — ASCE 7-10 Chapter 30</div><div class="sec-head-tag">ASCE 7-10</div></div>
+      <div class="sec-body">
+        <div class="fbox">
+          <strong>C&C: p = q<sub>h</sub>[(GC<sub>p</sub>) − (GC<sub>pi</sub>)]  [Eq. 30.4-1]</strong>
+          <span class="feq">Edge zone width a = ${r.a.toFixed(2)} m</span>
+          <span class="feq">Effective area for zone check = ${(r.a*r.a).toFixed(2)} m²</span>
+          <span class="fsub">Based on h ≤ 18m low-rise method (Ch. 30 Part 1) or h &gt; 18m method</span>
+        </div>
+        <div class="fbox" style="border-left-color:var(--amber);">
+          <strong>Roof Zones (GC<sub>p</sub>) — negative (uplift)</strong>
+          <span class="feq" style="color:var(--amber);">Zone 3 Corner: GC<sub>p</sub> = ${r.GCp_corner}</span>
+          <span class="feq" style="color:var(--amber);">Zone 2 Edge:   GC<sub>p</sub> = ${r.GCp_edge}</span>
+          <span class="feq" style="color:var(--amber);">Zone 1 Interior: GC<sub>p</sub> = ${r.GCp_interior}</span>
+        </div>
+        <table class="wtable">
+          <thead><tr><th>Zone</th><th>GC<sub>p</sub></th><th>Net Pressure (kN/m²)<br><span style="font-weight:400">q<sub>h</sub>[GC<sub>p</sub>−(+GC<sub>pi</sub>)]</span></th></tr></thead>
+          <tbody>
+            <tr><td>Roof Corner (Zone 3)</td><td class="neg">${r.GCp_corner}</td><td class="neg">${(r.qh*(r.GCp_corner-r.GCpi)).toFixed(4)}</td></tr>
+            <tr><td>Roof Edge (Zone 2)</td><td class="neg">${r.GCp_edge}</td><td class="neg">${(r.qh*(r.GCp_edge-r.GCpi)).toFixed(4)}</td></tr>
+            <tr><td>Roof Interior (Zone 1)</td><td class="neg">${r.GCp_interior}</td><td class="neg">${(r.qh*(r.GCp_interior-r.GCpi)).toFixed(4)}</td></tr>
+            <tr><td>Wall Corner (Zone 5)</td><td class="pos">+${r.GCp_wall_corner}</td><td class="pos">+${(r.qh*(r.GCp_wall_corner+r.GCpi)).toFixed(4)}</td></tr>
+            <tr><td>Wall Edge (Zone 4−)</td><td class="neg">${r.GCp_wall_edge}</td><td class="neg">${(r.qh*(r.GCp_wall_edge-r.GCpi)).toFixed(4)}</td></tr>
+            <tr><td>Wall Interior (Zone 4+)</td><td class="pos">+${r.GCp_wall_int}</td><td class="pos">+${(r.qh*(r.GCp_wall_int+r.GCpi)).toFixed(4)}</td></tr>
+          </tbody>
+        </table>
+      </div>
+    </div>
+  </div>
+
+  <!-- PROFILE -->
+  <div class="tab-panel" id="panel-profile">
+    <div class="sec">
+      <div class="sec-head"><div class="sec-head-title">Velocity Pressure &amp; Wall Pressure Profile with Height</div><div class="sec-head-tag">ASCE 7-10</div></div>
+      <div class="sec-body">
+        <table class="wtable">
+          <thead><tr><th>z (m)</th><th>K<sub>z</sub></th><th>q<sub>z</sub> (kN/m²)</th><th>WW p (kN/m²)</th><th>LW p (kN/m²)</th><th>SW p (kN/m²)</th></tr></thead>
+          <tbody>${r.profile.map(row=>`<tr>
+            <td>${row.z}</td><td>${row.Kz}</td><td>${row.qz}</td>
+            <td class="pos">+${row.pWW}</td><td class="neg">${row.pLW}</td><td class="neg">${row.pSW}</td>
+          </tr>`).join('')}</tbody>
+        </table>
+      </div>
+    </div>
+  </div>
+
+  <!-- DIAGRAM -->
+  <div class="tab-panel" id="panel-diagram">
+    <div class="sec">
+      <div class="sec-head"><div class="sec-head-title">Schematic Pressure Diagram — MWFRS</div><div class="sec-head-tag">ASCE 7-10</div></div>
+      <div class="sec-body">${buildEnclosedDiagram(r)}</div>
+    </div>
+  </div>
+
+  <!-- FORMULAS -->
+  <div class="tab-panel" id="panel-formulas">
+    <div class="sec">
+      <div class="sec-head"><div class="sec-head-title">Calculation Steps &amp; Formula Reference</div><div class="sec-head-tag">ASCE 7-10 Chapter 26–27</div></div>
+      <div class="sec-body">
+        <div class="fbox">
+          <strong>Step 1 — Basic Wind Speed (§26.5)</strong>
+          <span class="feq">V = ${r.V} km/h = ${(r.V/3.6).toFixed(2)} m/s  [3-second gust, Risk Cat. II]</span>
+        </div>
+        <div class="fbox">
+          <strong>Step 2 — Velocity Pressure (Eq. 26.10-1)</strong>
+          <span class="feq">q<sub>z</sub> = 0.613 · K<sub>z</sub> · K<sub>zt</sub> · K<sub>d</sub> · V²  [N/m²]</span>
+          <span class="feq">K<sub>d</sub> = ${r.Kd} (Table 26.6-1) | K<sub>zt</sub> = ${r.Kzt} | K<sub>z</sub>@h = ${Kz(r.h,r.exp).toFixed(4)}</span>
+          <span class="feq">→ q<sub>h</sub> = ${r.qh.toFixed(4)} kN/m²</span>
+        </div>
+        <div class="fbox">
+          <strong>Step 3 — Gust Effect Factor (§26.9)</strong>
+          <span class="feq">G<sub>f</sub> = 0.925·(1+1.7·I<sub>z̄</sub>·√(g<sub>Q</sub>²Q²+g<sub>R</sub>²R²)) / (1+1.7·g<sub>v</sub>·I<sub>z̄</sub>)</span>
+          <span class="feq">→ G<sub>f</sub> = ${r.gf.toFixed(4)}</span>
+        </div>
+        <div class="fbox">
+          <strong>Step 4 — External Pressure Coefficients (Fig. 27.4-1)</strong>
+          <span class="feq">WW Wall: C<sub>p</sub> = +0.8 (always)</span>
+          <span class="feq">LW Wall: C<sub>p</sub> = f(L/B) = ${r.Cp_LW.toFixed(3)}</span>
+          <span class="feq">Side Wall: C<sub>p</sub> = −0.7</span>
+        </div>
+        <div class="fbox">
+          <strong>Step 5 — Internal Pressure Coefficient (Table 26.13-1)</strong>
+          <span class="feq">GC<sub>pi</sub> = ±${r.GCpi}  (${r.enc})</span>
+        </div>
+        <div class="fbox">
+          <strong>Step 6 — Design Wind Pressure (Eq. 27.4-1)</strong>
+          <span class="feq">p = q<sub>z</sub>·G·C<sub>p</sub> − q<sub>i</sub>·(GC<sub>pi</sub>)</span>
+          <span class="feq">WW max: +${r.net_WW_wall.toFixed(4)} kN/m²</span>
+          <span class="feq">LW max: ${r.net_LW_wall.toFixed(4)} kN/m²</span>
+        </div>
+      </div>
+    </div>
+  </div>`;
+}
+
+function buildEnclosedDiagram(r) {
+  const wwBar = Math.min(Math.abs(r.net_WW_wall)*25, 70);
+  const lwBar = Math.min(Math.abs(r.net_LW_wall)*25, 50);
+  const swBar = Math.min(Math.abs(r.net_SW_wall)*15, 40);
+  return `<svg viewBox="0 0 600 280" xmlns="http://www.w3.org/2000/svg" style="max-height:280px;">
+    <defs>
+      <marker id="arr" markerWidth="8" markerHeight="8" refX="6" refY="3" orient="auto"><path d="M0,0 L0,6 L8,3z" fill="#1a4fd6"/></marker>
+      <marker id="arrA" markerWidth="8" markerHeight="8" refX="6" refY="3" orient="auto"><path d="M0,0 L0,6 L8,3z" fill="#b45309"/></marker>
+      <marker id="arrR" markerWidth="8" markerHeight="8" refX="6" refY="3" orient="auto"><path d="M0,0 L0,6 L8,3z" fill="#b91c1c"/></marker>
+      <linearGradient id="wwg" x1="0" y1="0" x2="1" y2="0"><stop offset="0" stop-color="#b45309" stop-opacity=".25"/><stop offset="1" stop-color="#b45309" stop-opacity=".05"/></linearGradient>
+      <linearGradient id="lwg" x1="1" y1="0" x2="0" y2="0"><stop offset="0" stop-color="#b91c1c" stop-opacity=".2"/><stop offset="1" stop-color="#b91c1c" stop-opacity=".04"/></linearGradient>
+    </defs>
+    <!-- Sky bg -->
+    <rect x="0" y="0" width="600" height="280" fill="#f7f8fb" rx="8"/>
+    <!-- Ground -->
+    <rect x="0" y="240" width="600" height="40" fill="#eef0f6"/>
+    <line x1="0" y1="240" x2="600" y2="240" stroke="#dde2ef" stroke-width="1"/>
+    <!-- Building walls -->
+    <rect x="180" y="100" width="240" height="140" fill="white" stroke="#cdd3e3" stroke-width="1.5"/>
+    <!-- Roof gable -->
+    <polygon points="180,100 300,50 420,100" fill="white" stroke="#cdd3e3" stroke-width="1.5"/>
+    <!-- Ridge line -->
+    <line x1="300" y1="50" x2="300" y2="100" stroke="#e0e4ef" stroke-width="1" stroke-dasharray="3,3"/>
+    <!-- WW pressure block -->
+    <rect x="${180-wwBar}" y="100" width="${wwBar}" height="140" fill="url(#wwg)"/>
+    <line x1="${180-wwBar}" y1="100" x2="180" y2="100" stroke="#b45309" stroke-width="1"/>
+    <line x1="${180-wwBar}" y1="240" x2="180" y2="240" stroke="#b45309" stroke-width="1"/>
+    <line x1="${180-wwBar}" y1="100" x2="${180-wwBar}" y2="240" stroke="#b45309" stroke-width="1.5"/>
+    <!-- LW pressure block -->
+    <rect x="420" y="100" width="${lwBar}" height="140" fill="url(#lwg)"/>
+    <line x1="420" y1="100" x2="${420+lwBar}" y2="100" stroke="#b91c1c" stroke-width="1"/>
+    <line x1="420" y1="240" x2="${420+lwBar}" y2="240" stroke="#b91c1c" stroke-width="1"/>
+    <line x1="${420+lwBar}" y1="100" x2="${420+lwBar}" y2="240" stroke="#b91c1c" stroke-width="1.5"/>
+    <!-- Roof uplift arrows -->
+    ${[-1,-2,-3].map((_, i)=>{
+      const x = 210 + i*50;
+      return `<line x1="${x}" y1="65" x2="${x}" y2="48" stroke="#b91c1c" stroke-width="1.5" marker-end="url(#arrR)"/>`;
+    }).join('')}
+    ${[-1,-2,-3].map((_, i)=>{
+      const x = 330 + i*30;
+      return `<line x1="${x}" y1="72" x2="${x}" y2="55" stroke="#b91c1c" stroke-width="1.5" marker-end="url(#arrR)"/>`;
+    }).join('')}
+    <!-- WW arrows -->
+    ${[0,1,2].map((_, i)=>{
+      const y = 120 + i*40;
+      return `<line x1="${180-wwBar+10}" y1="${y}" x2="${175}" y2="${y}" stroke="#b45309" stroke-width="1.5" marker-end="url(#arrA)"/>`;
+    }).join('')}
+    <!-- LW arrows (suction) -->
+    ${[0,1,2].map((_, i)=>{
+      const y = 120 + i*40;
+      return `<line x1="425" y1="${y}" x2="${420+lwBar-8}" y2="${y}" stroke="#b91c1c" stroke-width="1.5" marker-end="url(#arrR)"/>`;
+    }).join('')}
+    <!-- Wind arrow -->
+    ${[0,1,2].map((_, i)=>{
+      const y = 140 + i*25;
+      return `<line x1="30" y1="${y}" x2="78" y2="${y}" stroke="#1a4fd6" stroke-width="2" marker-end="url(#arr)"/>`;
+    }).join('')}
+    <!-- Labels -->
+    <text x="54" y="135" text-anchor="middle" fill="#1a4fd6" font-size="11" font-family="IBM Plex Mono, monospace" font-weight="600">WIND</text>
+    <text x="${180-wwBar/2}" y="175" text-anchor="middle" fill="#b45309" font-size="10" font-family="IBM Plex Mono, monospace">+${r.net_WW_wall.toFixed(3)}</text>
+    <text x="${180-wwBar/2}" y="187" text-anchor="middle" fill="#b45309" font-size="9" font-family="IBM Plex Mono, monospace">kN/m²</text>
+    <text x="${420+lwBar/2}" y="175" text-anchor="middle" fill="#b91c1c" font-size="10" font-family="IBM Plex Mono, monospace">${r.net_LW_wall.toFixed(3)}</text>
+    <text x="${420+lwBar/2}" y="187" text-anchor="middle" fill="#b91c1c" font-size="9" font-family="IBM Plex Mono, monospace">kN/m²</text>
+    <!-- Zone labels -->
+    <text x="185" y="90" fill="#1a4fd6" font-size="9" font-family="IBM Plex Mono, monospace">WW</text>
+    <text x="405" y="90" fill="#b91c1c" font-size="9" font-family="IBM Plex Mono, monospace" text-anchor="end">LW</text>
+    <text x="300" y="270" text-anchor="middle" fill="#7b8aaa" font-size="9" font-family="IBM Plex Mono, monospace">MWFRS — Normal to Ridge (γ = 0°)</text>
+    <!-- Dimension note -->
+    <text x="300" y="18" text-anchor="middle" fill="#b0bbd4" font-size="9" font-family="IBM Plex Mono, monospace">B=${r.B}m  L=${r.L}m  h=${r.h}m  hr=${r.hr}m  V=${r.V}km/h  Exp.${r.exp}</text>
+  </svg>`;
+}
+
+function renderCanopyASCE(r) {
+  return `
+  <div class="results-header">
+    <div class="results-title">Open Canopy — <span>ASCE 7-10</span></div>
+    <div class="badge-row">
+      <div class="badge badge-asce">ASCE 7-10 §27.4.3</div>
+      <div class="badge badge-struct">θ = ${r.theta}°</div>
+      <div class="badge badge-struct">φ = ${r.phi}</div>
+    </div>
+  </div>
+  <div class="kpi-grid">
+    <div class="kpi blue"><div class="kpi-label">q<sub>h</sub></div><div class="kpi-val blue">${r.qh.toFixed(3)}</div><div class="kpi-sub">kN/m² at h=${r.h}m</div></div>
+    <div class="kpi blue"><div class="kpi-label">G<sub>f</sub></div><div class="kpi-val blue">${r.gf.toFixed(4)}</div><div class="kpi-sub">gust factor</div></div>
+    <div class="kpi red"><div class="kpi-label">Max Uplift p</div><div class="kpi-val red">${r.p_uplift.toFixed(3)}</div><div class="kpi-sub">kN/m²</div></div>
+    <div class="kpi amber"><div class="kpi-label">Max Downforce p</div><div class="kpi-val amber">+${r.p_down.toFixed(3)}</div><div class="kpi-sub">kN/m²</div></div>
+    <div class="kpi red"><div class="kpi-label">Total Uplift F</div><div class="kpi-val red">${r.Fz_uplift.toFixed(1)}</div><div class="kpi-sub">kN (W×L=${r.W}×${r.L}m)</div></div>
+    <div class="kpi amber"><div class="kpi-label">Total Downforce F</div><div class="kpi-val amber">+${r.Fz_down.toFixed(1)}</div><div class="kpi-sub">kN</div></div>
+  </div>
+  <div class="sec">
+    <div class="sec-head"><div class="sec-head-title">Open Canopy Net Pressure Coefficients C<sub>N</sub> — ASCE Fig. 27.4-3/4</div><div class="sec-head-tag">ASCE 7-10</div></div>
+    <div class="sec-body">
+      <div class="fbox">
+        <strong>p = q<sub>h</sub> · G · C<sub>N</sub>  (Net — no internal pressure separation)</strong>
+        <span class="feq">Slope θ = ${r.theta}° | Blockage φ = ${r.phi} | φ-factor = ${(1-0.5*r.phi).toFixed(3)}</span>
+        <span class="feq">Uplift C<sub>N</sub> = ${r.CNmax_uplift.toFixed(3)} | Downforce C<sub>N</sub> = +${r.CNmax_down.toFixed(3)}</span>
+      </div>
+      <table class="wtable">
+        <thead><tr><th>Load Case</th><th>C<sub>N</sub></th><th>p (kN/m²)</th><th>Total F (kN)</th></tr></thead>
+        <tbody>
+          <tr><td>Maximum Uplift</td><td class="neg">${r.CNmax_uplift.toFixed(3)}</td><td class="neg">${r.p_uplift.toFixed(4)}</td><td class="neg">${r.Fz_uplift.toFixed(2)}</td></tr>
+          <tr><td>Maximum Downforce</td><td class="pos">+${r.CNmax_down.toFixed(3)}</td><td class="pos">+${r.p_down.toFixed(4)}</td><td class="pos">+${r.Fz_down.toFixed(2)}</td></tr>
+        </tbody>
+      </table>
+    </div>
+  </div>`;
+}
+
+function renderGableASCE(r) {
+  return `
+  <div class="results-header">
+    <div class="results-title">Gable / Duopitch Roof — <span>ASCE 7-10</span></div>
+    <div class="badge-row">
+      <div class="badge badge-asce">ASCE 7-10 MWFRS</div>
+      <div class="badge badge-struct">θ = ${r.theta.toFixed(1)}°</div>
+      <div class="badge badge-struct">${r.enc}</div>
+    </div>
+  </div>
+  <div class="kpi-grid">
+    <div class="kpi blue"><div class="kpi-label">q<sub>h</sub></div><div class="kpi-val blue">${r.qh.toFixed(3)}</div><div class="kpi-sub">kN/m²</div></div>
+    <div class="kpi blue"><div class="kpi-label">G<sub>f</sub></div><div class="kpi-val blue">${r.gf.toFixed(4)}</div><div class="kpi-sub">gust factor</div></div>
+    <div class="kpi amber"><div class="kpi-label">WW Wall Net</div><div class="kpi-val amber">+${r.pWW_wall.toFixed(3)}</div><div class="kpi-sub">kN/m²</div></div>
+    <div class="kpi red"><div class="kpi-label">Roof Uplift Max</div><div class="kpi-val red">${r.pWW_min.toFixed(3)}</div><div class="kpi-sub">kN/m²</div></div>
+    <div class="kpi green"><div class="kpi-label">Roof Down Max</div><div class="kpi-val ${r.pWW_max>=0?'green':'red'}">${r.pWW_max>=0?'+':''}${r.pWW_max.toFixed(3)}</div><div class="kpi-sub">kN/m²</div></div>
+    <div class="kpi red"><div class="kpi-label">GC<sub>pi</sub></div><div class="kpi-val red">±${r.GCpi}</div><div class="kpi-sub">internal</div></div>
+  </div>
+  <div class="sec">
+    <div class="sec-head"><div class="sec-head-title">Gable Roof — All Pressure Zones (Net)</div><div class="sec-head-tag">ASCE 7-10</div></div>
+    <div class="sec-body">
+      <div class="fbox">
+        <strong>Roof Slope θ = ${r.theta.toFixed(2)}° | L/B = ${r.LB.toFixed(3)}</strong>
+        <span class="feq">C<sub>p,WW</sub> range: ${r.WW_min} to ${r.WW_max>=0?'+':''}${r.WW_max}  (Fig. 27.4-1)</span>
+        <span class="feq">C<sub>p,LW</sub> = ${r.LW}</span>
+      </div>
+      <table class="wtable">
+        <thead><tr><th>Surface</th><th>C<sub>p</sub></th><th>Ext. q·G·Cp (kN/m²)</th><th>Net (±GCpi) kN/m²</th></tr></thead>
+        <tbody>
+          <tr><td>WW Wall</td><td class="pos">+${r.Cp_WW_wall}</td><td class="pos">+${(r.qh*r.gf*r.Cp_WW_wall).toFixed(4)}</td><td class="pos">+${r.pWW_wall.toFixed(4)}</td></tr>
+          <tr><td>LW Wall</td><td class="neg">${r.Cp_LW_wall.toFixed(3)}</td><td class="neg">${(r.qh*r.gf*r.Cp_LW_wall).toFixed(4)}</td><td class="neg">${r.pLW_wall.toFixed(4)}</td></tr>
+          <tr><td>Side Wall</td><td class="neg">${r.Cp_SW}</td><td class="neg">${(r.qh*r.gf*r.Cp_SW).toFixed(4)}</td><td class="neg">${r.pSW_wall.toFixed(4)}</td></tr>
+          <tr><td>WW Roof (uplift)</td><td class="neg">${r.WW_min}</td><td class="neg">${(r.qh*r.gf*r.WW_min).toFixed(4)}</td><td class="neg">${r.pWW_min.toFixed(4)}</td></tr>
+          <tr><td>WW Roof (downward)</td><td class="${r.WW_max>=0?'pos':'neg'}">${r.WW_max>=0?'+':''}${r.WW_max}</td><td class="${r.WW_max>=0?'pos':'neg'}">${(r.qh*r.gf*r.WW_max).toFixed(4)}</td><td class="${r.pWW_max>=0?'pos':'neg'}">${r.pWW_max.toFixed(4)}</td></tr>
+          <tr><td>LW Roof</td><td class="neg">${r.LW}</td><td class="neg">${(r.qh*r.gf*r.LW).toFixed(4)}</td><td class="neg">${r.pLW_min.toFixed(4)}</td></tr>
+          <tr><td>WW Roof ‖ ridge</td><td class="neg">−0.9</td><td class="neg">${(r.qh*r.gf*(-0.9)).toFixed(4)}</td><td class="neg">${r.pParWW.toFixed(4)}</td></tr>
+          <tr><td>LW Roof ‖ ridge</td><td class="neg">−0.5</td><td class="neg">${(r.qh*r.gf*(-0.5)).toFixed(4)}</td><td class="neg">${r.pParLW.toFixed(4)}</td></tr>
+        </tbody>
+      </table>
+    </div>
+  </div>`;
+}
+
+function renderCylinderASCE(r) {
+  return `
+  <div class="results-header">
+    <div class="results-title">Cylindrical Structure — <span>ASCE 7-10</span></div>
+    <div class="badge-row">
+      <div class="badge badge-asce">ASCE 7-10 §29.4</div>
+      <div class="badge badge-struct">H/D = ${r.HD.toFixed(2)}</div>
+      <div class="badge badge-struct">${r.surf}</div>
+    </div>
+  </div>
+  <div class="kpi-grid">
+    <div class="kpi blue"><div class="kpi-label">q<sub>z</sub>@top</div><div class="kpi-val blue">${r.qz.toFixed(3)}</div><div class="kpi-sub">kN/m²</div></div>
+    <div class="kpi blue"><div class="kpi-label">G<sub>f</sub></div><div class="kpi-val blue">${r.gf.toFixed(4)}</div><div class="kpi-sub">gust factor</div></div>
+    <div class="kpi amber"><div class="kpi-label">Force Coeff C<sub>f</sub></div><div class="kpi-val amber">${r.Cfh.toFixed(3)}</div><div class="kpi-sub">Table 29.4-1</div></div>
+    <div class="kpi amber"><div class="kpi-label">Max Wind Pressure</div><div class="kpi-val amber">+${r.pWind.toFixed(3)}</div><div class="kpi-sub">kN/m² (windward)</div></div>
+    <div class="kpi red"><div class="kpi-label">Wake Suction</div><div class="kpi-val red">${r.pWake.toFixed(3)}</div><div class="kpi-sub">kN/m² (leeward)</div></div>
+    <div class="kpi red"><div class="kpi-label">Base Shear F</div><div class="kpi-val red">${r.F.toFixed(1)}</div><div class="kpi-sub">kN total</div></div>
+  </div>
+  <div class="sec">
+    <div class="sec-head"><div class="sec-head-title">Cylinder Pressure &amp; Force Summary</div><div class="sec-head-tag">ASCE 7-10 §29.4</div></div>
+    <div class="sec-body">
+      <div class="fbox">
+        <strong>F = q<sub>z</sub> · G · C<sub>f</sub> · A<sub>f</sub>  [Eq. 29.4-1]</strong>
+        <span class="feq">D = ${r.D}m | H = ${r.H}m | H/D = ${r.HD.toFixed(2)}</span>
+        <span class="feq">Projected area A<sub>f</sub> = D × H = ${r.Af.toFixed(1)} m²</span>
+        <span class="feq">C<sub>f</sub> = ${r.Cf.toFixed(3)} (base) → ${r.Cfh.toFixed(3)} (H/D adjusted)</span>
+        <span class="feq">Base shear F = ${r.qz.toFixed(4)} × ${r.gf.toFixed(4)} × ${r.Cfh.toFixed(3)} × ${r.Af.toFixed(1)} = ${r.F.toFixed(2)} kN</span>
+      </div>
+      <table class="wtable">
+        <thead><tr><th>z (m)</th><th>q<sub>z</sub> (kN/m²)</th><th>Wind Pressure (kN/m²)</th></tr></thead>
+        <tbody>${r.profile.map(row=>`<tr>
+          <td>${row.z}</td><td>${row.qz_z}</td><td class="pos">+${row.p}</td>
+        </tr>`).join('')}</tbody>
+      </table>
+    </div>
+  </div>`;
+}
+
+function renderTowerASCE(r) {
+  return `
+  <div class="results-header">
+    <div class="results-title">Trussed Tower / Lattice — <span>ASCE 7-10</span></div>
+    <div class="badge-row">
+      <div class="badge badge-asce">ASCE 7-10 §29.5</div>
+      <div class="badge badge-struct">ε = ${r.eps}</div>
+      <div class="badge badge-struct">${r.cs}</div>
+    </div>
+  </div>
+  <div class="kpi-grid">
+    <div class="kpi blue"><div class="kpi-label">Force Coeff C<sub>f</sub></div><div class="kpi-val blue">${r.Cf.toFixed(3)}</div><div class="kpi-sub">Table 29.5-2</div></div>
+    <div class="kpi blue"><div class="kpi-label">G<sub>f</sub></div><div class="kpi-val blue">${r.gf.toFixed(4)}</div><div class="kpi-sub">gust factor</div></div>
+    <div class="kpi amber"><div class="kpi-label">Total Base Shear</div><div class="kpi-val amber">${r.totalF.toFixed(1)}</div><div class="kpi-sub">kN</div></div>
+    <div class="kpi red"><div class="kpi-label">Base Moment M<sub>b</sub></div><div class="kpi-val red">${r.Mb.toFixed(1)}</div><div class="kpi-sub">kN·m</div></div>
+    <div class="kpi blue"><div class="kpi-label">Solidity ε</div><div class="kpi-val blue">${r.eps}</div><div class="kpi-sub">effective ratio</div></div>
+    <div class="kpi blue"><div class="kpi-label">Height H</div><div class="kpi-val blue">${r.H}</div><div class="kpi-sub">m</div></div>
+  </div>
+  <div class="sec">
+    <div class="sec-head"><div class="sec-head-title">Tower Segment Wind Force Analysis</div><div class="sec-head-tag">ASCE 7-10 §29.5</div></div>
+    <div class="sec-body">
+      <div class="fbox">
+        <strong>F = q<sub>z</sub> · G · C<sub>f</sub> · A<sub>f</sub>  per segment  [Eq. 29.5-1]</strong>
+        <span class="feq">C<sub>f</sub> = ${r.cs==='square'?'4ε²−5.9ε+4':'3.4ε²−4.7ε+3.4'} = ${r.Cf.toFixed(3)}</span>
+        <span class="feq">Effective area = b(z) · ε · Δz per segment</span>
+      </div>
+      <table class="wtable">
+        <thead><tr><th>Segment (m)</th><th>b<sub>z</sub> (m)</th><th>q<sub>z</sub> (kN/m²)</th><th>F<sub>seg</sub> (kN)</th></tr></thead>
+        <tbody>${r.segments.map(s=>`<tr>
+          <td>${s.z1}–${s.z2}</td><td>${s.bz}</td><td>${s.qz}</td><td class="pos">+${s.Fz}</td>
+        </tr>`).join('')}
+        <tr style="background:var(--blue-bg);">
+          <td colspan="3" style="color:var(--blue);font-weight:600;">TOTAL BASE SHEAR</td>
+          <td class="pos" style="color:var(--blue);font-weight:700;">+${r.totalF.toFixed(3)} kN</td>
+        </tr>
+        </tbody>
+      </table>
+    </div>
+  </div>`;
+}
+
+// ─ EURO RENDER ───────────────────────────────────────
+function renderEuroOnly(ec, asce) {
+  return `
+  <div class="results-header">
+    <div class="results-title">Enclosed Building — <em>EN 1991-1-4</em></div>
+    <div class="badge-row">
+      <div class="badge badge-euro">EN 1991-1-4 Eurocode</div>
+      <div class="badge badge-struct">TC ${ec.tc}</div>
+      <div class="badge badge-struct">h/d = ${ec.hd.toFixed(3)}</div>
+    </div>
+  </div>
+  <div class="kpi-grid">
+    <div class="kpi teal"><div class="kpi-label">Peak q<sub>p</sub>(z<sub>e</sub>)</div><div class="kpi-val teal">${ec.qp.toFixed(3)}</div><div class="kpi-sub">kN/m²</div></div>
+    <div class="kpi teal"><div class="kpi-label">Basic q<sub>b</sub></div><div class="kpi-val teal">${ec.qb.toFixed(3)}</div><div class="kpi-sub">kN/m²</div></div>
+    <div class="kpi teal"><div class="kpi-label">Roughness c<sub>r</sub></div><div class="kpi-val teal">${ec.cr.toFixed(4)}</div><div class="kpi-sub">§4.3.2</div></div>
+    <div class="kpi teal"><div class="kpi-label">Turbulence I<sub>v</sub></div><div class="kpi-val teal">${ec.Iv.toFixed(4)}</div><div class="kpi-sub">§4.4</div></div>
+    <div class="kpi amber"><div class="kpi-label">WW (D) Net Max</div><div class="kpi-val amber">+${ec.wnet_D_max.toFixed(3)}</div><div class="kpi-sub">kN/m²</div></div>
+    <div class="kpi red"><div class="kpi-label">LW (E) Net Min</div><div class="kpi-val red">${ec.wnet_E_min.toFixed(3)}</div><div class="kpi-sub">kN/m²</div></div>
+  </div>
+  <div class="output-tabs">
+    <button class="output-tab active" id="tab-ec-walls" onclick="setOutputTab('ec-walls')">Walls</button>
+    <button class="output-tab" id="tab-ec-roof" onclick="setOutputTab('ec-roof')">Roof Zones</button>
+    <button class="output-tab" id="tab-ec-net" onclick="setOutputTab('ec-net')">Net Pressures</button>
+    <button class="output-tab" id="tab-ec-form" onclick="setOutputTab('ec-form')">Formulas</button>
+  </div>
+  <div class="tab-panel active" id="panel-ec-walls">
+    <div class="sec">
+      <div class="sec-head"><div class="sec-head-title">External Pressure Coefficients c<sub>pe,10</sub> — Vertical Walls (Table 7.1)</div><div class="sec-head-tag teal">EN 1991-1-4</div></div>
+      <div class="sec-body">
+        <div class="fbox teal">
+          <strong>w<sub>e</sub> = q<sub>p</sub>(z<sub>e</sub>) · c<sub>pe,10</sub>  [§5.2 Eq. 5.1]</strong>
+          <span class="feq">q<sub>p</sub> = ${ec.qp.toFixed(4)} kN/m² | z<sub>e</sub> = ${ec.ze.toFixed(1)}m | h/d = ${ec.hd.toFixed(3)}</span>
+        </div>
+        <table class="wtable">
+          <thead><tr><th>Zone</th><th>Face</th><th>c<sub>pe,10</sub></th><th>w<sub>e</sub> (kN/m²)</th><th>Net + C<sub>pi</sub> (kN/m²)</th></tr></thead>
+          <tbody>
+            <tr><td>D</td><td>Windward</td><td class="pos">+${ec.CpD.toFixed(3)}</td><td class="pos">+${ec.we_D.toFixed(4)}</td><td class="pos">+${ec.wnet_D_max.toFixed(4)}</td></tr>
+            <tr><td>E</td><td>Leeward</td><td class="neg">${ec.CpE.toFixed(3)}</td><td class="neg">${ec.we_E.toFixed(4)}</td><td class="neg">${ec.wnet_E_min.toFixed(4)}</td></tr>
+            <tr><td>A</td><td>Side (near edge)</td><td class="neg">${ec.CpA}</td><td class="neg">${(ec.qp*ec.CpA).toFixed(4)}</td><td class="neg">${ec.wnet_A.toFixed(4)}</td></tr>
+            <tr><td>B</td><td>Side (middle)</td><td class="neg">${ec.CpB}</td><td class="neg">${(ec.qp*ec.CpB).toFixed(4)}</td><td class="neg">${ec.wnet_B.toFixed(4)}</td></tr>
+          </tbody>
+        </table>
+      </div>
+    </div>
+  </div>
+  <div class="tab-panel" id="panel-ec-roof">
+    <div class="sec">
+      <div class="sec-head"><div class="sec-head-title">Flat Roof Pressure Zones c<sub>pe,10</sub> — Table 7.2</div><div class="sec-head-tag teal">EN 1991-1-4</div></div>
+      <div class="sec-body">
+        <table class="wtable">
+          <thead><tr><th>Zone</th><th>Location</th><th>c<sub>pe,10</sub></th><th>w<sub>e</sub> (kN/m²)</th></tr></thead>
+          <tbody>
+            <tr><td>F</td><td>Corner (1×1 edge zone)</td><td class="neg">${ec.Cp_F}</td><td class="neg">${ec.wRoofF.toFixed(4)}</td></tr>
+            <tr><td>G</td><td>Windward edge strip</td><td class="neg">${ec.Cp_G}</td><td class="neg">${ec.wRoofG.toFixed(4)}</td></tr>
+            <tr><td>H</td><td>Interior (windward half)</td><td class="neg">${ec.Cp_H}</td><td class="neg">${ec.wRoofH.toFixed(4)}</td></tr>
+            <tr><td>I+</td><td>Interior (leeward half)</td><td class="pos">+0.20</td><td class="pos">+${(ec.qp*0.2).toFixed(4)}</td></tr>
+            <tr><td>I−</td><td>Interior (leeward half)</td><td class="neg">−0.20</td><td class="neg">${(ec.qp*(-0.2)).toFixed(4)}</td></tr>
+          </tbody>
+        </table>
+      </div>
+    </div>
+  </div>
+  <div class="tab-panel" id="panel-ec-net">
+    <div class="sec">
+      <div class="sec-head"><div class="sec-head-title">Net Design Pressures w<sub>net</sub> = w<sub>e</sub> + w<sub>i</sub></div><div class="sec-head-tag teal">EN 1991-1-4</div></div>
+      <div class="sec-body">
+        <div class="fbox teal">
+          <strong>w<sub>net</sub> = q<sub>p</sub>(z<sub>e</sub>)·c<sub>pe</sub> − q<sub>p</sub>(z<sub>i</sub>)·c<sub>pi</sub>  [§5.2]</strong>
+          <span class="feq">C<sub>pi,pos</sub> = +${ec.Cpi_pos} | C<sub>pi,neg</sub> = ${ec.Cpi_neg}</span>
+        </div>
+        <table class="wtable">
+          <thead><tr><th>Zone</th><th>c<sub>pe</sub></th><th>Max +ve net (kN/m²)</th><th>Max −ve net (kN/m²)</th></tr></thead>
+          <tbody>
+            <tr><td>D (WW)</td><td class="pos">+${ec.CpD.toFixed(3)}</td><td class="pos">+${ec.wnet_D_max.toFixed(4)}</td><td>${(ec.qp*(ec.CpD-ec.Cpi_pos)).toFixed(4)}</td></tr>
+            <tr><td>E (LW)</td><td class="neg">${ec.CpE.toFixed(3)}</td><td>${(ec.qp*(ec.CpE+Math.abs(ec.Cpi_neg))).toFixed(4)}</td><td class="neg">${ec.wnet_E_min.toFixed(4)}</td></tr>
+            <tr><td>A (side)</td><td class="neg">${ec.CpA}</td><td>—</td><td class="neg">${ec.wnet_A.toFixed(4)}</td></tr>
+            <tr><td>B (side)</td><td class="neg">${ec.CpB}</td><td>—</td><td class="neg">${ec.wnet_B.toFixed(4)}</td></tr>
+            <tr><td>F (roof)</td><td class="neg">${ec.Cp_F}</td><td>—</td><td class="neg">${(ec.qp*(ec.Cp_F-ec.Cpi_pos)).toFixed(4)}</td></tr>
+            <tr><td>H (roof)</td><td class="neg">${ec.Cp_H}</td><td>—</td><td class="neg">${(ec.qp*(ec.Cp_H-ec.Cpi_pos)).toFixed(4)}</td></tr>
+          </tbody>
+        </table>
+      </div>
+    </div>
+  </div>
+  <div class="tab-panel" id="panel-ec-form">
+    <div class="sec">
+      <div class="sec-head"><div class="sec-head-title">Calculation Steps — EN 1991-1-4</div><div class="sec-head-tag teal">Eurocode</div></div>
+      <div class="sec-body">
+        <div class="fbox teal"><strong>Step 1 — Basic Wind Velocity (§4.2)</strong><span class="feq">v<sub>b</sub> = c<sub>dir</sub>·c<sub>season</sub>·v<sub>b,0</sub> = ${ec.vb0} m/s</span></div>
+        <div class="fbox teal"><strong>Step 2 — Mean Wind Velocity (§4.3)</strong><span class="feq">v<sub>m</sub>(z) = c<sub>r</sub>(z) · c<sub>0</sub>(z) · v<sub>b</sub> = ${ec.vm.toFixed(3)} m/s</span><span class="feq">c<sub>r</sub>(z) = k<sub>r</sub>·ln(z/z<sub>0</sub>) = ${ec.cr.toFixed(4)}</span></div>
+        <div class="fbox teal"><strong>Step 3 — Turbulence Intensity (§4.4)</strong><span class="feq">I<sub>v</sub>(z) = σ<sub>v</sub>/v<sub>m</sub> = k<sub>1</sub>/(c<sub>0</sub>·ln(z/z<sub>0</sub>)) = ${ec.Iv.toFixed(4)}</span></div>
+        <div class="fbox teal"><strong>Step 4 — Peak Velocity Pressure (§4.5)</strong><span class="feq">q<sub>p</sub>(z) = [1+7·I<sub>v</sub>(z)] · ½·ρ·v<sub>m</sub>² = ${ec.qp.toFixed(4)} kN/m²</span></div>
+        <div class="fbox teal"><strong>Step 5 — Pressure Coefficients (§7.2)</strong><span class="feq">c<sub>pe,D</sub> = ${ec.CpD.toFixed(3)} (h/d=${ec.hd.toFixed(3)})</span><span class="feq">c<sub>pe,E</sub> = ${ec.CpE.toFixed(3)}</span></div>
+      </div>
+    </div>
+  </div>`;
+}
+
+// ─ COMPARISON RENDER ─────────────────────────────────
+function renderBoth(asce, ec) {
+  const diffWW = ((asce.net_WW_wall - ec.wnet_D_max)/ec.wnet_D_max*100).toFixed(1);
+  const diffLW = ((asce.net_LW_wall - ec.wnet_E_min)/Math.abs(ec.wnet_E_min)*100).toFixed(1);
+  return `
+  <div class="results-header">
+    <div class="results-title"><span>ASCE 7-10</span> vs <em>EN 1991-1-4</em></div>
+    <div class="badge-row">
+      <div class="badge badge-asce">ASCE 7-10</div>
+      <div class="badge badge-euro">EN 1991-1-4</div>
+      <div class="badge badge-struct">Side-by-Side</div>
+    </div>
+  </div>
+  <div class="cmp-grid">
+    <div class="cmp-card asce-card">
+      <h4 class="asce-h">⚡ ASCE 7-10 — MWFRS</h4>
+      <table class="wtable">
+        <tbody>
+          <tr><td>q<sub>h</sub></td><td class="pos">${asce.qh.toFixed(4)} kN/m²</td></tr>
+          <tr><td>G<sub>f</sub></td><td>${asce.gf.toFixed(4)}</td></tr>
+          <tr><td>K<sub>z</sub>@h</td><td>${Kz(asce.h,asce.exp).toFixed(4)}</td></tr>
+          <tr><td>WW Net Max</td><td class="pos">+${asce.net_WW_wall.toFixed(4)} kN/m²</td></tr>
+          <tr><td>LW Net Max</td><td class="neg">${asce.net_LW_wall.toFixed(4)} kN/m²</td></tr>
+          <tr><td>SW Net Max</td><td class="neg">${asce.net_SW_wall.toFixed(4)} kN/m²</td></tr>
+          <tr><td>Roof Uplift Min</td><td class="neg">${asce.net_roof_min.toFixed(4)} kN/m²</td></tr>
+          <tr><td>GC<sub>pi</sub></td><td>±${asce.GCpi}</td></tr>
+          <tr><td>C<sub>p,WW</sub></td><td>+${asce.Cp_WW}</td></tr>
+          <tr><td>C<sub>p,LW</sub></td><td>${asce.Cp_LW.toFixed(3)}</td></tr>
+        </tbody>
+      </table>
+    </div>
+    <div class="cmp-card euro-card">
+      <h4 class="euro-h">🇪🇺 EN 1991-1-4 — Eurocode</h4>
+      <table class="wtable">
+        <tbody>
+          <tr><td>q<sub>p</sub></td><td class="pos">${ec.qp.toFixed(4)} kN/m²</td></tr>
+          <tr><td>I<sub>v</sub></td><td>${ec.Iv.toFixed(4)}</td></tr>
+          <tr><td>c<sub>r</sub>(z<sub>e</sub>)</td><td>${ec.cr.toFixed(4)}</td></tr>
+          <tr><td>WW (D) Net Max</td><td class="pos">+${ec.wnet_D_max.toFixed(4)} kN/m²</td></tr>
+          <tr><td>LW (E) Net Min</td><td class="neg">${ec.wnet_E_min.toFixed(4)} kN/m²</td></tr>
+          <tr><td>Side A Net Min</td><td class="neg">${ec.wnet_A.toFixed(4)} kN/m²</td></tr>
+          <tr><td>Roof F Zone</td><td class="neg">${ec.wRoofF.toFixed(4)} kN/m²</td></tr>
+          <tr><td>C<sub>pi</sub></td><td>+${ec.Cpi_pos}/−${Math.abs(ec.Cpi_neg)}</td></tr>
+          <tr><td>c<sub>pe,D</sub></td><td>+${ec.CpD.toFixed(3)}</td></tr>
+          <tr><td>c<sub>pe,E</sub></td><td>${ec.CpE.toFixed(3)}</td></tr>
+        </tbody>
+      </table>
+    </div>
+  </div>
+  <div class="sec">
+    <div class="sec-head"><div class="sec-head-title">Quantitative Comparison</div></div>
+    <div class="sec-body">
+      <div class="fbox">
+        <strong>Wind Speed Basis (important for valid comparison)</strong>
+        <span class="feq">ASCE uses 3-second gust speed: V = ${asce.V} km/h = ${(asce.V/3.6).toFixed(1)} m/s</span>
+        <span class="feq">EN uses 10-min mean speed: v<sub>b</sub> = ${ec.vb0} m/s → 3s equiv ≈ ${(ec.vb0*1.57).toFixed(1)} m/s</span>
+        <span class="feq">For equiv. 3s gust, multiply EN v<sub>b</sub> by ≈1.57 (ESDU factor)</span>
+      </div>
+      <table class="wtable">
+        <thead><tr><th>Parameter</th><th style="color:var(--blue)">ASCE 7-10</th><th style="color:var(--teal)">EN 1991-1-4</th><th>Δ (%)</th></tr></thead>
+        <tbody>
+          <tr><td>Velocity pressure</td><td>${asce.qh.toFixed(4)} kN/m²</td><td>${ec.qp.toFixed(4)} kN/m²</td><td class="neutral">—</td></tr>
+          <tr><td>Roughness/Exposure</td><td>K<sub>z</sub>=${Kz(asce.h,asce.exp).toFixed(3)}</td><td>c<sub>r</sub>=${ec.cr.toFixed(3)}</td><td class="neutral">—</td></tr>
+          <tr><td>Turbulence/Gust</td><td>G<sub>f</sub>=${asce.gf.toFixed(3)}</td><td>I<sub>v</sub>=${ec.Iv.toFixed(3)}</td><td class="neutral">—</td></tr>
+          <tr><td>WW net pressure</td><td class="pos">+${asce.net_WW_wall.toFixed(4)}</td><td class="pos">+${ec.wnet_D_max.toFixed(4)}</td><td class="${Math.abs(diffWW)>15?'neg':'neutral'}">${diffWW}%</td></tr>
+          <tr><td>LW net pressure</td><td class="neg">${asce.net_LW_wall.toFixed(4)}</td><td class="neg">${ec.wnet_E_min.toFixed(4)}</td><td class="${Math.abs(diffLW)>15?'neg':'neutral'}">${diffLW}%</td></tr>
+          <tr><td>WW Cp / Cpe</td><td>+${asce.Cp_WW}</td><td>+${ec.CpD.toFixed(3)}</td><td class="neutral">—</td></tr>
+          <tr><td>LW Cp / Cpe</td><td>${asce.Cp_LW.toFixed(3)}</td><td>${ec.CpE.toFixed(3)}</td><td class="neutral">—</td></tr>
+          <tr><td>Internal ±</td><td>±${asce.GCpi}</td><td>+${ec.Cpi_pos}/−${Math.abs(ec.Cpi_neg)}</td><td class="neutral">—</td></tr>
+        </tbody>
+      </table>
+    </div>
+  </div>`;
+}
+
+// ═══════════════════════════════════════════════════════
+// INIT
+// ═══════════════════════════════════════════════════════
+document.addEventListener('DOMContentLoaded', () => {
+  // Show only enclosed form by default
+  ['canopy','gable','cylinder','tower'].forEach(t => {
+    const f = document.getElementById('form-'+t);
+    if(f) f.style.display='none';
+  });
+});
+</script>
+</body>
+</html>

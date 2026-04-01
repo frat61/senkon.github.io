@@ -1,0 +1,1105 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8"/>
+<meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+<title>RC Column Design — ACI 318</title>
+<style>
+@import url('https://fonts.googleapis.com/css2?family=IBM+Plex+Mono:wght@400;500;600&family=IBM+Plex+Sans:wght@300;400;500;600&display=swap');
+
+:root {
+  --bg: #0f1117;
+  --surface: #171b24;
+  --surface2: #1e2330;
+  --border: #2a3142;
+  --accent: #4fc3f7;
+  --accent2: #f59e0b;
+  --accent3: #10b981;
+  --danger: #ef4444;
+  --warn: #f59e0b;
+  --text: #e2e8f0;
+  --muted: #64748b;
+  --mono: 'IBM Plex Mono', monospace;
+  --sans: 'IBM Plex Sans', sans-serif;
+}
+
+* { box-sizing: border-box; margin: 0; padding: 0; }
+
+body {
+  background: var(--bg);
+  color: var(--text);
+  font-family: var(--sans);
+  font-size: 14px;
+  min-height: 100vh;
+}
+
+.header {
+  background: var(--surface);
+  border-bottom: 1px solid var(--border);
+  padding: 14px 24px;
+  display: flex;
+  align-items: center;
+  gap: 16px;
+}
+.header-icon {
+  width: 36px; height: 36px;
+  background: var(--accent);
+  border-radius: 6px;
+  display: flex; align-items: center; justify-content: center;
+  font-size: 18px;
+}
+.header h1 { font-size: 16px; font-weight: 600; letter-spacing: 0.02em; }
+.header span { font-size: 12px; color: var(--muted); font-family: var(--mono); }
+
+.layout {
+  display: grid;
+  grid-template-columns: 320px 1fr;
+  height: calc(100vh - 57px);
+}
+
+/* SIDEBAR */
+.sidebar {
+  background: var(--surface);
+  border-right: 1px solid var(--border);
+  overflow-y: auto;
+  padding: 16px;
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+}
+
+.section-label {
+  font-size: 10px;
+  font-family: var(--mono);
+  color: var(--muted);
+  text-transform: uppercase;
+  letter-spacing: 0.12em;
+  padding: 6px 0 4px;
+  border-bottom: 1px solid var(--border);
+  margin-bottom: 4px;
+}
+
+.tab-row {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 4px;
+  background: var(--bg);
+  border-radius: 6px;
+  padding: 3px;
+}
+.tab-btn {
+  background: none; border: none; cursor: pointer;
+  padding: 6px; border-radius: 4px;
+  font-family: var(--sans); font-size: 12px; font-weight: 500;
+  color: var(--muted); transition: all 0.15s;
+}
+.tab-btn.active {
+  background: var(--accent);
+  color: #000;
+}
+
+.field { display: flex; flex-direction: column; gap: 4px; }
+.field label { font-size: 11px; color: var(--muted); font-family: var(--mono); }
+.field input, .field select {
+  background: var(--bg);
+  border: 1px solid var(--border);
+  color: var(--text);
+  padding: 7px 10px;
+  border-radius: 5px;
+  font-family: var(--mono);
+  font-size: 13px;
+  outline: none;
+  transition: border-color 0.15s;
+}
+.field input:focus, .field select:focus { border-color: var(--accent); }
+.field select option { background: var(--surface); }
+
+.row2 { display: grid; grid-template-columns: 1fr 1fr; gap: 8px; }
+.row3 { display: grid; grid-template-columns: 1fr 1fr 1fr; gap: 8px; }
+
+.btn {
+  padding: 10px 16px;
+  border-radius: 6px;
+  border: none;
+  cursor: pointer;
+  font-family: var(--sans);
+  font-weight: 600;
+  font-size: 13px;
+  transition: all 0.15s;
+}
+.btn-primary {
+  background: var(--accent);
+  color: #000;
+  width: 100%;
+}
+.btn-primary:hover { background: #81d4fa; }
+.btn-secondary {
+  background: var(--surface2);
+  color: var(--text);
+  border: 1px solid var(--border);
+}
+.btn-secondary:hover { border-color: var(--accent); }
+
+/* MAIN AREA */
+.main {
+  display: flex;
+  flex-direction: column;
+  overflow: hidden;
+}
+
+.tabs-bar {
+  display: flex;
+  border-bottom: 1px solid var(--border);
+  background: var(--surface);
+  padding: 0 16px;
+}
+.view-tab {
+  padding: 12px 16px;
+  background: none; border: none; cursor: pointer;
+  font-family: var(--sans); font-size: 13px; font-weight: 500;
+  color: var(--muted);
+  border-bottom: 2px solid transparent;
+  transition: all 0.15s;
+}
+.view-tab.active { color: var(--accent); border-bottom-color: var(--accent); }
+
+.view-area {
+  flex: 1;
+  overflow-y: auto;
+  padding: 20px;
+  display: none;
+}
+.view-area.active { display: block; }
+
+/* CARDS */
+.card {
+  background: var(--surface);
+  border: 1px solid var(--border);
+  border-radius: 8px;
+  padding: 16px;
+  margin-bottom: 12px;
+}
+.card-title {
+  font-size: 11px;
+  font-family: var(--mono);
+  color: var(--muted);
+  text-transform: uppercase;
+  letter-spacing: 0.1em;
+  margin-bottom: 12px;
+}
+
+/* STATUS */
+.status-row {
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  gap: 10px;
+  margin-bottom: 12px;
+}
+.stat-box {
+  background: var(--surface2);
+  border: 1px solid var(--border);
+  border-radius: 6px;
+  padding: 12px;
+  text-align: center;
+}
+.stat-box .val {
+  font-family: var(--mono);
+  font-size: 20px;
+  font-weight: 600;
+  color: var(--accent);
+}
+.stat-box .lbl { font-size: 10px; color: var(--muted); margin-top: 2px; }
+
+.verdict {
+  padding: 10px 16px;
+  border-radius: 6px;
+  font-weight: 600;
+  font-size: 14px;
+  text-align: center;
+  margin-bottom: 12px;
+}
+.verdict.pass { background: rgba(16,185,129,0.15); color: #10b981; border: 1px solid rgba(16,185,129,0.3); }
+.verdict.fail { background: rgba(239,68,68,0.15); color: #ef4444; border: 1px solid rgba(239,68,68,0.3); }
+.verdict.warn { background: rgba(245,158,11,0.15); color: #f59e0b; border: 1px solid rgba(245,158,11,0.3); }
+
+/* P-M DIAGRAM */
+#pmCanvas {
+  width: 100%;
+  max-width: 500px;
+  display: block;
+  margin: 0 auto;
+}
+
+/* REBAR CANVAS */
+#sectionCanvas {
+  display: block;
+  margin: 0 auto;
+}
+
+/* RESULT TABLE */
+.result-table {
+  width: 100%;
+  border-collapse: collapse;
+  font-family: var(--mono);
+  font-size: 12px;
+}
+.result-table th {
+  background: var(--surface2);
+  color: var(--muted);
+  padding: 7px 10px;
+  text-align: left;
+  font-weight: 500;
+  border-bottom: 1px solid var(--border);
+}
+.result-table td {
+  padding: 7px 10px;
+  border-bottom: 1px solid var(--border);
+  color: var(--text);
+}
+.result-table tr:last-child td { border-bottom: none; }
+.result-table td.num { color: var(--accent); }
+.result-table td.ok { color: var(--accent3); }
+.result-table td.ng { color: var(--danger); }
+
+/* REPORT */
+#reportArea {
+  font-family: var(--sans);
+  font-size: 13px;
+  line-height: 1.7;
+}
+.report-header {
+  border-bottom: 2px solid var(--accent);
+  padding-bottom: 12px;
+  margin-bottom: 20px;
+}
+.report-header h2 { font-size: 20px; font-weight: 600; }
+.report-header p { color: var(--muted); font-size: 12px; font-family: var(--mono); }
+.rpt-section { margin-bottom: 20px; }
+.rpt-section h3 {
+  font-size: 12px;
+  font-family: var(--mono);
+  color: var(--accent);
+  text-transform: uppercase;
+  letter-spacing: 0.1em;
+  border-bottom: 1px solid var(--border);
+  padding-bottom: 6px;
+  margin-bottom: 10px;
+}
+.rpt-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 4px 24px; }
+.rpt-row { display: flex; justify-content: space-between; padding: 3px 0; }
+.rpt-row span:first-child { color: var(--muted); }
+.rpt-row span:last-child { font-family: var(--mono); }
+
+.print-btn {
+  background: var(--accent2);
+  color: #000;
+  padding: 8px 20px;
+  border-radius: 5px;
+  border: none;
+  font-weight: 600;
+  cursor: pointer;
+  font-family: var(--sans);
+  font-size: 13px;
+}
+.print-btn:hover { background: #fbbf24; }
+
+.no-result {
+  text-align: center;
+  padding: 60px 20px;
+  color: var(--muted);
+  font-family: var(--mono);
+  font-size: 13px;
+}
+
+/* Slenderness table */
+.slen-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; }
+.slen-box {
+  background: var(--surface2);
+  border: 1px solid var(--border);
+  border-radius: 6px;
+  padding: 12px;
+}
+.slen-box h4 { font-size: 11px; color: var(--muted); font-family: var(--mono); margin-bottom: 8px; }
+
+@media print {
+  body { background: white; color: black; }
+  .layout { display: block; }
+  .sidebar, .tabs-bar { display: none; }
+  .view-area { display: block !important; padding: 0; }
+  .main { height: auto; }
+  .card { border: 1px solid #ccc; background: white; }
+  .card-title, .rpt-section h3 { color: #333; }
+  .stat-box { background: #f5f5f5; border: 1px solid #ccc; }
+  .stat-box .val { color: #0066aa; }
+  .rpt-row span:first-child { color: #555; }
+  .rpt-row span:last-child { color: #000; }
+  #reportArea { color: black; }
+  .report-header h2 { color: black; }
+  .print-btn { display: none; }
+}
+</style>
+</head>
+<body>
+
+<div class="header">
+  <div class="header-icon">⬛</div>
+  <div>
+    <h1>RC Column Design</h1>
+    <span>ACI 318 · P-M Interaction · Slenderness · Section Diagram</span>
+  </div>
+</div>
+
+<div class="layout">
+
+<!-- SIDEBAR -->
+<div class="sidebar">
+  <div class="section-label">Column Type</div>
+  <div class="tab-row">
+    <button class="tab-btn active" id="btnRect" onclick="setType('rect')">Rectangular</button>
+    <button class="tab-btn" id="btnCirc" onclick="setType('circ')">Circular</button>
+  </div>
+
+  <div class="section-label">Section Dimensions</div>
+  <div id="rectDims">
+    <div class="row2">
+      <div class="field"><label>b (mm)</label><input type="number" id="b" value="400" min="150" max="2000"></div>
+      <div class="field"><label>h (mm)</label><input type="number" id="h" value="500" min="150" max="2000"></div>
+    </div>
+  </div>
+  <div id="circDims" style="display:none">
+    <div class="field"><label>Diameter D (mm)</label><input type="number" id="D" value="500" min="150" max="2000"></div>
+  </div>
+
+  <div class="section-label">Materials (ACI 318)</div>
+  <div class="field">
+    <label>f'c — Concrete (MPa)</label>
+    <select id="fc">
+      <option value="21">21 MPa (C21)</option>
+      <option value="24">24 MPa (C24)</option>
+      <option value="28" selected>28 MPa (C28)</option>
+      <option value="30">30 MPa (C30)</option>
+      <option value="35">35 MPa (C35)</option>
+      <option value="40">40 MPa (C40)</option>
+      <option value="45">45 MPa (C45)</option>
+      <option value="50">50 MPa (C50)</option>
+    </select>
+  </div>
+  <div class="field">
+    <label>fy — Steel (MPa)</label>
+    <select id="fy">
+      <option value="280">280 MPa</option>
+      <option value="350">350 MPa</option>
+      <option value="420" selected>420 MPa (Grade 60)</option>
+      <option value="500">500 MPa</option>
+    </select>
+  </div>
+
+  <div class="section-label">Reinforcement</div>
+  <div class="row2">
+    <div class="field"><label>Cover cc (mm)</label><input type="number" id="cover" value="40" min="20" max="100"></div>
+    <div class="field"><label>Tie/Stirrup Ø (mm)</label><input type="number" id="tieD" value="10" min="6" max="20"></div>
+  </div>
+  <div class="row2">
+    <div class="field"><label>Bar Ø (mm)</label>
+      <select id="barD">
+        <option value="12">Ø12</option>
+        <option value="14">Ø14</option>
+        <option value="16">Ø16</option>
+        <option value="18">Ø18</option>
+        <option value="20" selected>Ø20</option>
+        <option value="22">Ø22</option>
+        <option value="25">Ø25</option>
+        <option value="28">Ø28</option>
+        <option value="32">Ø32</option>
+      </select>
+    </div>
+    <div class="field"><label>No. of Bars</label>
+      <select id="nBars">
+        <option value="4">4</option>
+        <option value="6">6</option>
+        <option value="8" selected>8</option>
+        <option value="10">10</option>
+        <option value="12">12</option>
+        <option value="14">14</option>
+        <option value="16">16</option>
+        <option value="20">20</option>
+      </select>
+    </div>
+  </div>
+
+  <div class="section-label">Applied Loads</div>
+  <div class="row2">
+    <div class="field"><label>Pu (kN)</label><input type="number" id="Pu" value="1500" min="0"></div>
+    <div class="field"><label>Mu (kN·m)</label><input type="number" id="Mu" value="200" min="0"></div>
+  </div>
+
+  <div class="section-label">Slenderness</div>
+  <div class="row2">
+    <div class="field"><label>Lu (m)</label><input type="number" id="Lu" value="4.0" step="0.1" min="0.5"></div>
+    <div class="field"><label>k factor</label><input type="number" id="kfac" value="1.0" step="0.05" min="0.5" max="2.5"></div>
+  </div>
+  <div class="field">
+    <label>Bracing</label>
+    <select id="bracing">
+      <option value="braced">Braced (non-sway)</option>
+      <option value="unbraced">Unbraced (sway)</option>
+    </select>
+  </div>
+
+  <button class="btn btn-primary" onclick="design()">▶  Run Design</button>
+</div>
+
+<!-- MAIN -->
+<div class="main">
+  <div class="tabs-bar">
+    <button class="view-tab active" onclick="showView('results',this)">Results</button>
+    <button class="view-tab" onclick="showView('pm',this)">P-M Diagram</button>
+    <button class="view-tab" onclick="showView('section',this)">Section</button>
+    <button class="view-tab" onclick="showView('report',this)">Report</button>
+  </div>
+
+  <!-- RESULTS -->
+  <div class="view-area active" id="view-results">
+    <div id="resultsContent">
+      <div class="no-result">← Set inputs and click Run Design</div>
+    </div>
+  </div>
+
+  <!-- P-M -->
+  <div class="view-area" id="view-pm">
+    <div class="card">
+      <div class="card-title">φP-φM Interaction Diagram (ACI 318)</div>
+      <canvas id="pmCanvas" height="460"></canvas>
+    </div>
+  </div>
+
+  <!-- SECTION -->
+  <div class="view-area" id="view-section">
+    <div class="card">
+      <div class="card-title">Cross-Section — Rebar Layout</div>
+      <canvas id="sectionCanvas" width="360" height="360"></canvas>
+    </div>
+  </div>
+
+  <!-- REPORT -->
+  <div class="view-area" id="view-report">
+    <div style="display:flex;justify-content:flex-end;margin-bottom:12px;gap:8px;">
+      <button class="print-btn" onclick="window.print()">🖨 Print / Save PDF</button>
+    </div>
+    <div id="reportArea">
+      <div class="no-result">Run design to generate report.</div>
+    </div>
+  </div>
+</div>
+
+</div><!-- layout -->
+
+<script>
+let colType = 'rect';
+let R = null; // last results
+
+function setType(t) {
+  colType = t;
+  document.getElementById('btnRect').classList.toggle('active', t === 'rect');
+  document.getElementById('btnCirc').classList.toggle('active', t === 'circ');
+  document.getElementById('rectDims').style.display = t === 'rect' ? '' : 'none';
+  document.getElementById('circDims').style.display = t === 'circ' ? '' : 'none';
+}
+
+function showView(id, el) {
+  document.querySelectorAll('.view-area').forEach(v => v.classList.remove('active'));
+  document.querySelectorAll('.view-tab').forEach(v => v.classList.remove('active'));
+  document.getElementById('view-' + id).classList.add('active');
+  el.classList.add('active');
+  if (R) {
+    if (id === 'pm') drawPM();
+    if (id === 'section') drawSection();
+  }
+}
+
+function v(id) { return parseFloat(document.getElementById(id).value); }
+function vi(id) { return parseInt(document.getElementById(id).value); }
+
+/* ===============================================================
+   CORE ACI 318 DESIGN
+   =============================================================== */
+
+function design() {
+  const fc  = v('fc');        // MPa
+  const fy  = v('fy');        // MPa
+  const cc  = v('cover');     // mm
+  const tD  = v('tieD');      // mm
+  const db  = v('barD');      // mm
+  const nb  = vi('nBars');
+  const Pu  = v('Pu') * 1e3;  // N
+  const Mu  = v('Mu') * 1e6;  // N·mm
+  const Lu  = v('Lu') * 1e3;  // mm
+  const k   = v('kfac');
+  const Es  = 200000;         // MPa
+
+  // Section geometry
+  let bw, hw, Ag;
+  if (colType === 'rect') {
+    bw = v('b'); hw = v('h');
+    Ag = bw * hw;
+  } else {
+    bw = v('D'); hw = v('D');
+    Ag = Math.PI * bw * bw / 4;
+  }
+
+  // d' = clear cover + tie + half bar
+  const dp = cc + tD + db / 2;
+
+  // Steel area
+  const Abar = Math.PI * db * db / 4;
+  const Ast  = nb * Abar;
+  const rho  = Ast / Ag;
+
+  // ACI minimum/maximum rho check
+  const rhoMin = 0.01, rhoMax = 0.08;
+  const rhoOK = rho >= rhoMin && rho <= rhoMax;
+
+  /* ------ AXIAL CAPACITY ------ */
+  // φPn_max (tied): φ = 0.65
+  const phiPnMax_tied = 0.65 * 0.80 * (0.85 * fc * (Ag - Ast) + fy * Ast) / 1000; // kN
+  // φPn_max (spiral): φ = 0.75
+  const phi_spiral = colType === 'circ' ? 0.75 : 0.65;
+  const alpha       = colType === 'circ' ? 0.85 : 0.80;
+  const phi_tied    = 0.65;
+  const phiPnMax = phi_spiral * alpha * (0.85 * fc * (Ag - Ast) + fy * Ast) / 1000; // kN
+
+  /* ------ P-M INTERACTION (rectangular, simplified Whitney) ------ */
+  const pts = buildInteraction(fc, fy, Es, bw, hw, Ag, Ast, nb, db, dp, cc, tD);
+
+  // Check if (Pu, Mu) is inside
+  const puKN = Pu / 1000, muKNm = Mu / 1e6;
+  const inside = isInsidePM(pts, puKN, muKNm);
+
+  /* ------ SLENDERNESS ACI 318-19 §22.7 ------ */
+  let Ig, r;
+  if (colType === 'rect') {
+    Ig = bw * hw * hw * hw / 12;
+    r  = hw / Math.sqrt(12);
+  } else {
+    Ig = Math.PI * Math.pow(bw, 4) / 64;
+    r  = bw / 4;
+  }
+  const kLr = k * Lu / r;
+  const bracing = document.getElementById('bracing').value;
+  const limit = bracing === 'braced' ? 34 : 22; // simplified
+  const slender = kLr > limit;
+
+  /* ------ MOMENT MAGNIFICATION (braced only, ACI 10.10.6) ------ */
+  let Muc = Mu, delta = 1.0;
+  if (slender && bracing === 'braced') {
+    const beta_dns = 0.6; // assume 60% sustained load
+    const EI = (0.4 * fc * 1000 * Ig) / (1 + beta_dns); // N·mm²  (Ec≈4700√fc MPa? use simplified)
+    // Actually Ec = 4700*sqrt(fc) but we keep simple:
+    const Ec = 4700 * Math.sqrt(fc); // MPa
+    const EI2 = (0.4 * Ec * Ig) / (1 + beta_dns);
+    const Pc = Math.PI * Math.PI * EI2 / (k * Lu) / (k * Lu); // N
+    const Cm = 0.6; // conservative
+    delta = Cm / (1 - Pu / (0.75 * Pc));
+    delta = Math.max(delta, 1.0);
+    Muc = Mu * delta;
+  }
+
+  const MuKNm = Mu / 1e6;
+  const MucKNm = Muc / 1e6;
+  const pmOK = isInsidePM(pts, puKN, MucKNm);
+
+  R = {
+    fc, fy, cc, tD, db, nb, bw, hw, Ag, Ast, rho, rhoOK, dp,
+    Abar, phiPnMax, alpha, phi_spiral,
+    pts, inside, pmOK,
+    kLr, limit, slender, bracing, delta, MucKNm,
+    puKN, muKNm,
+    Lu: Lu/1000, k, Ig, r
+  };
+
+  renderResults();
+  drawSection();
+  drawPM();
+}
+
+/* -------------------------------------------------------
+   P-M INTERACTION POINTS
+   ------------------------------------------------------- */
+function buildInteraction(fc, fy, Es, b, h, Ag, Ast, nb, db, dp, cc, tD) {
+  // For simplicity: rectangular section, bars in 2 layers (top & bottom)
+  // We build ~30 points from pure compression to pure tension
+  const pts = [];
+  const beta1 = fc <= 28 ? 0.85 : Math.max(0.65, 0.85 - 0.05 * (fc - 28) / 7);
+  const d  = h - dp;     // effective depth (tension side)
+  const ds = dp;         // depth of comp bars
+
+  // For circular: approximate as equivalent rect
+  const isCirc = colType === 'circ';
+
+  // Pure compression (φ = phi_c)
+  const phi_c = isCirc ? 0.75 : 0.65;
+  const phi_t = 0.90;
+  const Ast_comp = Ast / 2;
+  const Ast_tens = Ast / 2;
+
+  const nSteps = 40;
+  for (let i = 0; i <= nSteps; i++) {
+    const ratio = i / nSteps; // 0=pure compression, 1=pure tension
+    // c from h to 0
+    const c = h * (1 - ratio) + 0.001;
+    const a = Math.min(beta1 * c, h);
+
+    // Comp concrete force
+    const Cc = 0.85 * fc * a * b;
+
+    // Steel forces — two layers
+    const eps_cu = 0.003;
+    const eps_s  = eps_cu * (c - ds) / c;
+    const eps_st = eps_cu * (d - c) / c;
+
+    const fs_comp = Math.min(Math.max(eps_s * Es, -fy), fy);
+    const fs_tens = Math.min(Math.max(eps_st * Es, -fy), fy);
+
+    const Cs = Ast_comp * (fs_comp - 0.85 * fc);
+    const Ts = Ast_tens * fs_tens;
+
+    let Pn = Cc + Cs - Ts;
+    let Mn = Cc * (h / 2 - a / 2) + Cs * (h / 2 - ds) + Ts * (d - h / 2);
+
+    // Clamp Pn to limits
+    const Pn_max = alpha_coef() * (0.85 * fc * (Ag - Ast) + fy * Ast);
+    Pn = Math.min(Pn, Pn_max);
+    Pn = Math.max(Pn, -Ast * fy);
+
+    // φ — transition 0.65→0.90
+    const eps_t = Math.abs(eps_st);
+    let phi;
+    if (eps_t <= 0.002) phi = phi_c;
+    else if (eps_t >= 0.005) phi = phi_t;
+    else phi = phi_c + (phi_t - phi_c) * (eps_t - 0.002) / 0.003;
+
+    pts.push({ Pn: Pn / 1000, Mn: Mn / 1e6, phi, phiPn: phi * Pn / 1000, phiMn: phi * Mn / 1e6 });
+  }
+
+  // Add pure tension point
+  pts.push({ Pn: -Ast * fy / 1000, Mn: 0, phi: phi_t, phiPn: -phi_t * Ast * fy / 1000, phiMn: 0 });
+  return pts;
+}
+
+function alpha_coef() { return colType === 'circ' ? 0.85 : 0.80; }
+
+function isInsidePM(pts, Pu_kN, Mu_kNm) {
+  // Check if point is below the envelope
+  // Find phiMn at Pu level
+  for (let i = 0; i < pts.length - 1; i++) {
+    const p0 = pts[i], p1 = pts[i + 1];
+    if ((p0.phiPn >= Pu_kN && p1.phiPn <= Pu_kN) || (p0.phiPn <= Pu_kN && p1.phiPn >= Pu_kN)) {
+      const t = (Pu_kN - p0.phiPn) / (p1.phiPn - p0.phiPn);
+      const MnAtP = p0.phiMn + t * (p1.phiMn - p0.phiMn);
+      return Mu_kNm <= MnAtP;
+    }
+  }
+  return false;
+}
+
+/* -------------------------------------------------------
+   RENDER RESULTS TAB
+   ------------------------------------------------------- */
+function renderResults() {
+  const r = R;
+  const overall = r.pmOK && r.rhoOK;
+  const verdictClass = !r.pmOK ? 'fail' : (!r.rhoOK ? 'warn' : 'pass');
+  const verdictText  = !r.pmOK ? '✗ FAILS — Point outside P-M envelope'
+                     : (!r.rhoOK ? '⚠ WARN — ρ out of ACI limits (1–8%)'
+                     : '✓ PASS — Section adequate');
+
+  let html = `
+  <div class="verdict ${verdictClass}">${verdictText}</div>
+
+  <div class="status-row">
+    <div class="stat-box">
+      <div class="val">${(r.rho * 100).toFixed(2)}%</div>
+      <div class="lbl">ρ (Ast/Ag)</div>
+    </div>
+    <div class="stat-box">
+      <div class="val">${r.phiPnMax.toFixed(0)} kN</div>
+      <div class="lbl">φPn,max</div>
+    </div>
+    <div class="stat-box">
+      <div class="val">${r.kLr.toFixed(1)}</div>
+      <div class="lbl">kLu/r</div>
+    </div>
+  </div>
+
+  <div class="card">
+    <div class="card-title">Section Properties</div>
+    <table class="result-table">
+      <tr><th>Parameter</th><th>Value</th><th>Limit</th><th>Status</th></tr>
+      <tr>
+        <td>Gross Area Ag</td>
+        <td class="num">${(r.Ag / 1e4).toFixed(2)} cm²</td>
+        <td>—</td><td>—</td>
+      </tr>
+      <tr>
+        <td>Steel Area Ast</td>
+        <td class="num">${(r.Ast).toFixed(0)} mm²</td>
+        <td>—</td><td>—</td>
+      </tr>
+      <tr>
+        <td>ρ = Ast/Ag</td>
+        <td class="num">${(r.rho * 100).toFixed(2)}%</td>
+        <td>1% – 8%</td>
+        <td class="${r.rhoOK ? 'ok' : 'ng'}">${r.rhoOK ? '✓' : '✗'}</td>
+      </tr>
+      <tr>
+        <td>φPn,max</td>
+        <td class="num">${r.phiPnMax.toFixed(1)} kN</td>
+        <td>≥ Pu = ${r.puKN.toFixed(0)} kN</td>
+        <td class="${r.phiPnMax >= r.puKN ? 'ok' : 'ng'}">${r.phiPnMax >= r.puKN ? '✓' : '✗'}</td>
+      </tr>
+    </table>
+  </div>
+
+  <div class="card">
+    <div class="card-title">P-M Check</div>
+    <table class="result-table">
+      <tr><th>Parameter</th><th>Value</th><th>Status</th></tr>
+      <tr><td>Applied Pu</td><td class="num">${r.puKN.toFixed(1)} kN</td><td>—</td></tr>
+      <tr><td>Applied Mu</td><td class="num">${r.muKNm.toFixed(1)} kN·m</td><td>—</td></tr>
+      ${r.slender ? `<tr><td>Magnified Muc (δ=${r.delta.toFixed(2)})</td><td class="num">${r.MucKNm.toFixed(1)} kN·m</td><td>—</td></tr>` : ''}
+      <tr>
+        <td>Point inside φP-φM envelope</td>
+        <td class="num">${r.pmOK ? 'YES' : 'NO'}</td>
+        <td class="${r.pmOK ? 'ok' : 'ng'}">${r.pmOK ? '✓' : '✗'}</td>
+      </tr>
+    </table>
+  </div>
+
+  <div class="card">
+    <div class="card-title">Slenderness (ACI 318-19 §6.2.5)</div>
+    <div class="slen-grid">
+      <div class="slen-box">
+        <h4>Non-Sway (Braced) Limit</h4>
+        <table class="result-table">
+          <tr><td>kLu/r</td><td class="num">${r.kLr.toFixed(1)}</td></tr>
+          <tr><td>Limit</td><td class="num">${r.limit}</td></tr>
+          <tr><td>Slender?</td>
+            <td class="${r.slender ? 'ng' : 'ok'}">${r.slender ? 'YES — magnified' : 'NO — short'}</td>
+          </tr>
+          ${r.slender ? `<tr><td>δns</td><td class="num">${r.delta.toFixed(3)}</td></tr>` : ''}
+        </table>
+      </div>
+      <div class="slen-box">
+        <h4>Section Radius of Gyration</h4>
+        <table class="result-table">
+          <tr><td>Ig</td><td class="num">${(r.Ig / 1e8).toFixed(2)} ×10⁸ mm⁴</td></tr>
+          <tr><td>r = 0.3h or D/4</td><td class="num">${r.r.toFixed(1)} mm</td></tr>
+          <tr><td>kLu</td><td class="num">${(r.k * r.Lu * 1000).toFixed(0)} mm</td></tr>
+        </table>
+      </div>
+    </div>
+  </div>`;
+
+  document.getElementById('resultsContent').innerHTML = html;
+
+  // Also update report
+  renderReport();
+}
+
+/* -------------------------------------------------------
+   DRAW P-M DIAGRAM
+   ------------------------------------------------------- */
+function drawPM() {
+  if (!R) return;
+  const canvas = document.getElementById('pmCanvas');
+  const W = canvas.parentElement.clientWidth - 32;
+  canvas.width = Math.min(W, 520);
+  canvas.height = 460;
+  const ctx = canvas.getContext('2d');
+  const { pts, puKN, muKNm: muK, MucKNm } = R;
+
+  // Find bounds
+  const allP = pts.map(p => p.phiPn);
+  const allM = pts.map(p => p.phiMn);
+  const Pmax = Math.max(...allP) * 1.1;
+  const Pmin = Math.min(...allP) * 1.1;
+  const Mmax = Math.max(...allM) * 1.15;
+  const Mmin = 0;
+
+  const pad = { t: 30, r: 20, b: 50, l: 70 };
+  const W2 = canvas.width - pad.l - pad.r;
+  const H2 = canvas.height - pad.t - pad.b;
+
+  function tx(m) { return pad.l + (m - Mmin) / (Mmax - Mmin) * W2; }
+  function ty(p) { return pad.t + (1 - (p - Pmin) / (Pmax - Pmin)) * H2; }
+
+  ctx.clearRect(0, 0, canvas.width, canvas.height);
+  ctx.fillStyle = '#171b24';
+  ctx.fillRect(0, 0, canvas.width, canvas.height);
+
+  // Grid
+  ctx.strokeStyle = '#2a3142'; ctx.lineWidth = 1;
+  for (let i = 0; i <= 5; i++) {
+    const x = pad.l + i / 5 * W2;
+    ctx.beginPath(); ctx.moveTo(x, pad.t); ctx.lineTo(x, pad.t + H2); ctx.stroke();
+  }
+  for (let i = 0; i <= 5; i++) {
+    const y = pad.t + i / 5 * H2;
+    ctx.beginPath(); ctx.moveTo(pad.l, y); ctx.lineTo(pad.l + W2, y); ctx.stroke();
+  }
+
+  // Axes
+  ctx.strokeStyle = '#4fc3f7'; ctx.lineWidth = 1.5;
+  const y0 = ty(0);
+  ctx.beginPath(); ctx.moveTo(pad.l, pad.t); ctx.lineTo(pad.l, pad.t + H2); ctx.stroke();
+  ctx.beginPath(); ctx.moveTo(pad.l, y0); ctx.lineTo(pad.l + W2, y0); ctx.stroke();
+
+  // Labels
+  ctx.fillStyle = '#64748b'; ctx.font = '11px IBM Plex Mono';
+  ctx.textAlign = 'center'; ctx.fillText('φMn (kN·m)', pad.l + W2 / 2, canvas.height - 8);
+  ctx.save(); ctx.translate(16, pad.t + H2 / 2); ctx.rotate(-Math.PI / 2);
+  ctx.fillText('φPn (kN)', 0, 0); ctx.restore();
+
+  // Tick labels
+  ctx.font = '10px IBM Plex Mono'; ctx.fillStyle = '#64748b';
+  for (let i = 0; i <= 5; i++) {
+    const mv = Mmin + i / 5 * (Mmax - Mmin);
+    ctx.textAlign = 'center';
+    ctx.fillText(mv.toFixed(0), tx(mv), pad.t + H2 + 16);
+    const pv = Pmin + (1 - i / 5) * (Pmax - Pmin);
+    ctx.textAlign = 'right';
+    ctx.fillText(pv.toFixed(0), pad.l - 6, pad.t + i / 5 * H2 + 4);
+  }
+
+  // Envelope
+  ctx.beginPath();
+  ctx.strokeStyle = '#4fc3f7'; ctx.lineWidth = 2.5;
+  ctx.shadowColor = '#4fc3f7'; ctx.shadowBlur = 6;
+  pts.forEach((p, i) => {
+    const x = tx(p.phiMn), y = ty(p.phiPn);
+    if (i === 0) ctx.moveTo(x, y); else ctx.lineTo(x, y);
+  });
+  ctx.stroke();
+  ctx.shadowBlur = 0;
+
+  // Fill inside
+  ctx.beginPath();
+  pts.forEach((p, i) => {
+    const x = tx(p.phiMn), y = ty(p.phiPn);
+    if (i === 0) ctx.moveTo(x, y); else ctx.lineTo(x, y);
+  });
+  ctx.closePath();
+  ctx.fillStyle = 'rgba(79,195,247,0.07)';
+  ctx.fill();
+
+  // Applied point
+  const px = tx(MucKNm), py = ty(puKN);
+  const color = R.pmOK ? '#10b981' : '#ef4444';
+  ctx.beginPath(); ctx.arc(px, py, 7, 0, Math.PI * 2);
+  ctx.fillStyle = color; ctx.fill();
+  ctx.strokeStyle = '#fff'; ctx.lineWidth = 1.5; ctx.stroke();
+
+  // Label
+  ctx.fillStyle = color; ctx.font = 'bold 11px IBM Plex Mono'; ctx.textAlign = 'left';
+  ctx.fillText(`(${MucKNm.toFixed(0)}, ${puKN.toFixed(0)})`, px + 10, py - 4);
+
+  // Legend
+  ctx.fillStyle = '#4fc3f7'; ctx.font = '11px IBM Plex Mono'; ctx.textAlign = 'left';
+  ctx.fillText('── φP-φM Envelope', pad.l + 10, pad.t + 16);
+  ctx.fillStyle = color;
+  ctx.fillText('● Applied (Pu, Muc)', pad.l + 10, pad.t + 32);
+}
+
+/* -------------------------------------------------------
+   DRAW SECTION
+   ------------------------------------------------------- */
+function drawSection() {
+  if (!R) return;
+  const canvas = document.getElementById('sectionCanvas');
+  const size = Math.min(canvas.parentElement.clientWidth - 40, 360);
+  canvas.width = size; canvas.height = size;
+  const ctx = canvas.getContext('2d');
+  ctx.clearRect(0, 0, size, size);
+
+  const { bw, hw, db, nb, cc, tD, dp } = R;
+  const pad = 30;
+  const scaleX = (size - pad * 2) / bw;
+  const scaleY = (size - pad * 2) / hw;
+  const sc = Math.min(scaleX, scaleY);
+  const offX = (size - bw * sc) / 2;
+  const offY = (size - hw * sc) / 2;
+
+  ctx.fillStyle = '#171b24';
+  ctx.fillRect(0, 0, size, size);
+
+  if (colType === 'rect') {
+    // Concrete section
+    ctx.fillStyle = '#2a3142';
+    ctx.strokeStyle = '#4fc3f7';
+    ctx.lineWidth = 2;
+    ctx.beginPath();
+    ctx.rect(offX, offY, bw * sc, hw * sc);
+    ctx.fill(); ctx.stroke();
+
+    // Bars
+    const barR = db * sc / 2;
+    const bars = barPositionsRect(bw, hw, nb, dp);
+    bars.forEach(bar => {
+      const bx = offX + bar.x * sc;
+      const by = offY + bar.y * sc;
+      ctx.beginPath(); ctx.arc(bx, by, barR, 0, Math.PI * 2);
+      ctx.fillStyle = '#f59e0b'; ctx.fill();
+      ctx.strokeStyle = '#fbbf24'; ctx.lineWidth = 1; ctx.stroke();
+    });
+
+    // Dimensions
+    ctx.fillStyle = '#64748b'; ctx.font = `${Math.max(10, sc * 5)}px IBM Plex Mono`;
+    ctx.textAlign = 'center';
+    ctx.fillText(`b = ${bw} mm`, size / 2, offY + hw * sc + 18);
+    ctx.save(); ctx.translate(offX - 18, size / 2); ctx.rotate(-Math.PI / 2);
+    ctx.fillText(`h = ${hw} mm`, 0, 0); ctx.restore();
+
+  } else {
+    const cx = size / 2, cy = size / 2;
+    const R2 = (bw / 2) * sc;
+    ctx.beginPath(); ctx.arc(cx, cy, R2, 0, Math.PI * 2);
+    ctx.fillStyle = '#2a3142'; ctx.fill();
+    ctx.strokeStyle = '#4fc3f7'; ctx.lineWidth = 2; ctx.stroke();
+
+    const barR = db * sc / 2;
+    const rBar = (bw / 2 - dp) * sc;
+    for (let i = 0; i < nb; i++) {
+      const angle = (2 * Math.PI * i / nb) - Math.PI / 2;
+      const bx = cx + rBar * Math.cos(angle);
+      const by = cy + rBar * Math.sin(angle);
+      ctx.beginPath(); ctx.arc(bx, by, barR, 0, Math.PI * 2);
+      ctx.fillStyle = '#f59e0b'; ctx.fill();
+      ctx.strokeStyle = '#fbbf24'; ctx.lineWidth = 1; ctx.stroke();
+    }
+
+    ctx.fillStyle = '#64748b'; ctx.font = '11px IBM Plex Mono'; ctx.textAlign = 'center';
+    ctx.fillText(`D = ${bw} mm`, cx, cy + R2 + 18);
+  }
+
+  // Legend
+  ctx.fillStyle = '#f59e0b'; ctx.font = '11px IBM Plex Mono'; ctx.textAlign = 'left';
+  ctx.fillText(`Ø${db}mm × ${nb} bars (Ast = ${R.Ast.toFixed(0)} mm²)`, 8, size - 8);
+}
+
+function barPositionsRect(b, h, nb, dp) {
+  const bars = [];
+  // Distribute bars around perimeter
+  const nTop = Math.max(2, Math.floor(nb / 4));
+  const nBot = nTop;
+  const nSide = Math.floor((nb - nTop - nBot) / 2);
+
+  const xL = dp, xR = b - dp;
+  const yT = dp, yB = h - dp;
+
+  // Top
+  for (let i = 0; i < nTop; i++) bars.push({ x: xL + i * (xR - xL) / (nTop - 1), y: yT });
+  // Bottom
+  for (let i = 0; i < nBot; i++) bars.push({ x: xL + i * (xR - xL) / (nBot - 1), y: yB });
+  // Sides
+  if (nSide > 0) {
+    for (let i = 1; i <= nSide; i++) {
+      bars.push({ x: xL, y: yT + i * (yB - yT) / (nSide + 1) });
+      bars.push({ x: xR, y: yT + i * (yB - yT) / (nSide + 1) });
+    }
+  }
+  return bars;
+}
+
+/* -------------------------------------------------------
+   REPORT
+   ------------------------------------------------------- */
+function renderReport() {
+  const r = R;
+  const colLabel = colType === 'rect' ? `${r.bw}×${r.hw} mm` : `Ø${r.bw} mm`;
+  const now = new Date().toLocaleDateString('en-GB', { day: '2-digit', month: 'long', year: 'numeric' });
+
+  const html = `
+  <div id="reportArea">
+    <div class="report-header">
+      <h2>RC Column Design Calculation</h2>
+      <p>ACI 318-19 · ${colType === 'rect' ? 'Rectangular Tied' : 'Circular Spiral'} Column · ${now}</p>
+    </div>
+
+    <div class="rpt-section">
+      <h3>1. Section & Materials</h3>
+      <div class="rpt-grid">
+        <div class="rpt-row"><span>Column Type</span><span>${colType === 'rect' ? 'Rectangular' : 'Circular'}</span></div>
+        <div class="rpt-row"><span>Dimensions</span><span>${colLabel}</span></div>
+        <div class="rpt-row"><span>Gross Area Ag</span><span>${(r.Ag / 100).toFixed(1)} cm²</span></div>
+        <div class="rpt-row"><span>f'c</span><span>${r.fc} MPa</span></div>
+        <div class="rpt-row"><span>fy</span><span>${r.fy} MPa</span></div>
+        <div class="rpt-row"><span>Clear Cover</span><span>${r.cc} mm</span></div>
+        <div class="rpt-row"><span>Tie Diameter</span><span>Ø${r.tD} mm</span></div>
+      </div>
+    </div>
+
+    <div class="rpt-section">
+      <h3>2. Reinforcement</h3>
+      <div class="rpt-grid">
+        <div class="rpt-row"><span>Bar Diameter</span><span>Ø${r.db} mm</span></div>
+        <div class="rpt-row"><span>No. of Bars</span><span>${r.nb}</span></div>
+        <div class="rpt-row"><span>Ast provided</span><span>${r.Ast.toFixed(0)} mm²</span></div>
+        <div class="rpt-row"><span>ρ = Ast/Ag</span><span>${(r.rho * 100).toFixed(2)}%</span></div>
+        <div class="rpt-row"><span>ACI ρ Limits</span><span>1.0% – 8.0%</span></div>
+        <div class="rpt-row"><span>ρ Status</span><span style="color:${r.rhoOK ? '#10b981' : '#ef4444'}">${r.rhoOK ? 'OK' : 'FAILS'}</span></div>
+      </div>
+    </div>
+
+    <div class="rpt-section">
+      <h3>3. Axial Capacity</h3>
+      <div class="rpt-grid">
+        <div class="rpt-row"><span>φ (comp-controlled)</span><span>${colType === 'circ' ? '0.75' : '0.65'}</span></div>
+        <div class="rpt-row"><span>α factor</span><span>${r.alpha}</span></div>
+        <div class="rpt-row"><span>φPn,max</span><span>${r.phiPnMax.toFixed(1)} kN</span></div>
+        <div class="rpt-row"><span>Pu applied</span><span>${r.puKN.toFixed(1)} kN</span></div>
+        <div class="rpt-row"><span>Axial ratio</span><span>${(r.puKN / r.phiPnMax * 100).toFixed(1)}%</span></div>
+      </div>
+    </div>
+
+    <div class="rpt-section">
+      <h3>4. P-M Interaction Check</h3>
+      <div class="rpt-grid">
+        <div class="rpt-row"><span>Applied Pu</span><span>${r.puKN.toFixed(1)} kN</span></div>
+        <div class="rpt-row"><span>Applied Mu</span><span>${r.muKNm.toFixed(1)} kN·m</span></div>
+        ${r.slender ? `
+        <div class="rpt-row"><span>Magnification δns</span><span>${r.delta.toFixed(3)}</span></div>
+        <div class="rpt-row"><span>Magnified Muc</span><span>${r.MucKNm.toFixed(1)} kN·m</span></div>` : ''}
+        <div class="rpt-row"><span>Inside envelope</span><span style="color:${r.pmOK ? '#10b981' : '#ef4444'}">${r.pmOK ? 'YES ✓' : 'NO ✗'}</span></div>
+      </div>
+    </div>
+
+    <div class="rpt-section">
+      <h3>5. Slenderness (ACI 318-19 §6.2.5)</h3>
+      <div class="rpt-grid">
+        <div class="rpt-row"><span>Unbraced length Lu</span><span>${r.Lu.toFixed(2)} m</span></div>
+        <div class="rpt-row"><span>Effective k</span><span>${r.k}</span></div>
+        <div class="rpt-row"><span>r (gyration)</span><span>${r.r.toFixed(1)} mm</span></div>
+        <div class="rpt-row"><span>kLu/r</span><span>${r.kLr.toFixed(1)}</span></div>
+        <div class="rpt-row"><span>Slenderness limit</span><span>${r.limit} (${r.bracing})</span></div>
+        <div class="rpt-row"><span>Column class</span><span style="color:${r.slender ? '#f59e0b' : '#10b981'}">${r.slender ? 'SLENDER' : 'SHORT'}</span></div>
+      </div>
+    </div>
+
+    <div class="rpt-section">
+      <h3>6. Overall Verdict</h3>
+      <div class="verdict ${r.pmOK && r.rhoOK ? 'pass' : 'fail'}" style="font-size:15px;padding:14px;">
+        ${r.pmOK && r.rhoOK ? '✓ SECTION ADEQUATE — All ACI 318 checks satisfied'
+          : '✗ SECTION FAILS — Review highlighted checks above'}
+      </div>
+    </div>
+  </div>`;
+
+  document.getElementById('reportArea').outerHTML = html;
+}
+
+// Auto-draw section on load
+window.addEventListener('load', () => { drawSection(); });
+window.addEventListener('resize', () => { if (R) { drawPM(); drawSection(); } });
+</script>
+</body>
+</html>

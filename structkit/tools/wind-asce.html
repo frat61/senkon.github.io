@@ -1,0 +1,1209 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>WindCalc Pro — ASCE 7-10</title>
+<link href="https://fonts.googleapis.com/css2?family=Literata:ital,opsz,wght@0,7..72,400;0,7..72,700;0,7..72,900;1,7..72,400&family=Outfit:wght@300;400;500;600;700&family=IBM+Plex+Mono:wght@400;500;600&display=swap" rel="stylesheet">
+<style>
+*{box-sizing:border-box;margin:0;padding:0;}
+:root{
+  --bg:#faf9f7;--bg2:#f3f1ed;--surface:#fff;--border:#e4e0d8;--border2:#d1ccc2;
+  --ink:#1a1814;--ink2:#4a453c;--ink3:#8a8478;--ink4:#b5afa5;
+  --blue:#2563eb;--blue2:#3b82f6;--blue-l:#eff6ff;--blue-b:#bfdbfe;
+  --amber:#d97706;--amber-l:#fffbeb;--amber-b:#fde68a;
+  --red:#dc2626;--red-l:#fef2f2;--red-b:#fecaca;
+  --green:#16a34a;--green-l:#f0fdf4;--green-b:#bbf7d0;
+  --teal:#0d9488;
+  --r:8px;--mono:'IBM Plex Mono',monospace;--body:'Outfit',sans-serif;--display:'Literata',serif;
+}
+html{font-size:14px;}
+body{font-family:var(--body);background:var(--bg);color:var(--ink);min-height:100vh;}
+
+/* TOPBAR */
+.topbar{display:flex;align-items:center;gap:16px;padding:0 28px;height:50px;background:var(--surface);border-bottom:1px solid var(--border);position:sticky;top:0;z-index:100;}
+.logo{font-family:var(--display);font-weight:900;font-size:19px;letter-spacing:-.5px;}.logo span{color:var(--blue);}
+.logo-sep{width:1px;height:18px;background:var(--border);}
+.logo-sub{font-family:var(--mono);font-size:8.5px;color:var(--ink4);letter-spacing:1.2px;text-transform:uppercase;}
+.topbar-spacer{flex:1;}
+.steps-bar{display:flex;align-items:center;gap:0;}
+.step-dot{display:flex;align-items:center;gap:5px;padding:5px 12px;font-family:var(--mono);font-size:9.5px;font-weight:600;color:var(--ink4);letter-spacing:.4px;text-transform:uppercase;cursor:pointer;border-radius:5px;transition:all .2s;}
+.step-dot.active{color:var(--blue);background:var(--blue-l);}
+.step-dot.done{color:var(--green);cursor:pointer;}
+.step-dot .num{width:18px;height:18px;border-radius:50%;display:flex;align-items:center;justify-content:center;font-size:9px;font-weight:700;border:1.5px solid var(--ink4);color:var(--ink4);transition:all .2s;}
+.step-dot.active .num{border-color:var(--blue);color:#fff;background:var(--blue);}
+.step-dot.done .num{border-color:var(--green);color:#fff;background:var(--green);}
+.step-conn{width:20px;height:1px;background:var(--border);}
+
+/* MAIN */
+.main{max-width:1120px;margin:0 auto;padding:24px 28px 60px;}
+.step-panel{display:none;}.step-panel.active{display:block;animation:fadeUp .25s ease;}
+@keyframes fadeUp{from{opacity:0;transform:translateY(10px);}to{opacity:1;transform:none;}}
+.sec-title{font-family:var(--display);font-weight:900;font-size:24px;letter-spacing:-.5px;margin-bottom:3px;}
+.sec-sub{font-size:13px;color:var(--ink3);margin-bottom:20px;line-height:1.5;}
+
+/* INPUT GROUP */
+.ig{background:var(--surface);border:1px solid var(--border);border-radius:var(--r);padding:14px 16px;margin-bottom:12px;}
+.ig-title{font-family:var(--mono);font-size:8.5px;text-transform:uppercase;letter-spacing:1.5px;color:var(--ink4);margin-bottom:8px;}
+.field{margin-bottom:6px;}.field:last-child{margin-bottom:0;}
+.field label{display:flex;justify-content:space-between;align-items:baseline;font-size:12px;color:var(--ink2);margin-bottom:2px;font-weight:500;}
+.field label .u{font-family:var(--mono);font-size:8.5px;color:var(--ink4);}
+.fr{display:flex;gap:5px;}
+.field input,.field select{width:100%;background:var(--bg);border:1.5px solid var(--border);border-radius:5px;color:var(--ink);font-family:var(--mono);font-size:12px;padding:7px 9px;outline:none;transition:all .15s;-webkit-appearance:none;}
+.field input:focus,.field select:focus{border-color:var(--blue);box-shadow:0 0 0 3px rgba(37,99,235,.08);}
+.ub{flex-shrink:0;background:var(--bg2);border:1.5px solid var(--border);border-radius:5px;padding:7px 8px;font-family:var(--mono);font-size:9px;color:var(--ink3);display:flex;align-items:center;}
+
+/* BUILD LAYOUT */
+.bl{display:grid;grid-template-columns:300px 1fr;gap:24px;align-items:start;}
+.bi{display:flex;flex-direction:column;gap:10px;}
+
+/* DETECT BADGE */
+.detect{display:flex;align-items:center;gap:8px;padding:8px 14px;border-radius:6px;background:var(--blue-l);border:1px solid var(--blue-b);font-family:var(--mono);font-size:11px;font-weight:600;color:var(--blue);margin-bottom:6px;}
+.detect .det-icon{font-size:16px;}
+.detect .det-gcpi{margin-left:auto;font-size:10px;padding:2px 8px;border-radius:4px;background:rgba(37,99,235,.1);}
+
+/* PREVIEW */
+.pv-wrap{background:var(--surface);border:1px solid var(--border);border-radius:var(--r);overflow:hidden;position:sticky;top:74px;}
+.pv-head{padding:8px 14px;background:var(--bg2);border-bottom:1px solid var(--border);display:flex;align-items:center;justify-content:space-between;}
+.pv-label{font-family:var(--mono);font-size:8.5px;text-transform:uppercase;letter-spacing:1px;color:var(--ink4);}
+.pv-info{font-family:var(--mono);font-size:9.5px;color:var(--ink3);}
+.pv-canvas{width:100%;height:360px;position:relative;background:linear-gradient(180deg,#f8f7f5,#f0eeea 85%,#e8e5df);overflow:hidden;}
+.pv-canvas svg{width:100%;height:100%;cursor:default;}
+.pv-hint{position:absolute;bottom:8px;left:50%;transform:translateX(-50%);font-family:var(--mono);font-size:9px;color:var(--ink4);background:rgba(255,255,255,.85);padding:3px 10px;border-radius:4px;border:1px solid var(--border);pointer-events:none;}
+
+/* PLAN VIEW */
+.plan-section{margin-top:12px;background:var(--surface);border:1px solid var(--border);border-radius:var(--r);overflow:hidden;}
+.plan-head{padding:8px 14px;background:var(--bg2);border-bottom:1px solid var(--border);}
+.plan-canvas{padding:16px;display:flex;align-items:center;justify-content:center;}
+.plan-canvas svg{max-width:100%;}
+
+/* WALL TOGGLE LEGEND */
+.wall-legend{display:flex;gap:10px;flex-wrap:wrap;padding:8px 14px;border-top:1px solid var(--border);background:var(--bg2);}
+.wl-item{display:flex;align-items:center;gap:4px;font-family:var(--mono);font-size:9px;color:var(--ink3);}
+.wl-swatch{width:10px;height:10px;border-radius:2px;border:1px solid var(--border);}
+
+/* CLASSIFY CARDS */
+.cc-grid{display:grid;grid-template-columns:1fr 1fr;gap:16px;margin-bottom:20px;}
+.cc{background:var(--surface);border:1px solid var(--border);border-radius:var(--r);overflow:hidden;}
+.cc-head{padding:12px 16px;background:var(--bg2);border-bottom:1px solid var(--border);}
+.cc-title{font-family:var(--display);font-weight:700;font-size:14px;margin-bottom:1px;}
+.cc-ref{font-family:var(--mono);font-size:8.5px;color:var(--ink3);letter-spacing:.4px;}
+.cc-body{padding:14px 16px;}
+.cf{background:var(--bg);border:1px solid var(--border);border-radius:5px;padding:10px;margin-bottom:10px;overflow:hidden;}
+.cf svg{width:100%;display:block;}
+.cf-cap{font-family:var(--mono);font-size:8.5px;color:var(--ink3);margin-top:6px;text-align:center;}
+
+/* OPT BUTTONS */
+.og{display:flex;flex-direction:column;gap:5px;}
+.ob{display:flex;align-items:center;gap:8px;padding:9px 11px;border:1.5px solid var(--border);border-radius:5px;background:var(--surface);cursor:pointer;transition:all .12s;text-align:left;font-family:var(--body);font-size:12px;color:var(--ink2);}
+.ob:hover{border-color:var(--blue-b);background:var(--blue-l);}
+.ob.sel{border-color:var(--blue);background:var(--blue-l);color:var(--blue);font-weight:600;box-shadow:0 0 0 2px rgba(37,99,235,.08);}
+.ob .oi{font-size:16px;flex-shrink:0;width:24px;text-align:center;}
+.ob .ol{flex:1;}.ob .od{font-size:9.5px;color:var(--ink3);font-weight:400;display:block;margin-top:1px;}
+.ob .oc{width:16px;height:16px;border-radius:50%;border:1.5px solid var(--border);display:flex;align-items:center;justify-content:center;flex-shrink:0;font-size:9px;color:transparent;transition:all .12s;}
+.ob.sel .oc{border-color:var(--blue);background:var(--blue);color:#fff;}
+
+/* WALKTHROUGH */
+.ws{background:var(--surface);border:1px solid var(--border);border-radius:var(--r);overflow:hidden;margin-bottom:8px;transition:all .2s;opacity:.35;pointer-events:none;}
+.ws.cur{opacity:1;pointer-events:auto;box-shadow:0 2px 10px rgba(0,0,0,.05);}
+.ws.done{opacity:1;pointer-events:auto;}
+.ws-head{padding:12px 18px;display:flex;align-items:center;gap:10px;cursor:pointer;transition:background .1s;}
+.ws.done .ws-head:hover{background:var(--bg2);}
+.ws-num{width:26px;height:26px;border-radius:50%;display:flex;align-items:center;justify-content:center;font-family:var(--mono);font-size:10px;font-weight:700;border:2px solid var(--border);color:var(--ink3);flex-shrink:0;transition:all .2s;}
+.ws.cur .ws-num{border-color:var(--blue);color:#fff;background:var(--blue);}
+.ws.done .ws-num{border-color:var(--green);color:#fff;background:var(--green);}
+.ws-title{font-family:var(--display);font-weight:700;font-size:14px;flex:1;}
+.ws-res{font-family:var(--mono);font-size:11px;font-weight:600;color:var(--blue);display:none;}
+.ws.done .ws-res{display:block;}
+.ws-body{padding:0 18px 16px;display:none;}
+.ws.cur .ws-body,.ws.done .ws-body{display:block;}
+
+/* Formula */
+.fb{background:var(--bg);border:1px solid var(--border);border-left:3px solid var(--blue);border-radius:0 var(--r) var(--r) 0;padding:12px 14px;margin-bottom:10px;}
+.fb .fl{font-size:11px;color:var(--ink2);font-weight:600;margin-bottom:3px;display:block;}
+.fb .ff{font-family:var(--mono);font-size:11px;color:var(--blue);line-height:2;display:block;}
+.fb .fn{font-family:var(--mono);font-size:9.5px;color:var(--ink4);margin-top:3px;display:block;}
+
+/* ASCE Code Reference Placeholder */
+.asce-ref{
+  background:repeating-linear-gradient(45deg,#f9f8f6,#f9f8f6 8px,#f5f3ef 8px,#f5f3ef 16px);
+  border:2px dashed var(--border2);border-radius:var(--r);
+  padding:16px 20px;margin-bottom:12px;position:relative;overflow:hidden;
+}
+.asce-ref-badge{
+  position:absolute;top:0;right:0;padding:4px 10px;
+  background:var(--amber);color:#fff;font-family:var(--mono);
+  font-size:8px;font-weight:700;letter-spacing:.8px;
+  border-radius:0 0 0 6px;text-transform:uppercase;
+}
+.asce-ref-title{font-family:var(--display);font-weight:700;font-size:14px;color:var(--ink);margin-bottom:4px;}
+.asce-ref-clause{font-family:var(--mono);font-size:10px;color:var(--amber);font-weight:600;margin-bottom:6px;}
+.asce-ref-desc{font-size:11.5px;color:var(--ink2);line-height:1.5;margin-bottom:8px;}
+.asce-ref-look{font-family:var(--mono);font-size:9.5px;color:var(--ink3);line-height:1.6;}
+.asce-ref-look b{color:var(--ink2);}
+.asce-ref-icon{
+  position:absolute;bottom:10px;right:14px;font-size:32px;opacity:.15;
+}
+.asce-ref-page{
+  display:inline-flex;align-items:center;gap:4px;
+  font-family:var(--mono);font-size:9px;color:var(--ink4);
+  margin-top:8px;padding:3px 8px;background:rgba(255,255,255,.7);
+  border-radius:4px;border:1px solid var(--border);
+}
+.rp{display:inline-flex;align-items:center;gap:5px;padding:6px 14px;border-radius:5px;font-family:var(--mono);font-size:12px;font-weight:600;margin-top:6px;margin-right:6px;}
+.rp.blue{background:var(--blue-l);color:var(--blue);border:1px solid var(--blue-b);}
+.rp.amber{background:var(--amber-l);color:var(--amber);border:1px solid var(--amber-b);}
+.rp.red{background:var(--red-l);color:var(--red);border:1px solid var(--red-b);}
+.rp.green{background:var(--green-l);color:var(--green);border:1px solid var(--green-b);}
+.wn{display:inline-flex;align-items:center;gap:5px;padding:8px 18px;border:none;border-radius:5px;font-family:var(--body);font-size:12px;font-weight:600;background:var(--blue);color:#fff;cursor:pointer;transition:all .12s;margin-top:10px;}
+.wn:hover{background:#1d4ed8;transform:translateY(-1px);}
+
+/* DATA TABLE */
+.dt{width:100%;border-collapse:collapse;font-family:var(--mono);font-size:11px;margin-top:8px;}
+.dt th{padding:7px 10px;text-align:left;font-size:8.5px;text-transform:uppercase;letter-spacing:.6px;color:var(--ink4);border-bottom:2px solid var(--border);background:var(--bg2);font-weight:600;}
+.dt td{padding:6px 10px;border-bottom:1px solid var(--border);color:var(--ink2);}
+.dt tr:last-child td{border-bottom:none;}
+.dt .pos{color:var(--green);font-weight:600;}
+.dt .neg{color:var(--red);font-weight:600;}
+
+/* BAR CHART */
+.bar-wrap{margin-top:14px;background:var(--bg);border:1px solid var(--border);border-radius:var(--r);padding:14px 16px;}
+.bar-title{font-family:var(--mono);font-size:9px;text-transform:uppercase;letter-spacing:1px;color:var(--ink4);margin-bottom:10px;}
+.bar-row{display:flex;align-items:center;gap:8px;margin-bottom:6px;}
+.bar-label{width:80px;font-family:var(--mono);font-size:10px;color:var(--ink2);text-align:right;flex-shrink:0;}
+.bar-track{flex:1;height:22px;background:var(--bg2);border-radius:3px;position:relative;overflow:hidden;}
+.bar-fill{height:100%;border-radius:3px;transition:width .5s ease;display:flex;align-items:center;justify-content:flex-end;padding-right:6px;font-family:var(--mono);font-size:9px;font-weight:600;color:#fff;min-width:40px;}
+.bar-fill.pos-bar{background:linear-gradient(90deg,#f59e0b,#d97706);}
+.bar-fill.neg-bar{background:linear-gradient(90deg,#ef4444,#dc2626);}
+
+/* PRESSURE DIAGRAM */
+.pd-wrap{margin-top:14px;background:var(--surface);border:1px solid var(--border);border-radius:var(--r);overflow:hidden;}
+.pd-head{padding:8px 14px;background:var(--bg2);border-bottom:1px solid var(--border);font-family:var(--mono);font-size:9px;text-transform:uppercase;letter-spacing:1px;color:var(--ink4);}
+.pd-canvas{padding:12px;}
+.pd-canvas svg{width:100%;display:block;}
+
+/* ZONE MAP */
+.zm-wrap{margin-top:14px;background:var(--surface);border:1px solid var(--border);border-radius:var(--r);overflow:hidden;}
+.zm-head{padding:8px 14px;background:var(--bg2);border-bottom:1px solid var(--border);font-family:var(--mono);font-size:9px;text-transform:uppercase;letter-spacing:1px;color:var(--ink4);}
+.zm-canvas{padding:12px;}
+.zm-canvas svg{width:100%;display:block;}
+
+/* WIND FLOW CANVAS */
+.wf-wrap{margin-top:14px;background:var(--surface);border:1px solid var(--border);border-radius:var(--r);overflow:hidden;}
+.wf-head{padding:8px 14px;background:var(--bg2);border-bottom:1px solid var(--border);font-family:var(--mono);font-size:9px;text-transform:uppercase;letter-spacing:1px;color:var(--ink4);}
+.wf-canvas{position:relative;height:200px;overflow:hidden;background:linear-gradient(180deg,#f8f7f5,#f0eeea);}
+.wf-canvas svg{width:100%;height:100%;}
+
+/* SUMMARY STRIP */
+.ss{display:flex;gap:10px;flex-wrap:wrap;padding:10px 14px;background:var(--bg2);border:1px solid var(--border);border-radius:var(--r);margin-bottom:18px;}
+.sc{font-family:var(--mono);font-size:9.5px;color:var(--ink3);}.sc .v{color:var(--ink);font-weight:600;}
+
+/* CPI VISUAL */
+.cpi-v{display:grid;grid-template-columns:1fr 1fr;gap:8px;margin-top:8px;}
+.cpi-c{background:var(--bg);border:1px solid var(--border);border-radius:5px;padding:10px;text-align:center;}
+.cpi-ct{font-family:var(--mono);font-size:8.5px;text-transform:uppercase;letter-spacing:.6px;color:var(--ink3);margin-bottom:4px;}
+.cpi-cv{font-family:var(--display);font-weight:900;font-size:18px;}
+.cpi-cv.pos{color:var(--amber);}.cpi-cv.neg{color:var(--blue);}
+
+/* BTN */
+.big-btn{display:flex;align-items:center;justify-content:center;gap:8px;width:100%;padding:12px;border:none;border-radius:var(--r);font-family:var(--display);font-weight:700;font-size:15px;cursor:pointer;transition:all .15s;}
+.big-btn.primary{background:var(--blue);color:#fff;box-shadow:0 2px 10px rgba(37,99,235,.18);}
+.big-btn.primary:hover{background:#1d4ed8;transform:translateY(-1px);}
+
+/* WIND PARTICLES */
+@keyframes pMove{0%{transform:translateX(-30px);opacity:0;}10%{opacity:.6;}90%{opacity:.6;}100%{transform:translateX(500px);opacity:0;}}
+.wind-p{position:absolute;height:1px;background:linear-gradient(90deg,transparent,var(--blue),transparent);animation:pMove linear infinite;opacity:0;border-radius:1px;}
+
+/* CLICKABLE WALLS */
+.wall-click{cursor:pointer;transition:all .15s;}
+.wall-click:hover{filter:brightness(1.1);stroke-width:2.5;}
+.wall-open{fill:transparent !important;stroke-dasharray:6,4 !important;opacity:.5 !important;}
+
+@media(max-width:860px){.bl{grid-template-columns:1fr;}.cc-grid{grid-template-columns:1fr;}.main{padding:16px 14px 40px;}}
+</style>
+</head>
+<body>
+
+<div class="topbar">
+  <div class="logo">Wind<span>Calc</span></div>
+  <div class="logo-sep"></div>
+  <div class="logo-sub">ASCE 7-10 Wind Loads</div>
+  <div class="topbar-spacer"></div>
+  <div class="steps-bar">
+    <div class="step-dot active" id="sd1" onclick="goStep(1)"><div class="num">1</div>Build</div><div class="step-conn"></div>
+    <div class="step-dot" id="sd2" onclick="goStep(2)"><div class="num">2</div>Classify</div><div class="step-conn"></div>
+    <div class="step-dot" id="sd3" onclick="goStep(3)"><div class="num">3</div>Analyze</div>
+  </div>
+</div>
+
+<div class="main">
+
+<!-- ═══════ STEP 1: BUILD ═══════ -->
+<div class="step-panel active" id="p1">
+<div class="sec-title">Define Your Structure</div>
+<div class="sec-sub">Enter dimensions and click walls on the preview to toggle openings. Enclosure is auto-detected.</div>
+
+<div class="detect" id="detect-badge">
+  <span class="det-icon" id="det-icon">🏢</span>
+  <span id="det-label">Enclosed Building — all walls closed</span>
+  <span class="det-gcpi" id="det-gcpi">GCpi = ±0.18</span>
+</div>
+
+<div class="bl">
+  <div class="bi">
+    <div class="ig">
+      <div class="ig-title">Geometry</div>
+      <div class="field"><label>Width B <span class="u">⊥ wind</span></label><div class="fr"><input type="number" id="iB" value="12" step="0.5" oninput="upd()"><div class="ub">m</div></div></div>
+      <div class="field"><label>Length L <span class="u">‖ wind</span></label><div class="fr"><input type="number" id="iL" value="7" step="0.5" oninput="upd()"><div class="ub">m</div></div></div>
+      <div class="field"><label>Eave Height h<sub>e</sub></label><div class="fr"><input type="number" id="ihe" value="3" step="0.1" oninput="upd()"><div class="ub">m</div></div></div>
+      <div class="field"><label>Ridge Height h<sub>r</sub> <span class="u">=h<sub>e</sub> if flat</span></label><div class="fr"><input type="number" id="ihr" value="3" step="0.1" oninput="upd()"><div class="ub">m</div></div></div>
+    </div>
+    <div class="ig">
+      <div class="ig-title">Wind</div>
+      <div class="field"><label>Basic Wind Speed V <span class="u">3s gust</span></label><div class="fr"><input type="number" id="iV" value="150" step="5" oninput="upd()"><div class="ub">km/h</div></div></div>
+    </div>
+    <button class="big-btn primary" onclick="goStep(2)">Continue to Classification →</button>
+  </div>
+
+  <div>
+    <div class="pv-wrap">
+      <div class="pv-head">
+        <span class="pv-label">Live Preview — Click walls to toggle openings</span>
+        <span class="pv-info" id="pv-info"></span>
+      </div>
+      <div class="pv-canvas" id="pv-canvas"><svg id="bsvg" viewBox="0 0 660 360"></svg>
+        <div class="pv-hint">Click any wall face to mark it as open</div>
+      </div>
+    </div>
+
+    <!-- PLAN VIEW -->
+    <div class="plan-section">
+      <div class="plan-head"><span class="pv-label">Plan View — Wall Openings</span></div>
+      <div class="plan-canvas"><svg id="plan-svg" viewBox="0 0 340 260"></svg></div>
+      <div class="wall-legend">
+        <div class="wl-item"><div class="wl-swatch" style="background:#8a8478;"></div>Closed wall</div>
+        <div class="wl-item"><div class="wl-swatch" style="background:transparent;border:1.5px dashed #dc2626;"></div>Open wall</div>
+        <div class="wl-item"><div class="wl-swatch" style="background:var(--blue);opacity:.3;"></div>Wind direction</div>
+      </div>
+    </div>
+  </div>
+</div>
+</div>
+
+<!-- ═══════ STEP 2: CLASSIFY ═══════ -->
+<div class="step-panel" id="p2">
+<div class="sec-title">Classify Site Conditions</div>
+<div class="sec-sub">Select parameters per ASCE 7-10. Each card shows the relevant code figure.</div>
+<div class="ss" id="ss1"></div>
+
+<div class="cc-grid">
+  <!-- EXPOSURE -->
+  <div class="cc"><div class="cc-head"><div class="cc-title">Exposure Category</div><div class="cc-ref">ASCE 7-10 §26.7</div></div>
+    <div class="cc-body">
+      <div class="cf"><svg viewBox="0 0 400 100">
+        <rect x="5" y="60" width="125" height="40" fill="#f0eeea" stroke="#d1ccc2" rx="2"/>
+        <rect x="15" y="32" width="12" height="28" fill="#b5afa5" rx="1"/><rect x="30" y="18" width="16" height="42" fill="#8a8478" rx="1"/>
+        <rect x="50" y="24" width="14" height="36" fill="#a09a8e" rx="1"/><rect x="68" y="14" width="18" height="46" fill="#7a7468" rx="1"/>
+        <rect x="90" y="28" width="12" height="32" fill="#9a9488" rx="1"/>
+        <text x="65" y="92" text-anchor="middle" font-family="IBM Plex Mono" font-size="8.5" fill="#8a8478" font-weight="600">B — URBAN</text>
+        <rect x="140" y="76" width="125" height="24" fill="#f0eeea" stroke="#d1ccc2" rx="2"/>
+        <path d="M150,76 Q170,70 190,74 Q210,68 230,72 Q245,68 255,76" fill="none" stroke="#b5afa5" stroke-width="1.2"/>
+        <rect x="188" y="66" width="4" height="10" fill="#8a8478"/><polygon points="190,60 185,66 195,66" fill="#a09a8e"/>
+        <text x="202" y="92" text-anchor="middle" font-family="IBM Plex Mono" font-size="8.5" fill="#8a8478" font-weight="600">C — OPEN</text>
+        <rect x="275" y="76" width="125" height="24" fill="#f0eeea" stroke="#d1ccc2" rx="2"/>
+        <path d="M275,74 Q300,66 325,74 Q350,66 375,74 Q395,66 400,74" fill="none" stroke="#3b82f6" stroke-width="1.2" opacity=".4"/>
+        <text x="337" y="92" text-anchor="middle" font-family="IBM Plex Mono" font-size="8.5" fill="#8a8478" font-weight="600">D — COASTAL</text>
+      </svg><div class="cf-cap">ASCE 7-10 §26.7 — Surface Roughness Categories</div></div>
+      <div class="og" id="og-exp">
+        <button class="ob" onclick="sel('exp','B',this)"><div class="oi">🏙️</div><div class="ol">Exposure B<span class="od">Urban/suburban — closely spaced obstructions</span></div><div class="oc">✓</div></button>
+        <button class="ob sel" onclick="sel('exp','C',this)"><div class="oi">🌾</div><div class="ol">Exposure C<span class="od">Open terrain — scattered obstructions h&lt;9m</span></div><div class="oc">✓</div></button>
+        <button class="ob" onclick="sel('exp','D',this)"><div class="oi">🌊</div><div class="ol">Exposure D<span class="od">Flat coastal, unobstructed water surfaces</span></div><div class="oc">✓</div></button>
+      </div>
+    </div>
+  </div>
+
+  <!-- RISK -->
+  <div class="cc"><div class="cc-head"><div class="cc-title">Risk Category</div><div class="cc-ref">ASCE 7-10 Table 1.5-1</div></div>
+    <div class="cc-body">
+      <div class="cf"><svg viewBox="0 0 400 80">
+        <rect x="5" y="5" width="390" height="70" fill="var(--bg)" stroke="var(--border)" rx="3"/>
+        <text x="15" y="20" font-family="IBM Plex Mono" font-size="8.5" fill="#8a8478" font-weight="600">TABLE 1.5-1  RISK CATEGORY</text>
+        <line x1="15" y1="25" x2="385" y2="25" stroke="#d1ccc2"/>
+        <text x="15" y="37" font-family="IBM Plex Mono" font-size="8.5" fill="#b5afa5">I    Low hazard (agricultural, minor storage)</text>
+        <text x="15" y="49" font-family="IBM Plex Mono" font-size="8.5" fill="#4a453c" font-weight="600">II   Standard occupancy (most buildings)</text>
+        <text x="15" y="61" font-family="IBM Plex Mono" font-size="8.5" fill="#b5afa5">III  Substantial hazard (schools, >300 assembly)</text>
+        <text x="15" y="73" font-family="IBM Plex Mono" font-size="8.5" fill="#b5afa5">IV   Essential (hospitals, fire/police, power)</text>
+        <rect x="10" y="41" width="380" height="12" fill="rgba(37,99,235,.05)" rx="2"/>
+      </svg><div class="cf-cap">Risk Category determines importance factor</div></div>
+      <div class="og" id="og-risk">
+        <button class="ob" onclick="sel('risk','I',this)"><div class="oi">I</div><div class="ol">Cat. I<span class="od">Low hazard</span></div><div class="oc">✓</div></button>
+        <button class="ob sel" onclick="sel('risk','II',this)"><div class="oi">II</div><div class="ol">Cat. II<span class="od">Standard occupancy</span></div><div class="oc">✓</div></button>
+        <button class="ob" onclick="sel('risk','III',this)"><div class="oi">III</div><div class="ol">Cat. III<span class="od">Substantial hazard</span></div><div class="oc">✓</div></button>
+        <button class="ob" onclick="sel('risk','IV',this)"><div class="oi">IV</div><div class="ol">Cat. IV<span class="od">Essential</span></div><div class="oc">✓</div></button>
+      </div>
+    </div>
+  </div>
+
+  <!-- KZT -->
+  <div class="cc"><div class="cc-head"><div class="cc-title">Topographic Factor K<sub>zt</sub></div><div class="cc-ref">ASCE 7-10 §26.8 — Figure 26.8-1</div></div>
+    <div class="cc-body">
+      <div class="cf"><svg viewBox="0 0 400 80">
+        <line x1="10" y1="55" x2="120" y2="55" stroke="#b5afa5" stroke-width="1.5"/>
+        <text x="65" y="72" text-anchor="middle" font-family="IBM Plex Mono" font-size="8.5" fill="#8a8478">Flat → 1.0</text>
+        <line x1="145" y1="55" x2="175" y2="55" stroke="#b5afa5" stroke-width="1.5"/>
+        <path d="M175,55 Q210,15 245,55" fill="none" stroke="#b5afa5" stroke-width="1.5"/>
+        <line x1="245" y1="55" x2="275" y2="55" stroke="#b5afa5" stroke-width="1.5"/>
+        <text x="210" y="72" text-anchor="middle" font-family="IBM Plex Mono" font-size="8.5" fill="#8a8478">Hill / Ridge</text>
+        <line x1="300" y1="55" x2="335" y2="55" stroke="#b5afa5" stroke-width="1.5"/>
+        <path d="M335,55 Q348,25 360,25" fill="none" stroke="#b5afa5" stroke-width="1.5"/>
+        <line x1="360" y1="25" x2="400" y2="25" stroke="#b5afa5" stroke-width="1.5"/>
+        <text x="360" y="72" text-anchor="middle" font-family="IBM Plex Mono" font-size="8.5" fill="#8a8478">Escarpment</text>
+      </svg><div class="cf-cap">Figure 26.8-1 — Use 1.0 for flat terrain</div></div>
+      <div class="field"><label>K<sub>zt</sub> <span class="u">1.0=flat</span></label><div class="fr"><input type="number" id="iKzt" value="1.0" step="0.01" min="1"><div class="ub">—</div></div></div>
+    </div>
+  </div>
+
+  <!-- ENCLOSURE (auto-detected, override here) -->
+  <div class="cc"><div class="cc-head"><div class="cc-title">Enclosure Classification</div><div class="cc-ref">ASCE 7-10 §26.2 — Table 26.13-1</div></div>
+    <div class="cc-body">
+      <div class="cf"><svg viewBox="0 0 400 90">
+        <rect x="10" y="10" width="110" height="55" fill="none" stroke="#4a453c" stroke-width="1.5" rx="2"/>
+        <text x="65" y="42" text-anchor="middle" font-family="IBM Plex Mono" font-size="9" fill="#8a8478">±0.18</text>
+        <text x="65" y="80" text-anchor="middle" font-family="IBM Plex Mono" font-size="8.5" fill="#8a8478" font-weight="600">ENCLOSED</text>
+        <rect x="145" y="10" width="110" height="55" fill="none" stroke="#4a453c" stroke-width="1.5" rx="2" stroke-dasharray="8,4"/>
+        <rect x="145" y="22" width="3" height="30" fill="#dc2626" opacity=".5"/>
+        <text x="200" y="42" text-anchor="middle" font-family="IBM Plex Mono" font-size="9" fill="#dc2626">±0.55</text>
+        <text x="200" y="80" text-anchor="middle" font-family="IBM Plex Mono" font-size="8.5" fill="#8a8478" font-weight="600">PARTIALLY ENC.</text>
+        <line x1="280" y1="10" x2="280" y2="65" stroke="#4a453c" stroke-width="1.5"/>
+        <line x1="390" y1="10" x2="390" y2="65" stroke="#4a453c" stroke-width="1.5"/>
+        <line x1="280" y1="10" x2="390" y2="10" stroke="#4a453c" stroke-width="1.5"/>
+        <text x="335" y="42" text-anchor="middle" font-family="IBM Plex Mono" font-size="9" fill="#8a8478">0.00</text>
+        <text x="335" y="80" text-anchor="middle" font-family="IBM Plex Mono" font-size="8.5" fill="#8a8478" font-weight="600">OPEN</text>
+      </svg><div class="cf-cap">Table 26.13-1 — GCpi based on enclosure type</div></div>
+      <div style="font-size:11px;color:var(--ink3);margin-bottom:6px;">Auto-detected from wall openings. Override if needed:</div>
+      <div class="og" id="og-enc">
+        <button class="ob sel" onclick="sel('enc','enclosed',this)" id="enc-enclosed"><div class="oi">▪️</div><div class="ol">Enclosed<span class="od">GCpi = ±0.18</span></div><div class="oc">✓</div></button>
+        <button class="ob" onclick="sel('enc','partial',this)" id="enc-partial"><div class="oi">◻️</div><div class="ol">Partially Enclosed<span class="od">GCpi = ±0.55</span></div><div class="oc">✓</div></button>
+        <button class="ob" onclick="sel('enc','open',this)" id="enc-open"><div class="oi">▫️</div><div class="ol">Open<span class="od">GCpi = 0.00</span></div><div class="oc">✓</div></button>
+      </div>
+    </div>
+  </div>
+</div>
+
+<button class="big-btn primary" onclick="runCalc()">▶  Run ASCE 7-10 Analysis →</button>
+</div>
+
+<!-- ═══════ STEP 3: ANALYZE ═══════ -->
+<div class="step-panel" id="p3">
+<div class="sec-title">ASCE 7-10 Step-by-Step</div>
+<div class="sec-sub">Each calculation revealed progressively. Click Continue to advance.</div>
+<div class="ss" id="ss2"></div>
+<div id="walkthrough"></div>
+</div>
+
+</div>
+
+<script>
+let step=1, walls={front:true,back:true,left:true,right:true}; // true=closed
+let sels={exp:'C',risk:'II',enc:'enclosed'};
+let walkI=0, R=null;
+
+function goStep(n){
+  if(n>step+1)return;step=n;
+  document.querySelectorAll('.step-panel').forEach(p=>p.classList.remove('active'));
+  document.getElementById('p'+n).classList.add('active');
+  ['sd1','sd2','sd3'].forEach((id,i)=>{const d=document.getElementById(id);d.className='step-dot';if(i+1<n)d.classList.add('done');if(i+1===n)d.classList.add('active');});
+  if(n===2)updSummary();
+  window.scrollTo({top:0,behavior:'smooth'});
+}
+
+function sel(g,v,el){sels[g]=v;el.closest('.og').querySelectorAll('.ob').forEach(b=>b.classList.remove('sel'));el.classList.add('sel');}
+
+function gv(id){return +document.getElementById(id).value||0;}
+
+// ════════════════════════
+// WALL TOGGLE + DETECTION
+// ════════════════════════
+function toggleWall(face){
+  walls[face]=!walls[face];
+  detectEnclosure();
+  upd();
+}
+
+function detectEnclosure(){
+  const openCount=Object.values(walls).filter(v=>!v).length;
+  const closedCount=4-openCount;
+  let type,gcpi,icon,label;
+  if(openCount===0){type='enclosed';gcpi='±0.18';icon='🏢';label='Enclosed — all walls closed';}
+  else if(openCount>=3){type='open';gcpi='0.00';icon='⛺';label='Open Structure — '+openCount+' walls open';}
+  else{type='partial';gcpi='±0.55';icon='🏗️';label='Partially Enclosed — '+openCount+' wall'+(openCount>1?'s':'')+' open';}
+  document.getElementById('det-icon').textContent=icon;
+  document.getElementById('det-label').textContent=label;
+  document.getElementById('det-gcpi').textContent='GCpi = '+gcpi;
+  // Update classify step
+  sels.enc=type;
+  document.querySelectorAll('#og-enc .ob').forEach(b=>b.classList.remove('sel'));
+  const map={enclosed:'enc-enclosed',partial:'enc-partial',open:'enc-open'};
+  if(document.getElementById(map[type]))document.getElementById(map[type]).classList.add('sel');
+}
+
+// ════════════════════════
+// LIVE PREVIEW
+// ════════════════════════
+function upd(){
+  const B=gv('iB')||12,L=gv('iL')||7,he=gv('ihe')||3,hr=gv('ihr')||3,V=gv('iV')||150;
+  document.getElementById('pv-info').textContent=B+'×'+L+'m  h='+he+'m  V='+V+'km/h';
+  draw3D(B,L,he,hr,V);
+  drawPlan(B,L);
+}
+
+function draw3D(B,L,he,hr,V){
+  const svg=document.getElementById('bsvg');
+  const W=660,H=360,gnd=H-45,cx=W/2+20;
+  const mx=Math.max(B,hr,5);
+  const sc=Math.min(180/mx,18);
+  const bw=B*sc,bhe=he*sc,bhr=hr*sc;
+  const bx=cx-bw/2,by=gnd-bhe,ry=gnd-bhr;
+  const dp=Math.min(L*sc*.32,80);
+  const hasRidge=hr>he+.2;
+
+  // Colors for wall states
+  const fc=w=>walls[w]?'#d1ccc2':'none';
+  const sc2=w=>walls[w]?'#8a8478':'#dc2626';
+  const sd=w=>walls[w]?'none':'6,4';
+  const op=w=>walls[w]?'.55':'.25';
+
+  // Wind intensity
+  const wi=Math.min(V/200,1);
+
+  svg.innerHTML=`
+    <defs>
+      <marker id="wA" markerWidth="5" markerHeight="4" refX="4" refY="2" orient="auto"><path d="M0,0L0,4L5,2z" fill="#2563eb" opacity=".5"/></marker>
+      <marker id="dA" markerWidth="4" markerHeight="4" refX="2" refY="4" orient="auto"><path d="M0,0L4,0L2,4z" fill="#4a453c"/></marker>
+      <marker id="dAu" markerWidth="4" markerHeight="4" refX="2" refY="0" orient="auto"><path d="M0,4L4,4L2,0z" fill="#4a453c"/></marker>
+    </defs>
+
+    <!-- Ground -->
+    <line x1="0" y1="${gnd}" x2="${W}" y2="${gnd}" stroke="#d1ccc2" stroke-width="1.5"/>
+    <rect x="0" y="${gnd}" width="${W}" height="${H-gnd}" fill="#f0eeea"/>
+    ${Array.from({length:18},(_,i)=>`<line x1="${i*40}" y1="${gnd}" x2="${i*40-10}" y2="${gnd+10}" stroke="#d1ccc2" stroke-width=".6"/>`).join('')}
+
+    <!-- RIGHT SIDE WALL (clickable) -->
+    <polygon class="wall-click ${walls.right?'':'wall-open'}" onclick="toggleWall('right')"
+      points="${bx+bw},${by} ${bx+bw+dp},${by-dp*.33} ${bx+bw+dp},${gnd-dp*.33} ${bx+bw},${gnd}"
+      fill="${fc('right')}" fill-opacity="${op('right')}" stroke="${sc2('right')}" stroke-width="1.5" stroke-dasharray="${sd('right')}"/>
+    ${!walls.right?`<text x="${bx+bw+dp/2+4}" y="${(by+gnd)/2-dp*.16}" text-anchor="middle" font-family="IBM Plex Mono" font-size="9" fill="#dc2626" font-weight="600" transform="rotate(-18,${bx+bw+dp/2+4},${(by+gnd)/2-dp*.16})">OPEN</text>`:''}
+
+    <!-- ROOF -->
+    ${hasRidge?`
+      <polygon points="${bx},${by} ${cx-20},${ry} ${bx+bw},${by}" fill="#a09a8e" fill-opacity=".5" stroke="#8a8478" stroke-width="1.5"/>
+      <polygon points="${cx-20},${ry} ${bx+bw},${by} ${bx+bw+dp},${by-dp*.33} ${cx-20+dp},${ry-dp*.33}" fill="#8a8478" fill-opacity=".35" stroke="#8a8478" stroke-width="1"/>
+    `:`
+      <polygon points="${bx},${by} ${bx+dp},${by-dp*.33} ${bx+bw+dp},${by-dp*.33} ${bx+bw},${by}" fill="#a09a8e" fill-opacity=".45" stroke="#8a8478" stroke-width="1.5"/>
+    `}
+
+    <!-- FRONT WALL (windward — clickable) -->
+    <rect class="wall-click ${walls.front?'':'wall-open'}" onclick="toggleWall('front')"
+      x="${bx}" y="${by}" width="${bw}" height="${gnd-by}"
+      fill="${fc('front')}" fill-opacity="${op('front')}" stroke="${sc2('front')}" stroke-width="1.5" stroke-dasharray="${sd('front')}" rx="1"/>
+    ${!walls.front?`<text x="${cx-20}" y="${(by+gnd)/2}" text-anchor="middle" font-family="IBM Plex Mono" font-size="11" fill="#dc2626" font-weight="600">OPEN</text>`:''}
+    ${walls.front?genWindows(bx,by,bw,gnd-by):''}
+
+    <!-- BACK WALL (leeward — shown as line at rear) -->
+    <line class="wall-click ${walls.back?'':'wall-open'}" onclick="toggleWall('back')"
+      x1="${bx+dp}" y1="${by-dp*.33}" x2="${bx+bw+dp}" y2="${by-dp*.33}"
+      stroke="${sc2('back')}" stroke-width="${walls.back?'1.5':'1.5'}" stroke-dasharray="${sd('back')}" opacity="${walls.back?'.4':'.6'}"/>
+    ${!walls.back?`<text x="${bx+bw/2+dp}" y="${by-dp*.33-5}" text-anchor="middle" font-family="IBM Plex Mono" font-size="8" fill="#dc2626" font-weight="600">BACK OPEN</text>`:''}
+
+    <!-- LEFT WALL (shown as front-left edge line / implied) -->
+    <line class="wall-click ${walls.left?'':'wall-open'}" onclick="toggleWall('left')"
+      x1="${bx}" y1="${by}" x2="${bx+dp}" y2="${by-dp*.33}"
+      stroke="${sc2('left')}" stroke-width="${walls.left?'1.5':'2'}" stroke-dasharray="${sd('left')}" opacity="${walls.left?'.35':'.7'}"/>
+    <line class="wall-click ${walls.left?'':'wall-open'}" onclick="toggleWall('left')"
+      x1="${bx}" y1="${gnd}" x2="${bx+dp}" y2="${gnd-dp*.33}"
+      stroke="${sc2('left')}" stroke-width="${walls.left?'1':'1.5'}" stroke-dasharray="${sd('left')}" opacity="${walls.left?'.2':'.5'}"/>
+    ${!walls.left?`<text x="${bx+dp/2-2}" y="${(by+gnd)/2-dp*.16}" text-anchor="middle" font-family="IBM Plex Mono" font-size="8" fill="#dc2626" font-weight="600" transform="rotate(-18,${bx+dp/2-2},${(by+gnd)/2-dp*.16})">LEFT OPEN</text>`:''}
+
+    <!-- FACE LABELS -->
+    <text x="${cx-20}" y="${gnd+12}" text-anchor="middle" font-family="IBM Plex Mono" font-size="8" fill="#b5afa5">FRONT (WW)</text>
+    <text x="${bx+bw+dp/2+6}" y="${gnd-dp*.33+12}" font-family="IBM Plex Mono" font-size="8" fill="#b5afa5" text-anchor="middle" transform="rotate(-18,${bx+bw+dp/2+6},${gnd-dp*.33+12})">RIGHT (SW)</text>
+
+    <!-- DIMENSIONS -->
+    <line x1="${bx+bw+dp+18}" y1="${gnd}" x2="${bx+bw+dp+18}" y2="${by}" stroke="#4a453c" stroke-width=".8" marker-start="url(#dA)" marker-end="url(#dAu)"/>
+    <text x="${bx+bw+dp+26}" y="${(gnd+by)/2+4}" font-family="IBM Plex Mono" font-size="11" fill="#4a453c" font-weight="600">${he}m</text>
+    ${hasRidge?`<line x1="${bx+bw+dp+40}" y1="${gnd}" x2="${bx+bw+dp+40}" y2="${ry}" stroke="#8a8478" stroke-width=".6" stroke-dasharray="3,3"/>
+    <text x="${bx+bw+dp+48}" y="${(gnd+ry)/2+4}" font-family="IBM Plex Mono" font-size="10" fill="#8a8478">${hr}m</text>`:''}
+    <line x1="${bx}" y1="${gnd+22}" x2="${bx+bw}" y2="${gnd+22}" stroke="#4a453c" stroke-width=".8"/>
+    <text x="${cx-20}" y="${gnd+34}" text-anchor="middle" font-family="IBM Plex Mono" font-size="11" fill="#4a453c" font-weight="600">B = ${B}m</text>
+    <text x="${bx+bw+dp/2+8}" y="${by-dp*.17-6}" text-anchor="middle" font-family="IBM Plex Mono" font-size="9" fill="#8a8478" transform="rotate(-18,${bx+bw+dp/2+8},${by-dp*.17-6})">L = ${L}m</text>
+
+    <!-- WIND ARROWS -->
+    ${[0,1,2,3].map(i=>{const y=by-5+i*(gnd-by+5)/3;return`<line x1="${bx-70-wi*20}" y1="${y}" x2="${bx-15}" y2="${y}" stroke="#2563eb" stroke-width="${1.2+wi}" marker-end="url(#wA)" opacity="${.3+wi*.25}"/>`}).join('')}
+    <text x="${bx-45-wi*10}" y="${by-18}" text-anchor="middle" font-family="IBM Plex Mono" font-size="11" fill="#2563eb" font-weight="700" letter-spacing=".5">WIND</text>
+    <text x="${bx-45-wi*10}" y="${by-7}" text-anchor="middle" font-family="IBM Plex Mono" font-size="9" fill="#3b82f6">${V} km/h</text>
+
+    ${hasRidge?`<text x="${cx-12}" y="${ry-6}" font-family="IBM Plex Mono" font-size="9" fill="#d97706" font-weight="600">θ=${(Math.atan2(hr-he,B/2)*180/Math.PI).toFixed(1)}°</text>`:''}
+  `;
+}
+
+function genWindows(bx,by,bw,bh){
+  let h='';const c=Math.max(2,Math.min(6,Math.floor(bw/28))),r=Math.max(1,Math.min(5,Math.floor(bh/22)));
+  const px=bw*.1,py=bh*.08,ww=(bw-px*2-(c-1)*4)/c,wh=(bh-py*2-(r-1)*4)/r;
+  for(let ri=0;ri<r;ri++)for(let ci=0;ci<c;ci++){
+    h+=`<rect x="${bx+px+ci*(ww+4)}" y="${by+py+ri*(wh+4)}" width="${ww}" height="${wh}" rx="1" fill="rgba(37,99,235,.04)" stroke="rgba(138,132,120,.18)" stroke-width=".5"/>`;
+  }return h;
+}
+
+function drawPlan(B,L){
+  const svg=document.getElementById('plan-svg');
+  const sc=Math.min(160/Math.max(B,L),10);
+  const pw=B*sc,pl=L*sc;
+  const ox=170-pw/2,oy=130-pl/2;
+
+  const wc=f=>walls[f]?'#8a8478':'#dc2626';
+  const wd=f=>walls[f]?'':'6,4';
+  const wo=f=>walls[f]?'1':'1.5';
+  const wop=f=>walls[f]?'1':'.5';
+  const lbl=(f,x,y)=>!walls[f]?`<text x="${x}" y="${y}" text-anchor="middle" font-family="IBM Plex Mono" font-size="8" fill="#dc2626" font-weight="600">OPEN</text>`:'';
+
+  svg.innerHTML=`
+    <!-- Building outline -->
+    <rect x="${ox}" y="${oy}" width="${pw}" height="${pl}" fill="rgba(209,204,194,.2)" stroke="none"/>
+
+    <!-- Front (bottom — windward) -->
+    <line x1="${ox}" y1="${oy+pl}" x2="${ox+pw}" y2="${oy+pl}" stroke="${wc('front')}" stroke-width="2.5" stroke-dasharray="${wd('front')}" opacity="${wop('front')}" class="wall-click" onclick="toggleWall('front')" cursor="pointer"/>
+    ${lbl('front',ox+pw/2,oy+pl+14)}
+
+    <!-- Back (top — leeward) -->
+    <line x1="${ox}" y1="${oy}" x2="${ox+pw}" y2="${oy}" stroke="${wc('back')}" stroke-width="2.5" stroke-dasharray="${wd('back')}" opacity="${wop('back')}" class="wall-click" onclick="toggleWall('back')" cursor="pointer"/>
+    ${lbl('back',ox+pw/2,oy-6)}
+
+    <!-- Left -->
+    <line x1="${ox}" y1="${oy}" x2="${ox}" y2="${oy+pl}" stroke="${wc('left')}" stroke-width="2.5" stroke-dasharray="${wd('left')}" opacity="${wop('left')}" class="wall-click" onclick="toggleWall('left')" cursor="pointer"/>
+    ${lbl('left',ox-16,oy+pl/2)}
+
+    <!-- Right -->
+    <line x1="${ox+pw}" y1="${oy}" x2="${ox+pw}" y2="${oy+pl}" stroke="${wc('right')}" stroke-width="2.5" stroke-dasharray="${wd('right')}" opacity="${wop('right')}" class="wall-click" onclick="toggleWall('right')" cursor="pointer"/>
+    ${lbl('right',ox+pw+18,oy+pl/2)}
+
+    <!-- Labels -->
+    <text x="${ox+pw/2}" y="${oy+pl+28}" text-anchor="middle" font-family="IBM Plex Mono" font-size="9" fill="#2563eb" font-weight="600">WINDWARD (Front)</text>
+    <text x="${ox+pw/2}" y="${oy-16}" text-anchor="middle" font-family="IBM Plex Mono" font-size="9" fill="#dc2626" font-weight="600">LEEWARD (Back)</text>
+    <text x="${ox-6}" y="${oy+pl/2}" text-anchor="end" font-family="IBM Plex Mono" font-size="8" fill="#8a8478">SIDE</text>
+    <text x="${ox+pw+6}" y="${oy+pl/2}" font-family="IBM Plex Mono" font-size="8" fill="#8a8478">SIDE</text>
+
+    <!-- Wind arrow -->
+    <defs><marker id="pA" markerWidth="6" markerHeight="5" refX="5" refY="2.5" orient="auto"><path d="M0,0L0,5L6,2.5z" fill="#2563eb"/></marker></defs>
+    <line x1="${ox+pw/2}" y1="${oy+pl+52}" x2="${ox+pw/2}" y2="${oy+pl+38}" stroke="#2563eb" stroke-width="2" marker-end="url(#pA)"/>
+    <text x="${ox+pw/2}" y="${oy+pl+62}" text-anchor="middle" font-family="IBM Plex Mono" font-size="9" fill="#2563eb" font-weight="600">WIND ↑</text>
+
+    <!-- Dims -->
+    <text x="${ox+pw/2}" y="${oy+pl/2+3}" text-anchor="middle" font-family="IBM Plex Mono" font-size="10" fill="#b5afa5">${B}m × ${L}m</text>
+  `;
+}
+
+// ════════════════════════
+// SUMMARY
+// ════════════════════════
+function updSummary(){
+  const h=`<div class="sc">B <span class="v">${gv('iB')}m</span></div>
+    <div class="sc">L <span class="v">${gv('iL')}m</span></div>
+    <div class="sc">h <span class="v">${gv('ihe')}m</span></div>
+    <div class="sc">V <span class="v">${gv('iV')} km/h</span></div>
+    <div class="sc">WALLS <span class="v">${Object.values(walls).filter(v=>!v).length} open</span></div>`;
+  document.getElementById('ss1').innerHTML=h;
+}
+
+// ════════════════════════
+// ASCE 7-10 CORE
+// ════════════════════════
+const EXP={B:{alpha:7,zg:365.76,a:1/7,c:.45,l:97.54,eps:1/3,zmin:9.14},C:{alpha:9.5,zg:274.32,a:1/9.5,c:.2,l:152.4,eps:1/8,zmin:4.57},D:{alpha:11.5,zg:213.36,a:1/11.5,c:.15,l:198.12,eps:1/12,zmin:2.13}};
+function Kz(z,e){const p=EXP[e],zu=Math.max(z,p.zmin);return 2.01*Math.pow(zu/p.zg,2*p.a);}
+function qz(z,V,e,Kzt=1,Kd=.85){const v=V/3.6;return .613*Kz(z,e)*Kzt*Kd*v*v/1000;}
+function Gf(h,Vm,e){const p=EXP[e],Lz=p.l*Math.pow(h/10,p.eps),Iz=p.c*Math.pow(10/Math.max(h,p.zmin),1/6),Q2=1/(1+.63*Math.pow(2*h/Lz,.63)),n1=75*Vm/h,N1=n1*Lz/Vm,Rn=7.47*N1/Math.pow(1+10.3*N1,5/3),eta=4.6*n1*h/Vm,Rh=1/eta-1/(2*eta*eta)*(1-Math.exp(-2*eta)),R2=Math.PI/(4*.02)*Rn*Rh*Rh;return Math.max(.925*(1+1.7*Iz*Math.sqrt(9.04*Q2+11.56*R2))/(1+1.7*3.4*Iz),.85);}
+function CpLW(r){if(r<=1)return-.5;if(r<=2)return-.5+(r-1)*.1;if(r<=4)return-.3;return-.2;}
+
+// ════════════════════════
+// RUN ANALYSIS
+// ════════════════════════
+function runCalc(){
+  const B=gv('iB'),L=gv('iL'),he=gv('ihe'),hr=gv('ihr'),V=gv('iV');
+  const exp=sels.exp,Kzt=+document.getElementById('iKzt').value||1,Kd=.85;
+  let GCpi;if(sels.enc==='enclosed')GCpi=.18;else if(sels.enc==='partial')GCpi=.55;else GCpi=0;
+  const h=he,Vm=V/3.6,gf=Gf(h,Vm,exp),qh=qz(h,V,exp,Kzt,Kd),kzh=Kz(h,exp);
+  const LB=L/B,theta=Math.atan((hr-he)/(B/2))*180/Math.PI;
+  const CpWW=.8,CpLw=CpLW(LB),CpSW=-.7;
+  let CpRmin,CpRmax;
+  if(theta<10){CpRmin=-.9;CpRmax=-.18;}else if(theta<20){CpRmin=-.9;CpRmax=-.18;}else if(theta<27){CpRmin=-.7;CpRmax=0;}else{CpRmin=-.4;CpRmax=.3;}
+
+  const nWW=qh*gf*CpWW+qh*GCpi,nLW=qh*gf*CpLw-qh*GCpi,nSW=qh*gf*CpSW-qh*GCpi,nR=qh*gf*CpRmin-qh*GCpi;
+
+  R={B,L,he,hr,h,V,Vm,exp,Kzt,Kd,GCpi,gf,qh,kzh,LB,theta,CpWW,CpLw,CpSW,CpRmin,CpRmax,nWW,nLW,nSW,nR,enc:sels.enc};
+  goStep(3);buildWalk();
+}
+
+function buildWalk(){
+  const r=R,e=EXP[r.exp];
+  document.getElementById('ss2').innerHTML=`<div class="sc">B×L <span class="v">${r.B}×${r.L}m</span></div><div class="sc">h <span class="v">${r.h}m</span></div><div class="sc">V <span class="v">${r.V} km/h</span></div><div class="sc">EXP <span class="v">${r.exp}</span></div><div class="sc">GCpi <span class="v">${r.GCpi===0?'0.00':'±'+r.GCpi}</span></div><div class="sc">WALLS OPEN <span class="v">${Object.values(walls).filter(v=>!v).length}</span></div>`;
+
+  const maxP=Math.max(Math.abs(r.nWW),Math.abs(r.nLW),Math.abs(r.nSW),Math.abs(r.nR));
+
+  // ── SVG: Wind Speed Map Diagram ──
+  const svgWindSpeed=`<div class="pd-wrap"><div class="pd-head">Wind Speed — 3-Second Gust</div><div class="pd-canvas">
+    <svg viewBox="0 0 520 140">
+      <defs><marker id="wsA" markerWidth="6" markerHeight="4" refX="5" refY="2" orient="auto"><path d="M0,0L0,4L6,2z" fill="#2563eb"/></marker></defs>
+      <!-- Anemometer icon -->
+      <circle cx="50" cy="50" r="22" fill="none" stroke="#2563eb" stroke-width="1.5" opacity=".3"/>
+      <line x1="50" y1="50" x2="50" y2="28" stroke="#2563eb" stroke-width="2"/>
+      <line x1="50" y1="50" x2="68" y2="62" stroke="#2563eb" stroke-width="2"/>
+      <line x1="50" y1="50" x2="32" y2="62" stroke="#2563eb" stroke-width="2"/>
+      <circle cx="50" cy="28" r="5" fill="#2563eb" opacity=".2" stroke="#2563eb"/>
+      <circle cx="68" cy="62" r="5" fill="#2563eb" opacity=".2" stroke="#2563eb"/>
+      <circle cx="32" cy="62" r="5" fill="#2563eb" opacity=".2" stroke="#2563eb"/>
+      <circle cx="50" cy="50" r="3" fill="#2563eb"/>
+      <text x="50" y="90" text-anchor="middle" font-family="IBM Plex Mono" font-size="8" fill="#8a8478">ANEMOMETER</text>
+      <!-- Arrow to value -->
+      <line x1="85" y1="50" x2="140" y2="50" stroke="#2563eb" stroke-width="1.5" marker-end="url(#wsA)"/>
+      <!-- Value box -->
+      <rect x="150" y="20" width="180" height="60" rx="6" fill="#eff6ff" stroke="#bfdbfe" stroke-width="1.5"/>
+      <text x="240" y="42" text-anchor="middle" font-family="IBM Plex Mono" font-size="9" fill="#8a8478">3-SECOND GUST SPEED</text>
+      <text x="240" y="65" text-anchor="middle" font-family="Literata" font-size="22" font-weight="900" fill="#2563eb">${r.V} km/h</text>
+      <!-- Conversion -->
+      <line x1="340" y1="50" x2="380" y2="50" stroke="#b5afa5" stroke-width="1" stroke-dasharray="3,3"/>
+      <rect x="390" y="28" width="120" height="44" rx="5" fill="#f3f1ed" stroke="#d1ccc2"/>
+      <text x="450" y="47" text-anchor="middle" font-family="IBM Plex Mono" font-size="8" fill="#8a8478">CONVERTED</text>
+      <text x="450" y="64" text-anchor="middle" font-family="Literata" font-size="16" font-weight="900" fill="#4a453c">${r.Vm.toFixed(2)} m/s</text>
+      <text x="260" y="110" text-anchor="middle" font-family="IBM Plex Mono" font-size="8.5" fill="#b5afa5">ASCE 7-10 §26.5 — Basic Wind Speed V (Risk Cat. ${sels.risk})</text>
+    </svg></div></div>`;
+
+  // ── SVG: Kz Profile Diagram ──
+  const hMax=Math.max(r.h*1.3,15);
+  const kzPts=[];for(let z=0;z<=hMax;z+=hMax/20){kzPts.push({z,kz:Kz(z,r.exp)});}
+  const kzMax=Math.max(...kzPts.map(p=>p.kz));
+  const svgKz=`<div class="pd-wrap"><div class="pd-head">Kz Velocity Pressure Exposure Profile</div><div class="pd-canvas">
+    <svg viewBox="0 0 520 200">
+      <!-- Grid -->
+      ${[0,.25,.5,.75,1].map(f=>`<line x1="80" y1="${170-f*140}" x2="420" y2="${170-f*140}" stroke="#e4e0d8" stroke-width=".5"/><text x="75" y="${174-f*140}" text-anchor="end" font-family="IBM Plex Mono" font-size="8" fill="#b5afa5">${(f*hMax).toFixed(0)}m</text>`).join('')}
+      ${[0,.25,.5,.75,1].map(f=>`<text x="${80+f*340}" y="${184}" text-anchor="middle" font-family="IBM Plex Mono" font-size="8" fill="#b5afa5">${(f*kzMax*1.1).toFixed(2)}</text>`).join('')}
+      <!-- Kz profile curve -->
+      <polyline fill="none" stroke="#2563eb" stroke-width="2" points="${kzPts.map(p=>`${80+(p.kz/(kzMax*1.1))*340},${170-(p.z/hMax)*140}`).join(' ')}"/>
+      <!-- Shaded area -->
+      <polygon fill="rgba(37,99,235,.06)" stroke="none" points="80,170 ${kzPts.map(p=>`${80+(p.kz/(kzMax*1.1))*340},${170-(p.z/hMax)*140}`).join(' ')} 80,${170-(hMax/hMax)*140}"/>
+      <!-- Height marker at h -->
+      <line x1="80" y1="${170-(r.h/hMax)*140}" x2="${80+(r.kzh/(kzMax*1.1))*340}" y2="${170-(r.h/hMax)*140}" stroke="#d97706" stroke-width="1.5" stroke-dasharray="4,3"/>
+      <circle cx="${80+(r.kzh/(kzMax*1.1))*340}" cy="${170-(r.h/hMax)*140}" r="4" fill="#d97706"/>
+      <text x="${85+(r.kzh/(kzMax*1.1))*340}" y="${167-(r.h/hMax)*140}" font-family="IBM Plex Mono" font-size="10" fill="#d97706" font-weight="600">Kz = ${r.kzh.toFixed(4)} at h=${r.h}m</text>
+      <!-- Axes labels -->
+      <text x="30" y="100" text-anchor="middle" font-family="IBM Plex Mono" font-size="9" fill="#8a8478" transform="rotate(-90,30,100)">Height z (m)</text>
+      <text x="250" y="198" text-anchor="middle" font-family="IBM Plex Mono" font-size="9" fill="#8a8478">Kz — Exposure ${r.exp} (α=${e.alpha}, zg=${e.zg}m)</text>
+      <!-- Building silhouette -->
+      <rect x="440" y="${170-(r.h/hMax)*140}" width="30" height="${(r.h/hMax)*140}" fill="#d1ccc2" stroke="#8a8478" stroke-width="1" rx="1" opacity=".5"/>
+      <text x="455" y="${170-(r.h/hMax)*140-4}" text-anchor="middle" font-family="IBM Plex Mono" font-size="8" fill="#8a8478">${r.h}m</text>
+      <line x1="440" y1="170" x2="470" y2="170" stroke="#8a8478" stroke-width="1"/>
+    </svg></div></div>`;
+
+  // ── SVG: Velocity Pressure Diagram ──
+  const svgQh=`<div class="pd-wrap"><div class="pd-head">Velocity Pressure Equation Breakdown</div><div class="pd-canvas">
+    <svg viewBox="0 0 520 130">
+      <!-- Factor boxes -->
+      ${[{x:20,l:'0.613',s:'constant',c:'#8a8478'},{x:100,l:'Kz',s:r.kzh.toFixed(4),c:'#2563eb'},{x:190,l:'Kzt',s:r.Kzt.toFixed(2),c:'#8a8478'},{x:270,l:'Kd',s:r.Kd.toFixed(2),c:'#8a8478'},{x:350,l:'V²',s:(r.Vm*r.Vm).toFixed(1),c:'#d97706'}].map((f,i)=>`
+        <rect x="${f.x}" y="20" width="70" height="50" rx="5" fill="${f.c==='#2563eb'?'#eff6ff':f.c==='#d97706'?'#fffbeb':'#f3f1ed'}" stroke="${f.c==='#2563eb'?'#bfdbfe':f.c==='#d97706'?'#fde68a':'#d1ccc2'}" stroke-width="1.5"/>
+        <text x="${f.x+35}" y="40" text-anchor="middle" font-family="IBM Plex Mono" font-size="11" fill="${f.c}" font-weight="700">${f.l}</text>
+        <text x="${f.x+35}" y="56" text-anchor="middle" font-family="IBM Plex Mono" font-size="9" fill="${f.c}" opacity=".7">${f.s}</text>
+        ${i<4?`<text x="${f.x+78}" y="48" font-family="IBM Plex Mono" font-size="14" fill="#b5afa5">×</text>`:''}
+      `).join('')}
+      <!-- Equals -->
+      <text x="430" y="48" font-family="IBM Plex Mono" font-size="14" fill="#b5afa5">=</text>
+      <!-- Result -->
+      <rect x="445" y="20" width="70" height="50" rx="5" fill="#fffbeb" stroke="#fde68a" stroke-width="2"/>
+      <text x="480" y="40" text-anchor="middle" font-family="IBM Plex Mono" font-size="8" fill="#d97706">q<tspan font-size="6" dy="2">h</tspan></text>
+      <text x="480" y="58" text-anchor="middle" font-family="Literata" font-size="14" font-weight="900" fill="#d97706">${r.qh.toFixed(4)}</text>
+      <text x="480" y="82" text-anchor="middle" font-family="IBM Plex Mono" font-size="8" fill="#d97706">kN/m²</text>
+      <text x="260" y="110" text-anchor="middle" font-family="IBM Plex Mono" font-size="8.5" fill="#b5afa5">ASCE 7-10 Eq. 26.10-1 — q = 0.613·Kz·Kzt·Kd·V² [N/m²]</text>
+    </svg></div></div>`;
+
+  // ── SVG: Gust Factor Concept ──
+  const svgGf=`<div class="pd-wrap"><div class="pd-head">Gust-Effect Factor Concept</div><div class="pd-canvas">
+    <svg viewBox="0 0 520 150">
+      <!-- Wind speed time series sketch -->
+      <text x="20" y="16" font-family="IBM Plex Mono" font-size="9" fill="#8a8478">Wind Speed vs Time (conceptual)</text>
+      <line x1="40" y1="110" x2="480" y2="110" stroke="#d1ccc2" stroke-width="1"/>
+      <line x1="40" y1="20" x2="40" y2="110" stroke="#d1ccc2" stroke-width="1"/>
+      <!-- Mean wind line -->
+      <line x1="40" y1="65" x2="480" y2="65" stroke="#2563eb" stroke-width="1.5" stroke-dasharray="6,4" opacity=".5"/>
+      <text x="485" y="68" font-family="IBM Plex Mono" font-size="8" fill="#2563eb">V̄ mean</text>
+      <!-- Turbulent signal -->
+      <path d="M40,65 Q60,45 80,60 Q100,80 120,55 Q140,35 160,62 Q180,75 200,48 Q220,30 240,58 Q260,72 280,42 Q300,25 320,55 Q340,70 360,45 Q380,32 400,60 Q420,75 440,50 Q460,38 480,58" fill="none" stroke="#4a453c" stroke-width="1.2"/>
+      <!-- 3-second gust peak -->
+      <rect x="285" y="22" width="50" height="10" rx="2" fill="#dc2626" opacity=".15"/>
+      <line x1="310" y1="22" x2="310" y2="110" stroke="#dc2626" stroke-width=".7" stroke-dasharray="2,2" opacity=".4"/>
+      <text x="310" y="18" text-anchor="middle" font-family="IBM Plex Mono" font-size="7" fill="#dc2626" font-weight="600">3s GUST</text>
+      <!-- Gf result box -->
+      <rect x="370" y="120" width="140" height="28" rx="5" fill="#eff6ff" stroke="#bfdbfe" stroke-width="1.5"/>
+      <text x="440" y="138" text-anchor="middle" font-family="IBM Plex Mono" font-size="10" fill="#2563eb" font-weight="700">G<tspan font-size="7" dy="2">f</tspan><tspan dy="-2"> = ${r.gf.toFixed(4)}</tspan></text>
+      <!-- Labels -->
+      <text x="24" y="68" font-family="IBM Plex Mono" font-size="7" fill="#b5afa5" transform="rotate(-90,24,68)">V</text>
+      <text x="260" y="124" text-anchor="middle" font-family="IBM Plex Mono" font-size="7" fill="#b5afa5">time →</text>
+      <text x="140" y="145" font-family="IBM Plex Mono" font-size="8" fill="#b5afa5">§26.9 accounts for turbulence, building size, and resonance</text>
+    </svg></div></div>`;
+
+  // ── SVG: Cp Wall & Roof Diagram ──
+  const svgCp=`<div class="pd-wrap"><div class="pd-head">Figure 27.4-1 — External Pressure Coefficients Cp</div><div class="pd-canvas">
+    <svg viewBox="0 0 540 240">
+      <defs>
+        <marker id="cpA" markerWidth="6" markerHeight="4" refX="5" refY="2" orient="auto"><path d="M0,0L0,4L6,2z" fill="#d97706"/></marker>
+        <marker id="cpR" markerWidth="6" markerHeight="4" refX="5" refY="2" orient="auto"><path d="M0,0L0,4L6,2z" fill="#dc2626"/></marker>
+        <marker id="cpB" markerWidth="6" markerHeight="4" refX="5" refY="2" orient="auto"><path d="M0,0L0,4L6,2z" fill="#2563eb"/></marker>
+      </defs>
+      <!-- Building cross section -->
+      <rect x="160" y="80" width="200" height="100" fill="#f0eeea" stroke="#8a8478" stroke-width="1.5"/>
+      ${r.hr>r.he+.2?`<polygon points="160,80 260,${80-Math.min((r.hr-r.he)*5,40)} 360,80" fill="#e8e5df" stroke="#8a8478" stroke-width="1.5"/>`:''}
+      <line x1="100" y1="180" x2="440" y2="180" stroke="#d1ccc2" stroke-width="1.5"/>
+
+      <!-- WW arrows + label -->
+      ${[0,1,2,3].map(i=>{const y=90+i*22;return`<line x1="100" y1="${y}" x2="155" y2="${y}" stroke="#d97706" stroke-width="1.5" marker-end="url(#cpA)" opacity=".7"/>`}).join('')}
+      <rect x="58" y="105" width="38" height="32" rx="4" fill="#fffbeb" stroke="#fde68a"/>
+      <text x="77" y="118" text-anchor="middle" font-family="IBM Plex Mono" font-size="8" fill="#d97706">Cp</text>
+      <text x="77" y="132" text-anchor="middle" font-family="Literata" font-size="14" font-weight="900" fill="#d97706">+0.8</text>
+      <text x="77" y="150" text-anchor="middle" font-family="IBM Plex Mono" font-size="7" fill="#d97706">WINDWARD</text>
+
+      <!-- LW arrows + label -->
+      ${[0,1,2].map(i=>{const y=95+i*28;return`<line x1="365" y1="${y}" x2="420" y2="${y}" stroke="#dc2626" stroke-width="1.5" marker-end="url(#cpR)" opacity=".7"/>`}).join('')}
+      <rect x="425" y="105" width="50" height="32" rx="4" fill="#fef2f2" stroke="#fecaca"/>
+      <text x="450" y="118" text-anchor="middle" font-family="IBM Plex Mono" font-size="8" fill="#dc2626">Cp</text>
+      <text x="450" y="132" text-anchor="middle" font-family="Literata" font-size="14" font-weight="900" fill="#dc2626">${r.CpLw.toFixed(2)}</text>
+      <text x="450" y="150" text-anchor="middle" font-family="IBM Plex Mono" font-size="7" fill="#dc2626">LEEWARD</text>
+
+      <!-- Roof arrows -->
+      ${[0,1,2].map(i=>{const x=200+i*60;const ry=r.hr>r.he+.2?(80-Math.min((r.hr-r.he)*5,40)):80;return`<line x1="${x}" y1="${ry-2}" x2="${x}" y2="${ry-30}" stroke="#dc2626" stroke-width="1.2" marker-end="url(#cpR)" opacity=".5"/>`}).join('')}
+      <text x="260" y="${r.hr>r.he+.2?80-Math.min((r.hr-r.he)*5,40)-34:42}" text-anchor="middle" font-family="IBM Plex Mono" font-size="9" fill="#dc2626" font-weight="600">Roof: ${r.CpRmin}</text>
+
+      <!-- Side wall label (into screen) -->
+      <text x="260" y="140" text-anchor="middle" font-family="IBM Plex Mono" font-size="9" fill="#2563eb" opacity=".6">Side Walls: Cp = −0.7</text>
+      <text x="260" y="152" text-anchor="middle" font-family="IBM Plex Mono" font-size="8" fill="#2563eb" opacity=".4">(perpendicular to page)</text>
+
+      <!-- Wind label -->
+      <line x1="30" y1="130" x2="70" y2="130" stroke="#2563eb" stroke-width="2" marker-end="url(#cpB)"/>
+      <text x="50" y="122" text-anchor="middle" font-family="IBM Plex Mono" font-size="9" fill="#2563eb" font-weight="700">WIND</text>
+
+      <!-- L/B annotation -->
+      <text x="260" y="200" text-anchor="middle" font-family="IBM Plex Mono" font-size="9" fill="#b5afa5">L/B = ${r.LB.toFixed(2)} | θ = ${r.theta.toFixed(1)}° | Fig. 27.4-1</text>
+
+      <!-- Dimension -->
+      <text x="160" y="76" font-family="IBM Plex Mono" font-size="8" fill="#8a8478">B=${r.B}m</text>
+      <text x="370" y="135" font-family="IBM Plex Mono" font-size="8" fill="#8a8478" transform="rotate(90,370,135)">h=${r.h}m</text>
+    </svg></div></div>`;
+
+  // ── SVG: GCpi Building Section ──
+  const openWalls=Object.entries(walls).filter(([,v])=>!v).map(([k])=>k);
+  const svgCpi=`<div class="pd-wrap"><div class="pd-head">Internal Pressure — Enclosure Classification</div><div class="pd-canvas">
+    <svg viewBox="0 0 520 180">
+      <!-- Building outline -->
+      <rect x="120" y="30" width="160" height="100" fill="none" stroke="${r.enc==='enclosed'?'#8a8478':'#dc2626'}" stroke-width="2" ${r.enc!=='enclosed'?'stroke-dasharray="8,5"':''}  rx="3"/>
+
+      <!-- Open walls highlight -->
+      ${openWalls.includes('front')?`<line x1="120" y1="130" x2="280" y2="130" stroke="#dc2626" stroke-width="4" opacity=".5"/><text x="200" y="146" text-anchor="middle" font-family="IBM Plex Mono" font-size="8" fill="#dc2626" font-weight="600">FRONT OPEN</text>`:''}
+      ${openWalls.includes('back')?`<line x1="120" y1="30" x2="280" y2="30" stroke="#dc2626" stroke-width="4" opacity=".5"/><text x="200" y="24" text-anchor="middle" font-family="IBM Plex Mono" font-size="8" fill="#dc2626" font-weight="600">BACK OPEN</text>`:''}
+      ${openWalls.includes('left')?`<line x1="120" y1="30" x2="120" y2="130" stroke="#dc2626" stroke-width="4" opacity=".5"/>`:''}
+      ${openWalls.includes('right')?`<line x1="280" y1="30" x2="280" y2="130" stroke="#dc2626" stroke-width="4" opacity=".5"/>`:''}
+
+      <!-- Internal pressure arrows (if any GCpi) -->
+      ${r.GCpi>0?`
+        <line x1="200" y1="80" x2="200" y2="45" stroke="#d97706" stroke-width="1" stroke-dasharray="3,2" opacity=".5"/>
+        <line x1="200" y1="80" x2="200" y2="115" stroke="#d97706" stroke-width="1" stroke-dasharray="3,2" opacity=".5"/>
+        <line x1="200" y1="80" x2="140" y2="80" stroke="#d97706" stroke-width="1" stroke-dasharray="3,2" opacity=".5"/>
+        <line x1="200" y1="80" x2="260" y2="80" stroke="#d97706" stroke-width="1" stroke-dasharray="3,2" opacity=".5"/>
+        <text x="200" y="83" text-anchor="middle" font-family="IBM Plex Mono" font-size="9" fill="#d97706" font-weight="600">±${r.GCpi}</text>
+      `:`
+        <text x="200" y="83" text-anchor="middle" font-family="IBM Plex Mono" font-size="9" fill="#8a8478">GCpi = 0</text>
+      `}
+
+      <!-- Classification label -->
+      <rect x="320" y="40" width="180" height="80" rx="6" fill="${r.enc==='enclosed'?'#eff6ff':r.enc==='partial'?'#fef2f2':'#f3f1ed'}" stroke="${r.enc==='enclosed'?'#bfdbfe':r.enc==='partial'?'#fecaca':'#d1ccc2'}" stroke-width="1.5"/>
+      <text x="410" y="62" text-anchor="middle" font-family="IBM Plex Mono" font-size="9" fill="#8a8478" font-weight="600">${r.enc==='enclosed'?'ENCLOSED':r.enc==='partial'?'PARTIALLY ENCLOSED':'OPEN'}</text>
+      <text x="410" y="82" text-anchor="middle" font-family="Literata" font-size="22" font-weight="900" fill="${r.enc==='enclosed'?'#2563eb':r.enc==='partial'?'#dc2626':'#8a8478'}">±${r.GCpi}</text>
+      <text x="410" y="100" text-anchor="middle" font-family="IBM Plex Mono" font-size="8" fill="#8a8478">${openWalls.length} wall(s) open</text>
+
+      <!-- Reference -->
+      <text x="260" y="172" text-anchor="middle" font-family="IBM Plex Mono" font-size="8.5" fill="#b5afa5">ASCE 7-10 Table 26.13-1 — Internal Pressure Coefficient GCpi</text>
+    </svg></div></div>`;
+
+  const steps=[
+    {t:'Basic Wind Speed',res:`V = ${r.Vm.toFixed(2)} m/s`,body:`
+      <div class="asce-ref">
+        <div class="asce-ref-badge">Code Reference</div>
+        <div class="asce-ref-title">Figure 26.5-1A/B/C — Basic Wind Speeds</div>
+        <div class="asce-ref-clause">ASCE 7-10 §26.5, Pages 245–248</div>
+        <div class="asce-ref-desc">Wind speed contour maps for the United States. Separate maps for Risk Category II, III/IV, and I.</div>
+        <div class="asce-ref-look"><b>Look for:</b> Your project location on the map → read the contour value in mph or km/h. For special wind regions, check with local authority.<br><b>Your value:</b> V = ${r.V} km/h (${(r.V/1.609).toFixed(0)} mph)</div>
+        <div class="asce-ref-page">📖 See your ASCE 7-10, pp. 245–248</div>
+        <div class="asce-ref-icon">🗺️</div>
+      </div>
+      ${svgWindSpeed}
+      <div class="fb"><span class="fl">ASCE 7-10 §26.5</span><span class="ff">V = ${r.V} km/h ÷ 3.6 = ${r.Vm.toFixed(2)} m/s</span><span class="fn">3-second gust, Risk Category ${sels.risk}</span></div>
+      <div class="rp blue">V = ${r.Vm.toFixed(2)} m/s</div>`},
+
+    {t:'Velocity Pressure Coefficient K<sub>z</sub>',res:`Kz = ${r.kzh.toFixed(4)}`,body:`
+      <div class="asce-ref">
+        <div class="asce-ref-badge">Code Reference</div>
+        <div class="asce-ref-title">Table 26.10-1 — Velocity Pressure Exposure Coefficients</div>
+        <div class="asce-ref-clause">ASCE 7-10 §26.10.1, Page 255</div>
+        <div class="asce-ref-desc">Tabulated Kz values for heights 0–152m across Exposure B, C, and D. Also gives the power-law formula for intermediate heights.</div>
+        <div class="asce-ref-look"><b>Look for:</b> Column "Exposure ${r.exp}" → row for height z = ${Math.max(r.h,e.zmin).toFixed(1)}m → read Kz value.<br><b>Formula:</b> Kz = 2.01(z/zg)<sup>2/α</sup> where α=${e.alpha}, zg=${e.zg}m<br><b>Your value:</b> Kz = ${r.kzh.toFixed(4)}</div>
+        <div class="asce-ref-page">📖 See your ASCE 7-10, p. 255</div>
+        <div class="asce-ref-icon">📊</div>
+      </div>
+      ${svgKz}
+      <div class="fb"><span class="fl">ASCE 7-10 Table 26.10-1</span><span class="ff">K<sub>z</sub> = 2.01 × (z/z<sub>g</sub>)<sup>2/α</sup></span><span class="ff">z = max(${r.h}, ${e.zmin}) = ${Math.max(r.h,e.zmin).toFixed(1)} m</span><span class="ff">α = ${e.alpha} | z<sub>g</sub> = ${e.zg} m → K<sub>z</sub> = ${r.kzh.toFixed(4)}</span></div>
+      <div class="rp blue">K<sub>z</sub> = ${r.kzh.toFixed(4)}</div>`},
+
+    {t:'Velocity Pressure q<sub>h</sub>',res:`qh = ${r.qh.toFixed(4)} kN/m²`,body:`
+      <div class="asce-ref">
+        <div class="asce-ref-badge">Code Reference</div>
+        <div class="asce-ref-title">Eq. 26.10-1 — Velocity Pressure</div>
+        <div class="asce-ref-clause">ASCE 7-10 §26.10, Page 255</div>
+        <div class="asce-ref-desc">The fundamental velocity pressure equation combining exposure, topography, directionality, and wind speed into a single dynamic pressure.</div>
+        <div class="asce-ref-look"><b>Equation:</b> qz = 0.613 · Kz · Kzt · Kd · V² (N/m²)<br><b>Also reference:</b> Table 26.6-1 for Kd values (p. 249) — MWFRS: Kd = ${r.Kd}<br><b>Your value:</b> qh = ${r.qh.toFixed(4)} kN/m²</div>
+        <div class="asce-ref-page">📖 See your ASCE 7-10, p. 255 + Table 26.6-1 p. 249</div>
+        <div class="asce-ref-icon">📐</div>
+      </div>
+      ${svgQh}
+      <div class="fb"><span class="fl">ASCE 7-10 Eq. 26.10-1</span><span class="ff">q<sub>h</sub> = 0.613 × ${r.kzh.toFixed(4)} × ${r.Kzt} × ${r.Kd} × ${r.Vm.toFixed(2)}²</span><span class="ff">= ${(r.qh*1000).toFixed(1)} N/m² = ${r.qh.toFixed(4)} kN/m²</span></div>
+      <div class="rp amber">q<sub>h</sub> = ${r.qh.toFixed(4)} kN/m²</div>`},
+
+    {t:'Gust-Effect Factor G<sub>f</sub>',res:`Gf = ${r.gf.toFixed(4)}`,body:`
+      <div class="asce-ref">
+        <div class="asce-ref-badge">Code Reference</div>
+        <div class="asce-ref-title">§26.9 — Gust-Effect Factor</div>
+        <div class="asce-ref-clause">ASCE 7-10 §26.9.1–26.9.5, Pages 252–254</div>
+        <div class="asce-ref-desc">Determines gust effect for rigid (§26.9.4) or flexible (§26.9.5) structures. For rigid buildings (natural freq ≥ 1 Hz), G = 0.85 or calculated per Eq. 26.9-6.</div>
+        <div class="asce-ref-look"><b>Check:</b> Is your building rigid (T < 1s)? → Use §26.9.4 Eq. 26.9-6<br><b>Key parameters:</b> Integral length scale Lz̄, turbulence intensity Iz̄, background response Q<br><b>Minimum:</b> G = 0.85 per §26.9.1<br><b>Your value:</b> Gf = ${r.gf.toFixed(4)}</div>
+        <div class="asce-ref-page">📖 See your ASCE 7-10, pp. 252–254</div>
+        <div class="asce-ref-icon">🌀</div>
+      </div>
+      ${svgGf}
+      <div class="fb"><span class="fl">ASCE 7-10 §26.9</span><span class="ff">G<sub>f</sub> = 0.925·(1+1.7·I<sub>z̄</sub>·√(g²Q²+g²R²))/(1+1.7·g<sub>v</sub>·I<sub>z̄</sub>)</span><span class="ff">→ G<sub>f</sub> = ${r.gf.toFixed(4)}</span><span class="fn">Minimum G = 0.85 per §26.9.1</span></div>
+      <div class="rp blue">G<sub>f</sub> = ${r.gf.toFixed(4)}</div>`},
+
+    {t:'External Pressure Coefficients C<sub>p</sub>',res:`WW=+0.8 LW=${r.CpLw.toFixed(2)}`,body:`
+      <div class="asce-ref">
+        <div class="asce-ref-badge">Code Reference</div>
+        <div class="asce-ref-title">Figure 27.4-1 — Wall & Roof Cp for Enclosed/Partially Enclosed Buildings</div>
+        <div class="asce-ref-clause">ASCE 7-10 §27.4, Pages 261–264</div>
+        <div class="asce-ref-desc">External pressure coefficients for MWFRS. Shows Cp for windward wall (+0.8), leeward wall (function of L/B), side walls (−0.7), and roof zones (function of roof angle θ and h/L).</div>
+        <div class="asce-ref-look"><b>Walls — Figure 27.4-1:</b> WW always +0.8. LW: find your L/B = ${r.LB.toFixed(2)} in the table → Cp = ${r.CpLw.toFixed(3)}<br><b>Roof — Figure 27.4-1 (cont.):</b> Find θ = ${r.theta.toFixed(1)}° row, h/L = ${(r.h/r.L).toFixed(2)} → WW roof Cp range = ${r.CpRmin} to ${r.CpRmax>=0?'+':''}${r.CpRmax}<br><b>Also see:</b> Figure 27.4-2 for roof Cp interpolation by angle</div>
+        <div class="asce-ref-page">📖 See your ASCE 7-10, pp. 261–264 (Figures 27.4-1, 27.4-2, 27.4-3)</div>
+        <div class="asce-ref-icon">🏗️</div>
+      </div>
+      ${svgCp}
+      <div class="fb"><span class="fl">ASCE 7-10 Figure 27.4-1</span><span class="ff">WW: C<sub>p</sub> = +0.8 | LW: C<sub>p</sub> = f(L/B=${r.LB.toFixed(2)}) = ${r.CpLw.toFixed(3)} | SW: C<sub>p</sub> = −0.7</span></div>
+      <table class="dt"><thead><tr><th>Surface</th><th>Cp</th><th>q·G·Cp (kN/m²)</th></tr></thead><tbody>
+        <tr><td>Windward</td><td class="pos">+0.8</td><td class="pos">+${(r.qh*r.gf*.8).toFixed(4)}</td></tr>
+        <tr><td>Leeward (L/B=${r.LB.toFixed(1)})</td><td class="neg">${r.CpLw.toFixed(3)}</td><td class="neg">${(r.qh*r.gf*r.CpLw).toFixed(4)}</td></tr>
+        <tr><td>Side</td><td class="neg">−0.7</td><td class="neg">${(r.qh*r.gf*(-.7)).toFixed(4)}</td></tr>
+      </tbody></table>`},
+
+    {t:'Internal Pressure GC<sub>pi</sub>',res:`GCpi = ${r.GCpi===0?'0.00':'±'+r.GCpi}`,body:`
+      <div class="asce-ref">
+        <div class="asce-ref-badge">Code Reference</div>
+        <div class="asce-ref-title">Table 26.13-1 — Internal Pressure Coefficients (GCpi)</div>
+        <div class="asce-ref-clause">ASCE 7-10 §26.13, Page 258</div>
+        <div class="asce-ref-desc">Defines GCpi based on enclosure classification. Also reference §26.2 for definitions of enclosed, partially enclosed, and open buildings based on opening ratios.</div>
+        <div class="asce-ref-look"><b>§26.2 Definitions:</b> A building is "partially enclosed" if: (1) total area of openings in a wall receiving +ve external pressure exceeds 1.1× sum of openings in remaining walls, AND (2) that area exceeds 0.37 m² or 1% of wall area.<br><b>Your classification:</b> ${r.enc==='enclosed'?'Enclosed':r.enc==='partial'?'Partially Enclosed':'Open'} (${openWalls.length} open walls) → GCpi = ${r.GCpi===0?'0.00':'±'+r.GCpi}<br><b>Both ± cases must be checked</b> — design for the governing condition on each surface.</div>
+        <div class="asce-ref-page">📖 See your ASCE 7-10, p. 258 (Table 26.13-1) + pp. 240–241 (§26.2)</div>
+        <div class="asce-ref-icon">🚪</div>
+      </div>
+      ${svgCpi}
+      <div class="fb"><span class="fl">ASCE 7-10 Table 26.13-1</span><span class="ff">${r.enc==='enclosed'?'Enclosed':r.enc==='partial'?'Partially Enclosed':'Open'} → GC<sub>pi</sub> = ${r.GCpi===0?'0.00':'±'+r.GCpi}</span><span class="fn">${openWalls.length} wall(s) open: ${openWalls.length?openWalls.join(', '):'none'}</span></div>
+      <div class="cpi-v"><div class="cpi-c"><div class="cpi-ct">Case A (+)</div><div class="cpi-cv pos">+${r.GCpi}</div></div><div class="cpi-c"><div class="cpi-ct">Case B (−)</div><div class="cpi-cv neg">−${r.GCpi}</div></div></div>`},
+
+    {t:'Design Wind Pressures',res:`WW: +${r.nWW.toFixed(3)} kN/m²`,body:`
+      <div class="asce-ref">
+        <div class="asce-ref-badge">Code Reference</div>
+        <div class="asce-ref-title">Eq. 27.4-1 — Design Wind Pressure for MWFRS</div>
+        <div class="asce-ref-clause">ASCE 7-10 §27.4.1, Page 260</div>
+        <div class="asce-ref-desc">The master equation combining external and internal pressures. Evaluate for each surface and both ±GCpi cases. The governing (maximum magnitude) controls design.</div>
+        <div class="asce-ref-look"><b>Equation:</b> p = q·G·Cp − qi·(GCpi)<br><b>Note:</b> For windward walls, q = qz varies with height. For all other surfaces, q = qh evaluated at mean roof height.<br><b>Check both:</b> +GCpi and −GCpi on every surface — they produce different governing cases for different faces.</div>
+        <div class="asce-ref-page">📖 See your ASCE 7-10, p. 260</div>
+        <div class="asce-ref-icon">📋</div>
+      </div>
+      <div class="fb"><span class="fl">ASCE 7-10 Eq. 27.4-1</span><span class="ff">p = q·G·C<sub>p</sub> − q<sub>i</sub>·(GC<sub>pi</sub>)</span></div>
+      <table class="dt"><thead><tr><th>Surface</th><th>External</th><th>Internal</th><th>Net (kN/m²)</th></tr></thead><tbody>
+        <tr><td><strong>Windward</strong></td><td class="pos">+${(r.qh*r.gf*r.CpWW).toFixed(4)}</td><td>+${(r.qh*r.GCpi).toFixed(4)}</td><td class="pos"><strong>+${r.nWW.toFixed(4)}</strong></td></tr>
+        <tr><td><strong>Leeward</strong></td><td class="neg">${(r.qh*r.gf*r.CpLw).toFixed(4)}</td><td>−${(r.qh*r.GCpi).toFixed(4)}</td><td class="neg"><strong>${r.nLW.toFixed(4)}</strong></td></tr>
+        <tr><td><strong>Side</strong></td><td class="neg">${(r.qh*r.gf*r.CpSW).toFixed(4)}</td><td>−${(r.qh*r.GCpi).toFixed(4)}</td><td class="neg"><strong>${r.nSW.toFixed(4)}</strong></td></tr>
+        <tr><td><strong>Roof (uplift)</strong></td><td class="neg">${(r.qh*r.gf*r.CpRmin).toFixed(4)}</td><td>−${(r.qh*r.GCpi).toFixed(4)}</td><td class="neg"><strong>${r.nR.toFixed(4)}</strong></td></tr>
+      </tbody></table>
+      <div style="display:flex;gap:6px;flex-wrap:wrap;margin-top:10px;">
+        <div class="rp amber">WW: +${r.nWW.toFixed(3)}</div><div class="rp red">LW: ${r.nLW.toFixed(3)}</div><div class="rp red">SW: ${r.nSW.toFixed(3)}</div><div class="rp red">Roof: ${r.nR.toFixed(3)}</div>
+      </div>
+
+      <!-- BAR CHART -->
+      <div class="bar-wrap"><div class="bar-title">Pressure Comparison — All Surfaces (kN/m²)</div>
+        ${[{l:'Windward',v:r.nWW},{l:'Leeward',v:r.nLW},{l:'Side',v:r.nSW},{l:'Roof',v:r.nR}].map(b=>{const pct=Math.abs(b.v)/maxP*100;return`<div class="bar-row"><div class="bar-label">${b.l}</div><div class="bar-track"><div class="bar-fill ${b.v>0?'pos-bar':'neg-bar'}" style="width:${pct}%">${b.v>0?'+':''}${b.v.toFixed(3)}</div></div></div>`}).join('')}
+      </div>
+
+      <!-- PRESSURE DIAGRAM -->
+      <div class="pd-wrap"><div class="pd-head">Pressure Distribution on Structure — Cross Section</div><div class="pd-canvas">${buildPressureDiagram(r)}</div></div>
+
+      <!-- ZONE MAP -->
+      <div class="pd-wrap"><div class="pd-head">ASCE 7-10 Pressure Zones — Plan View</div><div class="pd-canvas">${buildZoneMap(r)}</div></div>
+
+      <!-- 3D ISOMETRIC PRESSURE -->
+      <div class="pd-wrap"><div class="pd-head">3D Isometric — Pressure Distribution</div><div class="pd-canvas">${build3DPressure(r)}</div></div>
+
+      <!-- WIND FLOW -->
+      <div class="wf-wrap"><div class="wf-head">Wind Flow Visualization</div><div class="wf-canvas" id="wf-canvas">${buildWindFlow(r)}</div></div>
+    `}
+  ];
+
+  const c=document.getElementById('walkthrough');
+  c.innerHTML=steps.map((s,i)=>`
+    <div class="ws ${i===0?'cur':''}" id="ws${i}">
+      <div class="ws-head" onclick="toggleWS(${i})"><div class="ws-num">${i+1}</div><div class="ws-title">${s.t}</div><div class="ws-res">${s.res}</div></div>
+      <div class="ws-body">${s.body}${i<steps.length-1?`<button class="wn" onclick="advWS(${i+1})">Continue → Step ${i+2}</button>`:
+      `<div style="margin-top:14px;padding:14px;background:var(--green-l);border:1px solid var(--green-b);border-radius:var(--r);"><strong style="color:var(--green);font-family:var(--display);font-size:15px;">✓ Analysis Complete</strong><div style="font-size:11px;color:var(--ink2);margin-top:3px;">All MWFRS design wind pressures per ASCE 7-10 Ch. 27.</div></div>`}</div>
+    </div>`).join('');
+  walkI=0;
+  setTimeout(()=>animateFlow(),100);
+}
+
+// ════════════════════════
+// VISUAL: 3D Isometric Pressure
+// ════════════════════════
+function build3DPressure(r){
+  const W=580,H=300,gnd=H-35,cx=W/2;
+  const sc=Math.min(140/Math.max(r.B,r.he,5),12);
+  const bw=r.B*sc,bh=r.he*sc,dp=Math.min(r.L*sc*.3,70);
+  const bx=cx-bw/2,by=gnd-bh;
+  const wwB=Math.min(Math.abs(r.nWW)*35,55),lwB=Math.min(Math.abs(r.nLW)*35,45),rB=Math.min(Math.abs(r.nR)*25,35);
+  const swB=Math.min(Math.abs(r.nSW)*25,35);
+
+  return`<svg viewBox="0 0 ${W} ${H}">
+    <defs>
+      <linearGradient id="p3ww" x1="1" y1="0" x2="0" y2="0"><stop offset="0" stop-color="#d97706" stop-opacity=".3"/><stop offset="1" stop-color="#d97706" stop-opacity=".03"/></linearGradient>
+      <linearGradient id="p3lw" x1="0" y1="0" x2="1" y2="0"><stop offset="0" stop-color="#dc2626" stop-opacity=".25"/><stop offset="1" stop-color="#dc2626" stop-opacity=".03"/></linearGradient>
+      <linearGradient id="p3sw" x1="0" y1="0" x2="1" y2="0"><stop offset="0" stop-color="#2563eb" stop-opacity=".2"/><stop offset="1" stop-color="#2563eb" stop-opacity=".03"/></linearGradient>
+      <linearGradient id="p3rf" x1="0" y1="1" x2="0" y2="0"><stop offset="0" stop-color="#dc2626" stop-opacity=".2"/><stop offset="1" stop-color="#dc2626" stop-opacity=".03"/></linearGradient>
+      <marker id="p3a" markerWidth="5" markerHeight="4" refX="4" refY="2" orient="auto"><path d="M0,0L0,4L5,2z" fill="#d97706"/></marker>
+      <marker id="p3r" markerWidth="5" markerHeight="4" refX="4" refY="2" orient="auto"><path d="M0,0L0,4L5,2z" fill="#dc2626"/></marker>
+      <marker id="p3b" markerWidth="5" markerHeight="4" refX="4" refY="2" orient="auto"><path d="M0,0L0,4L5,2z" fill="#2563eb"/></marker>
+    </defs>
+
+    <!-- Ground -->
+    <line x1="30" y1="${gnd}" x2="${W-30}" y2="${gnd}" stroke="#d1ccc2" stroke-width="1"/>
+
+    <!-- Side face (right) -->
+    <polygon points="${bx+bw},${by} ${bx+bw+dp},${by-dp*.33} ${bx+bw+dp},${gnd-dp*.33} ${bx+bw},${gnd}" fill="#e4e0d8" fill-opacity=".5" stroke="#8a8478" stroke-width="1"/>
+    <!-- Roof top -->
+    <polygon points="${bx},${by} ${bx+dp},${by-dp*.33} ${bx+bw+dp},${by-dp*.33} ${bx+bw},${by}" fill="#d1ccc2" fill-opacity=".5" stroke="#8a8478" stroke-width="1"/>
+    <!-- Front face -->
+    <rect x="${bx}" y="${by}" width="${bw}" height="${gnd-by}" fill="#f0eeea" stroke="#8a8478" stroke-width="1.5"/>
+
+    <!-- WW PRESSURE ZONE -->
+    <rect x="${bx-wwB}" y="${by}" width="${wwB}" height="${gnd-by}" fill="url(#p3ww)" rx="2"/>
+    ${[0,1,2,3].map(i=>{const y=by+8+i*(gnd-by-16)/3;return`<line x1="${bx-wwB+4}" y1="${y}" x2="${bx-3}" y2="${y}" stroke="#d97706" stroke-width="1.2" marker-end="url(#p3a)" opacity=".65"/>`}).join('')}
+    <rect x="${bx-wwB-2}" y="${(by+gnd)/2-16}" width="50" height="24" rx="4" fill="#fffbeb" stroke="#fde68a"/>
+    <text x="${bx-wwB+23}" y="${(by+gnd)/2-3}" text-anchor="middle" font-family="IBM Plex Mono" font-size="9" fill="#d97706" font-weight="600">+${r.nWW.toFixed(3)}</text>
+    <text x="${bx-wwB+23}" y="${(by+gnd)/2+8}" text-anchor="middle" font-family="IBM Plex Mono" font-size="7" fill="#d97706">WW</text>
+
+    <!-- LW PRESSURE on back face (shown offset) -->
+    <polygon points="${bx+dp},${by-dp*.33} ${bx+bw+dp},${by-dp*.33} ${bx+bw+dp+lwB},${by-dp*.33-lwB*.33} ${bx+dp+lwB},${by-dp*.33-lwB*.33}" fill="url(#p3lw)" opacity=".6"/>
+    ${[0,1,2].map(i=>{const x=bx+dp+15+i*(bw-30)/2;const yb=by-dp*.33;return`<line x1="${x}" y1="${yb}" x2="${x+lwB*.8}" y2="${yb-lwB*.8*.33}" stroke="#dc2626" stroke-width="1" marker-end="url(#p3r)" opacity=".5"/>`}).join('')}
+    <text x="${bx+bw/2+dp+lwB*.4}" y="${by-dp*.33-lwB*.33-5}" text-anchor="middle" font-family="IBM Plex Mono" font-size="9" fill="#dc2626" font-weight="600">${r.nLW.toFixed(3)} LW</text>
+
+    <!-- SW PRESSURE on side face -->
+    <polygon points="${bx+bw},${by} ${bx+bw+dp},${by-dp*.33} ${bx+bw+dp+swB},${by-dp*.33} ${bx+bw+swB},${by}" fill="url(#p3sw)" opacity=".4"/>
+    ${[0,1,2].map(i=>{const y=by+10+i*(gnd-by-20)/2;return`<line x1="${bx+bw+2}" y1="${y}" x2="${bx+bw+swB-2}" y2="${y}" stroke="#2563eb" stroke-width="1" marker-end="url(#p3b)" opacity=".5"/>`}).join('')}
+    <text x="${bx+bw+swB/2}" y="${(by+gnd)/2+3}" text-anchor="middle" font-family="IBM Plex Mono" font-size="8" fill="#2563eb" font-weight="600">${r.nSW.toFixed(3)}</text>
+
+    <!-- ROOF UPLIFT -->
+    ${[0,1,2].map(i=>{const x=bx+20+i*(bw-40)/2;return`<line x1="${x}" y1="${by-2}" x2="${x}" y2="${by-rB}" stroke="#dc2626" stroke-width="1.2" marker-end="url(#p3r)" opacity=".6"/>`}).join('')}
+    ${[0,1].map(i=>{const x=bx+dp*.3+20+i*(bw-40)/1;const yb=by-dp*.33*.3;return`<line x1="${x}" y1="${yb-2}" x2="${x}" y2="${yb-rB*.8}" stroke="#dc2626" stroke-width="1" marker-end="url(#p3r)" opacity=".4"/>`}).join('')}
+    <rect x="${cx-35}" y="${by-rB-20}" width="70" height="18" rx="4" fill="#fef2f2" stroke="#fecaca"/>
+    <text x="${cx}" y="${by-rB-8}" text-anchor="middle" font-family="IBM Plex Mono" font-size="9" fill="#dc2626" font-weight="600">${r.nR.toFixed(3)} ↑</text>
+
+    <!-- Wind label -->
+    <defs><marker id="p3w" markerWidth="6" markerHeight="5" refX="5" refY="2.5" orient="auto"><path d="M0,0L0,5L6,2.5z" fill="#2563eb"/></marker></defs>
+    ${[0,1,2].map(i=>{const y=by+15+i*(gnd-by-30)/2;return`<line x1="20" y1="${y}" x2="55" y2="${y}" stroke="#2563eb" stroke-width="1.5" marker-end="url(#p3w)" opacity=".4"/>`}).join('')}
+    <text x="38" y="${by}" text-anchor="middle" font-family="IBM Plex Mono" font-size="9" fill="#2563eb" font-weight="700">WIND</text>
+
+    <!-- Labels -->
+    <text x="${cx}" y="${H-5}" text-anchor="middle" font-family="IBM Plex Mono" font-size="8.5" fill="#b5afa5">3D Isometric View — Net Design Pressures (kN/m²)</text>
+    <text x="${cx}" y="${gnd+14}" text-anchor="middle" font-family="IBM Plex Mono" font-size="8" fill="#8a8478">B=${r.B}m × L=${r.L}m × h=${r.h}m</text>
+  </svg>`;
+}
+
+function advWS(n){document.getElementById('ws'+(n-1)).className='ws done';document.getElementById('ws'+n).className='ws cur';walkI=n;document.getElementById('ws'+n).scrollIntoView({behavior:'smooth',block:'center'});}
+function toggleWS(i){if(document.getElementById('ws'+i).classList.contains('done'))document.getElementById('ws'+i).scrollIntoView({behavior:'smooth',block:'center'});}
+
+// ════════════════════════
+// VISUAL: Pressure Diagram
+// ════════════════════════
+function buildPressureDiagram(r){
+  const W=600,H=260,gnd=H-30,cx=W/2;
+  const sc=12,bw=r.B*sc*.8,bh=r.he*sc*1.5;
+  const bx=cx-bw/2,by=gnd-bh;
+  const wwB=Math.min(Math.abs(r.nWW)*40,60);
+  const lwB=Math.min(Math.abs(r.nLW)*40,50);
+  const rB=Math.min(Math.abs(r.nR)*30,40);
+
+  return`<svg viewBox="0 0 ${W} ${H}">
+    <defs>
+      <marker id="aW" markerWidth="6" markerHeight="4" refX="5" refY="2" orient="auto"><path d="M0,0L0,4L6,2z" fill="#d97706"/></marker>
+      <marker id="aR" markerWidth="6" markerHeight="4" refX="5" refY="2" orient="auto"><path d="M0,0L0,4L6,2z" fill="#dc2626"/></marker>
+      <linearGradient id="wwG" x1="1" y1="0" x2="0" y2="0"><stop offset="0" stop-color="#d97706" stop-opacity=".25"/><stop offset="1" stop-color="#d97706" stop-opacity=".03"/></linearGradient>
+      <linearGradient id="lwG" x1="0" y1="0" x2="1" y2="0"><stop offset="0" stop-color="#dc2626" stop-opacity=".2"/><stop offset="1" stop-color="#dc2626" stop-opacity=".03"/></linearGradient>
+    </defs>
+    <line x1="0" y1="${gnd}" x2="${W}" y2="${gnd}" stroke="#d1ccc2" stroke-width="1"/>
+
+    <!-- Building -->
+    <rect x="${bx}" y="${by}" width="${bw}" height="${gnd-by}" fill="#e8e5df" stroke="#8a8478" stroke-width="1.5"/>
+
+    <!-- WW pressure -->
+    <rect x="${bx-wwB}" y="${by}" width="${wwB}" height="${gnd-by}" fill="url(#wwG)" rx="2"/>
+    ${[0,1,2,3].map(i=>{const y=by+10+i*(gnd-by-20)/3;return`<line x1="${bx-wwB+5}" y1="${y}" x2="${bx-4}" y2="${y}" stroke="#d97706" stroke-width="1.5" marker-end="url(#aW)" opacity=".7"/>`}).join('')}
+    <text x="${bx-wwB/2}" y="${(by+gnd)/2-4}" text-anchor="middle" font-family="IBM Plex Mono" font-size="10" fill="#d97706" font-weight="600">+${r.nWW.toFixed(3)}</text>
+    <text x="${bx-wwB/2}" y="${(by+gnd)/2+8}" text-anchor="middle" font-family="IBM Plex Mono" font-size="8" fill="#d97706">kN/m²</text>
+
+    <!-- LW suction -->
+    <rect x="${bx+bw}" y="${by}" width="${lwB}" height="${gnd-by}" fill="url(#lwG)" rx="2"/>
+    ${[0,1,2].map(i=>{const y=by+15+i*(gnd-by-30)/2;return`<line x1="${bx+bw+4}" y1="${y}" x2="${bx+bw+lwB-5}" y2="${y}" stroke="#dc2626" stroke-width="1.5" marker-end="url(#aR)" opacity=".7"/>`}).join('')}
+    <text x="${bx+bw+lwB/2}" y="${(by+gnd)/2-4}" text-anchor="middle" font-family="IBM Plex Mono" font-size="10" fill="#dc2626" font-weight="600">${r.nLW.toFixed(3)}</text>
+    <text x="${bx+bw+lwB/2}" y="${(by+gnd)/2+8}" text-anchor="middle" font-family="IBM Plex Mono" font-size="8" fill="#dc2626">kN/m²</text>
+
+    <!-- Roof uplift -->
+    ${[0,1,2].map(i=>{const x=bx+bw*.2+i*bw*.3;return`<line x1="${x}" y1="${by-2}" x2="${x}" y2="${by-rB}" stroke="#dc2626" stroke-width="1.5" marker-end="url(#aR)" opacity=".6"/>`}).join('')}
+    <text x="${cx}" y="${by-rB-6}" text-anchor="middle" font-family="IBM Plex Mono" font-size="10" fill="#dc2626" font-weight="600">${r.nR.toFixed(3)} kN/m²</text>
+
+    <!-- Wind label -->
+    <text x="40" y="${by-5}" font-family="IBM Plex Mono" font-size="10" fill="#2563eb" font-weight="600">WIND →</text>
+
+    <!-- Face labels -->
+    <text x="${bx-2}" y="${by-4}" font-family="IBM Plex Mono" font-size="8" fill="#d97706">WW</text>
+    <text x="${bx+bw+2}" y="${by-4}" font-family="IBM Plex Mono" font-size="8" fill="#dc2626">LW</text>
+    <text x="${cx}" y="${gnd+16}" text-anchor="middle" font-family="IBM Plex Mono" font-size="8" fill="#b5afa5">MWFRS — Wind Normal to Windward Face</text>
+  </svg>`;
+}
+
+// ════════════════════════
+// VISUAL: Zone Map (Plan)
+// ════════════════════════
+function buildZoneMap(r){
+  const W=500,H=320;
+  const pw=160,pl=120;
+  const ox=(W-pw)/2,oy=(H-pl)/2;
+  const e=Math.min(.1*Math.min(r.B,r.L),.4*r.he);
+
+  return`<svg viewBox="0 0 ${W} ${H}">
+    <!-- Building -->
+    <rect x="${ox}" y="${oy}" width="${pw}" height="${pl}" fill="#f0eeea" stroke="#8a8478" stroke-width="1.5"/>
+
+    <!-- Zone D (windward) -->
+    <rect x="${ox}" y="${oy+pl}" width="${pw}" height="8" fill="#d97706" opacity=".2"/>
+    <text x="${ox+pw/2}" y="${oy+pl+20}" text-anchor="middle" font-family="IBM Plex Mono" font-size="10" fill="#d97706" font-weight="600">Zone D (Windward)</text>
+    <text x="${ox+pw/2}" y="${oy+pl+31}" text-anchor="middle" font-family="IBM Plex Mono" font-size="9" fill="#d97706">Cp = +${r.CpWW}</text>
+
+    <!-- Zone E (leeward) -->
+    <rect x="${ox}" y="${oy-8}" width="${pw}" height="8" fill="#dc2626" opacity=".2"/>
+    <text x="${ox+pw/2}" y="${oy-16}" text-anchor="middle" font-family="IBM Plex Mono" font-size="10" fill="#dc2626" font-weight="600">Zone E (Leeward)</text>
+    <text x="${ox+pw/2}" y="${oy-5}" text-anchor="middle" font-family="IBM Plex Mono" font-size="9" fill="#dc2626">Cp = ${r.CpLw.toFixed(2)}</text>
+
+    <!-- Zone A/B (sides) -->
+    <rect x="${ox-8}" y="${oy}" width="8" height="${pl}" fill="#2563eb" opacity=".15"/>
+    <text x="${ox-14}" y="${oy+pl/2}" text-anchor="end" font-family="IBM Plex Mono" font-size="10" fill="#2563eb" font-weight="600">A/B</text>
+    <text x="${ox-14}" y="${oy+pl/2+12}" text-anchor="end" font-family="IBM Plex Mono" font-size="9" fill="#2563eb">−0.7</text>
+
+    <rect x="${ox+pw}" y="${oy}" width="8" height="${pl}" fill="#2563eb" opacity=".15"/>
+    <text x="${ox+pw+14}" y="${oy+pl/2}" font-family="IBM Plex Mono" font-size="10" fill="#2563eb" font-weight="600">A/B</text>
+    <text x="${ox+pw+14}" y="${oy+pl/2+12}" font-family="IBM Plex Mono" font-size="9" fill="#2563eb">−0.7</text>
+
+    <!-- Interior label -->
+    <text x="${ox+pw/2}" y="${oy+pl/2}" text-anchor="middle" font-family="IBM Plex Mono" font-size="9" fill="#b5afa5">${r.B}m × ${r.L}m</text>
+    <text x="${ox+pw/2}" y="${oy+pl/2+14}" text-anchor="middle" font-family="IBM Plex Mono" font-size="9" fill="#b5afa5">GCpi = ${r.GCpi===0?'0.00':'±'+r.GCpi}</text>
+
+    <!-- Wind arrow -->
+    <defs><marker id="zA" markerWidth="7" markerHeight="5" refX="6" refY="2.5" orient="auto"><path d="M0,0L0,5L7,2.5z" fill="#2563eb"/></marker></defs>
+    <line x1="${ox+pw/2}" y1="${H-20}" x2="${ox+pw/2}" y2="${oy+pl+36}" stroke="#2563eb" stroke-width="2" marker-end="url(#zA)"/>
+    <text x="${ox+pw/2}" y="${H-8}" text-anchor="middle" font-family="IBM Plex Mono" font-size="10" fill="#2563eb" font-weight="700">WIND</text>
+
+    <!-- Title -->
+    <text x="${W/2}" y="16" text-anchor="middle" font-family="IBM Plex Mono" font-size="9" fill="#b5afa5">ASCE 7-10 Figure 27.4-1 — Pressure Zones (Plan)</text>
+  </svg>`;
+}
+
+// ════════════════════════
+// VISUAL: Animated Wind Flow
+// ════════════════════════
+function buildWindFlow(r){
+  const W=700,H=200,gnd=H-20,cx=W/2;
+  const bw=80,bh=70,bx=cx-bw/2,by=gnd-bh;
+
+  return`<svg viewBox="0 0 ${W} ${H}" id="wf-svg">
+    <rect x="0" y="${gnd}" width="${W}" height="${H-gnd}" fill="#f0eeea"/>
+    <line x1="0" y1="${gnd}" x2="${W}" y2="${gnd}" stroke="#d1ccc2"/>
+    <rect x="${bx}" y="${by}" width="${bw}" height="${bh}" fill="#d1ccc2" stroke="#8a8478" stroke-width="1.5" rx="2"/>
+    <text x="${cx}" y="${by+bh/2+3}" text-anchor="middle" font-family="IBM Plex Mono" font-size="9" fill="#8a8478">BUILDING</text>
+    <!-- Streamlines rendered by JS -->
+    <g id="flow-lines"></g>
+  </svg>`;
+}
+
+function animateFlow(){
+  const g=document.getElementById('flow-lines');
+  if(!g)return;
+  const W=700,H=200,gnd=H-20,cx=W/2;
+  const bw=80,bh=70,bx=cx-bw/2,by=gnd-bh;
+  g.innerHTML='';
+
+  // Generate streamlines
+  const lines=[];
+  for(let i=0;i<14;i++){
+    const y0=20+i*12;
+    let pts=[];
+    for(let x=0;x<=W;x+=4){
+      let y=y0;
+      const dx=x-bx,dy=y0-(by+bh/2);
+      const dist=Math.sqrt(dx*dx+dy*dy);
+      if(x>bx-60&&x<bx+bw+60){
+        if(y0>by&&y0<by+bh){// hits building
+          if(x<bx)y=y0;
+          else if(x<bx+bw){pts=[];continue;}
+          else y=y0;
+        }else{
+          // deflect around
+          const push=Math.max(0,(60-Math.abs(x-cx))/60)*Math.sign(y0-(by+bh/2))*25;
+          y=y0-push;
+        }
+      }
+      pts.push(`${x},${y.toFixed(1)}`);
+    }
+    if(pts.length>2){
+      const path=document.createElementNS('http://www.w3.org/2000/svg','polyline');
+      path.setAttribute('points',pts.join(' '));
+      path.setAttribute('fill','none');
+      path.setAttribute('stroke','#2563eb');
+      path.setAttribute('stroke-width','1');
+      path.setAttribute('opacity','.25');
+      path.setAttribute('stroke-dasharray','8,6');
+      path.style.animation=`flowDash ${2+Math.random()}s linear infinite`;
+      g.appendChild(path);
+    }
+  }
+  // Add animation style
+  if(!document.getElementById('flow-style')){
+    const s=document.createElement('style');s.id='flow-style';
+    s.textContent='@keyframes flowDash{to{stroke-dashoffset:-28;}}';
+    document.head.appendChild(s);
+  }
+}
+
+// ════════════════════════
+// INIT
+// ════════════════════════
+document.addEventListener('DOMContentLoaded',()=>{
+  upd();detectEnclosure();
+});
+</script>
+</body>
+</html>

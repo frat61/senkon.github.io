@@ -1,0 +1,606 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>WindCalc Pro — EN 1991-1-4 Eurocode</title>
+<link href="https://fonts.googleapis.com/css2?family=Literata:ital,opsz,wght@0,7..72,400;0,7..72,700;0,7..72,900;1,7..72,400&family=Outfit:wght@300;400;500;600;700&family=IBM+Plex+Mono:wght@400;500;600&display=swap" rel="stylesheet">
+<style>
+*{box-sizing:border-box;margin:0;padding:0;}
+:root{
+  --bg:#f8fafb;--bg2:#eef2f5;--surface:#fff;--border:#d6dee6;--border2:#c0ccd6;
+  --ink:#111827;--ink2:#374151;--ink3:#6b7280;--ink4:#9ca3af;
+  --eu:#0d6e6e;--eu2:#0f9b8e;--eu-l:#ecfdf5;--eu-b:#a7f3d0;
+  --amber:#b45309;--amber-l:#fffbeb;--amber-b:#fde68a;
+  --red:#b91c1c;--red-l:#fef2f2;--red-b:#fecaca;
+  --green:#15803d;--green-l:#f0fdf4;--green-b:#bbf7d0;
+  --blue:#1d4ed8;--blue-l:#eff6ff;--blue-b:#bfdbfe;
+  --r:8px;--mono:'IBM Plex Mono',monospace;--body:'Outfit',sans-serif;--display:'Literata',serif;
+}
+html{font-size:14px;}
+body{font-family:var(--body);background:var(--bg);color:var(--ink);min-height:100vh;}
+
+.topbar{display:flex;align-items:center;gap:16px;padding:0 28px;height:50px;background:var(--surface);border-bottom:1px solid var(--border);position:sticky;top:0;z-index:100;}
+.logo{font-family:var(--display);font-weight:900;font-size:19px;letter-spacing:-.5px;}.logo span{color:var(--eu);}
+.logo-sep{width:1px;height:18px;background:var(--border);}
+.logo-sub{font-family:var(--mono);font-size:8.5px;color:var(--ink4);letter-spacing:1.2px;text-transform:uppercase;}
+.topbar-spacer{flex:1;}
+.eu-flag{font-size:16px;}
+.steps-bar{display:flex;align-items:center;gap:0;}
+.step-dot{display:flex;align-items:center;gap:5px;padding:5px 12px;font-family:var(--mono);font-size:9.5px;font-weight:600;color:var(--ink4);letter-spacing:.4px;text-transform:uppercase;cursor:pointer;border-radius:5px;transition:all .2s;}
+.step-dot.active{color:var(--eu);background:var(--eu-l);}
+.step-dot.done{color:var(--green);}
+.step-dot .num{width:18px;height:18px;border-radius:50%;display:flex;align-items:center;justify-content:center;font-size:9px;font-weight:700;border:1.5px solid var(--ink4);color:var(--ink4);transition:all .2s;}
+.step-dot.active .num{border-color:var(--eu);color:#fff;background:var(--eu);}
+.step-dot.done .num{border-color:var(--green);color:#fff;background:var(--green);}
+.step-conn{width:20px;height:1px;background:var(--border);}
+
+.main{max-width:1120px;margin:0 auto;padding:24px 28px 60px;}
+.step-panel{display:none;}.step-panel.active{display:block;animation:fadeUp .25s ease;}
+@keyframes fadeUp{from{opacity:0;transform:translateY(10px);}to{opacity:1;transform:none;}}
+.sec-title{font-family:var(--display);font-weight:900;font-size:24px;letter-spacing:-.5px;margin-bottom:3px;}
+.sec-sub{font-size:13px;color:var(--ink3);margin-bottom:20px;line-height:1.5;}
+
+.ig{background:var(--surface);border:1px solid var(--border);border-radius:var(--r);padding:14px 16px;margin-bottom:12px;}
+.ig-title{font-family:var(--mono);font-size:8.5px;text-transform:uppercase;letter-spacing:1.5px;color:var(--ink4);margin-bottom:8px;}
+.field{margin-bottom:6px;}.field:last-child{margin-bottom:0;}
+.field label{display:flex;justify-content:space-between;align-items:baseline;font-size:12px;color:var(--ink2);margin-bottom:2px;font-weight:500;}
+.field label .u{font-family:var(--mono);font-size:8.5px;color:var(--ink4);}
+.fr{display:flex;gap:5px;}
+.field input,.field select{width:100%;background:var(--bg);border:1.5px solid var(--border);border-radius:5px;color:var(--ink);font-family:var(--mono);font-size:12px;padding:7px 9px;outline:none;transition:all .15s;-webkit-appearance:none;}
+.field input:focus,.field select:focus{border-color:var(--eu);box-shadow:0 0 0 3px rgba(13,110,110,.08);}
+.ub{flex-shrink:0;background:var(--bg2);border:1.5px solid var(--border);border-radius:5px;padding:7px 8px;font-family:var(--mono);font-size:9px;color:var(--ink3);display:flex;align-items:center;}
+
+.bl{display:grid;grid-template-columns:300px 1fr;gap:24px;align-items:start;}
+.bi{display:flex;flex-direction:column;gap:10px;}
+
+.detect{display:flex;align-items:center;gap:8px;padding:8px 14px;border-radius:6px;background:var(--eu-l);border:1px solid var(--eu-b);font-family:var(--mono);font-size:11px;font-weight:600;color:var(--eu);margin-bottom:6px;}
+.detect .det-icon{font-size:16px;}
+.detect .det-gcpi{margin-left:auto;font-size:10px;padding:2px 8px;border-radius:4px;background:rgba(13,110,110,.1);}
+
+.pv-wrap{background:var(--surface);border:1px solid var(--border);border-radius:var(--r);overflow:hidden;position:sticky;top:74px;}
+.pv-head{padding:8px 14px;background:var(--bg2);border-bottom:1px solid var(--border);display:flex;align-items:center;justify-content:space-between;}
+.pv-label{font-family:var(--mono);font-size:8.5px;text-transform:uppercase;letter-spacing:1px;color:var(--ink4);}
+.pv-info{font-family:var(--mono);font-size:9.5px;color:var(--ink3);}
+.pv-canvas{width:100%;height:360px;position:relative;background:linear-gradient(180deg,#f0f4f7,#e6ecf0 85%,#dce4ea);overflow:hidden;}
+.pv-canvas svg{width:100%;height:100%;cursor:default;}
+.pv-hint{position:absolute;bottom:8px;left:50%;transform:translateX(-50%);font-family:var(--mono);font-size:9px;color:var(--ink4);background:rgba(255,255,255,.85);padding:3px 10px;border-radius:4px;border:1px solid var(--border);pointer-events:none;}
+
+.plan-section{margin-top:12px;background:var(--surface);border:1px solid var(--border);border-radius:var(--r);overflow:hidden;}
+.plan-head{padding:8px 14px;background:var(--bg2);border-bottom:1px solid var(--border);}
+.plan-canvas{padding:16px;display:flex;align-items:center;justify-content:center;}
+.plan-canvas svg{max-width:100%;}
+.wall-legend{display:flex;gap:10px;flex-wrap:wrap;padding:8px 14px;border-top:1px solid var(--border);background:var(--bg2);}
+.wl-item{display:flex;align-items:center;gap:4px;font-family:var(--mono);font-size:9px;color:var(--ink3);}
+.wl-swatch{width:10px;height:10px;border-radius:2px;border:1px solid var(--border);}
+
+.cc-grid{display:grid;grid-template-columns:1fr 1fr;gap:16px;margin-bottom:20px;}
+.cc{background:var(--surface);border:1px solid var(--border);border-radius:var(--r);overflow:hidden;}
+.cc-head{padding:12px 16px;background:var(--bg2);border-bottom:1px solid var(--border);}
+.cc-title{font-family:var(--display);font-weight:700;font-size:14px;margin-bottom:1px;}
+.cc-ref{font-family:var(--mono);font-size:8.5px;color:var(--ink3);letter-spacing:.4px;}
+.cc-body{padding:14px 16px;}
+.cf{background:var(--bg);border:1px solid var(--border);border-radius:5px;padding:10px;margin-bottom:10px;overflow:hidden;}
+.cf svg{width:100%;display:block;}
+.cf-cap{font-family:var(--mono);font-size:8.5px;color:var(--ink3);margin-top:6px;text-align:center;}
+
+.og{display:flex;flex-direction:column;gap:5px;}
+.ob{display:flex;align-items:center;gap:8px;padding:9px 11px;border:1.5px solid var(--border);border-radius:5px;background:var(--surface);cursor:pointer;transition:all .12s;text-align:left;font-family:var(--body);font-size:12px;color:var(--ink2);}
+.ob:hover{border-color:var(--eu-b);background:var(--eu-l);}
+.ob.sel{border-color:var(--eu);background:var(--eu-l);color:var(--eu);font-weight:600;box-shadow:0 0 0 2px rgba(13,110,110,.08);}
+.ob .oi{font-size:16px;flex-shrink:0;width:24px;text-align:center;}.ob .ol{flex:1;}.ob .od{font-size:9.5px;color:var(--ink3);font-weight:400;display:block;margin-top:1px;}
+.ob .oc{width:16px;height:16px;border-radius:50%;border:1.5px solid var(--border);display:flex;align-items:center;justify-content:center;flex-shrink:0;font-size:9px;color:transparent;transition:all .12s;}
+.ob.sel .oc{border-color:var(--eu);background:var(--eu);color:#fff;}
+
+.ws{background:var(--surface);border:1px solid var(--border);border-radius:var(--r);overflow:hidden;margin-bottom:8px;transition:all .2s;opacity:.35;pointer-events:none;}
+.ws.cur{opacity:1;pointer-events:auto;box-shadow:0 2px 10px rgba(0,0,0,.05);}
+.ws.done{opacity:1;pointer-events:auto;}
+.ws-head{padding:12px 18px;display:flex;align-items:center;gap:10px;cursor:pointer;transition:background .1s;}
+.ws.done .ws-head:hover{background:var(--bg2);}
+.ws-num{width:26px;height:26px;border-radius:50%;display:flex;align-items:center;justify-content:center;font-family:var(--mono);font-size:10px;font-weight:700;border:2px solid var(--border);color:var(--ink3);flex-shrink:0;transition:all .2s;}
+.ws.cur .ws-num{border-color:var(--eu);color:#fff;background:var(--eu);}
+.ws.done .ws-num{border-color:var(--green);color:#fff;background:var(--green);}
+.ws-title{font-family:var(--display);font-weight:700;font-size:14px;flex:1;}
+.ws-res{font-family:var(--mono);font-size:11px;font-weight:600;color:var(--eu);display:none;}
+.ws.done .ws-res{display:block;}
+.ws-body{padding:0 18px 16px;display:none;}
+.ws.cur .ws-body,.ws.done .ws-body{display:block;}
+
+.fb{background:var(--bg);border:1px solid var(--border);border-left:3px solid var(--eu);border-radius:0 var(--r) var(--r) 0;padding:12px 14px;margin-bottom:10px;}
+.fb .fl{font-size:11px;color:var(--ink2);font-weight:600;margin-bottom:3px;display:block;}
+.fb .ff{font-family:var(--mono);font-size:11px;color:var(--eu);line-height:2;display:block;}
+.fb .fn{font-family:var(--mono);font-size:9.5px;color:var(--ink4);margin-top:3px;display:block;}
+
+.asce-ref{background:repeating-linear-gradient(45deg,#f0f7f7,#f0f7f7 8px,#e8f2f2 8px,#e8f2f2 16px);border:2px dashed var(--eu-b);border-radius:var(--r);padding:16px 20px;margin-bottom:12px;position:relative;overflow:hidden;}
+.asce-ref-badge{position:absolute;top:0;right:0;padding:4px 10px;background:var(--eu);color:#fff;font-family:var(--mono);font-size:8px;font-weight:700;letter-spacing:.8px;border-radius:0 0 0 6px;text-transform:uppercase;}
+.asce-ref-title{font-family:var(--display);font-weight:700;font-size:14px;color:var(--ink);margin-bottom:4px;}
+.asce-ref-clause{font-family:var(--mono);font-size:10px;color:var(--eu);font-weight:600;margin-bottom:6px;}
+.asce-ref-desc{font-size:11.5px;color:var(--ink2);line-height:1.5;margin-bottom:8px;}
+.asce-ref-look{font-family:var(--mono);font-size:9.5px;color:var(--ink3);line-height:1.6;}
+.asce-ref-look b{color:var(--ink2);}
+.asce-ref-icon{position:absolute;bottom:10px;right:14px;font-size:32px;opacity:.15;}
+.asce-ref-page{display:inline-flex;align-items:center;gap:4px;font-family:var(--mono);font-size:9px;color:var(--ink4);margin-top:8px;padding:3px 8px;background:rgba(255,255,255,.7);border-radius:4px;border:1px solid var(--border);}
+
+.rp{display:inline-flex;align-items:center;gap:5px;padding:6px 14px;border-radius:5px;font-family:var(--mono);font-size:12px;font-weight:600;margin-top:6px;margin-right:6px;}
+.rp.eu{background:var(--eu-l);color:var(--eu);border:1px solid var(--eu-b);}
+.rp.amber{background:var(--amber-l);color:var(--amber);border:1px solid var(--amber-b);}
+.rp.red{background:var(--red-l);color:var(--red);border:1px solid var(--red-b);}
+.rp.green{background:var(--green-l);color:var(--green);border:1px solid var(--green-b);}
+.wn{display:inline-flex;align-items:center;gap:5px;padding:8px 18px;border:none;border-radius:5px;font-family:var(--body);font-size:12px;font-weight:600;background:var(--eu);color:#fff;cursor:pointer;transition:all .12s;margin-top:10px;}
+.wn:hover{background:#0a5a5a;transform:translateY(-1px);}
+
+.dt{width:100%;border-collapse:collapse;font-family:var(--mono);font-size:11px;margin-top:8px;}
+.dt th{padding:7px 10px;text-align:left;font-size:8.5px;text-transform:uppercase;letter-spacing:.6px;color:var(--ink4);border-bottom:2px solid var(--border);background:var(--bg2);font-weight:600;}
+.dt td{padding:6px 10px;border-bottom:1px solid var(--border);color:var(--ink2);}
+.dt tr:last-child td{border-bottom:none;}
+.dt .pos{color:var(--green);font-weight:600;}
+.dt .neg{color:var(--red);font-weight:600;}
+
+.pd-wrap{margin-top:14px;background:var(--surface);border:1px solid var(--border);border-radius:var(--r);overflow:hidden;}
+.pd-head{padding:8px 14px;background:var(--bg2);border-bottom:1px solid var(--border);font-family:var(--mono);font-size:9px;text-transform:uppercase;letter-spacing:1px;color:var(--ink4);}
+.pd-canvas{padding:12px;}.pd-canvas svg{width:100%;display:block;}
+
+.bar-wrap{margin-top:14px;background:var(--bg);border:1px solid var(--border);border-radius:var(--r);padding:14px 16px;}
+.bar-title{font-family:var(--mono);font-size:9px;text-transform:uppercase;letter-spacing:1px;color:var(--ink4);margin-bottom:10px;}
+.bar-row{display:flex;align-items:center;gap:8px;margin-bottom:6px;}
+.bar-label{width:80px;font-family:var(--mono);font-size:10px;color:var(--ink2);text-align:right;flex-shrink:0;}
+.bar-track{flex:1;height:22px;background:var(--bg2);border-radius:3px;position:relative;overflow:hidden;}
+.bar-fill{height:100%;border-radius:3px;transition:width .5s ease;display:flex;align-items:center;justify-content:flex-end;padding-right:6px;font-family:var(--mono);font-size:9px;font-weight:600;color:#fff;min-width:40px;}
+.bar-fill.pos-bar{background:linear-gradient(90deg,#0f9b8e,#0d6e6e);}
+.bar-fill.neg-bar{background:linear-gradient(90deg,#ef4444,#b91c1c);}
+
+.big-btn{display:flex;align-items:center;justify-content:center;gap:8px;width:100%;padding:12px;border:none;border-radius:var(--r);font-family:var(--display);font-weight:700;font-size:15px;cursor:pointer;transition:all .15s;}
+.big-btn.primary{background:var(--eu);color:#fff;box-shadow:0 2px 10px rgba(13,110,110,.18);}
+.big-btn.primary:hover{background:#0a5a5a;transform:translateY(-1px);}
+
+.ss{display:flex;gap:10px;flex-wrap:wrap;padding:10px 14px;background:var(--bg2);border:1px solid var(--border);border-radius:var(--r);margin-bottom:18px;}
+.sc{font-family:var(--mono);font-size:9.5px;color:var(--ink3);}.sc .v{color:var(--ink);font-weight:600;}
+
+.cpi-v{display:grid;grid-template-columns:1fr 1fr;gap:8px;margin-top:8px;}
+.cpi-c{background:var(--bg);border:1px solid var(--border);border-radius:5px;padding:10px;text-align:center;}
+.cpi-ct{font-family:var(--mono);font-size:8.5px;text-transform:uppercase;letter-spacing:.6px;color:var(--ink3);margin-bottom:4px;}
+.cpi-cv{font-family:var(--display);font-weight:900;font-size:18px;}
+.cpi-cv.pos{color:var(--amber);}.cpi-cv.neg{color:var(--eu);}
+
+.wall-click{cursor:pointer;transition:all .15s;}.wall-click:hover{filter:brightness(1.1);stroke-width:2.5;}
+.wall-open{fill:transparent !important;stroke-dasharray:6,4 !important;opacity:.5 !important;}
+
+.wf-wrap{margin-top:14px;background:var(--surface);border:1px solid var(--border);border-radius:var(--r);overflow:hidden;}
+.wf-head{padding:8px 14px;background:var(--bg2);border-bottom:1px solid var(--border);font-family:var(--mono);font-size:9px;text-transform:uppercase;letter-spacing:1px;color:var(--ink4);}
+.wf-canvas{position:relative;height:200px;overflow:hidden;background:linear-gradient(180deg,#f0f4f7,#e6ecf0);}
+.wf-canvas svg{width:100%;height:100%;}
+@keyframes flowDash{to{stroke-dashoffset:-28;}}
+
+@media(max-width:860px){.bl{grid-template-columns:1fr;}.cc-grid{grid-template-columns:1fr;}}
+</style>
+</head>
+<body>
+
+<div class="topbar">
+  <div class="logo">Wind<span>Calc</span></div>
+  <div class="logo-sep"></div>
+  <div class="eu-flag">🇪🇺</div>
+  <div class="logo-sub">EN 1991-1-4 Eurocode Wind Actions</div>
+  <div class="topbar-spacer"></div>
+  <div class="steps-bar">
+    <div class="step-dot active" id="sd1" onclick="goStep(1)"><div class="num">1</div>Build</div><div class="step-conn"></div>
+    <div class="step-dot" id="sd2" onclick="goStep(2)"><div class="num">2</div>Classify</div><div class="step-conn"></div>
+    <div class="step-dot" id="sd3" onclick="goStep(3)"><div class="num">3</div>Analyze</div>
+  </div>
+</div>
+
+<div class="main">
+
+<!-- ═══════ STEP 1: BUILD ═══════ -->
+<div class="step-panel active" id="p1">
+<div class="sec-title">Define Your Structure</div>
+<div class="sec-sub">Enter dimensions per EN 1991-1-4. Click walls on the preview to mark openings. Enclosure auto-detected.</div>
+
+<div class="detect" id="detect-badge">
+  <span class="det-icon" id="det-icon">🏢</span>
+  <span id="det-label">Enclosed Building — all walls closed</span>
+  <span class="det-gcpi" id="det-gcpi">cpi = +0.2 / −0.3</span>
+</div>
+
+<div class="bl">
+  <div class="bi">
+    <div class="ig">
+      <div class="ig-title">Geometry</div>
+      <div class="field"><label>Width b <span class="u">⊥ wind</span></label><div class="fr"><input type="number" id="iB" value="12" step="0.5" oninput="upd()"><div class="ub">m</div></div></div>
+      <div class="field"><label>Depth d <span class="u">‖ wind</span></label><div class="fr"><input type="number" id="iL" value="7" step="0.5" oninput="upd()"><div class="ub">m</div></div></div>
+      <div class="field"><label>Eave Height h</label><div class="fr"><input type="number" id="ihe" value="3" step="0.1" oninput="upd()"><div class="ub">m</div></div></div>
+      <div class="field"><label>Ridge Height <span class="u">=h if flat</span></label><div class="fr"><input type="number" id="ihr" value="3" step="0.1" oninput="upd()"><div class="ub">m</div></div></div>
+    </div>
+    <div class="ig">
+      <div class="ig-title">Wind</div>
+      <div class="field"><label>v<sub>b,0</sub> <span class="u">10-min mean</span></label><div class="fr"><input type="number" id="iV" value="28" step="1" oninput="upd()"><div class="ub">m/s</div></div></div>
+    </div>
+    <button class="big-btn primary" onclick="goStep(2)">Continue to Classification →</button>
+  </div>
+  <div>
+    <div class="pv-wrap">
+      <div class="pv-head"><span class="pv-label">Live Preview — Click walls to toggle openings</span><span class="pv-info" id="pv-info"></span></div>
+      <div class="pv-canvas"><svg id="bsvg" viewBox="0 0 660 360"></svg><div class="pv-hint">Click any wall face to mark it as open</div></div>
+    </div>
+    <div class="plan-section">
+      <div class="plan-head"><span class="pv-label">Plan View — Wall Openings & Zones</span></div>
+      <div class="plan-canvas"><svg id="plan-svg" viewBox="0 0 340 260"></svg></div>
+      <div class="wall-legend">
+        <div class="wl-item"><div class="wl-swatch" style="background:#6b7280;"></div>Closed</div>
+        <div class="wl-item"><div class="wl-swatch" style="background:transparent;border:1.5px dashed #b91c1c;"></div>Open</div>
+        <div class="wl-item"><div class="wl-swatch" style="background:var(--eu);opacity:.3;"></div>Wind</div>
+      </div>
+    </div>
+  </div>
+</div>
+</div>
+
+<!-- ═══════ STEP 2: CLASSIFY ═══════ -->
+<div class="step-panel" id="p2">
+<div class="sec-title">Classify Site Conditions</div>
+<div class="sec-sub">Select terrain category and directional factors per EN 1991-1-4.</div>
+<div class="ss" id="ss1"></div>
+
+<div class="cc-grid">
+  <!-- TERRAIN CATEGORY -->
+  <div class="cc"><div class="cc-head"><div class="cc-title">Terrain Category</div><div class="cc-ref">EN 1991-1-4 Table 4.1 — §4.3.2</div></div>
+    <div class="cc-body">
+      <div class="cf"><svg viewBox="0 0 440 110">
+        <!-- TC 0: Sea -->
+        <rect x="5" y="70" width="80" height="30" fill="#e0ecf0" stroke="#c0ccd6" rx="2"/>
+        <path d="M10,68 Q25,60 40,68 Q55,60 70,68 Q80,60 85,68" fill="none" stroke="#1d4ed8" stroke-width="1" opacity=".4"/>
+        <text x="45" y="96" text-anchor="middle" font-family="IBM Plex Mono" font-size="7.5" fill="#6b7280" font-weight="600">0 — SEA</text>
+        <text x="45" y="106" text-anchor="middle" font-family="IBM Plex Mono" font-size="6.5" fill="#9ca3af">z₀=0.003</text>
+        <!-- TC I: Lakes -->
+        <rect x="95" y="70" width="80" height="30" fill="#e8ede0" stroke="#c0ccd6" rx="2"/>
+        <path d="M100,68 Q115,64 130,68 Q145,62 160,66 Q170,64 175,68" fill="none" stroke="#6b7280" stroke-width="1"/>
+        <text x="135" y="96" text-anchor="middle" font-family="IBM Plex Mono" font-size="7.5" fill="#6b7280" font-weight="600">I — FLAT</text>
+        <text x="135" y="106" text-anchor="middle" font-family="IBM Plex Mono" font-size="6.5" fill="#9ca3af">z₀=0.01</text>
+        <!-- TC II: Low veg -->
+        <rect x="185" y="70" width="80" height="30" fill="#e8ede0" stroke="#c0ccd6" rx="2"/>
+        <path d="M195,68 Q205,60 215,66 Q225,58 235,64 Q245,62 255,68" fill="none" stroke="#15803d" stroke-width="1.2" opacity=".5"/>
+        <text x="225" y="96" text-anchor="middle" font-family="IBM Plex Mono" font-size="7.5" fill="#6b7280" font-weight="600">II — LOW VEG</text>
+        <text x="225" y="106" text-anchor="middle" font-family="IBM Plex Mono" font-size="6.5" fill="#9ca3af">z₀=0.05</text>
+        <!-- TC III: Suburban -->
+        <rect x="275" y="70" width="80" height="30" fill="#eef2f5" stroke="#c0ccd6" rx="2"/>
+        <rect x="285" y="52" width="8" height="18" fill="#9ca3af" rx="1"/><rect x="297" y="45" width="10" height="25" fill="#6b7280" rx="1"/>
+        <rect x="311" y="50" width="8" height="20" fill="#9ca3af" rx="1"/><rect x="323" y="55" width="10" height="15" fill="#6b7280" rx="1"/>
+        <text x="315" y="96" text-anchor="middle" font-family="IBM Plex Mono" font-size="7.5" fill="#6b7280" font-weight="600">III — SUBURB</text>
+        <text x="315" y="106" text-anchor="middle" font-family="IBM Plex Mono" font-size="6.5" fill="#9ca3af">z₀=0.3</text>
+        <!-- TC IV: Urban -->
+        <rect x="365" y="70" width="75" height="30" fill="#eef2f5" stroke="#c0ccd6" rx="2"/>
+        <rect x="370" y="35" width="10" height="35" fill="#374151" rx="1"/><rect x="383" y="25" width="13" height="45" fill="#6b7280" rx="1"/>
+        <rect x="400" y="30" width="10" height="40" fill="#374151" rx="1"/><rect x="414" y="40" width="12" height="30" fill="#6b7280" rx="1"/>
+        <text x="402" y="96" text-anchor="middle" font-family="IBM Plex Mono" font-size="7.5" fill="#6b7280" font-weight="600">IV — URBAN</text>
+        <text x="402" y="106" text-anchor="middle" font-family="IBM Plex Mono" font-size="6.5" fill="#9ca3af">z₀=1.0</text>
+      </svg><div class="cf-cap">EN 1991-1-4 Table 4.1 — Terrain Categories & Roughness Lengths</div></div>
+      <div class="og" id="og-tc">
+        <button class="ob" onclick="sel('tc','0',this)"><div class="oi">🌊</div><div class="ol">TC 0 — Sea<span class="od">z₀=0.003m, zmin=1m. Open sea, coastal area exposed to wind</span></div><div class="oc">✓</div></button>
+        <button class="ob" onclick="sel('tc','I',this)"><div class="oi">🏖️</div><div class="ol">TC I — Open flat<span class="od">z₀=0.01m, zmin=1m. Lakes, flat country without obstacles</span></div><div class="oc">✓</div></button>
+        <button class="ob sel" onclick="sel('tc','II',this)"><div class="oi">🌾</div><div class="ol">TC II — Low vegetation<span class="od">z₀=0.05m, zmin=2m. Farmland with isolated low obstacles</span></div><div class="oc">✓</div></button>
+        <button class="ob" onclick="sel('tc','III',this)"><div class="oi">🏘️</div><div class="ol">TC III — Suburban<span class="od">z₀=0.3m, zmin=5m. Regular cover of vegetation/buildings/obstacles</span></div><div class="oc">✓</div></button>
+        <button class="ob" onclick="sel('tc','IV',this)"><div class="oi">🏙️</div><div class="ol">TC IV — Urban<span class="od">z₀=1.0m, zmin=10m. At least 15% of surface covered by buildings, h>15m</span></div><div class="oc">✓</div></button>
+      </div>
+    </div>
+  </div>
+
+  <!-- DIRECTIONAL & SEASONAL -->
+  <div class="cc"><div class="cc-head"><div class="cc-title">Directional & Seasonal Factors</div><div class="cc-ref">EN 1991-1-4 §4.2 — NOTE 2, NOTE 3</div></div>
+    <div class="cc-body">
+      <div class="cf"><svg viewBox="0 0 400 90">
+        <rect x="5" y="5" width="390" height="80" fill="var(--bg)" stroke="var(--border)" rx="3"/>
+        <text x="15" y="22" font-family="IBM Plex Mono" font-size="8.5" fill="#6b7280" font-weight="600">EN 1991-1-4 §4.2 — BASIC WIND VELOCITY</text>
+        <line x1="15" y1="28" x2="385" y2="28" stroke="#c0ccd6"/>
+        <text x="15" y="42" font-family="IBM Plex Mono" font-size="9" fill="#374151">v<tspan font-size="7" dy="2">b</tspan><tspan dy="-2"> = c</tspan><tspan font-size="7" dy="2">dir</tspan><tspan dy="-2"> × c</tspan><tspan font-size="7" dy="2">season</tspan><tspan dy="-2"> × v</tspan><tspan font-size="7" dy="2">b,0</tspan></text>
+        <text x="15" y="58" font-family="IBM Plex Mono" font-size="8.5" fill="#6b7280">c<tspan font-size="6.5" dy="1.5">dir</tspan><tspan dy="-1.5"> = directional factor (recommended: 1.0)</tspan></text>
+        <text x="15" y="70" font-family="IBM Plex Mono" font-size="8.5" fill="#6b7280">c<tspan font-size="6.5" dy="1.5">season</tspan><tspan dy="-1.5"> = seasonal factor (recommended: 1.0)</tspan></text>
+        <text x="15" y="82" font-family="IBM Plex Mono" font-size="8.5" fill="#9ca3af">National Annex may specify different values</text>
+      </svg><div class="cf-cap">Most National Annexes use cdir = cseason = 1.0</div></div>
+      <div class="field"><label>c<sub>dir</sub> <span class="u">directional factor</span></label><div class="fr"><input type="number" id="iCdir" value="1.0" step="0.1" min="0.1"><div class="ub">—</div></div></div>
+      <div class="field"><label>c<sub>season</sub> <span class="u">seasonal factor</span></label><div class="fr"><input type="number" id="iCseason" value="1.0" step="0.1" min="0.1"><div class="ub">—</div></div></div>
+      <div class="field"><label>c<sub>o</sub>(z) <span class="u">orography factor</span></label><div class="fr"><input type="number" id="iCo" value="1.0" step="0.01" min="1"><div class="ub">—</div></div></div>
+    </div>
+  </div>
+
+  <!-- ENCLOSURE (auto-detected) -->
+  <div class="cc" style="grid-column:1/-1;"><div class="cc-head"><div class="cc-title">Internal Pressure — Enclosure</div><div class="cc-ref">EN 1991-1-4 §7.2.9 — Table 7.1 NOTE 2</div></div>
+    <div class="cc-body">
+      <div class="cf"><svg viewBox="0 0 500 80">
+        <rect x="10" y="10" width="130" height="50" fill="none" stroke="#374151" stroke-width="1.5" rx="2"/>
+        <text x="75" y="38" text-anchor="middle" font-family="IBM Plex Mono" font-size="9" fill="#6b7280">cpi = +0.2/−0.3</text>
+        <text x="75" y="74" text-anchor="middle" font-family="IBM Plex Mono" font-size="8.5" fill="#6b7280" font-weight="600">NO DOMINANT FACE</text>
+        <rect x="175" y="10" width="130" height="50" fill="none" stroke="#374151" stroke-width="1.5" rx="2" stroke-dasharray="8,4"/>
+        <rect x="175" y="20" width="3" height="30" fill="#b91c1c" opacity=".5"/>
+        <text x="240" y="38" text-anchor="middle" font-family="IBM Plex Mono" font-size="9" fill="#b91c1c">cpi = +0.7 / −0.3</text>
+        <text x="240" y="74" text-anchor="middle" font-family="IBM Plex Mono" font-size="8.5" fill="#6b7280" font-weight="600">DOMINANT OPENING</text>
+        <rect x="340" y="10" width="130" height="50" fill="none" stroke="#374151" stroke-width="1.5" rx="2"/>
+        <line x1="340" y1="10" x2="340" y2="60" stroke="#374151" stroke-width="1.5"/>
+        <line x1="470" y1="10" x2="470" y2="60" stroke="#374151" stroke-width="1.5"/>
+        <text x="405" y="38" text-anchor="middle" font-family="IBM Plex Mono" font-size="9" fill="#6b7280">cpi from §7.2.9(6)</text>
+        <text x="405" y="74" text-anchor="middle" font-family="IBM Plex Mono" font-size="8.5" fill="#6b7280" font-weight="600">OPEN / CANOPY</text>
+      </svg><div class="cf-cap">EN 1991-1-4 §7.2.9 — Internal Pressure Coefficients</div></div>
+      <div style="font-size:11px;color:var(--ink3);margin-bottom:6px;">Auto-detected from wall openings:</div>
+      <div class="og" id="og-enc">
+        <button class="ob sel" onclick="sel('enc','enclosed',this)" id="enc-enclosed"><div class="oi">▪️</div><div class="ol">No dominant face<span class="od">cpi = +0.2 and −0.3 (§7.2.9(6) NOTE 2)</span></div><div class="oc">✓</div></button>
+        <button class="ob" onclick="sel('enc','dominant',this)" id="enc-dominant"><div class="oi">◻️</div><div class="ol">Dominant opening<span class="od">cpi = 0.75 × cpe of dominant face (§7.2.9(5))</span></div><div class="oc">✓</div></button>
+      </div>
+    </div>
+  </div>
+</div>
+
+<button class="big-btn primary" onclick="runCalc()">▶  Run EN 1991-1-4 Analysis →</button>
+</div>
+
+<!-- ═══════ STEP 3: ANALYZE ═══════ -->
+<div class="step-panel" id="p3">
+<div class="sec-title">EN 1991-1-4 Step-by-Step</div>
+<div class="sec-sub">Eurocode wind action calculation, revealed progressively.</div>
+<div class="ss" id="ss2"></div>
+<div id="walkthrough"></div>
+</div>
+
+</div>
+
+<script>
+let step=1,walls={front:true,back:true,left:true,right:true};
+let sels={tc:'II',enc:'enclosed'};
+let walkI=0,R=null;
+
+function goStep(n){if(n>step+1)return;step=n;document.querySelectorAll('.step-panel').forEach(p=>p.classList.remove('active'));document.getElementById('p'+n).classList.add('active');['sd1','sd2','sd3'].forEach((id,i)=>{const d=document.getElementById(id);d.className='step-dot';if(i+1<n)d.classList.add('done');if(i+1===n)d.classList.add('active');});if(n===2)updSummary();window.scrollTo({top:0,behavior:'smooth'});}
+function sel(g,v,el){sels[g]=v;el.closest('.og').querySelectorAll('.ob').forEach(b=>b.classList.remove('sel'));el.classList.add('sel');}
+function gv(id){return +document.getElementById(id).value||0;}
+
+function toggleWall(face){walls[face]=!walls[face];detectEnclosure();upd();}
+function detectEnclosure(){
+  const openCount=Object.values(walls).filter(v=>!v).length;
+  let type,gcpi,icon,label;
+  if(openCount===0){type='enclosed';gcpi='+0.2 / −0.3';icon='🏢';label='No dominant face — all walls closed';}
+  else{type='dominant';gcpi='0.75×cpe of open face';icon='🏗️';label='Dominant opening — '+openCount+' wall'+(openCount>1?'s':'')+' open';}
+  document.getElementById('det-icon').textContent=icon;
+  document.getElementById('det-label').textContent=label;
+  document.getElementById('det-gcpi').textContent='cpi = '+gcpi;
+  sels.enc=type;
+  document.querySelectorAll('#og-enc .ob').forEach(b=>b.classList.remove('sel'));
+  const m={enclosed:'enc-enclosed',dominant:'enc-dominant'};
+  if(document.getElementById(m[type]))document.getElementById(m[type]).classList.add('sel');
+}
+
+function upd(){
+  const B=gv('iB')||12,L=gv('iL')||7,he=gv('ihe')||3,hr=gv('ihr')||3,V=gv('iV')||28;
+  document.getElementById('pv-info').textContent=B+'×'+L+'m  h='+he+'m  vb0='+V+'m/s';
+  draw3D(B,L,he,hr,V);drawPlan(B,L);
+}
+
+function draw3D(B,L,he,hr,V){
+  const svg=document.getElementById('bsvg');
+  const W=660,H=360,gnd=H-45,cx=W/2+20;
+  const mx=Math.max(B,hr,5),sc=Math.min(180/mx,18);
+  const bw=B*sc,bhe=he*sc,bx=cx-bw/2,by=gnd-bhe,ry=gnd-hr*sc;
+  const dp=Math.min(L*sc*.32,80);
+  const fc=w=>walls[w]?'#b0bec5':'none';
+  const sc2=w=>walls[w]?'#607d8b':'#b91c1c';
+  const sd=w=>walls[w]?'none':'6,4';
+  const op=w=>walls[w]?'.55':'.25';
+  svg.innerHTML=`
+    <defs><marker id="wA" markerWidth="5" markerHeight="4" refX="4" refY="2" orient="auto"><path d="M0,0L0,4L5,2z" fill="#0d6e6e" opacity=".5"/></marker>
+    <marker id="dA" markerWidth="4" markerHeight="4" refX="2" refY="4" orient="auto"><path d="M0,0L4,0L2,4z" fill="#374151"/></marker>
+    <marker id="dAu" markerWidth="4" markerHeight="4" refX="2" refY="0" orient="auto"><path d="M0,4L4,4L2,0z" fill="#374151"/></marker></defs>
+    <line x1="0" y1="${gnd}" x2="${W}" y2="${gnd}" stroke="#c0ccd6" stroke-width="1.5"/>
+    <rect x="0" y="${gnd}" width="${W}" height="${H-gnd}" fill="#e6ecf0"/>
+    ${Array.from({length:18},(_,i)=>`<line x1="${i*40}" y1="${gnd}" x2="${i*40-10}" y2="${gnd+10}" stroke="#c0ccd6" stroke-width=".6"/>`).join('')}
+    <polygon class="wall-click ${walls.right?'':'wall-open'}" onclick="toggleWall('right')" points="${bx+bw},${by} ${bx+bw+dp},${by-dp*.33} ${bx+bw+dp},${gnd-dp*.33} ${bx+bw},${gnd}" fill="${fc('right')}" fill-opacity="${op('right')}" stroke="${sc2('right')}" stroke-width="1.5" stroke-dasharray="${sd('right')}"/>
+    ${!walls.right?`<text x="${bx+bw+dp/2+4}" y="${(by+gnd)/2-dp*.16}" text-anchor="middle" font-family="IBM Plex Mono" font-size="9" fill="#b91c1c" font-weight="600" transform="rotate(-18,${bx+bw+dp/2+4},${(by+gnd)/2-dp*.16})">OPEN</text>`:''}
+    ${hr>he+.2?`<polygon points="${bx},${by} ${cx-20},${ry} ${bx+bw},${by}" fill="#90a4ae" fill-opacity=".5" stroke="#607d8b" stroke-width="1.5"/>
+      <polygon points="${cx-20},${ry} ${bx+bw},${by} ${bx+bw+dp},${by-dp*.33} ${cx-20+dp},${ry-dp*.33}" fill="#78909c" fill-opacity=".35" stroke="#607d8b" stroke-width="1"/>`
+      :`<polygon points="${bx},${by} ${bx+dp},${by-dp*.33} ${bx+bw+dp},${by-dp*.33} ${bx+bw},${by}" fill="#90a4ae" fill-opacity=".45" stroke="#607d8b" stroke-width="1.5"/>`}
+    <rect class="wall-click ${walls.front?'':'wall-open'}" onclick="toggleWall('front')" x="${bx}" y="${by}" width="${bw}" height="${gnd-by}" fill="${fc('front')}" fill-opacity="${op('front')}" stroke="${sc2('front')}" stroke-width="1.5" stroke-dasharray="${sd('front')}" rx="1"/>
+    ${!walls.front?`<text x="${cx-20}" y="${(by+gnd)/2}" text-anchor="middle" font-family="IBM Plex Mono" font-size="11" fill="#b91c1c" font-weight="600">OPEN</text>`:''}
+    <line class="wall-click ${walls.back?'':'wall-open'}" onclick="toggleWall('back')" x1="${bx+dp}" y1="${by-dp*.33}" x2="${bx+bw+dp}" y2="${by-dp*.33}" stroke="${sc2('back')}" stroke-width="1.5" stroke-dasharray="${sd('back')}" opacity="${walls.back?'.4':'.6'}"/>
+    ${!walls.back?`<text x="${bx+bw/2+dp}" y="${by-dp*.33-5}" text-anchor="middle" font-family="IBM Plex Mono" font-size="8" fill="#b91c1c" font-weight="600">BACK OPEN</text>`:''}
+    <line class="wall-click ${walls.left?'':'wall-open'}" onclick="toggleWall('left')" x1="${bx}" y1="${by}" x2="${bx+dp}" y2="${by-dp*.33}" stroke="${sc2('left')}" stroke-width="${walls.left?'1.5':'2'}" stroke-dasharray="${sd('left')}" opacity="${walls.left?'.35':'.7'}"/>
+    <line class="wall-click ${walls.left?'':'wall-open'}" onclick="toggleWall('left')" x1="${bx}" y1="${gnd}" x2="${bx+dp}" y2="${gnd-dp*.33}" stroke="${sc2('left')}" stroke-width="${walls.left?'1':'1.5'}" stroke-dasharray="${sd('left')}" opacity="${walls.left?'.2':'.5'}"/>
+    ${!walls.left?`<text x="${bx+dp/2-2}" y="${(by+gnd)/2-dp*.16}" text-anchor="middle" font-family="IBM Plex Mono" font-size="8" fill="#b91c1c" font-weight="600" transform="rotate(-18,${bx+dp/2-2},${(by+gnd)/2-dp*.16})">LEFT OPEN</text>`:''}
+    <text x="${cx-20}" y="${gnd+12}" text-anchor="middle" font-family="IBM Plex Mono" font-size="8" fill="#9ca3af">ZONE D (WW)</text>
+    <line x1="${bx+bw+dp+18}" y1="${gnd}" x2="${bx+bw+dp+18}" y2="${by}" stroke="#374151" stroke-width=".8" marker-start="url(#dA)" marker-end="url(#dAu)"/>
+    <text x="${bx+bw+dp+26}" y="${(gnd+by)/2+4}" font-family="IBM Plex Mono" font-size="11" fill="#374151" font-weight="600">${he}m</text>
+    <line x1="${bx}" y1="${gnd+22}" x2="${bx+bw}" y2="${gnd+22}" stroke="#374151" stroke-width=".8"/>
+    <text x="${cx-20}" y="${gnd+34}" text-anchor="middle" font-family="IBM Plex Mono" font-size="11" fill="#374151" font-weight="600">b = ${B}m</text>
+    <text x="${bx+bw+dp/2+8}" y="${by-dp*.17-6}" text-anchor="middle" font-family="IBM Plex Mono" font-size="9" fill="#6b7280" transform="rotate(-18,${bx+bw+dp/2+8},${by-dp*.17-6})">d = ${L}m</text>
+    ${[0,1,2,3].map(i=>{const y=by-5+i*(gnd-by+5)/3;return`<line x1="${bx-70}" y1="${y}" x2="${bx-15}" y2="${y}" stroke="#0d6e6e" stroke-width="1.5" marker-end="url(#wA)" opacity=".4"/>`}).join('')}
+    <text x="${bx-45}" y="${by-18}" text-anchor="middle" font-family="IBM Plex Mono" font-size="11" fill="#0d6e6e" font-weight="700" letter-spacing=".5">WIND</text>
+    <text x="${bx-45}" y="${by-7}" text-anchor="middle" font-family="IBM Plex Mono" font-size="9" fill="#0f9b8e">${V} m/s</text>
+  `;
+}
+
+function drawPlan(B,L){
+  const svg=document.getElementById('plan-svg');
+  const sc=Math.min(160/Math.max(B,L),10),pw=B*sc,pl=L*sc;
+  const ox=170-pw/2,oy=130-pl/2;
+  const wc=f=>walls[f]?'#607d8b':'#b91c1c',wd=f=>walls[f]?'':'6,4',wop=f=>walls[f]?'1':'.5';
+  const lbl=(f,x,y)=>!walls[f]?`<text x="${x}" y="${y}" text-anchor="middle" font-family="IBM Plex Mono" font-size="8" fill="#b91c1c" font-weight="600">OPEN</text>`:'';
+  svg.innerHTML=`
+    <rect x="${ox}" y="${oy}" width="${pw}" height="${pl}" fill="rgba(176,190,197,.15)" stroke="none"/>
+    <line x1="${ox}" y1="${oy+pl}" x2="${ox+pw}" y2="${oy+pl}" stroke="${wc('front')}" stroke-width="2.5" stroke-dasharray="${wd('front')}" opacity="${wop('front')}" class="wall-click" onclick="toggleWall('front')" cursor="pointer"/>${lbl('front',ox+pw/2,oy+pl+14)}
+    <line x1="${ox}" y1="${oy}" x2="${ox+pw}" y2="${oy}" stroke="${wc('back')}" stroke-width="2.5" stroke-dasharray="${wd('back')}" opacity="${wop('back')}" class="wall-click" onclick="toggleWall('back')" cursor="pointer"/>${lbl('back',ox+pw/2,oy-6)}
+    <line x1="${ox}" y1="${oy}" x2="${ox}" y2="${oy+pl}" stroke="${wc('left')}" stroke-width="2.5" stroke-dasharray="${wd('left')}" opacity="${wop('left')}" class="wall-click" onclick="toggleWall('left')" cursor="pointer"/>${lbl('left',ox-16,oy+pl/2)}
+    <line x1="${ox+pw}" y1="${oy}" x2="${ox+pw}" y2="${oy+pl}" stroke="${wc('right')}" stroke-width="2.5" stroke-dasharray="${wd('right')}" opacity="${wop('right')}" class="wall-click" onclick="toggleWall('right')" cursor="pointer"/>${lbl('right',ox+pw+18,oy+pl/2)}
+    <text x="${ox+pw/2}" y="${oy+pl+28}" text-anchor="middle" font-family="IBM Plex Mono" font-size="9" fill="#0d6e6e" font-weight="600">Zone D (Windward)</text>
+    <text x="${ox+pw/2}" y="${oy-16}" text-anchor="middle" font-family="IBM Plex Mono" font-size="9" fill="#b91c1c" font-weight="600">Zone E (Leeward)</text>
+    <text x="${ox-6}" y="${oy+pl/2}" text-anchor="end" font-family="IBM Plex Mono" font-size="8" fill="#6b7280">A/B</text>
+    <text x="${ox+pw+6}" y="${oy+pl/2}" font-family="IBM Plex Mono" font-size="8" fill="#6b7280">A/B</text>
+    <defs><marker id="pA" markerWidth="6" markerHeight="5" refX="5" refY="2.5" orient="auto"><path d="M0,0L0,5L6,2.5z" fill="#0d6e6e"/></marker></defs>
+    <line x1="${ox+pw/2}" y1="${oy+pl+52}" x2="${ox+pw/2}" y2="${oy+pl+38}" stroke="#0d6e6e" stroke-width="2" marker-end="url(#pA)"/>
+    <text x="${ox+pw/2}" y="${oy+pl+62}" text-anchor="middle" font-family="IBM Plex Mono" font-size="9" fill="#0d6e6e" font-weight="600">WIND ↑</text>
+    <text x="${ox+pw/2}" y="${oy+pl/2+3}" text-anchor="middle" font-family="IBM Plex Mono" font-size="10" fill="#9ca3af">${B}m × ${L}m</text>`;
+}
+
+function updSummary(){
+  document.getElementById('ss1').innerHTML=`<div class="sc">b <span class="v">${gv('iB')}m</span></div><div class="sc">d <span class="v">${gv('iL')}m</span></div><div class="sc">h <span class="v">${gv('ihe')}m</span></div><div class="sc">vb0 <span class="v">${gv('iV')} m/s</span></div><div class="sc">WALLS <span class="v">${Object.values(walls).filter(v=>!v).length} open</span></div>`;
+}
+
+// ══════════════════════ EN 1991-1-4 CORE ══════════════════════
+const TC={'0':{z0:.003,zmin:1},'I':{z0:.01,zmin:1},'II':{z0:.05,zmin:2},'III':{z0:.3,zmin:5},'IV':{z0:1,zmin:10}};
+const z0II=0.05;
+function CpeD(hd){return hd>=1?.8:(hd>=.25?.7+.1*(hd-.25)/.75:.7);}
+function CpeE(hd){if(hd>=1)return-.7;if(hd>=.25)return-.5-.2*(hd-.25)/.75;return-.5;}
+
+function runCalc(){
+  const b=gv('iB'),d=gv('iL'),he=gv('ihe'),hr=gv('ihr'),vb0=gv('iV');
+  const tc=sels.tc,t=TC[tc];
+  const cdir=+document.getElementById('iCdir').value||1;
+  const cseason=+document.getElementById('iCseason').value||1;
+  const co=+document.getElementById('iCo').value||1;
+  const h=he,hd=h/d;
+  const ze=Math.max(h,t.zmin);
+  const kr=.19*Math.pow(t.z0/z0II,.07);
+  const cr=kr*Math.log(ze/t.z0);
+  const Iv=1/(co*Math.log(ze/t.z0));
+  const vb=cdir*cseason*vb0;
+  const vm=cr*co*vb;
+  const qp=.5*1.25*vm*vm*(1+7*Iv)/1000;
+  const qb=.5*1.25*vb*vb/1000;
+
+  const CpD=CpeD(hd),CpE=CpeE(hd),CpA=-1.2,CpB=-.8;
+  let Cpi_pos,Cpi_neg;
+  if(sels.enc==='enclosed'){Cpi_pos=.2;Cpi_neg=-.3;}
+  else{Cpi_pos=.75*CpD;Cpi_neg=.75*CpE;}
+
+  const wD=qp*CpD,wE=qp*CpE;
+  const wnD=qp*(CpD-Cpi_neg),wnE=qp*(CpE-Cpi_pos);
+  const wnA=qp*(CpA-Cpi_pos),wnB=qp*(CpB-Cpi_pos);
+
+  const CpF=-1.8,CpG=-1.2,CpH=-.7;
+  const wF=qp*CpF,wG=qp*CpG,wH=qp*CpH;
+
+  R={b,d,he,hr,h,vb0,vb,tc,t,cdir,cseason,co,hd,ze,kr,cr,Iv,vm,qp,qb,CpD,CpE,CpA,CpB,Cpi_pos,Cpi_neg,wD,wE,wnD,wnE,wnA,wnB,CpF,CpG,CpH,wF,wG,wH,enc:sels.enc};
+  goStep(3);buildWalk();
+}
+
+function buildWalk(){
+  const r=R;
+  document.getElementById('ss2').innerHTML=`<div class="sc">b×d <span class="v">${r.b}×${r.d}m</span></div><div class="sc">h <span class="v">${r.h}m</span></div><div class="sc">vb <span class="v">${r.vb.toFixed(1)} m/s</span></div><div class="sc">TC <span class="v">${r.tc}</span></div><div class="sc">cpi <span class="v">${r.enc==='enclosed'?'+0.2/−0.3':'dominant'}</span></div>`;
+
+  const maxP=Math.max(Math.abs(r.wnD),Math.abs(r.wnE),Math.abs(r.wnA),Math.abs(r.wF));
+  const openWalls=Object.entries(walls).filter(([,v])=>!v).map(([k])=>k);
+
+  const steps=[
+    {t:'Basic Wind Velocity v<sub>b</sub>',res:`vb = ${r.vb.toFixed(1)} m/s`,body:`
+      <div class="asce-ref"><div class="asce-ref-badge">EN Reference</div>
+        <div class="asce-ref-title">§4.2 — Basic Values of Wind Velocity</div>
+        <div class="asce-ref-clause">EN 1991-1-4 §4.2(1)P, §4.2(2)</div>
+        <div class="asce-ref-desc">The fundamental value vb,0 is the 10-minute mean wind velocity at 10m height in terrain category II, with a 50-year return period. National Annex provides the wind map.</div>
+        <div class="asce-ref-look"><b>Equation:</b> vb = cdir × cseason × vb,0<br><b>Your NA map value:</b> vb,0 = ${r.vb0} m/s<br><b>Note:</b> 10-min mean ≈ 3s gust / 1.4–1.6 (for comparison with ASCE)</div>
+        <div class="asce-ref-page">📖 See your National Annex wind speed map + EN 1991-1-4 §4.2</div><div class="asce-ref-icon">🗺️</div></div>
+      <div class="fb"><span class="fl">EN 1991-1-4 §4.2 — Basic Wind Velocity</span><span class="ff">v<sub>b</sub> = c<sub>dir</sub> × c<sub>season</sub> × v<sub>b,0</sub> = ${r.cdir} × ${r.cseason} × ${r.vb0} = ${r.vb.toFixed(1)} m/s</span><span class="fn">q<sub>b</sub> = ½ρv<sub>b</sub>² = ${r.qb.toFixed(4)} kN/m²</span></div>
+      <div class="rp eu">v<sub>b</sub> = ${r.vb.toFixed(1)} m/s</div> <div class="rp eu">q<sub>b</sub> = ${r.qb.toFixed(4)} kN/m²</div>`},
+
+    {t:'Roughness Factor c<sub>r</sub>(z)',res:`cr = ${r.cr.toFixed(4)}`,body:`
+      <div class="asce-ref"><div class="asce-ref-badge">EN Reference</div>
+        <div class="asce-ref-title">§4.3.2 — Terrain Roughness</div>
+        <div class="asce-ref-clause">EN 1991-1-4 §4.3.2, Eq. 4.4 & 4.5</div>
+        <div class="asce-ref-desc">Roughness factor cr(z) accounts for terrain and height above ground using a logarithmic wind profile. The terrain factor kr depends on roughness length z0.</div>
+        <div class="asce-ref-look"><b>Equations:</b><br>kr = 0.19 × (z₀/z₀,II)^0.07 = 0.19 × (${r.t.z0}/${z0II})^0.07 = ${r.kr.toFixed(4)}<br>cr(z) = kr × ln(z/z₀) for z ≥ zmin<br><b>TC ${r.tc}:</b> z₀=${r.t.z0}m, zmin=${r.t.zmin}m</div>
+        <div class="asce-ref-page">📖 See EN 1991-1-4 §4.3.2, Table 4.1</div><div class="asce-ref-icon">🌍</div></div>
+      <div class="fb"><span class="fl">EN 1991-1-4 Eq. 4.4</span><span class="ff">k<sub>r</sub> = 0.19 × (${r.t.z0}/${z0II})<sup>0.07</sup> = ${r.kr.toFixed(4)}</span><span class="ff">c<sub>r</sub>(z<sub>e</sub>) = ${r.kr.toFixed(4)} × ln(${r.ze.toFixed(1)}/${r.t.z0}) = ${r.cr.toFixed(4)}</span><span class="fn">z<sub>e</sub> = max(h, z<sub>min</sub>) = max(${r.h}, ${r.t.zmin}) = ${r.ze.toFixed(1)} m</span></div>
+      <div class="rp eu">c<sub>r</sub>(z) = ${r.cr.toFixed(4)}</div>`},
+
+    {t:'Mean Wind Velocity v<sub>m</sub>(z)',res:`vm = ${r.vm.toFixed(2)} m/s`,body:`
+      <div class="asce-ref"><div class="asce-ref-badge">EN Reference</div>
+        <div class="asce-ref-title">§4.3.1 — Mean Wind Velocity</div>
+        <div class="asce-ref-clause">EN 1991-1-4 §4.3.1, Eq. 4.3</div>
+        <div class="asce-ref-desc">Mean wind velocity at height z, combining the roughness factor and orography factor.</div>
+        <div class="asce-ref-look"><b>Equation:</b> vm(z) = cr(z) × c₀(z) × vb<br><b>c₀(z):</b> orography factor = ${r.co} (1.0 for flat terrain, see §4.3.3 for hills)</div>
+        <div class="asce-ref-page">📖 See EN 1991-1-4 §4.3.1</div><div class="asce-ref-icon">💨</div></div>
+      <div class="fb"><span class="fl">EN 1991-1-4 Eq. 4.3</span><span class="ff">v<sub>m</sub>(z) = c<sub>r</sub>(z) × c<sub>o</sub>(z) × v<sub>b</sub> = ${r.cr.toFixed(4)} × ${r.co} × ${r.vb.toFixed(1)} = ${r.vm.toFixed(2)} m/s</span></div>
+      <div class="rp eu">v<sub>m</sub>(z) = ${r.vm.toFixed(2)} m/s</div>`},
+
+    {t:'Turbulence Intensity I<sub>v</sub>(z)',res:`Iv = ${r.Iv.toFixed(4)}`,body:`
+      <div class="asce-ref"><div class="asce-ref-badge">EN Reference</div>
+        <div class="asce-ref-title">§4.4 — Wind Turbulence</div>
+        <div class="asce-ref-clause">EN 1991-1-4 §4.4, Eq. 4.7</div>
+        <div class="asce-ref-desc">Turbulence intensity Iv(z) represents the ratio of standard deviation of turbulence to mean wind velocity. Used to calculate peak velocity pressure.</div>
+        <div class="asce-ref-look"><b>Equation:</b> Iv(z) = σv/vm = kI / [c₀(z) × ln(z/z₀)]<br><b>kI = 1.0</b> (recommended, turbulence factor)<br><b>Note:</b> For z < zmin, use Iv(zmin)</div>
+        <div class="asce-ref-page">📖 See EN 1991-1-4 §4.4</div><div class="asce-ref-icon">🌀</div></div>
+      <div class="fb"><span class="fl">EN 1991-1-4 Eq. 4.7</span><span class="ff">I<sub>v</sub>(z) = k<sub>I</sub> / [c<sub>o</sub>(z) × ln(z<sub>e</sub>/z<sub>0</sub>)] = 1.0 / [${r.co} × ln(${r.ze.toFixed(1)}/${r.t.z0})] = ${r.Iv.toFixed(4)}</span></div>
+      <div class="rp eu">I<sub>v</sub>(z) = ${r.Iv.toFixed(4)}</div>`},
+
+    {t:'Peak Velocity Pressure q<sub>p</sub>(z)',res:`qp = ${r.qp.toFixed(4)} kN/m²`,body:`
+      <div class="asce-ref"><div class="asce-ref-badge">EN Reference</div>
+        <div class="asce-ref-title">§4.5 — Peak Velocity Pressure</div>
+        <div class="asce-ref-clause">EN 1991-1-4 §4.5(1), Eq. 4.8</div>
+        <div class="asce-ref-desc">The peak velocity pressure includes both mean and turbulent components. The factor (1+7Iv) converts the mean velocity pressure to peak.</div>
+        <div class="asce-ref-look"><b>Equation:</b> qp(z) = [1 + 7·Iv(z)] × ½ρvm²<br><b>ρ = 1.25 kg/m³</b> (recommended air density)<br><b>Note:</b> National Annex may provide ce(z) exposure factor as alternative</div>
+        <div class="asce-ref-page">📖 See EN 1991-1-4 §4.5</div><div class="asce-ref-icon">📐</div></div>
+      <div class="fb"><span class="fl">EN 1991-1-4 Eq. 4.8</span><span class="ff">q<sub>p</sub>(z) = [1 + 7 × ${r.Iv.toFixed(4)}] × ½ × 1.25 × ${r.vm.toFixed(2)}²</span><span class="ff">= ${(1+7*r.Iv).toFixed(4)} × ${(.5*1.25*r.vm*r.vm).toFixed(2)} = ${(r.qp*1000).toFixed(1)} N/m² = ${r.qp.toFixed(4)} kN/m²</span></div>
+      <div class="rp amber">q<sub>p</sub>(z<sub>e</sub>) = ${r.qp.toFixed(4)} kN/m²</div>`},
+
+    {t:'External Pressure Coefficients c<sub>pe</sub>',res:`D=+${r.CpD.toFixed(2)} E=${r.CpE.toFixed(2)}`,body:`
+      <div class="asce-ref"><div class="asce-ref-badge">EN Reference</div>
+        <div class="asce-ref-title">Table 7.1 — cpe for Vertical Walls of Rectangular Buildings</div>
+        <div class="asce-ref-clause">EN 1991-1-4 §7.2.2, Table 7.1</div>
+        <div class="asce-ref-desc">External pressure coefficients for walls depend on h/d ratio. Zones D (windward), E (leeward), A (side near edge), B (side far), C (side central for long buildings).</div>
+        <div class="asce-ref-look"><b>h/d = ${r.hd.toFixed(3)}:</b><br>Zone D: cpe,10 = ${r.CpD.toFixed(3)} (interpolated from Table 7.1)<br>Zone E: cpe,10 = ${r.CpE.toFixed(3)}<br>Zone A: cpe,10 = −1.2 | Zone B: cpe,10 = −0.8<br><b>Also see:</b> Table 7.2 for flat roof zones (F, G, H, I)</div>
+        <div class="asce-ref-page">📖 See EN 1991-1-4 Table 7.1 (walls) + Table 7.2 (flat roofs)</div><div class="asce-ref-icon">🏗️</div></div>
+      <div class="fb"><span class="fl">EN 1991-1-4 Table 7.1 (h/d = ${r.hd.toFixed(3)})</span><span class="ff">Zone D (WW): c<sub>pe,10</sub> = +${r.CpD.toFixed(3)}</span><span class="ff">Zone E (LW): c<sub>pe,10</sub> = ${r.CpE.toFixed(3)}</span><span class="ff">Zone A (side): c<sub>pe,10</sub> = −1.2 | Zone B: c<sub>pe,10</sub> = −0.8</span></div>
+      <table class="dt"><thead><tr><th>Zone</th><th>Face</th><th>cpe,10</th><th>we = qp×cpe (kN/m²)</th></tr></thead><tbody>
+        <tr><td>D</td><td>Windward</td><td class="pos">+${r.CpD.toFixed(3)}</td><td class="pos">+${r.wD.toFixed(4)}</td></tr>
+        <tr><td>E</td><td>Leeward</td><td class="neg">${r.CpE.toFixed(3)}</td><td class="neg">${r.wE.toFixed(4)}</td></tr>
+        <tr><td>A</td><td>Side (near edge)</td><td class="neg">−1.200</td><td class="neg">${(r.qp*r.CpA).toFixed(4)}</td></tr>
+        <tr><td>B</td><td>Side (far)</td><td class="neg">−0.800</td><td class="neg">${(r.qp*r.CpB).toFixed(4)}</td></tr>
+        <tr><td>F</td><td>Roof corner</td><td class="neg">${r.CpF}</td><td class="neg">${r.wF.toFixed(4)}</td></tr>
+        <tr><td>G</td><td>Roof WW edge</td><td class="neg">${r.CpG}</td><td class="neg">${r.wG.toFixed(4)}</td></tr>
+        <tr><td>H</td><td>Roof interior</td><td class="neg">${r.CpH}</td><td class="neg">${r.wH.toFixed(4)}</td></tr>
+      </tbody></table>`},
+
+    {t:'Internal Pressure c<sub>pi</sub>',res:`cpi = +${r.Cpi_pos.toFixed(2)} / ${r.Cpi_neg.toFixed(2)}`,body:`
+      <div class="asce-ref"><div class="asce-ref-badge">EN Reference</div>
+        <div class="asce-ref-title">§7.2.9 — Internal Pressure Coefficients</div>
+        <div class="asce-ref-clause">EN 1991-1-4 §7.2.9(5), §7.2.9(6)</div>
+        <div class="asce-ref-desc">${r.enc==='enclosed'?'For buildings without a dominant face, cpi should be taken as the more onerous of +0.2 and −0.3.':'For buildings with a dominant face, cpi = 0.75 × cpe of the dominant face.'}</div>
+        <div class="asce-ref-look"><b>Classification:</b> ${r.enc==='enclosed'?'No dominant face':'Dominant opening'} (${openWalls.length} wall(s) open)<br><b>cpi,+ = +${r.Cpi_pos.toFixed(2)}</b> | <b>cpi,− = ${r.Cpi_neg.toFixed(2)}</b><br><b>Both cases must be checked</b> for each surface.</div>
+        <div class="asce-ref-page">📖 See EN 1991-1-4 §7.2.9</div><div class="asce-ref-icon">🚪</div></div>
+      <div class="fb"><span class="fl">EN 1991-1-4 §7.2.9</span><span class="ff">${r.enc==='enclosed'?'No dominant face':'Dominant opening'} → c<sub>pi,+</sub> = +${r.Cpi_pos.toFixed(2)} | c<sub>pi,−</sub> = ${r.Cpi_neg.toFixed(2)}</span></div>
+      <div class="cpi-v"><div class="cpi-c"><div class="cpi-ct">Positive case</div><div class="cpi-cv pos">+${r.Cpi_pos.toFixed(2)}</div></div><div class="cpi-c"><div class="cpi-ct">Negative case</div><div class="cpi-cv neg">${r.Cpi_neg.toFixed(2)}</div></div></div>`},
+
+    {t:'Net Design Pressures w<sub>net</sub>',res:`D: +${r.wnD.toFixed(3)} kN/m²`,body:`
+      <div class="asce-ref"><div class="asce-ref-badge">EN Reference</div>
+        <div class="asce-ref-title">§5.2 — Wind Pressure on Surfaces</div>
+        <div class="asce-ref-clause">EN 1991-1-4 §5.2, Eq. 5.1 & 5.2</div>
+        <div class="asce-ref-desc">Net pressure = external wind pressure minus internal wind pressure. Evaluate for both +cpi and −cpi cases on each zone.</div>
+        <div class="asce-ref-look"><b>we = qp(ze) × cpe</b> (external, Eq. 5.1)<br><b>wi = qp(zi) × cpi</b> (internal, Eq. 5.2)<br><b>wnet = we − wi</b> for each surface<br><b>Governing case:</b> max |wnet| from both ±cpi combinations</div>
+        <div class="asce-ref-page">📖 See EN 1991-1-4 §5.2</div><div class="asce-ref-icon">📋</div></div>
+      <div class="fb"><span class="fl">EN 1991-1-4 Eq. 5.1 & 5.2</span><span class="ff">w<sub>net</sub> = q<sub>p</sub>(z<sub>e</sub>) × c<sub>pe</sub> − q<sub>p</sub>(z<sub>i</sub>) × c<sub>pi</sub></span></div>
+      <table class="dt"><thead><tr><th>Zone</th><th>cpe</th><th>we (kN/m²)</th><th>Max wnet (kN/m²)</th></tr></thead><tbody>
+        <tr><td><strong>D (WW)</strong></td><td class="pos">+${r.CpD.toFixed(3)}</td><td class="pos">+${r.wD.toFixed(4)}</td><td class="pos"><strong>+${r.wnD.toFixed(4)}</strong></td></tr>
+        <tr><td><strong>E (LW)</strong></td><td class="neg">${r.CpE.toFixed(3)}</td><td class="neg">${r.wE.toFixed(4)}</td><td class="neg"><strong>${r.wnE.toFixed(4)}</strong></td></tr>
+        <tr><td><strong>A (side)</strong></td><td class="neg">−1.200</td><td class="neg">${(r.qp*r.CpA).toFixed(4)}</td><td class="neg"><strong>${r.wnA.toFixed(4)}</strong></td></tr>
+        <tr><td><strong>B (side)</strong></td><td class="neg">−0.800</td><td class="neg">${(r.qp*r.CpB).toFixed(4)}</td><td class="neg"><strong>${r.wnB.toFixed(4)}</strong></td></tr>
+        <tr><td><strong>F (roof)</strong></td><td class="neg">${r.CpF}</td><td class="neg">${r.wF.toFixed(4)}</td><td class="neg"><strong>${(r.qp*(r.CpF-r.Cpi_pos)).toFixed(4)}</strong></td></tr>
+        <tr><td><strong>H (roof)</strong></td><td class="neg">${r.CpH}</td><td class="neg">${r.wH.toFixed(4)}</td><td class="neg"><strong>${(r.qp*(r.CpH-r.Cpi_pos)).toFixed(4)}</strong></td></tr>
+      </tbody></table>
+      <div style="display:flex;gap:6px;flex-wrap:wrap;margin-top:10px;">
+        <div class="rp amber">D: +${r.wnD.toFixed(3)}</div><div class="rp red">E: ${r.wnE.toFixed(3)}</div><div class="rp red">A: ${r.wnA.toFixed(3)}</div><div class="rp red">F: ${(r.qp*(r.CpF-r.Cpi_pos)).toFixed(3)}</div>
+      </div>
+      <div class="bar-wrap"><div class="bar-title">Net Pressure Comparison — All Zones (kN/m²)</div>
+        ${[{l:'D (WW)',v:r.wnD},{l:'E (LW)',v:r.wnE},{l:'A (side)',v:r.wnA},{l:'B (side)',v:r.wnB},{l:'F (roof)',v:r.qp*(r.CpF-r.Cpi_pos)},{l:'H (roof)',v:r.qp*(r.CpH-r.Cpi_pos)}].map(b=>{const pct=Math.abs(b.v)/maxP*100;return`<div class="bar-row"><div class="bar-label">${b.l}</div><div class="bar-track"><div class="bar-fill ${b.v>0?'pos-bar':'neg-bar'}" style="width:${Math.min(pct,100)}%">${b.v>0?'+':''}${b.v.toFixed(3)}</div></div></div>`}).join('')}
+      </div>
+    `}
+  ];
+
+  const c=document.getElementById('walkthrough');
+  c.innerHTML=steps.map((s,i)=>`
+    <div class="ws ${i===0?'cur':''}" id="ws${i}">
+      <div class="ws-head" onclick="toggleWS(${i})"><div class="ws-num">${i+1}</div><div class="ws-title">${s.t}</div><div class="ws-res">${s.res}</div></div>
+      <div class="ws-body">${s.body}${i<steps.length-1?`<button class="wn" onclick="advWS(${i+1})">Continue → Step ${i+2}</button>`:
+      `<div style="margin-top:14px;padding:14px;background:var(--green-l);border:1px solid var(--green-b);border-radius:var(--r);"><strong style="color:var(--green);font-family:var(--display);font-size:15px;">✓ Analysis Complete</strong><div style="font-size:11px;color:var(--ink2);margin-top:3px;">All wind actions calculated per EN 1991-1-4.</div></div>`}</div>
+    </div>`).join('');
+  walkI=0;
+}
+
+function advWS(n){document.getElementById('ws'+(n-1)).className='ws done';document.getElementById('ws'+n).className='ws cur';walkI=n;document.getElementById('ws'+n).scrollIntoView({behavior:'smooth',block:'center'});}
+function toggleWS(i){if(document.getElementById('ws'+i).classList.contains('done'))document.getElementById('ws'+i).scrollIntoView({behavior:'smooth',block:'center'});}
+
+document.addEventListener('DOMContentLoaded',()=>{upd();detectEnclosure();});
+</script>
+</body>
+</html>
