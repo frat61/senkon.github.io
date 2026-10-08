@@ -175,9 +175,10 @@
     // ---- pointer input: drag rotates, right drag or shift pans, wheel zooms, two fingers pinch and pan
     const ptr = new Map(); let pinch = 0;
     const onCtx = e => e.preventDefault();
-    const onDown = e => { canvas.setPointerCapture(e.pointerId); ptr.set(e.pointerId, { x: e.clientX, y: e.clientY, b: e.button, sx: e.clientX, sy: e.clientY }); };
+    const onDown = e => { canvas.setPointerCapture(e.pointerId); ptr.set(e.pointerId, { x: e.clientX, y: e.clientY, b: e.button, sx: e.clientX, sy: e.clientY });
+      if (ptr.size > 1) ptr.forEach(q => { q.multi = true; }); };
     const onUp = e => { const p = ptr.get(e.pointerId); ptr.delete(e.pointerId); pinch = 0;
-      if (measuring && p && Math.hypot(e.clientX - p.sx, e.clientY - p.sy) < 7) pickAt(e.clientX, e.clientY); };
+      if (measuring && p && p.b === 0 && !p.multi && !e.shiftKey && Math.hypot(e.clientX - p.sx, e.clientY - p.sy) < 7) pickAt(e.clientX, e.clientY); };
     const onCancel = e => { ptr.delete(e.pointerId); pinch = 0; };
     const onMove = e => { const p = ptr.get(e.pointerId); if (!p) return;
       const dx = e.clientX - p.x, dy = e.clientY - p.y; p.x = e.clientX; p.y = e.clientY;
@@ -187,7 +188,7 @@
       else if (p.b === 2 || e.shiftKey) { const s = dist * 0.0012; tgt.addScaledVector(right, -dx * s); tgt.y += dy * s; }
       else { az -= dx * 0.006; el += dy * 0.005; }
       draw(); };
-    const onWheel = e => { e.preventDefault(); dist *= Math.exp(e.deltaY * 0.0012); draw(); };
+    const onWheel = e => { e.preventDefault(); const k = e.deltaMode === 1 ? 33 : e.deltaMode === 2 ? 800 : 1; dist *= Math.exp(e.deltaY * k * 0.0012); draw(); };
     canvas.addEventListener('contextmenu', onCtx); canvas.addEventListener('pointerdown', onDown); canvas.addEventListener('pointerup', onUp);
     canvas.addEventListener('pointercancel', onCancel); canvas.addEventListener('pointermove', onMove); canvas.addEventListener('wheel', onWheel, { passive: false });
     window.addEventListener('resize', resize);
