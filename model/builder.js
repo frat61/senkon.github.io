@@ -345,8 +345,31 @@
     } });
   }
 
+  // ---- architecture: wall faces as translucent planes up to the ceiling, doors, room names
+  function buildArchitecture(c) {
+    const { m, L, tris, lines, box, tag, quad } = c;
+    const H = L.ceiling, pos = [], edge = [];
+    // wall lines lying on a glazed side's outer face are part of the curtain wall, not interior walls
+    const glassFaces = SIDES.filter(s => m.facades[s] === 'glass').map(s =>
+      s === 'north' ? [1, 0] : s === 'south' ? [1, m.outline.y] : s === 'west' ? [0, 0] : [0, m.outline.x]);
+    const onGlass = w => glassFaces.some(([ax, v]) => Math.abs(w[ax] - v) < 0.12 && Math.abs(w[ax + 2] - v) < 0.12);
+    m.walls.forEach(w => {
+      if (w.length !== 4 || onGlass(w)) return;
+      const [x1, y1, x2, y2] = w;
+      pos.push.apply(pos, quad([x1, y1, 0], [x2, y2, 0], [x2, y2, H], [x1, y1, H]));
+      edge.push(x1, y1, H, x2, y2, H);
+    });
+    if (pos.length) { tris('walls', 'wall', pos, 'wallFace'); lines('walls', 'wallEdge', edge, 'wallEdge'); }
+    m.doors.forEach(d => {
+      const h = d.e ? 2.3 : 2.1, t = d.e ? 0.5 : 0.14, len = d.b - d.a, mid = (d.a + d.b) / 2;
+      box('doors', 'door', d.h ? [mid, d.c, h / 2] : [d.c, mid, h / 2], d.h ? [len, t, h] : [t, len, h], 'door');
+    });
+    m.rooms.forEach(r => tag('rooms', 'room', r.name, [r.x, r.y, 0.3], '#5b6670', 0.72));
+    m.labels.forEach(l => tag('rooms', 'label', l.name, [l.x, l.y, l.z !== undefined ? l.z : 2.9], '#b35c00', 0.8));
+  }
+
   const PARTS = [];  // sub-builders (frame, floor, envelope, architecture, annotations), each called with the context
-  PARTS.push(buildFrame, buildFloor, buildEnvelope, buildAnnotations);
+  PARTS.push(buildFrame, buildFloor, buildEnvelope, buildArchitecture, buildAnnotations);
 
   function build(model) {
     const m = normalize(model);

@@ -241,3 +241,30 @@ test('single-span gable: roof skin and gable panels peak at the mid-span ridge',
   near(Math.max.apply(null, west.pos.filter((v, i) => i % 3 === 2)), 6.55);
   assert.equal(west.pos.length, 36, 'west gable has two quads');
 });
+
+labTest('lab architecture: walls skip the glass face, doors, rooms, labels', () => {
+  const out = B.build(lab);
+  const wall = out.items.find(i => i.role === 'wall');
+  assert.equal(wall.pos.length, 256 * 18, '262 wall lines minus 6 on the south glass face, 18 numbers each');
+  assert.equal(out.items.find(i => i.role === 'wallEdge').pos.length, 256 * 6);
+  assert.equal(count(out, 'door', 'doors'), 32);
+  const ext = out.items.filter(i => i.role === 'door' && i.size[2] === 2.3);
+  assert.equal(ext.length, 3, 'exterior doors are 2.3 m high');
+  assert.equal(count(out, 'room', 'rooms'), 20);
+  assert.equal(count(out, 'label', 'rooms'), 4);
+  const lbl = out.items.find(i => i.role === 'label');
+  assert.equal(lbl.k, 0.8); assert.equal(lbl.p[2], 2.9);
+});
+
+test('doors along x and along y get the right box orientation', () => {
+  const out = B.build({ axes: { x: [0, 6], y: [0, 10] }, doors: [{ h: 1, a: 1, b: 2, c: 5, e: 0 }, { h: 0, a: 3, b: 4, c: 2, e: 1 }] });
+  const [dx, dy] = out.items.filter(i => i.role === 'door');
+  assert.deepEqual(dx.center, [1.5, 5, 1.05]); assert.deepEqual(dx.size, [1, 0.14, 2.1]);
+  assert.deepEqual(dy.center, [2, 3.5, 1.15]); assert.deepEqual(dy.size, [0.5, 1, 2.3]);
+});
+
+test('walls on a west glass face are skipped', () => {
+  const out = B.build({ axes: { x: [0.1, 6], y: [0.1, 10] }, outline: { x: 6.1, y: 10.1 }, facades: { west: 'glass' },
+    walls: [[0, 0, 0, 10], [0.05, 1, 0.05, 9], [3, 0, 3, 10]] });
+  assert.equal(out.items.find(i => i.role === 'wall').pos.length, 18);
+});
