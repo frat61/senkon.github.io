@@ -15,6 +15,14 @@ Design: `docs/superpowers/specs/2026-10-08-model-viewer-design.md`.
 | File | Source | SHA-256 |
 |---|---|---|
 | `model/vendor/three.r128.min.js` | https://cdnjs.cloudflare.com/ajax/libs/three.js/r128/three.min.js | `9274bbcec8d96168626c732b5d31c775aa8cfb7eaa0599bec0c175908a2c1ce2` |
+| `model/vendor/GLTFLoader.r128.js` | https://cdn.jsdelivr.net/npm/three@0.128.0/examples/js/loaders/GLTFLoader.js | `5c15967ba830918a9caea6338712c994c354bccd4edc4569bde411c3ec06a3e6` |
+| `model/vendor/GLTFExporter.r128.js` | https://cdn.jsdelivr.net/npm/three@0.128.0/examples/js/exporters/GLTFExporter.js | `a228cae09518e5034600a1aec65c3b3453f706f8943e542721c63c5e5727499c` |
+| `model/vendor/supabase-js.v2.117.3.min.js` | https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2.117.3/dist/umd/supabase.js | `d6a5c4414a5d4ce646d9c1de223aa7067d3ff664c15394ffeb7fcffc763354a3` |
+| `model/vendor/web-ifc/web-ifc-api-iife.js` | https://cdn.jsdelivr.net/npm/web-ifc@0.0.78/web-ifc-api-iife.js | `c6f7ba2b407065eac53a2d47e152f79bc987b120c42a7ea17355f7cc55bfdbf4` |
+| `model/vendor/web-ifc/web-ifc.wasm` | https://cdn.jsdelivr.net/npm/web-ifc@0.0.78/web-ifc.wasm | `1fbd30bd5515ff6ad15268e87aa26e41d57b29411c8461618b63bee92735d349` |
+
+`GLTFLoader` is loaded by the viewer only when a model is a file; `GLTFExporter`, supabase-js
+and web-ifc are loaded by the owner page only.
 
 ## Local development
 
