@@ -116,7 +116,7 @@
     return {
       v: VERSION, items, snaps, layers,
       center: [m.outline.x / 2, m.outline.y / 2], size: Math.max(m.outline.x, m.outline.y),
-      levels: { ceiling: L.ceiling, deck: L.deck, eave: zt(ys[ny]), ridge: zt(yr) },
+      levels: { ceiling: L.ceiling, deck: L.deck, eave: L.eave, ridge: L.ridge },
       model: m
     };
   }

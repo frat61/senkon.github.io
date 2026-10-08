@@ -77,3 +77,10 @@ test('rooms layer starts hidden', () => {
   const out = B.build({ axes: { x: [0, 6], y: [0, 10] }, rooms: [{ name: 'A', x: 1, y: 1 }] });
   assert.equal(out.layers.find(l => l.key === 'rooms').visible, false);
 });
+
+test('build().levels reports the model levels for every roof type', () => {
+  const mono = B.build({ axes: { x: [0, 6], y: [0, 10] }, roof: { type: 'mono' }, levels: { eave: 5, ridge: 7 } });
+  assert.deepEqual(mono.levels, { ceiling: 4, deck: 4.45, eave: 5, ridge: 7 });
+  const gable = B.build({ axes: { x: [0, 6], y: [0, 8, 20] }, levels: { eave: 5, ridge: 7 } });
+  assert.deepEqual(gable.levels, { ceiling: 4, deck: 4.45, eave: 5, ridge: 7 });
+});
