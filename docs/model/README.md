@@ -25,4 +25,27 @@ Serve the repository root (the viewer fetches `config.js` and vendor files relat
 Then open `http://127.0.0.1:8080/model/?src=../local/lab-model.json`. The `src` parameter works
 only on localhost and loads a row-shaped JSON file instead of the database.
 
-Run the builder tests with `node --test tests/`.
+Run the builder tests with `node --test` (bare; `node --test tests/` does not work on Node 24).
+
+## Database setup (once)
+
+1. Create a new Supabase project for senkonmuhendislik.com.
+2. Authentication > Providers > Email: turn off "Allow new users to sign up".
+3. Authentication > Users > Add user: your e-mail and a password (auto-confirm).
+4. SQL editor: paste and run `docs/model/schema.sql`.
+5. Project Settings > API: copy the Project URL and the `anon` `public` key into `model/config.js`.
+   Only the anon key. Never the `service_role` key.
+
+## Adding the laboratory model (first row)
+
+    node tools/extract-lab-model.js local/lab-frame-3d.html
+    node tools/make-model-sql.js local/lab-model.json <your-login-email> > local/lab-model.sql
+
+Run `local/lab-model.sql` in the SQL editor. The last line of the file is the share link.
+`local/` is gitignored; do not commit these files.
+
+## Publishing
+
+Push `model-viewer` to GitHub and merge into `main`; GitHub Pages deploys within a minute.
+Open the share link on an iPhone in Safari to check. Nothing links to `/model/`, and the slug
+is random, so a model is reachable only by its link.
