@@ -191,16 +191,20 @@ tests/
    and types arrive as the groups the converter makes. Once Fırat's files are in `local/`,
    decide whether a generic "switch per top-level group" is useful, and whether the IFC
    converter should group by storey instead of by entity type.
-2. **Up axis.** Confirm with real exports whether SketchUp GLB is Y-up (expected) and what
-   `web-ifc` yields (Z-up IFC coordinates; the converter rotates to Y-up). Until then the
-   viewer's bounding-box heuristic is a fallback only.
+2. **Up axis.** Resolved on the public sample (IfcOpenHouse, 2026-10-08): `web-ifc` 0.0.78
+   delivers Y-up geometry in metres, so the converter applies no rotation. The converter also
+   recentres the model at the origin (`COORDINATE_TO_ORIGIN`), so georeferenced coordinates are
+   not preserved; fine for a viewer. SketchUp GLB is Y-up by the glTF definition. Still to
+   confirm on Fırat's own exports.
 3. **IFC performance.** If a Tekla model with tens of thousands of elements is too slow or
    runs out of memory in the browser, the fallback is a desktop converter (IfcConvert from
    IfcOpenShell, or Blender's IFC add-on) producing the GLB, uploaded through the same
    `.glb` path. The page design does not change.
-4. **Units.** IFC and SketchUp exports may be in millimetres; the converter scales to metres
-   using the file's unit declaration, and the viewer's measuring reports metres. Verify on
-   real files.
+4. **Units.** `web-ifc` converts IFC lengths to metres itself (confirmed on the sample: a
+   2.2 m door). A SketchUp GLB exported in millimetres would arrive 1000× too large; the
+   viewer scales its camera to the model's size so it still displays, but measuring would
+   read millimetres. Verify on Fırat's own exports and add a unit option to "Model ekle" if
+   needed.
 
 ## 10. Acceptance
 
