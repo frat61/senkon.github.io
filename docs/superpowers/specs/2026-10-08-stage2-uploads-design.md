@@ -108,8 +108,9 @@ Nothing in the parametric path changes.
 alter table public.models add column if not exists thumbnail text;   -- data URL, JPEG
 
 insert into storage.buckets (id, name, public, file_size_limit, allowed_mime_types)
-values ('models', 'models', true, 52428800, array['model/gltf-binary','application/octet-stream'])
-on conflict (id) do nothing;
+values ('models', 'models', true, 52428800, array['model/gltf-binary'])
+on conflict (id) do update
+  set public = true, file_size_limit = 52428800, allowed_mime_types = array['model/gltf-binary'];
 
 -- Public read by exact path only (public bucket). No select policy for anon on
 -- storage.objects, so the bucket cannot be listed.
