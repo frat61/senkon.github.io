@@ -1,0 +1,79 @@
+<!doctype html>
+<html lang="tr">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<meta name="robots" content="noindex, nofollow">
+<title>Modeller – SENKON</title>
+<link rel="stylesheet" href="viewer.css">
+<link rel="stylesheet" href="panel.css">
+</head>
+<body class="panel">
+<header id="top">
+  <h1>Modeller</h1>
+  <div id="topActions" hidden><button id="add">Model ekle</button><button id="logout">Çıkış</button></div>
+</header>
+<main>
+  <p id="state">Yükleniyor…</p>
+  <section id="login" class="card" hidden>
+    <h2>Giriş</h2>
+    <form id="loginForm" novalidate>
+      <label>E-posta <input id="email" type="email" autocomplete="username" required></label>
+      <label>Şifre <input id="password" type="password" autocomplete="current-password" required></label>
+      <button type="submit" id="loginBtn">Giriş</button>
+      <p id="loginMsg" class="msg" role="alert"></p>
+    </form>
+  </section>
+  <section id="list" hidden>
+    <p id="empty" hidden>Henüz model yok. "Model ekle" ile başlayın.</p>
+    <div id="cards"></div>
+  </section>
+</main>
+<dialog id="addDlg">
+  <form id="addForm" novalidate>
+    <h2 id="addTitle">Model ekle</h2>
+    <label>Ad <input id="mName" maxlength="120"></label>
+    <label>Açıklama <textarea id="mDesc" rows="2"></textarea></label>
+    <label>Kaynak (çizim no, tarih) <input id="mSource"></label>
+    <label>Dosya (.glb, .gltf, .ifc, .json) <input id="mFile" type="file" accept=".glb,.gltf,.ifc,.json"></label>
+    <p id="addMsg" class="msg" role="alert"></p>
+    <progress id="addProg" max="1" value="0" hidden></progress>
+    <p id="addStep" class="step"></p>
+    <div class="actions"><button type="button" id="addCancel">Vazgeç</button><button type="submit" id="addOk">Ekle</button></div>
+  </form>
+</dialog>
+<dialog id="delDlg">
+  <p>Bu modeli silmek istediğinize emin misiniz?</p>
+  <p id="delName"></p>
+  <p id="delMsg" class="msg" role="alert"></p>
+  <div class="actions"><button id="delCancel">Vazgeç</button><button id="delOk" class="danger">Sil</button></div>
+</dialog>
+<div id="thumbStage" aria-hidden="true"></div>
+<template id="cardT">
+  <article class="mcard">
+    <img alt="">
+    <div class="body">
+      <h3></h3>
+      <p class="meta"></p>
+      <div class="btns">
+        <a class="open" target="_blank" rel="noopener">Aç</a>
+        <button class="copy">Bağlantıyı kopyala</button>
+        <button class="replace">Dosyayı değiştir</button>
+        <button class="del danger">Sil</button>
+      </div>
+    </div>
+  </article>
+</template>
+<script src="vendor/three.r128.min.js"></script>
+<script src="vendor/GLTFLoader.r128.js"></script>
+<script src="vendor/GLTFExporter.r128.js"></script>
+<script src="vendor/supabase-js.v2.117.3.min.js"></script>
+<script src="config.js"></script>
+<script src="builder.js"></script>
+<script src="viewer.js"></script>
+<script src="slug.js"></script>
+<script src="ingest.js"></script>
+<script src="ifc2glb.js"></script>
+<script src="panel.js"></script>
+</body>
+</html>
