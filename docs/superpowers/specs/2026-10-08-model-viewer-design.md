@@ -51,26 +51,43 @@ plus an editor that produces that data.
 ## 4. File layout
 
 ```
+.nojekyll           tells GitHub Pages to serve files as they are
+.gitignore          local/, .claude/, node_modules/
 model/
   index.html        viewer shell: reads ?m=, fetches the row, mounts the viewer, wires buttons
   viewer.css        styles shared by viewer and editor shells
-  viewer.js         scene builder and interaction; no network, no DOM outside its container
+  builder.js        pure geometry builder: model object in, plain item list out (no three.js)
+  viewer.js         three.js renderer and interaction for the builder's output
   config.js         SUPABASE_URL and SUPABASE_ANON_KEY (anon key only)
   editor.html       Stage 2
   editor.js         Stage 2
   vendor/
     three.r128.min.js
     supabase-js.v2.x.min.js     loaded by the editor only
+tools/
+  extract-lab-model.js   builds local/lab-model.json from the original lab-frame-3d.html
+  make-model-sql.js      writes an INSERT with a fresh random slug for one model JSON
+tests/
+  builder.test.js        node:test checks of the builder (skips lab checks if local/ is absent)
 docs/
   model/
     schema.sql        table, RLS policy, get_model function, updated_at trigger
-    lab-model.sql     insert of the laboratory model (first row)
-    lab-model.json    the same model as a plain JSON file, for comparison and tests
+    README.md         Fırat's steps: Supabase setup, inserting a model, publishing
   superpowers/specs/  this document
   superpowers/plans/  implementation plans
+local/                gitignored, never published: client data
+  lab-frame-3d.html   the original file, for side-by-side comparison
+  lab-model.json      the laboratory model as a row-shaped object {name, description, kind, data}
+  lab-model.sql       the generated insert for the laboratory model
 ```
 
-GitHub Pages serves `docs/` too. Nothing there is secret (SQL and JSON only).
+GitHub Pages serves the whole repository, so anything with client data (the lab model, the
+original file, generated inserts) lives only in the gitignored `local/` folder. `docs/` and
+`tools/` hold nothing secret.
+
+The builder is split from the renderer on purpose: a pure builder can be tested in Node
+without three.js, and Stage 3 (DXF export) and the later tonnage estimate can reuse its
+item list directly.
 
 ## 5. viewer.js interface
 
@@ -222,9 +239,11 @@ arrives, so a wrong slug never leaks another model's text.
 - Local: serve `C:\Dev\senkon` with a static server, open the viewer and the original file
   side by side in the in-app browser at desktop and phone widths; check every layer button,
   view preset, measuring, dark mode and the `__shot` hook.
-- The builder is pure (model object in, scene out): a small Node check loads `lab-model.json`
-  into the builder with a stub three.js and counts members per group against the original
-  file's numbers (columns, rafters, purlins, braces, wind posts, doors).
+- The builder is pure (model object in, item list out): `node --test tests/` loads
+  `local/lab-model.json` into `builder.js` and counts items per role against the original
+  file's numbers (columns, rafters, purlins, braces, wind posts, doors, walls, tags).
+- During development the viewer shell accepts `?src=<same-origin JSON>` on localhost only, so
+  the lab model can be drawn before the Supabase project exists.
 - Live: after Fırat pushes, the real check is the link on his iPhone in Safari.
 
 ## 10. Stages
