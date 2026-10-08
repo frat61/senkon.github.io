@@ -59,3 +59,18 @@ Run `local/lab-model.sql` in the SQL editor. The last line of the file is the sh
 Push `model-viewer` to GitHub and merge into `main`; GitHub Pages deploys within a minute.
 Open the share link on an iPhone in Safari to check. Nothing links to `/model/`, and the slug
 is random, so a model is reachable only by its link.
+
+## Stage 2 setup (once)
+
+1. SQL editor: run `docs/model/schema-stage2.sql` (preview column, `models` bucket, bucket policies).
+2. Open `https://senkonmuhendislik.com/model/panel.html`, sign in with the owner e-mail and password.
+
+## Adding a model
+
+"Model ekle" on the owner page: name, optional description and source reference, and a file:
+- `.glb` or self-contained `.gltf` (SketchUp: File > Export > 3D Model > glTF/GLB),
+- `.ifc` (Revit, Tekla): converted to GLB in your browser; large models take a while,
+- `.json` data sheet (parametric, like the laboratory model).
+The card shows the link; "Bağlantıyı kopyala" copies it. "Dosyayı değiştir" keeps the link and
+swaps the file. "Sil" removes the file and the row; the link then shows "Model bulunamadı".
+Limit: 50 MB per file. The IFC file itself never leaves your computer.

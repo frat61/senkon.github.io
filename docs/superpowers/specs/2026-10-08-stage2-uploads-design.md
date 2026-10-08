@@ -113,16 +113,17 @@ on conflict (id) do nothing;
 
 -- Public read by exact path only (public bucket). No select policy for anon on
 -- storage.objects, so the bucket cannot be listed.
-create policy models_owner_insert on storage.objects for insert to authenticated
-  with check (bucket_id = 'models' and owner = auth.uid());
-create policy models_owner_update on storage.objects for update to authenticated
-  using (bucket_id = 'models' and owner = auth.uid());
-create policy models_owner_delete on storage.objects for delete to authenticated
-  using (bucket_id = 'models' and owner = auth.uid());
-create policy models_owner_select on storage.objects for select to authenticated
-  using (bucket_id = 'models' and owner = auth.uid());
+create policy models_bucket_insert on storage.objects for insert to authenticated
+  with check (bucket_id = 'models');
+create policy models_bucket_update on storage.objects for update to authenticated
+  using (bucket_id = 'models') with check (bucket_id = 'models');
+create policy models_bucket_delete on storage.objects for delete to authenticated
+  using (bucket_id = 'models');
+create policy models_bucket_select on storage.objects for select to authenticated
+  using (bucket_id = 'models');
 ```
 
+- Policies are per bucket, not per owner: the project has exactly one user and sign-ups are closed, and Supabase's `owner` column on `storage.objects` is deprecated in favour of `owner_id`.
 - `get_model(p_slug)` is unchanged and still returns no `thumbnail`, `slug`, `id` or `owner`.
 - The owner page reads `models` directly under the existing row-level policy (its own rows
   only), including `thumbnail`.
