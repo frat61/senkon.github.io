@@ -222,7 +222,10 @@
     if (side === 'north') return [[f.a0, zt(ys[0]) + lift], [f.a1, zt(ys[0]) + lift]];
     if (side === 'south') return [[f.a0, zt(ys[ny]) + lift], [f.a1, zt(ys[ny]) + lift]];
     const p = [[f.a0, zt(ys[0]) + lift]];
-    for (let i = 1; i < ny; i++) p.push([ys[i], zt(ys[i]) + lift]);
+    for (let i = 0; i < ny; i++) {
+      roofKinks(m, ys[i], ys[i + 1]).forEach(y => p.push([y, zt(y) + lift]));
+      if (i < ny - 1) p.push([ys[i + 1], zt(ys[i + 1]) + lift]);
+    }
     p.push([f.a1, zt(ys[ny]) + lift]);
     return p;
   }
@@ -308,8 +311,12 @@
     // roof skin: one strip per y bay, extended by the cladding offset at both ends
     (function () {
       const x0 = xs[0] - o, x1 = xs[nx] + o, t = 0.2, pos = [];
-      for (let i = 0; i < ny; i++) {
-        const ya = i === 0 ? ys[0] - o : ys[i], yb = i === ny - 1 ? ys[ny] + o : ys[i + 1], za = zt(ys[i]) + t, zb = zt(ys[i + 1]) + t;
+      const nodes = [];
+      for (let i = 0; i < ny; i++) { nodes.push(ys[i]); nodes.push.apply(nodes, roofKinks(m, ys[i], ys[i + 1])); }
+      nodes.push(ys[ny]);
+      for (let i = 0; i < nodes.length - 1; i++) {
+        const ya = i === 0 ? nodes[0] - o : nodes[i], yb = i === nodes.length - 2 ? nodes[nodes.length - 1] + o : nodes[i + 1];
+        const za = zt(nodes[i]) + t, zb = zt(nodes[i + 1]) + t;
         pos.push.apply(pos, quad([x0, ya, za], [x1, ya, za], [x1, yb, zb], [x0, yb, zb]));
       }
       tris('skin', 'roofSkin', pos, 'skin');

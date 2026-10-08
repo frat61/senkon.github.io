@@ -230,3 +230,14 @@ test('open facade draws nothing on that side', () => {
   const out = B.build({ axes: { x: [0, 6], y: [0, 10] }, facades: { north: 'open' } });
   assert.equal(count(out, 'panel'), 3);
 });
+
+test('single-span gable: roof skin and gable panels peak at the mid-span ridge', () => {
+  const out = B.build({ axes: { x: [0, 6], y: [0, 10] } });
+  const skin = out.items.find(i => i.role === 'roofSkin');
+  assert.equal(skin.pos.length, 36, 'two strips of two triangles');
+  near(Math.max.apply(null, skin.pos.filter((v, i) => i % 3 === 2)), 6.5);
+  const west = out.items.filter(i => i.role === 'panel').find(p => p.pos.every((v, i) => i % 3 !== 0 || Math.abs(v + 0.16) < 1e-9));
+  assert.ok(west, 'west panel found');
+  near(Math.max.apply(null, west.pos.filter((v, i) => i % 3 === 2)), 6.55);
+  assert.equal(west.pos.length, 36, 'west gable has two quads');
+});
