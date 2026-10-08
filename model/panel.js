@@ -6,19 +6,22 @@
   const C = window.SENKON_CONFIG || {}, I = SenkonIngest;
   const SITE = 'https://senkonmuhendislik.com/model/?m=';
   const state = $('state');
-  let sb = null, models = [], replacing = null, delTarget = null;
+  let sb = null, models = [], replacing = null, delTarget = null, authed = false, working = false;
 
   const say = (el, msg) => { el.textContent = msg || ''; };
   const step = (text, p) => { $('addStep').textContent = text; if (p !== undefined) $('addProg').value = p; };
-  const busy = on => { $('addOk').disabled = on; $('addCancel').disabled = on; $('mFile').disabled = on; $('addProg').hidden = !on; if (!on) step(''); };
+  const busy = on => { working = on; $('addOk').disabled = on; $('addCancel').disabled = on; $('mFile').disabled = on; $('addProg').hidden = !on; if (!on) step(''); };
 
   // ---- auth
   async function init() {
     if (!C.SUPABASE_URL || !C.SUPABASE_ANON_KEY) { state.textContent = 'Yapılandırma eksik: config.js'; return; }
     sb = supabase.createClient(C.SUPABASE_URL, C.SUPABASE_ANON_KEY);
     const { data } = await sb.auth.getSession();
-    showAuth(!!data.session);
-    sb.auth.onAuthStateChange((event, session) => { if (event !== 'INITIAL_SESSION') showAuth(!!session); });
+    authed = !!data.session; showAuth(authed);
+    sb.auth.onAuthStateChange((event, session) => {
+      if (event === 'INITIAL_SESSION') return;
+      const on = !!session; if (on !== authed) { authed = on; showAuth(on); }
+    });
   }
   function showAuth(on) {
     state.hidden = true; $('login').hidden = on; $('list').hidden = !on; $('topActions').hidden = !on;
@@ -59,7 +62,7 @@
   async function copyLink(btn, slug) {
     const link = SITE + slug;
     try { await navigator.clipboard.writeText(link); const t = btn.textContent; btn.textContent = 'Kopyalandı'; setTimeout(() => { btn.textContent = t; }, 1500); }
-    catch (e) { window.prompt('Bağlantı:', link); }
+    catch (e) { $('linkText').value = link; $('linkDlg').showModal(); $('linkText').select(); }
   }
 
   // ---- add / replace
@@ -111,7 +114,7 @@
   }
   async function upload(path, glb) {
     step('Yükleniyor', 0.7);
-    const { error } = await sb.storage.from('models').upload(path, new Blob([glb], { type: I.MIME_GLB }), { contentType: I.MIME_GLB, upsert: true });
+    const { error } = await sb.storage.from('models').upload(path, new Blob([glb], { type: I.MIME_GLB }), { contentType: I.MIME_GLB, upsert: true, cacheControl: '300' });
     if (error) throw new Error('Yükleme başarısız: ' + error.message);
   }
   // Render once in the hidden 480x300 stage and capture a JPEG. Returns null on failure.
@@ -120,7 +123,7 @@
     const st = $('thumbStage'); let v = null;
     try { v = mountFn(st); v.setView('iso'); v.draw(); return st.querySelector('canvas').toDataURL(I.THUMB.mime, I.THUMB.quality); }
     catch (e) { console.warn('thumbnail failed', e); return null; }
-    finally { if (v) v.dispose(); }
+    finally { if (v) v.dispose(); st.textContent = ''; }
   }
   async function addModel(file, cls) {
     const slug = SenkonSlug.randomSlug(), name = $('mName').value, description = $('mDesc').value, source = $('mSource').value.trim();
@@ -129,15 +132,18 @@
       const p = I.parseModelJson(await file.text(), SenkonBuilder);
       if (source) p.data.source = source;
       row = I.makeRow({ slug, name, description: description || p.description, kind: 'parametric', data: p.data });
-      mountFn = st => SenkonViewer.mount(st, p.data, { compact: false });
+      mountFn = st => SenkonViewer.mount(st, p.data, { compact: false, pixelRatio: 1 });
     } else {
       const g = await toGlb(file, cls);
       await upload(I.storagePath(slug), g.glb);
       row = I.makeRow({ slug, name, description, kind: 'file', metadata: I.fileMetadata({ ext: cls.ext, name: file.name, bytes: file.size, glbBytes: g.glb.byteLength, converter: g.converter, source }) });
-      mountFn = st => SenkonViewer.mountFile(st, g.scene, { compact: false });
+      mountFn = st => SenkonViewer.mountFile(st, g.scene, { compact: false, pixelRatio: 1 });
     }
     const ins = await sb.from('models').insert(row).select('id').single();
-    if (ins.error) throw new Error('Kayıt başarısız: ' + ins.error.message);
+    if (ins.error) {
+      if (cls.kind !== 'parametric') { try { await sb.storage.from('models').remove([I.storagePath(slug)]); } catch (e) { console.warn(e); } }
+      throw new Error('Kayıt başarısız: ' + ins.error.message);
+    }
     const thumb = thumbnail(mountFn);
     if (thumb) { const up = await sb.from('models').update({ thumbnail: thumb }).eq('id', ins.data.id); if (up.error) console.warn('thumbnail not saved', up.error); }
   }
@@ -145,7 +151,7 @@
     const g = await toGlb(file, cls);
     await upload(I.storagePath(m.slug), g.glb);
     const meta = I.fileMetadata({ ext: cls.ext, name: file.name, bytes: file.size, glbBytes: g.glb.byteLength, converter: g.converter, source: $('mSource').value.trim() || null });
-    const thumb = thumbnail(st => SenkonViewer.mountFile(st, g.scene, { compact: false }));
+    const thumb = thumbnail(st => SenkonViewer.mountFile(st, g.scene, { compact: false, pixelRatio: 1 }));
     const up = await sb.from('models').update({ data: { metadata: meta }, file_path: I.storagePath(m.slug), file_format: 'glb', thumbnail: thumb }).eq('id', m.id);
     if (up.error) throw new Error('Kayıt güncellenemedi: ' + up.error.message);
   }
@@ -153,6 +159,9 @@
   // ---- delete
   function askDelete(m) { delTarget = m; $('delName').textContent = m.name; say($('delMsg'), ''); $('delDlg').showModal(); }
   $('delCancel').onclick = () => $('delDlg').close();
+  $('linkClose').onclick = () => $('linkDlg').close();
+  $('addDlg').addEventListener('cancel', e => { if (working) e.preventDefault(); });
+  $('delDlg').addEventListener('cancel', e => { if ($('delOk').disabled) e.preventDefault(); });
   $('delOk').onclick = async () => {
     const m = delTarget; $('delOk').disabled = true; say($('delMsg'), '');
     try {

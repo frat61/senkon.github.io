@@ -151,7 +151,7 @@
   }
   async function renderFile(row) {
     if (!hasWebGL()) return show('Tarayıcınız 3B görüntülemeyi desteklemiyor');
-    const url = dev && row.file_url ? row.file_url : (PATH_RE.test(row.file_path || '') ? C.SUPABASE_URL.replace(/\/$/, '') + '/storage/v1/object/public/models/' + row.file_path : null);
+    const url = dev && row.file_url ? row.file_url : (PATH_RE.test(row.file_path || '') ? C.SUPABASE_URL.replace(/\/$/, '') + '/storage/v1/object/public/models/' + row.file_path + '?v=' + encodeURIComponent(row.updated_at || '') : null);
     if (!url) return show('Model dosyası bulunamadı');
     let v, stage = 'net';
     try {

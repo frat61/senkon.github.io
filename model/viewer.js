@@ -38,7 +38,7 @@
     if (typeof SenkonBuilder === 'undefined' || typeof THREE === 'undefined') throw new Error('SenkonBuilder and THREE must be loaded first');
 
     const renderer = new THREE.WebGLRenderer({ antialias: true });
-    renderer.setPixelRatio(Math.min(window.devicePixelRatio || 1, 2));
+    renderer.setPixelRatio(opts.pixelRatio || Math.min(window.devicePixelRatio || 1, 2));
     if (model && model.isObject3D) renderer.outputEncoding = THREE.sRGBEncoding;
     const canvas = renderer.domElement; canvas.style.touchAction = 'none'; container.appendChild(canvas);
     const scene = new THREE.Scene(), cam = new THREE.PerspectiveCamera(38, 1, 0.1, 4000);
