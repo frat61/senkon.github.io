@@ -34,7 +34,7 @@ revoke all on function public.get_model(text) from public;
 grant execute on function public.get_model(text) to anon, authenticated;
 
 -- updated_at follows every update
-create or replace function public.set_updated_at() returns trigger language plpgsql as $$
+create or replace function public.set_updated_at() returns trigger language plpgsql set search_path = public as $$
 begin new.updated_at = now(); return new; end $$;
 create trigger models_updated_at before update on public.models
   for each row execute function public.set_updated_at();

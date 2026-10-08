@@ -268,3 +268,28 @@ test('walls on a west glass face are skipped', () => {
     walls: [[0, 0, 0, 10], [0.05, 1, 0.05, 9], [3, 0, 3, 10]] });
   assert.equal(out.items.find(i => i.role === 'wall').pos.length, 18);
 });
+
+const MATERIALS = ['steel', 'raf', 'tie', 'brace', 'pur', 'door', 'fix', 'floorBeam', 'al', 'fr', 'step', 'ridgeCap', 'gutter',
+  'slab', 'leaf', 'wallFace', 'wallEdge', 'glassPane', 'clad', 'cladLine', 'skin', 'deck', 'dimLine'];
+
+test('every item uses a known material and a catalogued layer', () => {
+  const layers = B.LAYERS.map(l => l.key);
+  const models = [
+    { axes: { x: [0, 6, 12], y: [0, 8, 20] }, interiorRows: [1], facades: { south: 'glass' }, entrance: { side: 'south', from: 2, to: 4 },
+      walls: [[1, 1, 1, 5]], doors: [{ h: 1, a: 1, b: 2, c: 5, e: 0 }], rooms: [{ name: 'A', x: 1, y: 1 }], labels: [{ name: 'B', x: 1, y: 1 }] },
+    { axes: { x: [0, 6], y: [0, 10] }, frame: { type: 'truss' }, roof: { type: 'mono' }, deck: { enabled: false } },
+    { axes: { x: [0, 6], y: [0, 8, 20] }, roof: { type: 'butterfly' }, facades: { west: 'glass', north: 'open' } }
+  ].concat(lab ? [lab] : []);
+  models.forEach(m => B.build(m).items.forEach(it => {
+    if (it.mat !== undefined) assert.ok(MATERIALS.includes(it.mat), 'unknown material ' + it.mat + ' on ' + it.role);
+    assert.ok(layers.includes(it.layer), 'unknown layer ' + it.layer + ' on ' + it.role);
+    JSON.stringify(it, (k, v) => { if (typeof v === 'number') assert.ok(Number.isFinite(v), 'non-finite number on ' + it.role); return v; });
+  }));
+});
+
+test('an entrance without finite from/to or a valid side is dropped', () => {
+  assert.equal(B.normalize({ axes: { x: [0, 6], y: [0, 10] }, entrance: { side: 'south' } }).entrance, null);
+  assert.equal(B.normalize({ axes: { x: [0, 6], y: [0, 10] }, entrance: { side: 'up', from: 1, to: 2 } }).entrance, null);
+  assert.ok(B.normalize({ axes: { x: [0, 6], y: [0, 10] }, entrance: { side: 'west', from: 1, to: 2 } }).entrance);
+  assert.equal(count(B.build({ axes: { x: [0, 6], y: [0, 10] }, entrance: { side: 'south' } }), 'entranceFrame'), 0);
+});

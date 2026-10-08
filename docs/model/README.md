@@ -7,7 +7,7 @@ Design: `docs/superpowers/specs/2026-10-08-model-viewer-design.md`.
 
 - `model/index.html` page shell, `model/builder.js` geometry, `model/viewer.js` three.js rendering,
   `model/config.js` Supabase URL and anon key, `model/vendor/three.r128.min.js` pinned three.js.
-- `docs/model/schema.sql` database setup. `tools/` helper scripts. `tests/` builder tests.
+- `docs/model/schema.sql` database setup. `tools/make-model-sql.js` insert generator. `tests/` builder tests.
 - `local/` (gitignored): client data for local testing. Never commit or publish it.
 
 ## Vendored dependencies
@@ -34,12 +34,14 @@ Run the builder tests with `node --test` (bare; `node --test tests/` does not wo
 3. Authentication > Users > Add user: your e-mail and a password (auto-confirm).
 4. SQL editor: paste and run `docs/model/schema.sql`.
 5. Project Settings > API: copy the Project URL and the `anon` `public` key into `model/config.js`.
-   Only the anon key. Never the `service_role` key.
+   Only the anon key. Never the `service_role` key. Newer dashboards call it the `publishable` key; either works, the viewer sends it only as `apikey`.
 
 ## Adding the laboratory model (first row)
 
-    node tools/extract-lab-model.js local/lab-frame-3d.html
+    node local/extract-lab-model.js local/lab-frame-3d.html
     node tools/make-model-sql.js local/lab-model.json <your-login-email> > local/lab-model.sql
+
+The extractor lives in `local/` because it embeds the laboratory project's names; only `make-model-sql.js` is generic.
 
 Run `local/lab-model.sql` in the SQL editor. The last line of the file is the share link.
 `local/` is gitignored; do not commit these files.

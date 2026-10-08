@@ -58,6 +58,7 @@
     const nx = m.axes.x.length - 1, ny = m.axes.y.length - 1;
     m.outline = Object.assign({ x: +(m.axes.x[nx] + 0.1).toFixed(3), y: +(m.axes.y[ny] + 0.1).toFixed(3) }, model.outline || {});
     m.interiorRows = (m.interiorRows || []).map(Number).filter(i => i > 0 && i < ny);
+    if (m.entrance && !(isFinite(m.entrance.from) && isFinite(m.entrance.to) && SIDES.indexOf(m.entrance.side) >= 0)) m.entrance = null;
     return m;
   }
 
@@ -125,7 +126,7 @@
   }
 
   // Clear-span lattice truss on one x axis: level bottom chord at the deck level, top chord
-  // along the roof, N-diagonals with posts at about 2.2 m, pinned on the two outer columns.
+  // along the roof, Warren zigzag diagonals with posts at about 2.2 m, pinned on the two outer columns.
   function trussAt(c, x) {
     const { m, ys, ny, L, zt, bar } = c;
     const zb = m.deck.enabled ? L.deck : L.ceiling, top = y => zt(y) - 0.08;

@@ -110,8 +110,7 @@
       Object.keys(G).forEach(k => delete G[k]); tags.length = 0; clearMeas();
     }
     function build(m) {
-      clear();
-      built = SenkonBuilder.build(m); snaps = built.snaps.map(V);
+      const next = SenkonBuilder.build(m); clear(); built = next; snaps = built.snaps.map(V);
       built.layers.forEach(l => {
         const g = new THREE.Group(); g.name = l.key;
         g.visible = l.key in layerState ? layerState[l.key] : l.visible !== false;
@@ -123,7 +122,7 @@
     }
 
     // ---- camera: simple orbit around tgt
-    const compact = () => opts.compact !== undefined ? opts.compact : window.innerWidth < 640;
+    const compact = () => opts.compact !== undefined ? opts.compact : matchMedia('(max-width:640px)').matches;
     function views() {
       const s = built ? built.size : 35;
       return { iso: [-0.62, 0.5, s * (compact() ? 3.2 : 1.65)], west: [-1.45, 0.3, s * 1.48], south: [0, 0.3, s * 1.6], top: [0, 1.5, s * 1.77] };

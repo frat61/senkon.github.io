@@ -65,7 +65,6 @@ model/
     three.r128.min.js
     supabase-js.v2.x.min.js     loaded by the editor only
 tools/
-  extract-lab-model.js   builds local/lab-model.json from the original lab-frame-3d.html
   make-model-sql.js      writes an INSERT with a fresh random slug for one model JSON
 tests/
   builder.test.js        node:test checks of the builder (skips lab checks if local/ is absent)
@@ -79,6 +78,7 @@ local/                gitignored, never published: client data
   lab-frame-3d.html   the original file, for side-by-side comparison
   lab-model.json      the laboratory model as a row-shaped object {name, description, kind, data}
   lab-model.sql       the generated insert for the laboratory model
+  extract-lab-model.js   one-off extractor for the laboratory model (embeds that project's names)
 ```
 
 GitHub Pages serves the whole repository, so anything with client data (the lab model, the
@@ -139,7 +139,7 @@ east, `y` runs south, `z` is up. In the three.js scene: X = x, Z = y, Y = z.
   "doors": [{ "h": 1, "a": 11.77, "b": 12.73, "c": 8.93, "e": 0 }],
   "rooms": [{ "name": "Lab", "x": 8.9, "y": 15.2 }],
   "labels": [{ "name": "Bina girişi", "x": 28.45, "y": 18.6, "z": 2.9 }],
-  "source": "ENL-26_336-F-001 (02.10.2026)"
+  "source": "<drawing number and date>"
 }
 ```
 
@@ -171,7 +171,7 @@ Missing optional fields take the defaults above, so the editor can save sparse o
 The `v` field is checked on load; a higher version than the viewer knows shows
 "Model sürümü desteklenmiyor".
 
-The laboratory model's values are the first row in the database. `docs/model/lab-model.json`
+The laboratory model's values are the first row in the database. `local/lab-model.json`
 holds them; the rendered result must match `lab-frame-3d.html`.
 
 ## 7. Database (Supabase)
@@ -251,7 +251,7 @@ arrives, so a wrong slug never leaks another model's text.
 **Stage 1: viewer from the database** (this plan)
 - Split the starting file into `viewer.js` and the page shell; move every hard-coded project
   value into the data format; clear-span truss; `kind` switch.
-- `docs/model/schema.sql`, `docs/model/lab-model.sql`, `docs/model/lab-model.json`.
+- `docs/model/schema.sql`, `local/lab-model.sql`, `local/lab-model.json`.
 - Fırat: create the Supabase project, disable sign-ups, create his user, run both SQL files,
   paste URL and anon key into `model/config.js`.
 

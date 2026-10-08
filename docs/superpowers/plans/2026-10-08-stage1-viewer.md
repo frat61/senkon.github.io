@@ -132,8 +132,7 @@ Co-Authored-By: Claude Fable 5.1 <noreply@anthropic.com>"
 ### Task 2: Extract the laboratory model into `local/`
 
 **Files:**
-- Create: `tools/extract-lab-model.js`
-- Create (gitignored): `local/lab-model.json`, `local/lab-frame-3d.html`
+- Create (gitignored): `local/extract-lab-model.js`, `local/lab-model.json`, `local/lab-frame-3d.html`
 
 **Interfaces:**
 - Produces: `local/lab-model.json`, a row-shaped object `{ name, description, kind: 'parametric', updated_at, data }` where `data` follows spec section 6. Tests (Task 3+) and the dev shell (Task 8) read this file.
@@ -144,13 +143,13 @@ Co-Authored-By: Claude Fable 5.1 <noreply@anthropic.com>"
 Copy-Item "C:\Users\Firat\Downloads\lab-frame-3d.html" local\lab-frame-3d.html
 ```
 
-- [ ] **Step 2: Write `tools/extract-lab-model.js`**
+- [ ] **Step 2: Write `local/extract-lab-model.js`**
 
 ```js
 // Builds local/lab-model.json (a row-shaped object) from the original lab-frame-3d.html.
 // The walls, doors and axes come from the DATA constant in the file; every other value was
 // hard-coded in its script and is written out here in the v1 data format.
-// Usage: node tools/extract-lab-model.js local/lab-frame-3d.html
+// Usage: node local/extract-lab-model.js local/lab-frame-3d.html
 'use strict';
 const fs = require('fs'), path = require('path');
 const file = process.argv[2] || path.join('local', 'lab-frame-3d.html');
@@ -159,15 +158,12 @@ const m = src.match(/const DATA=(\{[\s\S]*?\});\r?\n/);
 if (!m) throw new Error('DATA constant not found in ' + file);
 const D = JSON.parse(m[1]);
 
-const rooms = [['Lab', 8.9, 15.2], ['Kimyasal depo', 7.6, 4.2], ['Numune giriş', 3.0, 7.3], ['Numune kabul', 3.0, 12.3],
-  ['Kadın soyunma', 13.6, 7.0], ['WC', 16.9, 7.0], ['WC', 19.8, 7.0], ['Erkek soyunma', 22.9, 7.0], ['Arşiv', 26.0, 7.0],
-  ['Çay ocağı', 24.0, 1.6], ['Temizlik', 19.8, 1.6], ['Koridor', 14.0, 10.0], ['Analiz', 20.3, 15.3], ['Toplantı', 25.2, 13.8],
-  ['Ofis', 25.2, 18.0], ['Ofis 1', 32.2, 17.7], ['Ofis 2', 32.2, 13.8], ['Ofis 3', 32.2, 9.9], ['Ofis 4', 32.2, 6.0], ['Ofis 5', 32.2, 2.0]];
-const labels = [['Malzeme girişi', -0.3, 2.35, 2.9], ['Numune girişi', -0.3, 10.06, 2.9], ['Bina girişi', 28.45, 18.6, 2.9], ['Acil çıkış', 28.24, -0.3, 2.9]];
+const rooms = [/* ['Mahal adı', x, y], ... from the architectural plan */];
+const labels = [/* ['Etiket', x, y, z], ... */];
 
 const row = {
-  name: 'Laboratuvar binası, taşıyıcı sistem ön tasarımı',
-  description: 'Tek katlı çelik çerçeve, 35.05 × 19.66 m. 4.00 m tavan yüksekliğinde laboratuvar katı, üzerinde mekanik kat ve az eğimli çatı. Üç cephe panel, güney cephe cam.',
+  name: '<project name>',
+  description: '<one-sentence description>',
   kind: 'parametric',
   updated_at: '2026-10-05T00:00:00Z',
   data: {
@@ -188,7 +184,7 @@ const row = {
     doors: D.doors,
     rooms: rooms.map(([name, x, y]) => ({ name, x, y })),
     labels: labels.map(([name, x, y, z]) => ({ name, x, y, z })),
-    source: 'ENL-26_336-F-001 (02.10.2026)'
+    source: '<drawing number and date>'
   }
 };
 fs.mkdirSync('local', { recursive: true });
@@ -199,18 +195,16 @@ console.log('walls', D.walls.length, 'doors', D.doors.length, 'xs', D.xs.length,
 - [ ] **Step 3: Run it and check the counts**
 
 ```bash
-node tools/extract-lab-model.js local/lab-frame-3d.html
+node local/extract-lab-model.js local/lab-frame-3d.html
 ```
 Expected output: `walls 262 doors 32 xs 6 ys 3`, and `local/lab-model.json` exists.
 
-- [ ] **Step 4: Commit the tool only**
+- [ ] **Step 4: Nothing to commit**
+
+Nothing to commit: the extractor and its output stay in `local/`.
 
 ```bash
 git status --short   # local/ must NOT appear
-git add tools/extract-lab-model.js
-git commit -m "Add tool that extracts the laboratory model into local/
-
-Co-Authored-By: Claude Fable 5.1 <noreply@anthropic.com>"
 ```
 
 ---
@@ -1645,7 +1639,7 @@ process.stdout.write(
 - [ ] **Step 3: Generate the lab insert and check it**
 
 ```bash
-node tools/make-model-sql.js local/lab-model.json sfiratsenturk@gmail.com > local/lab-model.sql && head -c 300 local/lab-model.sql && echo && grep -oE "m=[a-z0-9]{12}$" local/lab-model.sql
+node tools/make-model-sql.js local/lab-model.json <your-login-email> > local/lab-model.sql && head -c 300 local/lab-model.sql && echo && grep -oE "m=[a-z0-9]{12}$" local/lab-model.sql
 ```
 Expected: the insert starts with `insert into public.models`, and the last line prints `m=` followed by exactly 12 characters from the alphabet. Run it twice and confirm the slugs differ.
 
@@ -1664,7 +1658,7 @@ Append:
 
 ## Adding the laboratory model (first row)
 
-    node tools/extract-lab-model.js local/lab-frame-3d.html
+    node local/extract-lab-model.js local/lab-frame-3d.html
     node tools/make-model-sql.js local/lab-model.json <your-login-email> > local/lab-model.sql
 
 Run `local/lab-model.sql` in the SQL editor. The last line of the file is the share link.
