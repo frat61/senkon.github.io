@@ -167,3 +167,66 @@ test('truss bottom chord drops to the ceiling when the deck is disabled', () => 
   assert.ok(bottom.every(i => i.a[2] === 4));
   assert.equal(count(out, 'floorEdge'), 0);
 });
+
+labTest('lab envelope: panels on three sides, glass on the south', () => {
+  const out = B.build(lab);
+  assert.equal(count(out, 'panel', 'clad'), 3);
+  assert.equal(count(out, 'panelLine', 'clad'), 3);
+  assert.equal(count(out, 'glassPane', 'glass'), 1);
+  const mull = out.items.filter(i => i.role === 'mullion');
+  assert.equal(mull.length, 30);
+  const raised = mull.filter(i => i.a[2] > 2.4 && i.a[2] < 2.5);
+  assert.equal(raised.length, 2, 'two mullions start above the entrance door');
+  assert.equal(count(out, 'transom', 'glass'), 4);
+  const pane = out.items.find(i => i.role === 'glassPane');
+  near(pane.pos[1], 19.71);                 // plane at ys[last] + claddingOffset
+  near(Math.max(...pane.pos.filter((v, i) => i % 3 === 2)), 5.85);   // zt + 0.10
+});
+
+labTest('lab entrance, roof skin, caps, gutters, purlins, posts, bracing', () => {
+  const out = B.build(lab);
+  assert.equal(count(out, 'entranceFrame', 'doors'), 4);
+  assert.equal(count(out, 'leaf', 'doors'), 2);
+  assert.equal(count(out, 'canopy', 'doors'), 1);
+  assert.equal(count(out, 'step', 'doors'), 1);
+  const canopy = out.items.find(i => i.role === 'canopy');
+  near(canopy.size[0], 3); near(canopy.size[1], 1.5); near(canopy.size[2], 0.1);   // door width 1.80 + 1.20
+  near(canopy.center[2], 2.62); near(canopy.center[1], 19.71 + 0.79);
+  assert.equal(count(out, 'roofSkin', 'skin'), 1);
+  assert.equal(count(out, 'ridgeCap', 'steel'), 1);
+  assert.equal(count(out, 'gutter', 'steel'), 2);
+  assert.equal(count(out, 'purlin', 'roof'), 15);
+  assert.equal(count(out, 'windpost', 'steel'), 5);
+  assert.equal(count(out, 'brace', 'rb'), 16);
+});
+
+test('all-panel box has four panels, no glass, no entrance', () => {
+  const out = B.build({ axes: { x: [0, 6], y: [0, 10] } });
+  assert.equal(count(out, 'panel'), 4);
+  assert.equal(out.items.filter(i => i.layer === 'glass').length, 0);
+  assert.equal(count(out, 'entranceFrame'), 0);
+});
+
+test('glass on a gable side follows the roof line and the entrance can sit on the west', () => {
+  const out = B.build({ axes: { x: [0, 6], y: [0, 8, 20] }, facades: { west: 'glass' }, entrance: { side: 'west', from: 3, to: 5 } });
+  const pane = out.items.find(i => i.role === 'glassPane');
+  const zs = pane.pos.filter((v, i) => i % 3 === 2);
+  assert.ok(Math.max(...zs) > 6.3 && Math.max(...zs) < 6.5, 'ridge height + 0.10');
+  const fr = out.items.filter(i => i.role === 'entranceFrame');
+  assert.equal(fr.length, 4);
+  assert.ok(fr.every(i => i.a[0] < 0), 'entrance frame outside the west axis');
+  const canopy = out.items.find(i => i.role === 'canopy');
+  assert.deepEqual(canopy.size, [1.5, 3.2, 0.1]);
+});
+
+test('butterfly roof gets a valley gutter and no ridge cap; mono gets one gutter', () => {
+  const bf = B.build({ axes: { x: [0, 6], y: [0, 8, 20] }, roof: { type: 'butterfly' }, levels: { eave: 6, ridge: 4 } });
+  assert.equal(count(bf, 'ridgeCap'), 0); assert.equal(count(bf, 'gutter'), 1);
+  const mono = B.build({ axes: { x: [0, 6], y: [0, 10] }, roof: { type: 'mono' } });
+  assert.equal(count(mono, 'ridgeCap'), 0); assert.equal(count(mono, 'gutter'), 1);
+});
+
+test('open facade draws nothing on that side', () => {
+  const out = B.build({ axes: { x: [0, 6], y: [0, 10] }, facades: { north: 'open' } });
+  assert.equal(count(out, 'panel'), 3);
+});
