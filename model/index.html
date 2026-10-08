@@ -1,0 +1,142 @@
+<!doctype html>
+<html lang="tr">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<meta name="robots" content="noindex, nofollow">
+<title>3B model – SENKON</title>
+<link rel="stylesheet" href="viewer.css">
+</head>
+<body>
+<div id="stage"></div>
+<div id="state" class="card"><p>Model yükleniyor…</p></div>
+<button id="menu" class="ui" aria-expanded="false" aria-controls="head">Seçenekler</button>
+<div id="head" class="card ui">
+  <h1 id="title"></h1>
+  <p id="desc"></p>
+  <div class="row"><span>Göster</span>
+    <button data-layer="clad" aria-pressed="true">Paneller</button>
+    <button data-layer="skin" aria-pressed="true">Çatı kaplaması</button>
+    <button data-layer="walls" aria-pressed="true">İç duvarlar</button>
+    <button data-layer="floor" aria-pressed="true">Döşeme kirişleri</button>
+    <button data-layer="deck" aria-pressed="true">Döşeme</button>
+    <button data-layer="roof" aria-pressed="true">Aşıklar</button>
+    <button data-layer="glass" aria-pressed="true">Cam cephe</button>
+    <button data-layer="rb" aria-pressed="true">Çatı çaprazları</button>
+  </div>
+  <div class="row"><span>Ölçü</span>
+    <button data-layer="dim" aria-pressed="true">Ölçüler</button>
+    <button data-layer="rooms" aria-pressed="false">Mahal adları</button>
+    <button id="meas" aria-pressed="false">Mesafe ölç</button>
+  </div>
+  <div class="row"><span>Görünüm</span>
+    <button data-view="iso">Genel</button>
+    <button data-view="west">Batı</button>
+    <button data-view="south">Güney</button>
+    <button data-view="top">Plan</button>
+  </div>
+</div>
+<div id="legend" class="card ui">
+  <ul>
+    <li><i style="background:var(--steel)"></i>Kolonlar</li>
+    <li><i style="background:var(--rafter)"></i>Çatı kirişleri</li>
+    <li><i style="background:var(--tie)"></i>Saçak ve mahya kirişleri</li>
+    <li><i style="background:#6a4c93"></i>Mekanik kat kirişleri</li>
+    <li><i style="background:var(--brace)"></i>Çatı çaprazları, rüzgar dikmeleri</li>
+    <li><i style="background:#d6a500"></i>Rijit birleşimler, ankastre tabanlar</li>
+    <li><i style="background:var(--door)"></i>Kapılar</li>
+    <li><i style="background:#6fb4cf"></i>Cam cephe</li>
+    <li><i style="background:#cfd4d9"></i>Sandviç paneller</li>
+    <li><i style="background:#3d6f8a"></i>Saçak olukları</li>
+  </ul>
+  <p id="note"></p>
+</div>
+<div id="status" class="ui">Ön tasarım modelidir, uygulama için değildir.</div>
+<div id="read" class="card ui" hidden></div>
+<div id="hint" class="ui">Döndürmek için sürükleyin, yakınlaştırmak için kaydırın, taşımak için sağ tuşla sürükleyin</div>
+<div id="thint" class="ui">Tek parmakla döndürün, iki parmakla yakınlaştırın ve taşıyın</div>
+<script src="vendor/three.r128.min.js"></script>
+<script src="config.js"></script>
+<script src="builder.js"></script>
+<script src="viewer.js"></script>
+<script>
+(function () {
+  'use strict';
+  const $ = id => document.getElementById(id);
+  const state = $('state'), C = window.SENKON_CONFIG || {};
+  const q = new URLSearchParams(location.search), slug = (q.get('m') || '').trim();
+  const SLUG_RE = /^[a-z0-9]{8,32}$/;
+  const FIXED = 'Ön tasarım modelidir, uygulama için değildir. Ölçüler metre, aks–aks; kotlar çelik üst kotudur.';
+
+  function show(msg, retry) {
+    state.hidden = false; state.innerHTML = '';
+    const p = document.createElement('p'); p.textContent = msg; state.appendChild(p);
+    if (retry) { const b = document.createElement('button'); b.textContent = 'Tekrar dene'; b.onclick = () => location.reload(); state.appendChild(b); }
+  }
+  function hasWebGL() {
+    try { const c = document.createElement('canvas'); return !!(window.WebGLRenderingContext && (c.getContext('webgl') || c.getContext('experimental-webgl'))); }
+    catch (e) { return false; }
+  }
+  async function load() {
+    // Development only: ?src=<same-origin JSON file> on localhost draws a row-shaped file instead of the database.
+    const src = q.get('src'), dev = ['localhost', '127.0.0.1', '[::1]'].indexOf(location.hostname) >= 0;
+    if (src && dev) { const r = await fetch(src); if (!r.ok) throw new Error('http ' + r.status); return await r.json(); }
+    if (!SLUG_RE.test(slug)) return null;
+    if (!C.SUPABASE_URL || !C.SUPABASE_ANON_KEY) throw new Error('config');
+    const r = await fetch(C.SUPABASE_URL.replace(/\/$/, '') + '/rest/v1/rpc/get_model', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json', apikey: C.SUPABASE_ANON_KEY },
+      body: JSON.stringify({ p_slug: slug })
+    });
+    if (!r.ok) throw new Error('http ' + r.status);
+    const rows = await r.json();
+    return Array.isArray(rows) && rows.length ? rows[0] : null;
+  }
+  function render(row) {
+    const name = typeof row.name === 'string' && row.name ? row.name : '3B model';
+    document.title = name + ' – SENKON';
+    $('title').textContent = name; $('desc').textContent = typeof row.description === 'string' ? row.description : '';
+    if (row.kind !== 'parametric') return show('Bu model türü henüz desteklenmiyor');
+    const data = row.data || {};
+    if ((data.v || 1) > SenkonBuilder.VERSION) return show('Model sürümü desteklenmiyor');
+    if (!hasWebGL()) return show('Tarayıcınız 3B görüntülemeyi desteklemiyor');
+    let v;
+    try { v = SenkonViewer.mount($('stage'), data); }
+    catch (e) { console.error(e); return show('Model çizilemedi'); }
+    state.hidden = true; document.body.classList.add('ready');
+
+    const d = row.updated_at ? new Date(row.updated_at) : null, when = d && !isNaN(d) ? d.toLocaleDateString('tr-TR') : '';
+    $('note').textContent = FIXED + (data.source ? ' Mimari plan ' + data.source + ' esas alınmıştır.' : '') + (when ? ' Güncelleme ' + when + '.' : '');
+
+    document.querySelectorAll('[data-layer]').forEach(b => {
+      const l = v.layers.find(x => x.key === b.dataset.layer);
+      if (!l) { b.hidden = true; return; }
+      b.setAttribute('aria-pressed', String(l.visible));
+      b.onclick = () => b.setAttribute('aria-pressed', String(v.setLayer(l.key, b.getAttribute('aria-pressed') !== 'true')));
+    });
+    document.querySelectorAll('[data-view]').forEach(b => { b.onclick = () => v.setView(b.dataset.view); });
+
+    const measBtn = $('meas'), read = $('read');
+    measBtn.onclick = () => {
+      const on = measBtn.getAttribute('aria-pressed') !== 'true';
+      measBtn.setAttribute('aria-pressed', String(on)); document.body.classList.toggle('measuring', on);
+      read.hidden = !on; read.textContent = 'Yapı veya zemin üzerinde iki noktaya dokunun'; v.setMeasuring(on);
+    };
+    v.onMeasure(r => {
+      if (!r) return;
+      if (r.pending) read.textContent = 'İkinci noktaya dokunun';
+      else read.innerHTML = '<b>' + r.d.toFixed(2) + ' m</b><br>yatay ' + r.hz.toFixed(2) + ' m, düşey ' + r.vt.toFixed(2) + ' m';
+    });
+
+    const menu = $('menu');
+    if (matchMedia('(max-width:640px)').matches) document.body.classList.add('compact');
+    menu.onclick = () => { const c = document.body.classList.toggle('compact'); menu.setAttribute('aria-expanded', String(!c)); menu.textContent = c ? 'Seçenekler' : 'Kapat'; };
+    window.__shot = o => { document.body.classList.add('shot'); v.shot(o); };
+    v.resize();
+  }
+  load().then(row => { if (!row) return show('Model bulunamadı'); render(row); })
+    .catch(e => { console.error(e); if (e.message === 'config') show('Yapılandırma eksik: model/config.js dosyasını doldurun'); else show('Model yüklenemedi, lütfen tekrar deneyin', true); });
+})();
+</script>
+</body>
+</html>
