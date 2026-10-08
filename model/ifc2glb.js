@@ -11,20 +11,22 @@
     return new Promise((res, rej) => { const s = document.createElement('script'); s.src = src; s.onload = res; s.onerror = () => rej(new Error('web-ifc yüklenemedi')); document.head.appendChild(s); });
   }
   async function getApi(wasmPath) {
-    if (!apiPromise) apiPromise = (async () => {
-      if (typeof WebIFC === 'undefined') await loadScript(wasmPath + 'web-ifc-api-iife.js');
-      const api = new WebIFC.IfcAPI();
-      api.SetWasmPath(wasmPath, true);
-      await api.Init();
-      return api;
-    })();
+    if (!apiPromise) {
+      apiPromise = (async () => {
+        if (typeof WebIFC === 'undefined') await loadScript(wasmPath + 'web-ifc-api-iife.js');
+        const api = new WebIFC.IfcAPI();
+        api.SetWasmPath(wasmPath, true);
+        await api.Init();
+        return api;
+      })().catch(e => { apiPromise = null; throw e; });
+    }
     return apiPromise;
   }
   function colourKey(c) { return [c.x, c.y, c.z, c.w].map(v => v.toFixed(3)).join(','); }
 
   async function convert(buffer, opts) {
     opts = opts || {};
-    const api = await getApi(opts.wasmPath || 'vendor/web-ifc/');
+    const api = await getApi(String(opts.wasmPath || 'vendor/web-ifc/').replace(/\/?$/, '/'));
     const modelID = api.OpenModel(new Uint8Array(buffer), { COORDINATE_TO_ORIGIN: true });
     if (modelID < 0) throw new Error('IFC dosyası okunamadı');
     try {
@@ -42,6 +44,7 @@
           const geom = api.GetGeometry(modelID, pg.geometryExpressID);
           const verts = api.GetVertexArray(geom.GetVertexData(), geom.GetVertexDataSize());   // x y z nx ny nz per vertex
           const idx = api.GetIndexArray(geom.GetIndexData(), geom.GetIndexDataSize());
+          if (!verts.length || !idx.length) { geom.delete(); continue; }
           m4.fromArray(pg.flatTransformation); m3.getNormalMatrix(m4);
           const key = typeName + '|' + colourKey(pg.color);
           let g = groups.get(key);
