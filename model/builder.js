@@ -88,6 +88,14 @@
     return [[ys[ny], zt(ys[ny]), 'saçak'], [yr, zt(yr), m.roof.type === 'butterfly' ? 'dere' : 'mahya']];
   }
 
+  // y positions where the roof profile changes slope strictly between a and b: the ridge or
+  // valley of a gable or butterfly roof. Mono roofs have none.
+  function roofKinks(m, a, b) {
+    if (m.roof.type === 'mono') return [];
+    const yr = ridgeY(m);
+    return yr > a && yr < b ? [yr] : [];
+  }
+
   const quad = (a, b, c, d) => [].concat(a, b, c, a, c, d);
 
   // ---- primary steel: columns, rafters or trusses, eave and ridge beams
@@ -107,8 +115,9 @@
       });
       if (!truss) {
         for (let k = 0; k < rows.length - 1; k++) {
-          const ya = ys[rows[k]], yb = ys[rows[k + 1]];
-          bar('raf', 'rafter', [x, ya, zt(ya) - 0.135], [x, yb, zt(yb) - 0.135], 0.135, 0.27, 'raf');
+          const pts = [ys[rows[k]]].concat(roofKinks(m, ys[rows[k]], ys[rows[k + 1]]), [ys[rows[k + 1]]]);
+          for (let j = 0; j < pts.length - 1; j++)
+            bar('raf', 'rafter', [x, pts[j], zt(pts[j]) - 0.135], [x, pts[j + 1], zt(pts[j + 1]) - 0.135], 0.135, 0.27, 'raf');
         }
       } else trussAt(c, x);
     });
@@ -118,14 +127,17 @@
   // Clear-span lattice truss on one x axis: level bottom chord at the deck level, top chord
   // along the roof, N-diagonals with posts at about 2.2 m, pinned on the two outer columns.
   function trussAt(c, x) {
-    const { ys, ny, L, zt, bar } = c;
-    const zb = L.deck, top = y => zt(y) - 0.08;
+    const { m, ys, ny, L, zt, bar } = c;
+    const zb = m.deck.enabled ? L.deck : L.ceiling, top = y => zt(y) - 0.08;
     bar('raf', 'trussChord', [x, ys[0], zb], [x, ys[ny], zb], 0.14, 0.14, 'raf');
-    for (let i = 0; i < ny; i++) bar('raf', 'trussChord', [x, ys[i], top(ys[i])], [x, ys[i + 1], top(ys[i + 1])], 0.14, 0.14, 'raf');
-    const pts = [ys[0]];
-    for (let i = 0; i < ny; i++) {
-      const n = Math.max(2, Math.round((ys[i + 1] - ys[i]) / 2.2));
-      for (let j = 1; j <= n; j++) pts.push(ys[i] + (ys[i + 1] - ys[i]) * j / n);
+    const nodes = [];
+    for (let i = 0; i < ny; i++) { nodes.push(ys[i]); nodes.push.apply(nodes, roofKinks(m, ys[i], ys[i + 1])); }
+    nodes.push(ys[ny]);
+    for (let i = 0; i < nodes.length - 1; i++) bar('raf', 'trussChord', [x, nodes[i], top(nodes[i])], [x, nodes[i + 1], top(nodes[i + 1])], 0.14, 0.14, 'raf');
+    const pts = [nodes[0]];
+    for (let i = 0; i < nodes.length - 1; i++) {
+      const n = Math.max(2, Math.round((nodes[i + 1] - nodes[i]) / 2.2));
+      for (let j = 1; j <= n; j++) pts.push(nodes[i] + (nodes[i + 1] - nodes[i]) * j / n);
     }
     for (let i = 0; i < pts.length - 1; i++) {
       const a = pts[i], b = pts[i + 1];

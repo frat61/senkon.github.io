@@ -135,12 +135,13 @@ test('truss frame: no interior columns, chords on every x axis, no floor primari
   assert.equal(count(out, 'floorEdge'), 3);
 });
 
-test('beams frame without interior rows spans the full depth', () => {
+test('beams frame without interior rows follows the roof profile across the span', () => {
   const out = B.build({ axes: { x: [0, 6], y: [0, 8, 20] } });
   assert.equal(count(out, 'column'), 4);
-  assert.equal(count(out, 'rafter'), 2);
-  const r = out.items.find(i => i.role === 'rafter');
-  assert.equal(r.a[1], 0); assert.equal(r.b[1], 20);
+  assert.equal(count(out, 'rafter'), 4);          // 2 axes x (0 -> 8, 8 -> 20)
+  const r = out.items.filter(i => i.role === 'rafter');
+  assert.equal(r[0].a[1], 0); assert.equal(r[0].b[1], 8); near(r[0].b[2], 6.3 - 0.135);
+  assert.equal(r[1].a[1], 8); assert.equal(r[1].b[1], 20);
 });
 
 test('mono and butterfly level tags', () => {
@@ -148,4 +149,21 @@ test('mono and butterfly level tags', () => {
   assert.deepEqual(mono.items.filter(i => i.role === 'level').map(i => i.text).sort(), ['mekanik kat +4.45', 'saçak +5.00', 'tavan +4.00', 'üst saçak +7.00']);
   const bf = B.build({ axes: { x: [0, 6], y: [0, 8, 20] }, roof: { type: 'butterfly' }, levels: { eave: 6, ridge: 4 } });
   assert.ok(bf.items.find(i => i.role === 'level' && i.text === 'dere +4.00'));
+});
+
+test('single-span gable: rafters and truss chords kink at the mid-span ridge', () => {
+  const beams = B.build({ axes: { x: [0, 6], y: [0, 10] } });
+  assert.equal(count(beams, 'rafter'), 4);
+  assert.ok(beams.items.some(i => i.role === 'rafter' && Math.abs(i.b[1] - 5) < 1e-9 && Math.abs(i.b[2] - (6.3 - 0.135)) < 1e-9));
+  const truss = B.build({ axes: { x: [0, 6], y: [0, 10] }, frame: { type: 'truss' } });
+  assert.equal(count(truss, 'trussChord'), 6);     // 2 axes x (1 bottom + 2 top)
+  assert.ok(truss.items.some(i => i.role === 'trussChord' && Math.abs(i.b[1] - 5) < 1e-9 && Math.abs(i.b[2] - (6.3 - 0.08)) < 1e-9));
+});
+
+test('truss bottom chord drops to the ceiling when the deck is disabled', () => {
+  const out = B.build({ axes: { x: [0, 6], y: [0, 8, 20] }, frame: { type: 'truss' }, deck: { enabled: false } });
+  const bottom = out.items.filter(i => i.role === 'trussChord' && i.a[2] === i.b[2]);
+  assert.equal(bottom.length, 2);
+  assert.ok(bottom.every(i => i.a[2] === 4));
+  assert.equal(count(out, 'floorEdge'), 0);
 });
