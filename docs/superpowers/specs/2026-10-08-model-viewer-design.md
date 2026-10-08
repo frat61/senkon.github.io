@@ -255,7 +255,7 @@ arrives, so a wrong slug never leaks another model's text.
 - Fırat: create the Supabase project, disable sign-ups, create his user, run both SQL files,
   paste URL and anon key into `model/config.js`.
 
-**Stage 2: editor**
+**Stage 2: editor** (superseded on 2026-10-08 by `2026-10-08-stage2-uploads-design.md`: models are view only, no editor; Stage 2 is the owner upload page and file viewing)
 - Login, model list, create, duplicate, delete, copy link. Side panel for every parametric
   field; live redraw with `v.rebuild`; explicit save. Done when the lab model can be recreated
   from an empty model using only the editor, apart from walls and doors.
