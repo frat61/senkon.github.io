@@ -39,6 +39,7 @@
 
     const renderer = new THREE.WebGLRenderer({ antialias: true });
     renderer.setPixelRatio(Math.min(window.devicePixelRatio || 1, 2));
+    if (model && model.isObject3D) renderer.outputEncoding = THREE.sRGBEncoding;
     const canvas = renderer.domElement; canvas.style.touchAction = 'none'; container.appendChild(canvas);
     const scene = new THREE.Scene(), cam = new THREE.PerspectiveCamera(38, 1, 0.1, 4000);
     const hemi = new THREE.HemisphereLight(0xffffff, 0x8a9099, 0.85); scene.add(hemi);
@@ -127,6 +128,7 @@
       const box = new THREE.Box3().setFromObject(obj);
       if (box.isEmpty()) throw new Error('empty model');
       const size = new THREE.Vector3(), c = new THREE.Vector3(); box.getSize(size); box.getCenter(c);
+      cam.near = Math.max(0.01, Math.max(size.x, size.y, size.z) / 1000); cam.far = Math.max(4000, Math.max(size.x, size.y, size.z) * 20); cam.updateProjectionMatrix();
       built = { v: 0, items: [], snaps: [], layers: [{ key: 'model', label: 'Model', visible: true, button: false }],
         center: [c.x, c.z], size: Math.max(size.x, size.y, size.z), levels: {}, model: null, up: c.y,
         bounds: { min: box.min.toArray(), max: box.max.toArray() } };
@@ -144,7 +146,8 @@
     }
     function place() {
       const s = built ? built.size : 35;
-      el = Math.max(0.03, Math.min(1.55, el)); dist = Math.max(8, Math.min(140 * s / 35, dist));
+      const minD = built && !built.model ? Math.max(0.05, 0.1 * s) : 8, maxD = built && !built.model ? Math.max(6 * s, 1) : 140 * s / 35;
+      el = Math.max(0.03, Math.min(1.55, el)); dist = Math.max(minD, Math.min(maxD, dist));
       cam.position.set(tgt.x + dist * Math.cos(el) * Math.sin(az), tgt.y + dist * Math.sin(el), tgt.z + dist * Math.cos(el) * Math.cos(az));
       cam.lookAt(tgt);
     }
@@ -175,7 +178,7 @@
       const hit = rc.intersectObjects(list, false)[0]; if (!hit) return;
       let p = hit.point.clone(), best = 0.8; snaps.forEach(q => { const d = q.distanceTo(hit.point); if (d < best) { best = d; p = q.clone(); } });
       if (mPts.length === 2) clearMeas();
-      mPts.push(p); const mk = new THREE.Mesh(new THREE.SphereGeometry(0.16, 16, 12), M.meas); mk.position.copy(p); mk.renderOrder = 9; measG.add(mk);
+      mPts.push(p); const mk = new THREE.Mesh(new THREE.SphereGeometry(Math.max(0.02, (built ? built.size : 35) * 0.0045), 16, 12), M.meas); mk.position.copy(p); mk.renderOrder = 9; measG.add(mk);
       if (mPts.length === 2) {
         const a = mPts[0], b = mPts[1], d = a.distanceTo(b), hz = Math.hypot(a.x - b.x, a.z - b.z), vt = Math.abs(a.y - b.y);
         measG.add(new THREE.Line(new THREE.BufferGeometry().setFromPoints([a, b]), M.measLine));

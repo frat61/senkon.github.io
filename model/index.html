@@ -67,7 +67,8 @@
   const state = $('state'), C = window.SENKON_CONFIG || {};
   const q = new URLSearchParams(location.search), slug = (q.get('m') || '').trim();
   const SLUG_RE = /^[a-z0-9]{8,32}$/, PATH_RE = /^[a-z0-9]{8,32}\/[A-Za-z0-9._-]+$/;
-  const FIXED = 'Ön tasarım modelidir, uygulama için değildir. Ölçüler metre, aks–aks; kotlar çelik üst kotudur.';
+  const FIXED_PARAM = 'Ön tasarım modelidir, uygulama için değildir. Ölçüler metre, aks–aks; kotlar çelik üst kotudur.';
+  const FIXED_FILE = 'Ön tasarım modelidir, uygulama için değildir.';
   const dev = ['localhost', '127.0.0.1', '[::1]'].indexOf(location.hostname) >= 0;
 
   function show(msg, retry) {
@@ -88,7 +89,7 @@
     const total = +r.headers.get('content-length') || 0;
     if (!r.body || !total) return await r.arrayBuffer();
     const reader = r.body.getReader(), chunks = []; let got = 0;
-    for (;;) { const { done, value } = await reader.read(); if (done) break; chunks.push(value); got += value.length; onProgress(got / total); }
+    for (;;) { const { done, value } = await reader.read(); if (done) break; chunks.push(value); got += value.length; onProgress(Math.min(1, got / total)); }
     const out = new Uint8Array(got); let o = 0; chunks.forEach(c => { out.set(c, o); o += c.length; });
     return out.buffer;
   }
@@ -105,10 +106,10 @@
     return Array.isArray(rows) && rows.length ? rows[0] : null;
   }
   // Shared wiring once a viewer handle exists: status line, buttons, menu, still-render hook.
-  function wire(v, row, source) {
+  function wire(v, row, fixed, sourceSentence) {
     state.hidden = true; document.body.classList.add('ready');
     const d = row.updated_at ? new Date(row.updated_at) : null, when = d && !isNaN(d) ? d.toLocaleDateString('tr-TR') : '';
-    $('note').textContent = FIXED + (source ? ' Kaynak: ' + source + '.' : '') + (when ? ' Güncelleme ' + when + '.' : '');
+    $('note').textContent = fixed + sourceSentence + (when ? ' Güncelleme ' + when + '.' : '');
     document.querySelectorAll('[data-layer]').forEach(b => {
       const l = v.layers.find(x => x.key === b.dataset.layer && x.button);
       if (!l) { b.hidden = true; return; }
@@ -146,27 +147,28 @@
     let v;
     try { v = SenkonViewer.mount($('stage'), data); }
     catch (e) { console.error(e); return show('Model çizilemedi'); }
-    wire(v, row, data.source ? 'mimari plan ' + data.source : '');
+    wire(v, row, FIXED_PARAM, data.source ? ' Mimari plan ' + data.source + ' esas alınmıştır.' : '');
   }
   async function renderFile(row) {
     if (!hasWebGL()) return show('Tarayıcınız 3B görüntülemeyi desteklemiyor');
     const url = dev && row.file_url ? row.file_url : (PATH_RE.test(row.file_path || '') ? C.SUPABASE_URL.replace(/\/$/, '') + '/storage/v1/object/public/models/' + row.file_path : null);
     if (!url) return show('Model dosyası bulunamadı');
-    let v;
+    let v, stage = 'net';
     try {
       progress('Model yükleniyor…');
       await loadScript('vendor/GLTFLoader.r128.js');
       const buf = await fetchWithProgress(url, p => progress('Model yükleniyor… ' + Math.round(p * 100) + ' %'));
+      stage = 'parse';
       const gltf = await new Promise((res, rej) => new THREE.GLTFLoader().parse(buf, '', res, rej));
+      stage = 'mount';
       v = SenkonViewer.mountFile($('stage'), gltf.scene);
     } catch (e) {
       console.error(e);
-      const net = e && /^(http |script |Failed to fetch|NetworkError)/.test(e.message || '');
-      return show(net ? 'Model yüklenemedi, lütfen tekrar deneyin' : 'Model dosyası okunamadı', net);
+      return stage === 'net' ? show('Model yüklenemedi, lütfen tekrar deneyin', true) : show('Model dosyası okunamadı');
     }
     document.body.classList.add('file');
     const meta = row.data && row.data.metadata ? row.data.metadata : {};
-    wire(v, row, meta.source || '');
+    wire(v, row, FIXED_FILE, typeof meta.source === 'string' && meta.source ? ' Kaynak: ' + meta.source + '.' : '');
   }
   function render(row) {
     header(row);
