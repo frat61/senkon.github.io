@@ -51,6 +51,7 @@
   </ul>
   <p id="note"></p>
 </div>
+<div id="status" class="ui">Ön tasarım modelidir, uygulama için değildir.</div>
 <div id="read" class="card ui" hidden></div>
 <div id="hint" class="ui">Döndürmek için sürükleyin, yakınlaştırmak için kaydırın, taşımak için sağ tuşla sürükleyin</div>
 <div id="thint" class="ui">Tek parmakla döndürün, iki parmakla yakınlaştırın ve taşıyın</div>
@@ -84,7 +85,7 @@
     if (!C.SUPABASE_URL || !C.SUPABASE_ANON_KEY) throw new Error('config');
     const r = await fetch(C.SUPABASE_URL.replace(/\/$/, '') + '/rest/v1/rpc/get_model', {
       method: 'POST',
-      headers: { 'Content-Type': 'application/json', apikey: C.SUPABASE_ANON_KEY, Authorization: 'Bearer ' + C.SUPABASE_ANON_KEY },
+      headers: { 'Content-Type': 'application/json', apikey: C.SUPABASE_ANON_KEY },
       body: JSON.stringify({ p_slug: slug })
     });
     if (!r.ok) throw new Error('http ' + r.status);
@@ -92,8 +93,9 @@
     return Array.isArray(rows) && rows.length ? rows[0] : null;
   }
   function render(row) {
-    document.title = row.name + ' – SENKON';
-    $('title').textContent = row.name; $('desc').textContent = row.description || '';
+    const name = typeof row.name === 'string' && row.name ? row.name : '3B model';
+    document.title = name + ' – SENKON';
+    $('title').textContent = name; $('desc').textContent = typeof row.description === 'string' ? row.description : '';
     if (row.kind !== 'parametric') return show('Bu model türü henüz desteklenmiyor');
     const data = row.data || {};
     if ((data.v || 1) > SenkonBuilder.VERSION) return show('Model sürümü desteklenmiyor');

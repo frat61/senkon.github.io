@@ -34,6 +34,7 @@ button[hidden]{display:none}
 #read b{font-size:16px}
 #hint{position:absolute;right:12px;bottom:calc(12px + env(safe-area-inset-bottom,0px));color:var(--muted);font-size:12px}
 #thint{display:none;position:absolute;left:0;right:0;bottom:calc(14px + env(safe-area-inset-bottom,0px));text-align:center;color:var(--muted);font-size:12.5px;pointer-events:none}
+#status{display:none;position:absolute;left:12px;right:12px;bottom:calc(34px + env(safe-area-inset-bottom,0px));text-align:center;color:var(--muted);font-size:11.5px;pointer-events:none}
 #menu{display:none;position:absolute;top:calc(12px + env(safe-area-inset-top,0px));right:12px;background:var(--panel);z-index:5;padding:9px 13px;font-size:14px}
 @media (max-width:640px){
   #hint{display:none} body.ready #menu{display:block} body.compact #thint{display:block} body.measuring #thint{display:none}
@@ -43,4 +44,5 @@ button[hidden]{display:none}
   body:not(.compact) #read{display:none}
   body:not(.compact) #head{right:12px;top:calc(60px + env(safe-area-inset-top,0px))}
   button{padding:8px 11px;font-size:13.5px}
+  body.compact #status{display:block} body.compact.measuring #status{bottom:calc(76px + env(safe-area-inset-bottom,0px))}
 }
