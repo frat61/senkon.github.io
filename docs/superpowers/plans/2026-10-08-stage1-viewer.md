@@ -21,7 +21,7 @@
 - three.js is pinned to r128 and vendored at `model/vendor/three.r128.min.js`; no CDN script tags in the pages.
 - Slugs: 12 characters from `abcdefghjkmnpqrstuvwxyz23456789`, from `crypto.getRandomValues`.
 - Commit after every task with the message trailer `Co-Authored-By: Claude Fable 5.1 <noreply@anthropic.com>`.
-- Tests: `node --test tests/` must pass before each commit (from Task 3 on).
+- Tests: `node --test` (bare; it discovers tests/*.test.js — `node --test tests/` fails on Node 24) must pass before each commit (from Task 3 on).
 
 ---
 
