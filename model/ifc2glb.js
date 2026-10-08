@@ -27,38 +27,41 @@
   async function convert(buffer, opts) {
     opts = opts || {};
     const api = await getApi(String(opts.wasmPath || 'vendor/web-ifc/').replace(/\/?$/, '/'));
-    const modelID = api.OpenModel(new Uint8Array(buffer), { COORDINATE_TO_ORIGIN: true });
-    if (modelID < 0) throw new Error('IFC dosyası okunamadı');
+    let modelID;
+    try { modelID = api.OpenModel(new Uint8Array(buffer), { COORDINATE_TO_ORIGIN: true }); } catch (e) { throw new Error('IFC dosyası okunamadı'); }
+    if (!(modelID >= 0)) throw new Error('IFC dosyası okunamadı');
     try {
       const groups = new Map();   // "type|colour" -> { type, color, pos[], nor[], idx[], count }
       let meshes = 0;
       const m4 = new THREE.Matrix4(), m3 = new THREE.Matrix3(), v = new THREE.Vector3();
-      api.StreamAllMeshes(modelID, mesh => {
-        meshes++;
-        if (opts.onProgress && meshes % 25 === 0) opts.onProgress(meshes, 0);
-        let typeName = 'IFCELEMENT';
-        try { typeName = api.GetNameFromTypeCode(api.GetLineType(modelID, mesh.expressID)) || typeName; } catch (e) { /* unknown type: keep default */ }
-        const n = mesh.geometries.size();
-        for (let i = 0; i < n; i++) {
-          const pg = mesh.geometries.get(i);
-          const geom = api.GetGeometry(modelID, pg.geometryExpressID);
-          const verts = api.GetVertexArray(geom.GetVertexData(), geom.GetVertexDataSize());   // x y z nx ny nz per vertex
-          const idx = api.GetIndexArray(geom.GetIndexData(), geom.GetIndexDataSize());
-          if (!verts.length || !idx.length) { geom.delete(); continue; }
-          m4.fromArray(pg.flatTransformation); m3.getNormalMatrix(m4);
-          const key = typeName + '|' + colourKey(pg.color);
-          let g = groups.get(key);
-          if (!g) { g = { type: typeName, color: pg.color, pos: [], nor: [], idx: [], count: 0 }; groups.set(key, g); }
-          const base = g.count;
-          for (let k = 0; k < verts.length; k += 6) {
-            v.set(verts[k], verts[k + 1], verts[k + 2]).applyMatrix4(m4); g.pos.push(v.x, v.y, v.z);
-            v.set(verts[k + 3], verts[k + 4], verts[k + 5]).applyMatrix3(m3).normalize(); g.nor.push(v.x, v.y, v.z);
+      try {
+        api.StreamAllMeshes(modelID, mesh => {
+          meshes++;
+          if (opts.onProgress && meshes % 25 === 0) opts.onProgress(meshes, 0);
+          let typeName = 'IFCELEMENT';
+          try { typeName = api.GetNameFromTypeCode(api.GetLineType(modelID, mesh.expressID)) || typeName; } catch (e) { /* unknown type: keep default */ }
+          const n = mesh.geometries.size();
+          for (let i = 0; i < n; i++) {
+            const pg = mesh.geometries.get(i);
+            const geom = api.GetGeometry(modelID, pg.geometryExpressID);
+            const verts = api.GetVertexArray(geom.GetVertexData(), geom.GetVertexDataSize());   // x y z nx ny nz per vertex
+            const idx = api.GetIndexArray(geom.GetIndexData(), geom.GetIndexDataSize());
+            if (!verts.length || !idx.length) { geom.delete(); continue; }
+            m4.fromArray(pg.flatTransformation); m3.getNormalMatrix(m4);
+            const key = typeName + '|' + colourKey(pg.color);
+            let g = groups.get(key);
+            if (!g) { g = { type: typeName, color: pg.color, pos: [], nor: [], idx: [], count: 0 }; groups.set(key, g); }
+            const base = g.count;
+            for (let k = 0; k < verts.length; k += 6) {
+              v.set(verts[k], verts[k + 1], verts[k + 2]).applyMatrix4(m4); g.pos.push(v.x, v.y, v.z);
+              v.set(verts[k + 3], verts[k + 4], verts[k + 5]).applyMatrix3(m3).normalize(); g.nor.push(v.x, v.y, v.z);
+            }
+            for (let k = 0; k < idx.length; k++) g.idx.push(idx[k] + base);
+            g.count += verts.length / 6;
+            geom.delete();
           }
-          for (let k = 0; k < idx.length; k++) g.idx.push(idx[k] + base);
-          g.count += verts.length / 6;
-          geom.delete();
-        }
-      });
+        });
+      } catch (e) { throw new Error('IFC dosyası okunamadı'); }
       if (!groups.size) throw new Error('IFC dosyasında geometri bulunamadı');
       const scene = new THREE.Group(); scene.name = 'ifc';
       const byType = new Map();
