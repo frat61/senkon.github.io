@@ -20,7 +20,7 @@
 <header class="wrap top">
   <a class="brand" href="#"><img src="assets/senkon/logo.png" alt=""><span>Senkon Mühendislik</span></a>
   <nav class="nav" aria-label="Sayfa içi">
-    <a href="#hizmetler">Hizmetler</a><a href="#projeler">Projeler</a><a href="#hakkinda">Hakkında</a><a href="#structkit">StructKit</a><a href="#iletisim">İletişim</a>
+    <a href="#hizmetler">Hizmetler</a><a href="#projeler">Projeler</a><a href="#hakkinda">Hakkında</a><a href="#model">Model</a><a href="#structkit">StructKit</a><a href="#iletisim">İletişim</a>
   </nav>
   <a class="btn btn-line top-contact" href="#iletisim">İletişim</a>
 </header>
@@ -99,6 +99,19 @@
     </div>
   </section>
 
+  <section id="model" class="wrap viewer rule">
+    <p class="eyebrow">3B model görüntüleyici</p>
+    <h2>Size gönderilen modeli açın</h2>
+    <p class="lead">Konsept aşamasındaki modeller telefonda açılan bir bağlantıyla paylaşılır. Bağlantıyı veya 12 haneli model kodunu buraya yapıştırın.</p>
+    <form id="openModel" class="open-form" novalidate>
+      <label class="sr-only" for="modelCode">Model bağlantısı veya kodu</label>
+      <input id="modelCode" type="text" inputmode="url" autocomplete="off" spellcheck="false" placeholder="https://senkonmuhendislik.com/model/?m=…">
+      <button type="submit" class="btn btn-main">Modeli aç</button>
+    </form>
+    <p id="openMsg" class="form-msg" role="alert"></p>
+    <p class="note">Modeller yalnızca bağlantıyı alan kişilerce görüntülenir; herkese açık bir liste yoktur.</p>
+  </section>
+
   <section id="iletisim" class="wrap contact rule">
     <p class="eyebrow">İletişim</p>
     <h2>Bir projeniz mi var?</h2>
@@ -112,8 +125,21 @@
 
 <footer class="wrap foot rule">
   <div>Senkon Mühendislik · İstanbul</div>
-  <div>© 2026</div>
+  <div><a class="foot-link" href="model/panel.html">Giriş</a> · © 2026</div>
 </footer>
+<script>
+(function () {
+  var form = document.getElementById('openModel'), input = document.getElementById('modelCode'), msg = document.getElementById('openMsg');
+  if (!form) return;
+  form.addEventListener('submit', function (e) {
+    e.preventDefault();
+    var raw = input.value.trim(), m = /(?:[?&]m=)([a-z0-9]{8,32})/i.exec(raw) || /^([a-z0-9]{8,32})$/i.exec(raw);
+    if (!m) { msg.textContent = 'Bağlantı tanınmadı. Size gönderilen bağlantının tamamını ya da 12 haneli kodu yapıştırın.'; input.focus(); return; }
+    msg.textContent = '';
+    location.href = 'model/?m=' + encodeURIComponent(m[1].toLowerCase());
+  });
+})();
+</script>
 <script src="assets/senkon/hero.js" defer></script>
 </body>
 </html>

@@ -61,6 +61,16 @@ p{margin:0}
 .sk-grid{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:12px}
 .sk-grid div{background:var(--tint);padding:16px 18px;border-radius:6px} .sk-grid b{display:block;font-weight:600} .sk-grid small{color:var(--muted);font-size:14px}
 @media (max-width:860px){ .sk{grid-template-columns:1fr;gap:20px;padding-top:40px;padding-bottom:40px} }
+.viewer{padding-top:64px;padding-bottom:40px}
+.viewer .lead{margin-top:14px}
+.open-form{display:flex;gap:10px;margin-top:22px;max-width:640px}
+.open-form input{flex:1 1 auto;min-width:0;min-height:48px;padding:0 16px;font:inherit;color:var(--ink);background:var(--ground);border:1.5px solid var(--ink);border-radius:999px}
+.open-form input:focus-visible{outline:2px solid var(--accent);outline-offset:3px}
+.open-form input::placeholder{color:var(--muted)}
+.form-msg{min-height:1.4em;margin-top:10px;color:#b3261e;font-size:14px}
+.sr-only{position:absolute;width:1px;height:1px;overflow:hidden;clip:rect(0 0 0 0);white-space:nowrap}
+.foot-link{color:var(--muted);text-decoration:none} .foot-link:hover{color:var(--link);text-decoration:underline}
+@media (max-width:640px){ .open-form{flex-direction:column} .open-form .btn{width:100%} }
 .contact{padding-top:64px;padding-bottom:48px}
 .contact .btns{margin-top:24px} @media (max-width:640px){ .contact .btns{flex-direction:column} .contact .btn{width:100%} }
 .foot{display:flex;justify-content:space-between;gap:16px;padding-top:22px;padding-bottom:calc(28px + env(safe-area-inset-bottom,0px));font-size:14px;color:var(--muted);flex-wrap:wrap}
