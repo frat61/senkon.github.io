@@ -1,90 +1,96 @@
 {
  "w": 2000,
- "h": 494,
- "ground": 466,
+ "h": 436,
+ "ground": 408,
  "cols": [
   {
    "x0": 25,
-   "x1": 125,
-   "top": 219,
+   "x1": 111,
+   "top": 193,
    "name": "Eyfel Kulesi, Paris, 1889"
   },
   {
-   "x0": 186,
-   "x1": 260,
-   "top": 178,
+   "x0": 172,
+   "x1": 238,
+   "top": 157,
    "name": "Empire State Building, New York, 1931"
   },
   {
-   "x0": 320,
-   "x1": 392,
-   "top": 184,
+   "x0": 298,
+   "x1": 361,
+   "top": 162,
    "name": "John Hancock Center, Chicago, 1969"
   },
   {
-   "x0": 452,
-   "x1": 520,
-   "top": 149,
+   "x0": 420,
+   "x1": 481,
+   "top": 132,
    "name": "Willis Tower, Chicago, 1973"
   },
   {
-   "x0": 581,
-   "x1": 642,
-   "top": 208,
+   "x0": 540,
+   "x1": 595,
+   "top": 183,
    "name": "Bank of China Tower, Hong Kong, 1990"
   },
   {
-   "x0": 702,
-   "x1": 828,
-   "top": 180,
+   "x0": 654,
+   "x1": 764,
+   "top": 159,
    "name": "Petronas Kuleleri, Kuala Lumpur, 1998"
   },
   {
-   "x0": 888,
-   "x1": 932,
-   "top": 354,
+   "x0": 823,
+   "x1": 863,
+   "top": 310,
    "name": "İstanbul Havalimanı Kontrol Kulesi, 2018"
   },
   {
-   "x0": 993,
-   "x1": 1039,
-   "top": 129,
+   "x0": 918,
+   "x1": 1015,
+   "top": 283,
+   "name": "Esenboğa Havalimanı Kontrol Kulesi, Ankara"
+  },
+  {
+   "x0": 1073,
+   "x1": 1114,
+   "top": 114,
    "name": "Çamlıca Kulesi, İstanbul, 2021"
   },
   {
-   "x0": 1099,
-   "x1": 1151,
-   "top": 154,
+   "x0": 1174,
+   "x1": 1220,
+   "top": 136,
    "name": "Taipei 101, Taipei, 2004"
   },
   {
-   "x0": 1211,
-   "x1": 1278,
-   "top": 107,
+   "x0": 1280,
+   "x1": 1338,
+   "top": 95,
    "name": "Shanghai Tower, 2015"
   },
   {
-   "x0": 1339,
-   "x1": 1466,
-   "top": 309,
+   "x0": 1399,
+   "x1": 1510,
+   "top": 271,
    "name": "CCTV Genel Merkezi, Pekin, 2012"
   },
   {
-   "x0": 1526,
-   "x1": 1590,
-   "top": 234,
+   "x0": 1569,
+   "x1": 1625,
+   "top": 206,
    "name": "The Shard, Londra, 2012"
   },
   {
-   "x0": 1649,
-   "x1": 1838,
-   "top": 330,
+   "x0": 1684,
+   "x1": 1849,
+   "top": 289,
    "name": "Marina Bay Sands, Singapur, 2010"
   },
   {
-   "x0": 1898,
-   "x1": 1975,
-   "top": 28,
+   "x0": 1908,
+   "x1": 1976,
+   "top": 26,
    "name": "Burj Khalifa, Dubai, 2010"
   }
  ]
