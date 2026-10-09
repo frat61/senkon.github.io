@@ -12,7 +12,8 @@ row does not fit, every cut-out is scaled down to fit. --drop leaves out buildin
 index in the source (counted before any insert). --insert places another drawing (alone on
 white, any size) before building <index> (0-based), scaled to <height_px> above the ground line.
 --blank starts from an empty canvas of that size with a ground line 30 px above the bottom, for a
-picture made only of inserted drawings. Empty sky above the tallest building is trimmed, so the output can be shorter than the input;
+picture made only of inserted drawings. --sky sets the empty space kept above the tallest building
+(room for cranes); the canvas grows or is trimmed to match, so the output can be shorter than the input;
 update the width/height attributes of the <img> in index.html to the printed size.
 Run measure-skyline.py on the result to write skyline.json.
 """
@@ -82,6 +83,9 @@ total = sum(p.width for p in pieces) + gap * (len(pieces) - 1) + 2 * margin
 f = min(1.0, (w - 2 * margin - gap * (len(pieces) - 1)) / sum(p.width for p in pieces))
 if f < 1: pieces = [p.resize((max(1, round(p.width * f)), max(1, round(p.height * f))), Image.LANCZOS) for p in pieces]
 
+maxh = max(p.height for p in pieces)
+if ground - maxh < skypx:                                   # not enough sky: grow the canvas upward
+    grow = skypx - (ground - maxh); h += grow; ground += grow
 canvas = Image.new('L', (w, h), 255)
 x = margin
 for p in pieces:
@@ -89,7 +93,7 @@ for p in pieces:
     x += p.width + gap
 d = ImageDraw.Draw(canvas)
 d.line([(margin // 2, ground), (w - margin // 2, ground)], fill=0, width=3 if blank else 2)
-sky = ground - max(p.height for p in pieces) - skypx       # trim empty sky (keep --sky px for cranes)
+sky = ground - maxh - skypx                                # trim empty sky (keep --sky px for cranes)
 if sky > 0: canvas = canvas.crop((0, sky, w, h)); ground -= sky
 canvas.save(out, quality=92)
 print(f'{len(pieces)} buildings, gap {gap}px, scale {f:.3f}, size {canvas.width}x{canvas.height}, ground {ground} -> {out}')

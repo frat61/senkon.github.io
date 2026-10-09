@@ -1,42 +1,42 @@
 {
  "w": 2000,
- "h": 500,
- "ground": 472,
+ "h": 570,
+ "ground": 542,
  "cols": [
   {
    "x0": 24,
    "x1": 130,
-   "top": 213,
+   "top": 283,
    "name": "Eyfel Kulesi, Paris, 1889"
   },
   {
    "x0": 191,
    "x1": 268,
-   "top": 170,
+   "top": 240,
    "name": "Empire State Building, New York, 1931"
   },
   {
    "x0": 329,
    "x1": 404,
-   "top": 176,
+   "top": 246,
    "name": "John Hancock Center, Chicago, 1969"
   },
   {
    "x0": 465,
    "x1": 536,
-   "top": 139,
+   "top": 209,
    "name": "Willis Tower, Chicago, 1973"
   },
   {
    "x0": 597,
    "x1": 661,
-   "top": 201,
+   "top": 271,
    "name": "Bank of China Tower, Hong Kong, 1990"
   },
   {
    "x0": 722,
    "x1": 852,
-   "top": 172,
+   "top": 242,
    "name": "Petronas Kuleleri, Kuala Lumpur, 1998",
    "cranes": [
     {
@@ -51,25 +51,25 @@
   {
    "x0": 913,
    "x1": 961,
-   "top": 118,
+   "top": 188,
    "name": "Çamlıca Kulesi, İstanbul, 2021"
   },
   {
    "x0": 1022,
-   "x1": 1075,
-   "top": 144,
+   "x1": 1076,
+   "top": 214,
    "name": "Taipei 101, Taipei, 2004"
   },
   {
    "x0": 1136,
    "x1": 1206,
-   "top": 96,
+   "top": 166,
    "name": "Shanghai Tower, 2015"
   },
   {
    "x0": 1267,
    "x1": 1400,
-   "top": 307,
+   "top": 377,
    "name": "CCTV Genel Merkezi, Pekin, 2012",
    "cranes": [
     {
@@ -91,13 +91,13 @@
   {
    "x0": 1461,
    "x1": 1526,
-   "top": 229,
+   "top": 299,
    "name": "The Shard, Londra, 2012"
   },
   {
    "x0": 1587,
    "x1": 1784,
-   "top": 329,
+   "top": 399,
    "name": "Marina Bay Sands, Singapur, 2010",
    "cranes": [
     {
@@ -119,7 +119,7 @@
   {
    "x0": 1845,
    "x1": 1925,
-   "top": 13,
+   "top": 83,
    "name": "Burj Khalifa, Dubai, 2010"
   }
  ]
