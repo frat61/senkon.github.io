@@ -3,9 +3,6 @@
   --steel:#2f363d; --rafter:#b3261e; --tie:#0b7f93; --brace:#1557b0; --door:#e08a00; --accent:#1557b0;
   box-sizing:border-box; padding-top:env(safe-area-inset-top,0px); padding-bottom:env(safe-area-inset-bottom,0px);
 }
-@media (prefers-color-scheme: dark){ :root:not([data-theme="light"]){
-  --bg:#171b20; --panel:#20262dee; --ink:#e8ecf0; --muted:#9aa5b0; --line:#39424c; --accent:#6ea8ff; } }
-:root[data-theme="dark"]{ --bg:#171b20; --panel:#20262dee; --ink:#e8ecf0; --muted:#9aa5b0; --line:#39424c; --accent:#6ea8ff; }
 *{box-sizing:inherit}
 html,body{height:100%;margin:0}
 body{background:var(--bg);color:var(--ink);font:14px/1.45 "Segoe UI",Roboto,"Helvetica Neue",Arial,sans-serif;overflow:hidden}
