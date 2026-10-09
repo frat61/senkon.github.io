@@ -40,7 +40,7 @@
         cranes = c.cranes.map((k, n) => ({ kind: k.kind || 'hammer', x: c.x0 + w * k.fx, dir: k.dir || -1, cap: k.cap || 1,
           mast: (k.mastM || MAST_M) * m, phase: i * 2.3 + n * 3.1, tie: k.tieFx === undefined ? null : c.x0 + w * k.tieFx, tieCap: k.tieCap || 1 }));
       } else {                                                   // one crane in the gap beside the building, tied to its facade
-        const next = cols[i + 1], gapR = (next ? next.x0 : W) - c.x1, right = gapR >= 30;
+        const next = cols[i + 1], right = !!next && next.x0 - c.x1 >= 30;   // the last building's crane stands on its left
         cranes = [{ kind: i % 2 ? 'luff' : 'hammer', x: right ? c.x1 + 14 : c.x0 - 14, dir: right ? -1 : 1,
           mast: MAST_M * m, phase: i * 2.3, tie: right ? c.x1 : c.x0, tieCap: 1 }];
       }
