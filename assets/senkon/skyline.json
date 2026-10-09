@@ -37,7 +37,16 @@
    "x0": 722,
    "x1": 852,
    "top": 172,
-   "name": "Petronas Kuleleri, Kuala Lumpur, 1998"
+   "name": "Petronas Kuleleri, Kuala Lumpur, 1998",
+   "cranes": [
+    {
+     "fx": 0.485,
+     "kind": "hammer",
+     "dir": -1,
+     "tieFx": 0.36,
+     "tieCap": 0.95
+    }
+   ]
   },
   {
    "x0": 913,
@@ -61,7 +70,23 @@
    "x0": 1267,
    "x1": 1400,
    "top": 307,
-   "name": "CCTV Genel Merkezi, Pekin, 2012"
+   "name": "CCTV Genel Merkezi, Pekin, 2012",
+   "cranes": [
+    {
+     "fx": 0.5,
+     "kind": "luff",
+     "dir": 1,
+     "tieFx": 0.32,
+     "tieCap": 0.55
+    },
+    {
+     "fx": 1.0,
+     "kind": "hammer",
+     "dir": -1,
+     "tieFx": 0.96,
+     "mastM": 22
+    }
+   ]
   },
   {
    "x0": 1461,
@@ -73,7 +98,23 @@
    "x0": 1587,
    "x1": 1784,
    "top": 329,
-   "name": "Marina Bay Sands, Singapur, 2010"
+   "name": "Marina Bay Sands, Singapur, 2010",
+   "cranes": [
+    {
+     "fx": 0.34,
+     "kind": "hammer",
+     "dir": -1,
+     "tieFx": 0.29,
+     "tieCap": 0.75
+    },
+    {
+     "fx": 0.63,
+     "kind": "luff",
+     "dir": 1,
+     "tieFx": 0.68,
+     "tieCap": 0.75
+    }
+   ]
   },
   {
    "x0": 1845,

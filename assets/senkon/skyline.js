@@ -1,5 +1,5 @@
 /* Build animation for ink drawings: every <figure data-skyline="…json"> raises its buildings at once,
-   each with small tower cranes working a lifting cycle, a soft unfinished edge and a little dust, once
+   each with a small tower crane in the gap beside it (or cranes placed by hand) working a lifting cycle, a soft unfinished edge and a little dust, once
    per page load, then leaves the finished picture. The JSON (written by tools/measure-skyline.py) gives
    each building's column and top in image pixels; a column may carry its own "cranes" list. Optional
    data-tallest-m on the figure gives the real height of its tallest building, which sets the crane
@@ -14,7 +14,7 @@
   const MIN_BUILD = 6, MAX_BUILD = 11;      // seconds per building, scaled by its height
   const STAGGER = 0.05;                     // seconds between neighbouring starts, a ripple left to right
   const CYCLE = 7;                          // seconds per lifting cycle
-  const JIB_M = 70, LUFF_M = 60, MAST_M = 28, TWO_CRANES_PX = 40;
+  const JIB_M = 70, LUFF_M = 60, MAST_M = 22;
   const PUFFS = 3, PUFF_CYCLE = 2.2, EDGE_PX = 10;
 
   document.querySelectorAll('figure[data-skyline]').forEach(fig => {
@@ -39,11 +39,10 @@
       if (c.cranes) {                                            // placed by hand in the JSON
         cranes = c.cranes.map((k, n) => ({ kind: k.kind || 'hammer', x: c.x0 + w * k.fx, dir: k.dir || -1, cap: k.cap || 1,
           mast: (k.mastM || MAST_M) * m, phase: i * 2.3 + n * 3.1, tie: k.tieFx === undefined ? null : c.x0 + w * k.tieFx, tieCap: k.tieCap || 1 }));
-      } else if (w >= TWO_CRANES_PX) {                           // two cranes up the facade, anchored at the ground
-        cranes = [{ kind: 'hammer', x: c.x0 + w * 0.3, dir: -1, mast: MAST_M * m, phase: i * 2.3, tie: null },
-                  { kind: 'luff', x: c.x0 + w * 0.72, dir: 1, mast: MAST_M * 1.35 * m, phase: i * 2.3 + 3.1, tie: null }];
-      } else {                                                   // one crane beside a slender tower, tied to it
-        cranes = [{ kind: i % 2 ? 'luff' : 'hammer', x: c.x1 + 9, dir: -1, mast: MAST_M * m, phase: i * 2.3, tie: c.x1, tieCap: 1 }];
+      } else {                                                   // one crane in the gap beside the building, tied to its facade
+        const next = cols[i + 1], gapR = (next ? next.x0 : W) - c.x1, right = gapR >= 30;
+        cranes = [{ kind: i % 2 ? 'luff' : 'hammer', x: right ? c.x1 + 14 : c.x0 - 14, dir: right ? -1 : 1,
+          mast: MAST_M * m, phase: i * 2.3, tie: right ? c.x1 : c.x0, tieCap: 1 }];
       }
       return { c: c, i: i, t0: t0, b0: t0 + SETUP, b1: t0 + SETUP + dur, t1: t0 + SETUP + dur + TEARDOWN, cranes: cranes };
     });
@@ -168,7 +167,7 @@
         cyc = { out: 0, hook: 0.1, target: 'deck', load: false }; mastH = mastH * (1 - dd);
       }
       if (e <= 0 || mastH <= 0.5) return '';
-      const top = base - mastH * e, half = 2.5 * s, step = 7 * s;
+      const top = base - mastH * e, half = 2.5 * s, step = 10 * s;
       let d = L(x - half, base, x - half, top) + L(x + half, base, x + half, top);
       for (let y = base - step; y > top + 3; y -= step) d += L(x - half, y, x + half, y - step) + L(x + half, y, x - half, y - step);
       if (k.tie !== null) for (let y = base - 30 * s; y > Math.max(curTop, top, G - (k.tieCap || 1) * (G - j.c.top)) + 10 * s; y -= 30 * s) d += L(x - half * Math.sign(k.tie - x || 1) * -1, y, k.tie, y);   // ties to the shaft
@@ -177,7 +176,7 @@
       d += L(cabX, ty + 2 * u, cabX + 3 * u * dir, ty + 2 * u) + L(cabX + 3 * u * dir, ty + 2 * u, cabX + 3 * u * dir, ty + 6 * u) + L(cabX + 3 * u * dir, ty + 6 * u, cabX, ty + 6 * u);   // cab
       let hookX, hookTopY, apex = ty - 7 * u;
       if (k.kind === 'hammer') {
-        const jl = JIB_M * m * (0.45 + 0.55 * cyc.out) * dir, cl = -jl * 0.35;
+        const jl = JIB_M * m * (0.45 + 0.55 * cyc.out) * dir, cl = -jl * 0.3;
         d += L(x - half, ty, x + jl, ty) + L(x + half, ty + 2.5 * u, x + jl * 0.97, ty + 2.5 * u);
         const n = Math.max(2, Math.floor(Math.abs(jl) / (6 * u)));
         for (let i = 0; i < n; i++) d += L(x + jl * i / n, ty + 2.5 * u, x + jl * (i + 1) / n, ty);
