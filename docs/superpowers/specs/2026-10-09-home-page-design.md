@@ -90,6 +90,7 @@ Title line: "İnşaat Yüksek Mühendisi"; full name Süleyman Fırat Şentürk.
 - Fallback: a static SVG or PNG of the same frame shown until three.js is ready and kept when
   WebGL is missing or `prefers-reduced-motion` is set. Rotation pauses when the hero leaves
   the viewport or the tab is hidden.
+- The static SVG carries its own dark-mode colours in a `<style>` block so the fallback is readable in both schemes.
 - Budget: three.js (600 KB) is deferred, so the page's first paint depends only on HTML, CSS
   and the fonts.
 
@@ -98,7 +99,7 @@ Title line: "İnşaat Yüksek Mühendisi"; full name Süleyman Fırat Şentürk.
 ```
 index.html              the new home page
 assets/senkon/
-  logo.png              the mammoth mark, web size (about 600 px wide), from senkonlogo.png
+  logo.png              the mammoth mark at 160 px (displayed at 40 px); favicon and apple-touch-icon beside it
   hero-model.json       generic frame data sheet for the hero
   hero.svg              static fallback drawing of the frame
   hero.js               loads three.js lazily, builds the line scene, rotates, pauses

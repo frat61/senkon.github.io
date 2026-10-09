@@ -20,6 +20,7 @@
   const ROLES = { column: 'ink', rafter: 'accent', tie: 'ink', purlin: 'faint', brace: 'faint', windpost: 'ink' };
   const PERIOD = 40;   // seconds per rotation
   let started = false;
+  function onMQ(mq, fn) { if (mq.addEventListener) mq.addEventListener('change', fn); else if (mq.addListener) mq.addListener(fn); }
 
   function loadScript(src) {
     return new Promise((res, rej) => { const s = document.createElement('script'); s.src = src; s.defer = true; s.onload = res; s.onerror = () => rej(new Error(src)); document.head.appendChild(s); });
@@ -45,6 +46,8 @@
     const canvas = document.createElement('canvas');
     canvas.setAttribute('role', 'img');
     canvas.setAttribute('aria-label', 'Beş açıklıklı çelik çerçevenin dönen çizgi modeli');
+    let visible = true, stopped = false;
+    canvas.addEventListener('webglcontextlost', e => { e.preventDefault(); stopped = true; visible = false; fig.dataset.live = ''; const im = document.getElementById('heroStatic'); if (im) im.removeAttribute('aria-hidden'); });
     const stat = document.getElementById('heroStatic');
     const renderer = new THREE.WebGLRenderer({ canvas: canvas, antialias: true, alpha: true });
     renderer.setPixelRatio(Math.min(window.devicePixelRatio || 1, 2));
@@ -77,13 +80,14 @@
     }
     place();
 
+    onMQ(matchMedia('(prefers-color-scheme: dark)'), () => { c = colors(); Object.keys(lines).forEach(k => lines[k].material.color.set(c[k])); });
+    onMQ(reduce, () => { if (reduce.matches) { stopped = true; visible = false; fig.dataset.live = ''; if (stat) stat.removeAttribute('aria-hidden'); } });
     fig.appendChild(canvas); fig.dataset.live = '1';
     if (stat) stat.setAttribute('aria-hidden', 'true');
     function resize() { const w = fig.clientWidth, h = fig.clientHeight; if (!w || !h) return; renderer.setSize(w, h, false); cam.aspect = w / h; cam.updateProjectionMatrix(); place(); }
     resize(); window.addEventListener('resize', resize);
-    matchMedia('(prefers-color-scheme: dark)').addEventListener('change', () => { c = colors(); Object.keys(lines).forEach(k => lines[k].material.color.set(c[k])); });
 
-    let visible = true, stopped = false, last = performance.now(), angle = -0.6, raf = 0;
+    let last = performance.now(), angle = -0.6, raf = 0;
     function frame(now) {
       raf = 0;
       if (!visible || document.hidden) return;
@@ -95,7 +99,6 @@
     function wake() { if (stopped) return; if (!raf && visible && !document.hidden) { last = performance.now(); raf = requestAnimationFrame(frame); } }
     new IntersectionObserver(es => { if (stopped) return; visible = es[0].isIntersecting; wake(); }, { threshold: 0.05 }).observe(fig);
     document.addEventListener('visibilitychange', () => { if (!stopped) wake(); });
-    reduce.addEventListener('change', () => { if (reduce.matches) { stopped = true; visible = false; fig.dataset.live = ''; if (stat) stat.removeAttribute('aria-hidden'); } });
     wake();
   }
 

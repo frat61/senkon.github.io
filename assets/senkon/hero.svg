@@ -1,4 +1,5 @@
 <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 520 360" width="520" height="360" role="img" aria-label="Çelik çerçeve çizgi modeli" fill="none" stroke-linecap="round">
+<style>@media (prefers-color-scheme: dark){.ink{stroke:#e6e2da}.faint{stroke:#5b6a73}.accent{stroke:#e0936f}}</style>
 <g stroke="#b9c2c7" stroke-width="1.1" class="faint">
 <line x1="169.60" y1="40.19" x2="502.00" y2="139.11"/>
 <line x1="150.65" y1="49.22" x2="483.05" y2="148.13"/>
