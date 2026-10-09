@@ -28,7 +28,7 @@
     opts = opts || {};
     const api = await getApi(String(opts.wasmPath || 'vendor/web-ifc/').replace(/\/?$/, '/'));
     let modelID;
-    try { modelID = api.OpenModel(new Uint8Array(buffer), { COORDINATE_TO_ORIGIN: true }); } catch (e) { throw new Error('IFC dosyası okunamadı'); }
+    try { modelID = api.OpenModel(new Uint8Array(buffer), { COORDINATE_TO_ORIGIN: true }); } catch (e) { console.error(e); throw new Error('IFC dosyası okunamadı'); }
     if (!(modelID >= 0)) throw new Error('IFC dosyası okunamadı');
     try {
       const groups = new Map();   // "type|colour" -> { type, color, pos[], nor[], idx[], count }
@@ -61,7 +61,7 @@
             geom.delete();
           }
         });
-      } catch (e) { throw new Error('IFC dosyası okunamadı'); }
+      } catch (e) { console.error(e); throw new Error('IFC dosyası okunamadı'); }
       if (!groups.size) throw new Error('IFC dosyasında geometri bulunamadı');
       const scene = new THREE.Group(); scene.name = 'ifc';
       const byType = new Map();
@@ -70,7 +70,7 @@
         bg.setAttribute('position', new THREE.Float32BufferAttribute(g.pos, 3));
         bg.setAttribute('normal', new THREE.Float32BufferAttribute(g.nor, 3));
         bg.setIndex(g.idx);
-        const mat = new THREE.MeshStandardMaterial({ color: new THREE.Color(g.color.x, g.color.y, g.color.z), roughness: 0.8, metalness: 0.1,
+        const mat = new THREE.MeshStandardMaterial({ color: new THREE.Color(g.color.x, g.color.y, g.color.z).convertSRGBToLinear(), roughness: 0.8, metalness: 0.1,
           transparent: g.color.w < 1, opacity: g.color.w, side: THREE.DoubleSide });
         let parent = byType.get(g.type);
         if (!parent) { parent = new THREE.Group(); parent.name = g.type; byType.set(g.type, parent); scene.add(parent); }

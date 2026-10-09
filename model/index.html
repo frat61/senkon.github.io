@@ -66,7 +66,7 @@
   const $ = id => document.getElementById(id);
   const state = $('state'), C = window.SENKON_CONFIG || {};
   const q = new URLSearchParams(location.search), slug = (q.get('m') || '').trim();
-  const SLUG_RE = /^[a-z0-9]{8,32}$/, PATH_RE = /^[a-z0-9]{8,32}\/[A-Za-z0-9._-]+$/;
+  const SLUG_RE = /^[a-z0-9]{8,32}$/, PATH_RE = /^[a-z0-9]{8,32}\/model\.glb$/;
   const FIXED_PARAM = 'Ön tasarım modelidir, uygulama için değildir. Ölçüler metre, aks–aks; kotlar çelik üst kotudur.';
   const FIXED_FILE = 'Ön tasarım modelidir, uygulama için değildir.';
   const dev = ['localhost', '127.0.0.1', '[::1]'].indexOf(location.hostname) >= 0;

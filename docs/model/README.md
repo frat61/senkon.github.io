@@ -56,7 +56,7 @@ Run `local/lab-model.sql` in the SQL editor. The last line of the file is the sh
 
 ## Publishing
 
-Push `model-viewer` to GitHub and merge into `main`; GitHub Pages deploys within a minute.
+Push the feature branch to GitHub and merge into `main`; GitHub Pages deploys within a minute.
 Open the share link on an iPhone in Safari to check. Nothing links to `/model/`, and the slug
 is random, so a model is reachable only by its link.
 

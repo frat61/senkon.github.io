@@ -45,7 +45,7 @@ placeholder for rows without one), name, kind badge ("Parametrik" or "Dosya"), l
 date, and buttons:
 - **Aç**: opens the public link in a new tab.
 - **Bağlantıyı kopyala**: puts `https://senkonmuhendislik.com/model/?m=<slug>` on the clipboard, shows "Kopyalandı".
-- **Dosyayı değiştir** (file models only): same flow as adding, but into the existing slug; updates `file_path`, metadata, thumbnail; `updated_at` follows from the trigger.
+- **Dosyayı değiştir** (file models only): same flow as adding, but into the existing slug; updates `file_path`, metadata, thumbnail; `updated_at` follows from the trigger. The source reference is kept unless a new one is typed.
 - **Sil**: confirm dialog, then delete.
 A "Çıkış" button and a "Model ekle" button sit in the header.
 
@@ -54,7 +54,7 @@ A "Çıkış" button and a "Model ekle" button sit in the header.
 and a file picker accepting `.glb,.gltf,.ifc,.json`. Flow by extension:
 
 1. `.json`: parse; accept either a row-shaped object `{ name, description, data }` or a bare
-   data sheet; the name field in the dialog wins over the file's. Validate with
+   data sheet; the name field in the dialog wins over the file's; an empty dialog name falls back to the file's. Validate with
    `SenkonBuilder.normalize` (throws on bad input) and `data.v <= SenkonBuilder.VERSION`.
    Insert `kind = 'parametric'`. Render once with `SenkonViewer` to capture the thumbnail.
 2. `.glb` / `.gltf`: check size, check that `GLTFLoader` parses it (a quick in-memory parse);
@@ -63,8 +63,9 @@ and a file picker accepting `.glb,.gltf,.ifc,.json`. Flow by extension:
    the thumbnail.
 3. `.ifc`: check size; load `web-ifc`, read the geometry, build a three.js scene with one
    mesh group per IFC entity type (names like `IfcColumn`, `IfcBeam`, `IfcSlab`), export to
-   GLB with `GLTFExporter`; if the GLB exceeds 50 MB, stop with "Dönüştürülen model çok
-   büyük" and the advice to simplify or convert on the PC. Upload the GLB, insert the row with
+   GLB with `GLTFExporter`; if the resulting GLB (from IFC or from an embedded `.gltf`) exceeds
+   50 MB, stop with "Dönüştürülen model çok büyük" and the advice to simplify or export a
+   smaller GLB. Upload the GLB, insert the row with
    `data.metadata = { source_format: 'ifc', original_name, original_bytes, glb_bytes,
    converter: 'web-ifc <version>' }`, render for the thumbnail.
 

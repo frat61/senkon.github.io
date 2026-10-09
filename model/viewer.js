@@ -130,7 +130,7 @@
       const size = new THREE.Vector3(), c = new THREE.Vector3(); box.getSize(size); box.getCenter(c);
       cam.near = Math.max(0.01, Math.max(size.x, size.y, size.z) / 1000); cam.far = Math.max(4000, Math.max(size.x, size.y, size.z) * 20); cam.updateProjectionMatrix();
       built = { v: 0, items: [], snaps: [], layers: [{ key: 'model', label: 'Model', visible: true, button: false }],
-        center: [c.x, c.z], size: Math.max(size.x, size.y, size.z), levels: {}, model: null, up: c.y,
+        center: [c.x, c.z], size: size.length(), levels: {}, model: null, up: c.y,
         bounds: { min: box.min.toArray(), max: box.max.toArray() } };
       snaps = [];
       const g = new THREE.Group(); g.name = 'model'; g.visible = true; G.model = g; g.add(obj); rootG.add(g);

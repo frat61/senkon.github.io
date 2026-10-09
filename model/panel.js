@@ -11,6 +11,7 @@
   const say = (el, msg) => { el.textContent = msg || ''; };
   const step = (text, p) => { $('addStep').textContent = text; if (p !== undefined) $('addProg').value = p; };
   const busy = on => { working = on; $('addOk').disabled = on; $('addCancel').disabled = on; $('mFile').disabled = on; $('addProg').hidden = !on; if (!on) step(''); };
+  const withTimeout = (p, ms, msg) => Promise.race([p, new Promise((_, rej) => setTimeout(() => rej(new Error(msg)), ms))]);
 
   // ---- auth
   async function init() {
@@ -41,7 +42,7 @@
 
   // ---- list
   async function refresh() {
-    const { data, error } = await sb.from('models').select('id,slug,name,description,kind,file_path,updated_at,thumbnail').order('updated_at', { ascending: false });
+    const { data, error } = await sb.from('models').select('id,slug,name,description,kind,file_path,updated_at,thumbnail,data').order('updated_at', { ascending: false });
     if (error) { state.hidden = false; state.textContent = 'Liste alınamadı: ' + error.message; return; }
     models = data || []; draw();
   }
@@ -72,7 +73,7 @@
     $('addTitle').textContent = m ? 'Dosyayı değiştir: ' + m.name : 'Model ekle';
     $('mName').value = m ? m.name : ''; $('mName').disabled = !!m;
     $('mDesc').value = m ? (m.description || '') : ''; $('mDesc').disabled = !!m;
-    $('mSource').value = ''; $('mFile').value = ''; $('mFile').accept = m ? '.glb,.gltf,.ifc' : '.glb,.gltf,.ifc,.json';
+    $('mSource').value = m && m.data && m.data.metadata && typeof m.data.metadata.source === 'string' ? m.data.metadata.source : ''; $('mFile').value = ''; $('mFile').accept = m ? '.glb,.gltf,.ifc' : '.glb,.gltf,.ifc,.json';
     $('addOk').textContent = m ? 'Değiştir' : 'Ekle';
     say($('addMsg'), ''); step(''); $('addProg').hidden = true; $('addProg').value = 0;
     $('addDlg').showModal();
@@ -81,11 +82,11 @@
   $('addForm').onsubmit = async e => {
     e.preventDefault(); say($('addMsg'), '');
     const file = $('mFile').files[0];
-    const nameErr = replacing ? null : I.validateName($('mName').value);
-    if (nameErr) return say($('addMsg'), nameErr);
     if (!file) return say($('addMsg'), 'Dosya seçin');
     const cls = I.classify(file.name, file.size);
     if (cls.error) return say($('addMsg'), cls.error);
+    const nameErr = replacing || cls.kind === 'parametric' ? null : I.validateName($('mName').value);
+    if (nameErr) return say($('addMsg'), nameErr);
     if (replacing && cls.kind !== 'file') return say($('addMsg'), 'Değiştirmek için bir 3B dosya seçin (.glb, .gltf, .ifc)');
     busy(true);
     try {
@@ -94,7 +95,12 @@
     } catch (err) { console.error(err); busy(false); say($('addMsg'), err.message || 'İşlem başarısız'); }
   };
   const parseGltf = input => new Promise((res, rej) => new THREE.GLTFLoader().parse(input, '', res, () => rej(new Error('Model dosyası okunamadı'))));
-  const exportGlb = scene => new Promise((res, rej) => { try { new THREE.GLTFExporter().parse(scene, res, { binary: true }); } catch (e) { rej(e); } });
+  const exportGlb = scene => withTimeout(new Promise((res, rej) => { try { new THREE.GLTFExporter().parse(scene, res, { binary: true }); } catch (e) { rej(e); } }), 120000, 'Dönüştürme zaman aşımına uğradı');
+  // Every converted result passes the 50 MB check before it is uploaded.
+  const checked = out => {
+    if (out.glb.byteLength > I.LIMIT_BYTES) throw new Error('Dönüştürülen model çok büyük (' + Math.round(out.glb.byteLength / 1048576) + ' MB). Modeli sadeleştirin veya bilgisayarda daha küçük bir GLB olarak dışa aktarın.');
+    return out;
+  };
   // Turn the chosen file into { glb, scene, converter }.
   async function toGlb(file, cls) {
     step('Okunuyor', 0.1);
@@ -105,16 +111,15 @@
       if (!I.isEmbeddedGltf(text)) throw new Error('Yalnızca tek dosyalı .glb veya gömülü .gltf yüklenebilir');
       const gltf = await parseGltf(text);
       step('Dönüştürülüyor', 0.4);
-      return { glb: await exportGlb(gltf.scene), scene: gltf.scene, converter: 'three r128 GLTFExporter' };
+      return checked({ glb: await exportGlb(gltf.scene), scene: gltf.scene, converter: 'three r128 GLTFExporter' });
     }
     step('Dönüştürülüyor', 0.3);
-    const r = await SenkonIfc.convert(buf, { wasmPath: 'vendor/web-ifc/', onProgress: (d, t) => step('Dönüştürülüyor: ' + d + (t ? ' / ' + t : '') + ' eleman', t ? 0.3 + 0.3 * d / t : 0.4) });
-    if (r.glb.byteLength > I.LIMIT_BYTES) throw new Error('Dönüştürülen model çok büyük (' + Math.round(r.glb.byteLength / 1048576) + ' MB). Modeli sadeleştirin veya bilgisayarda GLB olarak dışa aktarın.');
-    return { glb: r.glb, scene: r.scene, converter: 'web-ifc ' + r.version };
+    const r = await withTimeout(SenkonIfc.convert(buf, { wasmPath: 'vendor/web-ifc/', onProgress: (d, t) => step('Dönüştürülüyor: ' + d + (t ? ' / ' + t : '') + ' eleman', t ? 0.3 + 0.3 * d / t : 0.4) }), 300000, 'IFC dönüştürme zaman aşımına uğradı');
+    return checked({ glb: r.glb, scene: r.scene, converter: 'web-ifc ' + r.version });
   }
   async function upload(path, glb) {
     step('Yükleniyor', 0.7);
-    const { error } = await sb.storage.from('models').upload(path, new Blob([glb], { type: I.MIME_GLB }), { contentType: I.MIME_GLB, upsert: true, cacheControl: '300' });
+    const { error } = await withTimeout(sb.storage.from('models').upload(path, new Blob([glb], { type: I.MIME_GLB }), { contentType: I.MIME_GLB, upsert: true, cacheControl: '300' }), 300000, 'Yükleme zaman aşımına uğradı');
     if (error) throw new Error('Yükleme başarısız: ' + error.message);
   }
   // Render once in the hidden 480x300 stage and capture a JPEG. Returns null on failure.
@@ -130,8 +135,11 @@
     let row, mountFn;
     if (cls.kind === 'parametric') {
       const p = I.parseModelJson(await file.text(), SenkonBuilder);
+      const finalName = $('mName').value.trim() || p.name || '';
+      const err = I.validateName(finalName);
+      if (err) throw new Error(err);
       if (source) p.data.source = source;
-      row = I.makeRow({ slug, name, description: description || p.description, kind: 'parametric', data: p.data });
+      row = I.makeRow({ slug, name: finalName, description: description || p.description, kind: 'parametric', data: p.data });
       mountFn = st => SenkonViewer.mount(st, p.data, { compact: false, pixelRatio: 1 });
     } else {
       const g = await toGlb(file, cls);
@@ -150,9 +158,9 @@
   async function replaceModel(m, file, cls) {
     const g = await toGlb(file, cls);
     await upload(I.storagePath(m.slug), g.glb);
-    const meta = I.fileMetadata({ ext: cls.ext, name: file.name, bytes: file.size, glbBytes: g.glb.byteLength, converter: g.converter, source: $('mSource').value.trim() || null });
+    const meta = I.fileMetadata({ ext: cls.ext, name: file.name, bytes: file.size, glbBytes: g.glb.byteLength, converter: g.converter, source: $('mSource').value.trim() || (m.data && m.data.metadata && m.data.metadata.source) || null });
     const thumb = thumbnail(st => SenkonViewer.mountFile(st, g.scene, { compact: false, pixelRatio: 1 }));
-    const up = await sb.from('models').update({ data: { metadata: meta }, file_path: I.storagePath(m.slug), file_format: 'glb', thumbnail: thumb }).eq('id', m.id);
+    const up = await sb.from('models').update({ data: { metadata: meta }, file_path: I.storagePath(m.slug), file_format: 'glb', ...(thumb ? { thumbnail: thumb } : {}) }).eq('id', m.id);
     if (up.error) throw new Error('Kayıt güncellenemedi: ' + up.error.message);
   }
 
