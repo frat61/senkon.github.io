@@ -41,7 +41,7 @@ function svg(model, opts) {
     groups[ROLES[l.role]].push(`<line x1="${f(a[0] * s + ox)}" y1="${f(a[1] * s + oy)}" x2="${f(b[0] * s + ox)}" y2="${f(b[1] * s + oy)}"/>`);
   });
   const g = Object.keys(groups).map(k => `<g stroke="${COLORS[k]}" stroke-width="${WIDTHS[k]}" class="${k}">\n${groups[k].join('\n')}\n</g>`).join('\n');
-  return `<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 ${W} ${Hh}" width="${W}" height="${Hh}" role="img" aria-label="Çelik çerçeve çizgi modeli" fill="none" stroke-linecap="round">\n<style>@media (prefers-color-scheme: dark){.ink{stroke:#e6e2da}.faint{stroke:#5b6a73}.accent{stroke:#e0936f}}</style>\n${g}\n</svg>\n`;
+  return `<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 ${W} ${Hh}" width="${W}" height="${Hh}" role="img" aria-label="Çelik çerçeve çizgi modeli" fill="none" stroke-linecap="round">\n${g}\n</svg>\n`;
 }
 module.exports = { ROLES, COLORS, WIDTHS, lines, project, svg };
 

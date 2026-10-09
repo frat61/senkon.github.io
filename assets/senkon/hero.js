@@ -80,7 +80,6 @@
     }
     place();
 
-    onMQ(matchMedia('(prefers-color-scheme: dark)'), () => { c = colors(); Object.keys(lines).forEach(k => lines[k].material.color.set(c[k])); });
     onMQ(reduce, () => { if (reduce.matches) { stopped = true; visible = false; fig.dataset.live = ''; if (stat) stat.removeAttribute('aria-hidden'); } });
     fig.appendChild(canvas); fig.dataset.live = '1';
     if (stat) stat.setAttribute('aria-hidden', 'true');
