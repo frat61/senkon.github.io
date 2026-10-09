@@ -14,7 +14,7 @@
   const SRC = stat.getAttribute('src'), V = SRC.indexOf('?') > -1 ? SRC.slice(SRC.indexOf('?')) : '';
   const HERE = document.currentScript && document.currentScript.src ? document.currentScript.src : location.href;
 
-  const SETUP = 1.2, TEARDOWN = 1.6;        // seconds to erect / climb down a crane
+  const SETUP = 1.2, TEARDOWN = 1.6;        // seconds to erect / dismantle a crane
   const MIN_BUILD = 6, MAX_BUILD = 11;      // seconds per building, scaled by its height
   const STAGGER = 0.05;                     // seconds between neighbouring starts, a ripple left to right
   const CYCLE = 7;                          // seconds per lifting cycle
@@ -34,7 +34,7 @@
       const dur = MIN_BUILD + (MAX_BUILD - MIN_BUILD) * (G - c.top) / hmax;
       const t0 = i * STAGGER, w = c.x1 - c.x0;
       const cranes = [];
-      if (w >= TWO_CRANES_PX) {                                  // climbing cranes riding on the deck
+      if (w >= TWO_CRANES_PX) {                                  // two cranes up the facade, anchored at the ground
         cranes.push({ kind: 'hammer', fx: 0.3, dir: -1, mast: MAST_M * m, phase: i * 2.3, climb: true });
         cranes.push({ kind: 'luff', fx: 0.72, dir: 1, mast: MAST_M * 1.35 * m, phase: i * 2.3 + 3.1, climb: true });
       } else {                                                   // one crane beside a slender tower, tied to it
@@ -156,17 +156,14 @@
     function crane(j, k, t, p, curTop) {
       if (t < j.t0) return '';
       const c = j.c, x = k.x, dir = k.dir;
-      let base = k.climb ? (p > 0 ? curTop : G) : G;             // climbing cranes ride on the deck
-      let mastH = k.climb ? k.mast : (G - curTop) + k.mast;        // tied cranes stand on the ground
-      let e = 1, cyc = cycle(t, k.phase);
-      if (t < j.b0) { e = ease((t - j.t0) / SETUP); cyc = { out: 0, hook: 0.1, target: 'deck', load: false }; base = G; mastH = k.mast; }
-      else if (t >= j.b1) {                                        // climb down the facade, jib pulled in
-        const d = ease((t - j.b1) / TEARDOWN);
-        cyc = { out: 0, hook: 0.1, target: 'deck', load: false };
-        if (k.climb) base = curTop + d * (G - curTop); else mastH = mastH * (1 - d);
-        if (k.climb) e = 1 - Math.max(0, (d - 0.8) / 0.2); else e = 1;
+      const base = G;                                              // every mast is anchored at the ground line
+      let mastH = (G - curTop) + k.mast, e = 1, cyc = cycle(t, k.phase);   // and leads the deck by k.mast
+      if (t < j.b0) { e = ease((t - j.t0) / SETUP); cyc = { out: 0, hook: 0.1, target: 'deck', load: false }; mastH = k.mast; }
+      else if (t >= j.b1) {                                        // dismantle: jib pulled in, mast comes down
+        const dd = ease((t - j.b1) / TEARDOWN);
+        cyc = { out: 0, hook: 0.1, target: 'deck', load: false }; mastH = mastH * (1 - dd);
       }
-      if (e <= 0 || mastH <= 0) return '';
+      if (e <= 0 || mastH <= 0.5) return '';
       const top = base - mastH * e, mw = 5, half = mw / 2;
       let d = L(x - half, base, x - half, top) + L(x + half, base, x + half, top);
       for (let y = base - 7; y > top + 3; y -= 7) d += L(x - half, y, x + half, y - 7) + L(x + half, y, x - half, y - 7);
