@@ -37,7 +37,7 @@
       const t0 = i * STAGGER, w = c.x1 - c.x0;
       let cranes;
       if (c.cranes) {                                            // placed by hand in the JSON
-        cranes = c.cranes.map((k, n) => ({ kind: k.kind || 'hammer', x: c.x0 + w * k.fx, dir: k.dir || -1,
+        cranes = c.cranes.map((k, n) => ({ kind: k.kind || 'hammer', x: c.x0 + w * k.fx, dir: k.dir || -1, cap: k.cap || 1,
           mast: (k.mastM || MAST_M) * m, phase: i * 2.3 + n * 3.1, tie: k.tieFx === undefined ? null : c.x0 + w * k.tieFx }));
       } else if (w >= TWO_CRANES_PX) {                           // two cranes up the facade, anchored at the ground
         cranes = [{ kind: 'hammer', x: c.x0 + w * 0.3, dir: -1, mast: MAST_M * m, phase: i * 2.3, tie: null },
@@ -159,10 +159,12 @@
     function crane(j, k, t, p, curTop) {
       if (t < j.t0) return '';
       const x = k.x, dir = k.dir, base = G, s = Math.max(1, m / 1.2);   // s: line-detail scale, 1 on the skyline
+      const cap = k.cap || 1, b1 = cap < 1 ? j.b0 + (j.b1 - j.b0) * cap + 0.8 : j.b1;   // a capped crane serves only the lower part
+      if (cap < 1) curTop = Math.max(curTop, G - cap * (G - j.c.top));
       let mastH = (G - curTop) + k.mast, e = 1, cyc = cycle(t, k.phase);   // the mast leads the deck by k.mast
       if (t < j.b0) { e = ease((t - j.t0) / SETUP); cyc = { out: 0, hook: 0.1, target: 'deck', load: false }; mastH = k.mast; }
-      else if (t >= j.b1) {                                        // dismantle: jib pulled in, mast comes down
-        const dd = ease((t - j.b1) / TEARDOWN);
+      else if (t >= b1) {                                          // dismantle: jib pulled in, mast comes down
+        const dd = ease((t - b1) / TEARDOWN);
         cyc = { out: 0, hook: 0.1, target: 'deck', load: false }; mastH = mastH * (1 - dd);
       }
       if (e <= 0 || mastH <= 0.5) return '';

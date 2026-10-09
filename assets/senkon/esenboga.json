@@ -17,11 +17,11 @@
      "mastM": 30
     },
     {
-     "fx": 0.56,
+     "fx": 0.1,
      "kind": "hammer",
      "dir": 1,
-     "tieFx": 0.66,
-     "mastM": 22
+     "mastM": 18,
+     "cap": 0.24
     }
    ]
   }
