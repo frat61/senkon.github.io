@@ -1,0 +1,11 @@
+Downloaded 2026-10-09T06:44:21.907Z from
+https://fonts.googleapis.com/css2?family=Fraunces:opsz,wght@9..144,600&family=Work+Sans:wght@400;500;600&display=swap
+
+fraunces-latin-ext-fffaa196.woff2  fffaa1960497be87b9763e6431ca06cc98362b63deb59fe424f964b0fe560708  32196
+fraunces-latin-170a928c.woff2  170a928c701ef00e4b91105f870dd2c764b9ddb0c725cda6e71de576a8e72a00  35120
+work-sans-latin-ext-2aa17fc7.woff2  2aa17fc7b072e46652e84bbe3dbba9ec57cdea320d89e8c951ed7cf3218c300b  35716
+work-sans-latin-1dd49afc.woff2  1dd49afc07fb2231b2ff686cbf007725fb2742271bb1f28ebd98f22a0d817343  50316
+work-sans-500-latin-ext  (same file as work-sans-latin-ext-2aa17fc7.woff2)
+work-sans-500-latin  (same file as work-sans-latin-1dd49afc.woff2)
+work-sans-600-latin-ext  (same file as work-sans-latin-ext-2aa17fc7.woff2)
+work-sans-600-latin  (same file as work-sans-latin-1dd49afc.woff2)
