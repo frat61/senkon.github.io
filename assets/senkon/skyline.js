@@ -10,7 +10,7 @@
   if (!('fetch' in window) || !('IntersectionObserver' in window)) return;
   if (matchMedia('(prefers-reduced-motion: reduce)').matches) return;
 
-  const SETUP = 1.2, TEARDOWN = 1.6;        // seconds to erect / dismantle a crane
+  const SETUP = 1.2, HOLD = 1.6, TEARDOWN = 4.5;   // seconds to erect a crane, to keep working after topping out, to dismantle
   const MIN_BUILD = 6, MAX_BUILD = 11;      // seconds per building, scaled by its height
   const STAGGER = 0.05;                     // seconds between neighbouring starts, a ripple left to right
   const CYCLE = 7;                          // seconds per lifting cycle
@@ -44,7 +44,7 @@
         cranes = [{ kind: i % 2 ? 'luff' : 'hammer', x: right ? c.x1 + 14 : c.x0 - 14, dir: right ? -1 : 1,
           mast: MAST_M * m, phase: i * 2.3, tie: right ? c.x1 : c.x0, tieCap: 1 }];
       }
-      return { c: c, i: i, t0: t0, b0: t0 + SETUP, b1: t0 + SETUP + dur, t1: t0 + SETUP + dur + TEARDOWN, cranes: cranes };
+      return { c: c, i: i, t0: t0, b0: t0 + SETUP, b1: t0 + SETUP + dur, t1: t0 + SETUP + dur + HOLD + TEARDOWN, cranes: cranes };
     });
     const total = Math.max.apply(null, jobs.map(j => j.t1)) + 0.2;
 
@@ -158,13 +158,15 @@
     function crane(j, k, t, p, curTop) {
       if (t < j.t0) return '';
       const x = k.x, dir = k.dir, base = G, s = Math.max(1, m / 1.2);   // s: line-detail scale, 1 on the skyline
-      const cap = k.cap || 1, b1 = cap < 1 ? j.b0 + (j.b1 - j.b0) * cap + 0.8 : j.b1;   // a capped crane serves only the lower part
+      const cap = k.cap || 1, b1 = (cap < 1 ? j.b0 + (j.b1 - j.b0) * cap : j.b1) + HOLD;   // a capped crane serves only the lower part
       if (cap < 1) curTop = Math.max(curTop, G - cap * (G - j.c.top));
       let mastH = (G - curTop) + k.mast, e = 1, cyc = cycle(t, k.phase);   // the mast leads the deck by k.mast
       if (t < j.b0) { e = ease((t - j.t0) / SETUP); cyc = { out: 0, hook: 0.1, target: 'deck', load: false }; mastH = k.mast; }
-      else if (t >= b1) {                                          // dismantle: jib pulled in, mast comes down
-        const dd = ease((t - b1) / TEARDOWN);
-        cyc = { out: 0, hook: 0.1, target: 'deck', load: false }; mastH = mastH * (1 - dd);
+      else if (t >= b1) {                                          // dismantle: the jib swings in, then the mast comes down
+        const dd = (t - b1) / TEARDOWN;
+        if (dd >= 1) return '';
+        cyc = { out: cycle(b1, k.phase).out * (1 - seg(dd, 0, 0.3)), hook: 0.1, target: 'deck', load: false };
+        mastH = mastH * (1 - seg(dd, 0.25, 1));
       }
       if (e <= 0 || mastH <= 0.5) return '';
       const top = base - mastH * e, half = 2.5 * s, step = 10 * s;
