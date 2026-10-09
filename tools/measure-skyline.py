@@ -14,7 +14,8 @@ import json, sys
 from PIL import Image
 sys.stdout.reconfigure(encoding='utf-8')   # Turkish names on a Windows console
 
-DARK = 170      # gray level below which a pixel counts as ink
+DARK = 232      # gray level below which a pixel counts as ink (light hatching included)
+PAD = 5         # pixels added on each side of a building so faint edges are not trimmed
 GAP = 6         # white columns needed to separate two buildings
 MIN_W = 12      # narrower runs are noise (stray hatching)
 BASE = 24       # pixels above the ground line ignored when splitting (base clutter, plinths)
@@ -58,6 +59,9 @@ while x < w:
     x = max(x, x1 + 1)
 
 for i, r in enumerate(runs):
+    lo = runs[i - 1]['x1'] + 1 if i else 0
+    hi = runs[i + 1]['x0'] - 1 if i + 1 < len(runs) else w - 1
+    r['x0'] = max(lo, r['x0'] - PAD); r['x1'] = min(hi, r['x1'] + PAD)
     if i < len(names): r['name'] = names[i]
 json.dump({'w': w, 'h': h, 'ground': ground, 'cols': runs}, open(out, 'w', encoding='utf-8'), ensure_ascii=False, indent=1)
 print(f'{w}x{h} ground={ground} buildings={len(runs)}')

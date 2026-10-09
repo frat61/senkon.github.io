@@ -17,7 +17,7 @@ Run measure-skyline.py on the result to write skyline.json.
 import sys
 from PIL import Image, ImageDraw
 
-DARK, GAP, MIN_W, BASE = 170, 6, 12, 24
+DARK, GAP, MIN_W, BASE, PAD = 232, 6, 12, 24, 5
 
 def columns(im, splits=()):
     w, h = im.size; px = im.load()
@@ -66,7 +66,7 @@ src, out = args[0], args[1]
 im = Image.open(src).convert('L')
 w, h = im.size
 ground, runs = columns(im, splits)
-pieces = [im.crop((x0, 0, x1 + 1, ground)) for i, (x0, x1) in enumerate(runs) if i not in drops]   # above the ground line
+pieces = [im.crop((max(0, x0 - PAD), 0, min(w, x1 + 1 + PAD), ground)) for i, (x0, x1) in enumerate(runs) if i not in drops]   # above the ground line
 for idx, f, hpx in sorted(inserts, reverse=True):
     extra = crop_ink(Image.open(f).convert('L'))
     scale = hpx / extra.height
