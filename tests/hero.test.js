@@ -29,7 +29,7 @@ test('projection keeps vertical lines vertical and fits the viewBox', () => {
 
 test('the committed hero.svg matches the generator', () => {
   const file = fs.readFileSync(path.join(__dirname, '..', 'assets', 'senkon', 'hero.svg'), 'utf8');
-  assert.equal(file.trim(), H.svg(model, { width: 520, height: 360 }).trim());
+  assert.equal(file.replace(/\r\n/g, '\n').trim(), H.svg(model, { width: 520, height: 360 }).trim());
 });
 
 function near(a, b) { assert.ok(Math.abs(a - b) < 1e-9, a + ' != ' + b); }

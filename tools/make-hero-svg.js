@@ -21,7 +21,7 @@ function project(points, view) {
   const cy = Math.cos(view.yaw), sy = Math.sin(view.yaw), cp = Math.cos(view.pitch), sp = Math.sin(view.pitch);
   return points.map(([x, y, z]) => {
     const rx = x * cy - y * sy, ry = x * sy + y * cy;        // rotate the plan
-    return [rx, -(z * cp) + ry * sp];                          // tilt: depth lifts the far side
+    return [rx, -(z * cp) + ry * sp];                          // tilt: larger plan y (south) sits lower on screen, nearer the viewer
   });
 }
 function svg(model, opts) {
@@ -46,7 +46,7 @@ function svg(model, opts) {
 module.exports = { ROLES, COLORS, WIDTHS, lines, project, svg };
 
 if (require.main === module) {
-  const model = JSON.parse(fs.readFileSync(path.join('assets', 'senkon', 'hero-model.json'), 'utf8'));
-  fs.writeFileSync(path.join('assets', 'senkon', 'hero.svg'), svg(model, { width: 520, height: 360 }));
+  const model = JSON.parse(fs.readFileSync(path.join(__dirname, '..', 'assets', 'senkon', 'hero-model.json'), 'utf8'));
+  fs.writeFileSync(path.join(__dirname, '..', 'assets', 'senkon', 'hero.svg'), svg(model, { width: 520, height: 360 }));
   console.log('assets/senkon/hero.svg written, ' + lines(model).length + ' lines');
 }
