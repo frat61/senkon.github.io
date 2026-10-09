@@ -76,14 +76,14 @@
       const svg = el('svg');
       svg.setAttribute('class', 'sk-cranes'); svg.setAttribute('viewBox', '0 0 ' + W + ' ' + H); svg.setAttribute('preserveAspectRatio', 'none');
       const cs = getComputedStyle(document.documentElement);
-      const ink = cs.getPropertyValue('--ink').trim() || '#1d2b33', dust = cs.getPropertyValue('--muted').trim() || '#5b6a73';
+      const ink = '#3a3f44', dust = cs.getPropertyValue('--muted').trim() || '#5b6a73';   // neutral grey like the drawings' ink
       const dustG = el('g'); dustG.setAttribute('fill', dust); svg.appendChild(dustG);
       jobs.forEach(j => {
         j.puffs = [];
         for (let q = 0; q < PUFFS; q++) { const o = el('circle'); o.setAttribute('r', '0'); dustG.appendChild(o); j.puffs.push(o); }
         j.cranes.forEach(k => {
           const p = el('path');
-          p.setAttribute('fill', 'none'); p.setAttribute('stroke', ink); p.setAttribute('stroke-width', '1.1'); p.setAttribute('stroke-linejoin', 'round');
+          p.setAttribute('fill', 'none'); p.setAttribute('stroke', ink); p.setAttribute('stroke-width', '1.8'); p.setAttribute('stroke-opacity', '0.85'); p.setAttribute('stroke-linejoin', 'round');   // image pixels, scales with the picture
           svg.appendChild(p); k.path = p;
         });
       });
