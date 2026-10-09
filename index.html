@@ -1,418 +1,112 @@
-<!DOCTYPE html>
+<!doctype html>
 <html lang="tr">
 <head>
-  <meta charset="UTF-8" />
-  <title>Şentürk Fiyat & Ürün Araçları</title>
-  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-
-  <style>
-    :root{
-      --page-bg: #f3f3f3;
-      --surface: #ffffff;
-      --surface-2: #fafafa;
-
-      --text: #1f2937;
-      --muted: #6b7280;
-
-      --border: #d9d9d9;
-
-      --brand: #6b2b2b;
-      --brand-2: #203a7a;
-
-      --radius: 16px;
-      --shadow: 0 10px 30px rgba(0,0,0,0.08);
-    }
-
-    *{margin:0;padding:0;box-sizing:border-box;}
-
-    body{
-      background: var(--page-bg);
-      color: var(--text);
-      font-family: "Segoe UI", Arial, sans-serif;
-      padding: 30px 16px;
-      display:flex;
-      justify-content:center;
-    }
-
-    .container{
-      width:100%;
-      max-width: 1200px;
-      background: var(--surface);
-      border: 1px solid var(--border);
-      border-radius: 18px;
-      box-shadow: var(--shadow);
-      overflow:hidden;
-    }
-
-    /* HEADER */
-    .topbar{
-      padding: 26px 30px;
-      border-bottom: 1px solid var(--border);
-      background: #fff;
-    }
-
-    .header{
-      display:flex;
-      align-items:center;
-      justify-content:space-between;
-      gap: 20px;
-      flex-wrap: wrap;
-    }
-
-    .brand{
-      display:flex;
-      align-items:center;
-      gap: 16px;
-    }
-
-    .brand img{
-      height: 54px;
-      width:auto;
-    }
-
-    .brand-text{
-      display:flex;
-      flex-direction:column;
-    }
-
-    .brand-text .name{
-      font-size: 20px;
-      font-weight: 900;
-      color: var(--brand);
-      letter-spacing: .02em;
-    }
-
-    .brand-text .desc{
-      font-size: 14px;
-      color: var(--muted);
-      margin-top: 2px;
-    }
-
-    /* RIGHT LOGOS ONLY */
-    .header-right{
-      display:flex;
-      align-items:center;
-      gap: 18px;
-    }
-
-    .header-right img{
-      height: 42px;
-      width:auto;
-      object-fit:contain;
-    }
-
-    /* CONTENT */
-    .content{
-      padding: 26px 30px 30px 30px;
-    }
-
-    .tools-head{
-      display:flex;
-      align-items:center;
-      justify-content:space-between;
-      margin-bottom: 18px;
-      gap: 14px;
-      flex-wrap: wrap;
-    }
-
-    .tools-head h2{
-      font-size: 16px;
-      font-weight: 900;
-      color: var(--brand-2);
-      text-transform: uppercase;
-    }
-
-    .search{
-      display:flex;
-      gap: 10px;
-    }
-
-    .search input{
-      padding: 12px 14px;
-      border-radius: 14px;
-      border: 1px solid var(--border);
-      width: min(520px, 75vw);
-      font-size: 15px;
-    }
-
-    .btn{
-      padding: 12px 16px;
-      border-radius: 14px;
-      border: 1px solid var(--border);
-      background: #fafafa;
-      font-weight: 800;
-      cursor:pointer;
-    }
-
-    .grid{
-      display:grid;
-      grid-template-columns: repeat(auto-fill, minmax(300px, 1fr));
-      gap: 18px;
-    }
-
-    .card{
-      position:relative;
-      background:#fff;
-      border:1px solid var(--border);
-      border-radius: var(--radius);
-      padding:18px 18px 16px 18px;
-      box-shadow:0 8px 18px rgba(0,0,0,0.05);
-      cursor:pointer;
-      display:flex;
-      flex-direction:column;
-      transition:.18s;
-      min-height: 190px;
-    }
-
-    .card:hover{
-      transform: translateY(-3px);
-      box-shadow:0 14px 26px rgba(0,0,0,0.08);
-    }
-
-    .stripe{
-      position:absolute;
-      left:0;top:0;bottom:0;
-      width:7px;
-      background:#203a7a;
-      border-top-left-radius: var(--radius);
-      border-bottom-left-radius: var(--radius);
-    }
-
-    .card-top{
-      display:flex;
-      justify-content:flex-end;
-      margin-left:10px;
-      margin-bottom:6px;
-      min-height: 30px;
-      align-items:center;
-    }
-
-    .card-logo{
-      height:28px;
-      width:auto;
-      object-fit:contain;
-    }
-
-    .card h3{
-      margin-left:10px;
-      font-size:20px;
-      font-weight:900;
-      line-height: 1.15;
-    }
-
-    .card p{
-      margin-left:10px;
-      margin-top: 8px;
-      font-size:15px;
-      color:var(--muted);
-      line-height:1.45;
-      flex:1;
-    }
-
-    .card-footer{
-      margin-left:10px;
-      margin-top:14px;
-      display:flex;
-      justify-content:space-between;
-      align-items:center;
-      gap: 12px;
-    }
-
-    .meta{
-      font-size:13px;
-      color:var(--muted);
-    }
-
-    .pill{
-      padding:10px 16px;
-      border-radius:999px;
-      border:1px solid var(--border);
-      font-weight:900;
-      text-decoration:none;
-      color:var(--brand-2);
-      background:#fff;
-      white-space:nowrap;
-    }
-
-    .disabled{
-      opacity:.55;
-      pointer-events:none;
-    }
-
-    .footer{
-      padding:14px;
-      text-align:center;
-      font-size:12px;
-      color:var(--muted);
-      border-top:1px solid var(--border);
-      background: #fff;
-    }
-
-    @media(max-width:650px){
-      .header{justify-content:center;}
-      .header-right{justify-content:center;}
-    }
-  </style>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>Senkon Mühendislik · Çelik ve betonarme yapılar için taşıyıcı sistem tasarımı</title>
+<meta name="description" content="Senkon Mühendislik, İstanbul. Çelik ve betonarme yapılar için taşıyıcı sistem tasarımı, TBDY 2018 deprem performans değerlendirmesi, teknik rapor ve 3B ön tasarım modelleri.">
+<link rel="icon" type="image/png" href="assets/senkon/favicon.png">
+<link rel="preload" href="assets/senkon/fonts/fonts.css" as="style">
+<link rel="stylesheet" href="site.css">
 </head>
-
 <body>
-<div class="container">
+<header class="wrap top">
+  <a class="brand" href="#"><img src="assets/senkon/logo.png" alt="Senkon Mühendislik logosu, çizgisel mamut"><span>Senkon Mühendislik</span></a>
+  <nav class="nav" aria-label="Sayfa içi">
+    <a href="#hizmetler">Hizmetler</a><a href="#projeler">Projeler</a><a href="#hakkinda">Hakkında</a><a href="#structkit">StructKit</a><a href="#iletisim">İletişim</a>
+  </nav>
+  <a class="btn btn-line" href="#iletisim" style="display:none" id="topContact">İletişim</a>
+</header>
 
-  <!-- HEADER -->
-  <div class="topbar">
-    <div class="header">
-      <div class="brand">
-        <img src="assets/images/senturk_logo.png" alt="Şentürk Logo">
-        <div class="brand-text">
-          <div class="name">ŞENTÜRK BOYA</div>
-          <div class="desc">Fiyat & Ürün Araçları</div>
-        </div>
-      </div>
+<main>
+  <section class="wrap hero">
+    <div class="hero-text">
+      <p class="eyebrow">Taşıyıcı sistem tasarımı · İstanbul</p>
+      <h1>Çelik ve betonarme yapılar için taşıyıcı sistem tasarımı</h1>
+      <p class="lead">Deprem performans değerlendirmesi, teknik raporlama ve konsept aşamasında telefonda açılan 3B ön tasarım modelleri. Süleyman Fırat Şentürk, İnşaat Yüksek Mühendisi.</p>
+      <div class="btns"><a class="btn btn-main" href="#iletisim">İletişim</a><a class="btn btn-line" href="#structkit">StructKit araçları</a></div>
+    </div>
+    <figure id="hero" class="hero-figure">
+      <img id="heroStatic" src="assets/senkon/hero.svg" alt="Beş açıklıklı çelik çerçevenin çizgi modeli" width="520" height="360">
+      <figcaption class="hero-caption">Ön tasarım modeli · çizgi gösterimi</figcaption>
+    </figure>
+  </section>
 
-      <!-- ONLY LOGOS ON RIGHT -->
-      <div class="header-right">
-        <img src="assets/images/marshall_logo.png" alt="Marshall">
-        <img src="assets/images/stargill_logo.png" alt="StarGil">
-        <img src="assets/images/alt_toplu_logo.png" alt="Alternatif Markalar">
+  <section id="hizmetler" class="wrap section rule">
+    <p class="eyebrow">Hizmetler</p>
+    <h2>Ne yapıyoruz</h2>
+    <div class="list2">
+      <div class="item"><span class="num">01</span><h3>Çelik yapı tasarımı</h3><p>Endüstriyel yapılar, laboratuvar ve ofis binaları, çatı ve platformlar.</p></div>
+      <div class="item"><span class="num">02</span><h3>Betonarme tasarım</h3><p>TS 500 ve TBDY 2018'e göre taşıyıcı sistem tasarımı.</p></div>
+      <div class="item"><span class="num">03</span><h3>Deprem performans değerlendirmesi</h3><p>Mevcut yapılar için TBDY 2018 kapsamında inceleme ve güçlendirme projeleri.</p></div>
+      <div class="item"><span class="num">04</span><h3>Teknik rapor ve danışmanlık</h3><p>Statik rapor, güçlendirme önerileri, ikinci görüş.</p></div>
+      <div class="item"><span class="num">05</span><h3>3B ön tasarım modelleri</h3><p>Konsept aşamasında, telefonda açılan paylaşılabilir modeller.</p></div>
+    </div>
+  </section>
+
+  <section id="projeler" class="wrap section">
+    <p class="eyebrow">Seçilmiş projeler</p>
+    <h2>Görev aldığım projeler</h2>
+    <div class="cards">
+      <article class="card"><div class="ph">Havalimanı</div><h3>Antalya Havalimanı yeni terminal</h3><p>Statik tasarım · 10.000 m² · Antalya</p></article>
+      <article class="card"><div class="ph">Havalimanı</div><h3>Esenboğa Havalimanı teknik blok</h3><p>Kule ve ikincil yapılar · 12.000 m² · Ankara</p></article>
+      <article class="card"><div class="ph">Endüstriyel</div><h3>Vem İlaç fabrikası</h3><p>Endüstriyel tesis tasarımı · 200.000 m² · İstanbul</p></article>
+      <article class="card"><div class="ph">Ticari</div><h3>Alfraganus Alışveriş Merkezi</h3><p>Taşıyıcı sistem tasarımı · 54.000 m² · Taşkent</p></article>
+      <article class="card"><div class="ph">Konut ve ofis</div><h3>Karmall Rezidans</h3><p>Yüksek katlı konut ve ofis · 27.000 m² · İstanbul</p></article>
+      <article class="card"><div class="ph">Değerlendirme</div><h3>Koç Üniversitesi</h3><p>TBDY 2018 performans değerlendirmesi · 25.000 m² · İstanbul</p></article>
+    </div>
+    <p class="note">GVN Tasarım ve Mühendislik ile Yapı Akademisi Mühendislik bünyesinde görev aldığım projelerden.</p>
+  </section>
+
+  <section id="hakkinda" class="wrap section rule">
+    <p class="eyebrow">Hakkında</p>
+    <h2>Süleyman Fırat Şentürk</h2>
+    <div class="about">
+      <dl>
+        <dt>Eğitim</dt>
+        <dd>İstanbul Teknik Üniversitesi ve SUNY Buffalo, İnşaat Mühendisliği lisans, 2018</dd>
+        <dd>Gebze Teknik Üniversitesi, Deprem ve Yapı Mühendisliği yüksek lisans, 2025</dd>
+        <dt>Deneyim</dt>
+        <dd>GVN Tasarım ve Mühendislik, yapısal tasarım mühendisi, 2023–2024</dd>
+        <dd>Yapı Akademisi Mühendislik, inşaat mühendisi, 2021–2023</dd>
+      </dl>
+      <div>
+        <p class="eyebrow" style="font-size:12px">Yazılımlar</p>
+        <div class="chips"><span>ETABS</span><span>SAP2000</span><span>IDEA StatiCa</span><span>ProtaStructure</span><span>Sta4CAD</span><span>Staad.Pro</span><span>AutoCAD</span><span>Python</span></div>
       </div>
     </div>
-  </div>
+  </section>
 
-  <!-- CONTENT -->
-  <div class="content">
-    <div class="tools-head">
-      <h2>Araçlar</h2>
-      <div class="search">
-        <input id="searchInput" placeholder="Araç ara (örn: Marshall, StarGil, alternatif, indirim)…">
-        <button class="btn" id="clearBtn">Temizle</button>
-      </div>
+  <section id="structkit" class="wrap sk rule">
+    <div>
+      <p class="eyebrow">StructKit</p>
+      <h2>Tarayıcıda çalışan mühendislik araçları</h2>
+      <p class="lead" style="margin-top:14px">Kurulum gerektirmeyen, telefonda da çalışan hesap araçları. Çelik, betonarme, deprem ve rüzgar.</p>
+      <div class="btns" style="margin-top:22px"><a class="btn btn-main" href="structkit/">StructKit'i aç</a></div>
     </div>
+    <div class="sk-grid">
+      <div><b>Kiriş tasarımı</b><small>Sehim ile kesit seçimi</small></div>
+      <div><b>Zımbalama</b><small>ACI 318</small></div>
+      <div><b>Temel donatısı</b><small>TS 500</small></div>
+      <div><b>Rüzgar yükleri</b><small>ASCE 7 · Eurocode</small></div>
+    </div>
+  </section>
 
-    <div id="toolsGrid" class="grid"></div>
-  </div>
+  <section id="iletisim" class="wrap contact rule">
+    <p class="eyebrow">İletişim</p>
+    <h2>Bir projeniz mi var?</h2>
+    <div class="btns">
+      <a class="btn btn-main" href="https://wa.me/905309250461">WhatsApp ile yazın</a>
+      <a class="btn btn-line" href="tel:+905309250461">+90 530 925 04 61</a>
+      <a class="btn btn-line" href="mailto:firatsenturk@senkonmuhendislik.com">firatsenturk@senkonmuhendislik.com</a>
+    </div>
+  </section>
+</main>
 
-  <div class="footer">
-    v1.3 · Şentürk için tasarlandı · Mobil uyumlu
-  </div>
-
-</div>
-
-<script>
-const TOOLS = [
-  {
-    title: "Marshall Tam Fiyat Listesi",
-    description: "Tüm Marshall ürünlerini (tüm gruplar, tüm ambalajlar) arama/filtreleme ve profesyonel yazdırma düzeni ile görüntüleyin.",
-    href: "fiyat-listesi.html",
-    status: "Aktif · Ana araç",
-    stripe: "#c77a2a",
-    logo: "assets/images/marshall_logo.png",
-    enabled: true
-  },
-  {
-    title: "StarGil Fiyat Listesi",
-    description: "StarGil ürünlerini Excel’den otomatik yükleyin, bölümler halinde görüntüleyin ve yazdırma için optimize edilmiş düzenle alın.",
-    href: "stargill_fiyat.html",   /* ✅ UPDATED */
-    status: "Aktif · Excel tabanlı",
-    stripe: "#1b2533",
-    logo: "assets/images/stargill_logo.png",
-    enabled: true
-  },
-  {
-    title: "Alternatif Markalar & Ürünler",
-    description: "Marshall dışındaki ürünlerinizi (DaySon, Aquacool Trend, Dekor, Doğuş vb.) marka bazında listeleyin.",
-    href: "alternatif_urunler.html",
-    status: "Aktif · Excel tabanlı",
-    stripe: "#203a7a",
-    logo: "assets/images/alt_toplu_logo.png",
-    enabled: true
-  },
-  {
-    title: "İndirim & Teklif Hesaplayıcı",
-    description: "Nakit/kart/vadeli fiyat hesaplama, özel iskonto uygulama ve hızlı teklif oluşturma.",
-    status: "Planlandı",
-    stripe: "#9ca3af",
-    enabled: false
-  }
-];
-
-const grid = document.getElementById("toolsGrid");
-const searchInput = document.getElementById("searchInput");
-const clearBtn = document.getElementById("clearBtn");
-
-function createEl(tag, className, text){
-  const el = document.createElement(tag);
-  if (className) el.className = className;
-  if (text != null) el.textContent = text;
-  return el;
-}
-
-function render(list){
-  grid.innerHTML = "";
-
-  list.forEach(t => {
-    const card = createEl("div", "card" + (t.enabled ? "" : " disabled"));
-
-    const stripe = createEl("div", "stripe");
-    stripe.style.background = t.stripe || "#203a7a";
-    card.appendChild(stripe);
-
-    const top = createEl("div", "card-top");
-    if (t.logo){
-      const img = document.createElement("img");
-      img.src = t.logo;
-      img.alt = t.title;
-      img.className = "card-logo";
-      top.appendChild(img);
-    }
-    card.appendChild(top);
-
-    const h3 = createEl("h3", "", t.title);
-    h3.style.marginLeft = "10px";
-    card.appendChild(h3);
-
-    const p = createEl("p", "", t.description);
-    p.style.marginLeft = "10px";
-    card.appendChild(p);
-
-    const footer = createEl("div", "card-footer");
-    const meta = createEl("span", "meta", t.status || "");
-    footer.appendChild(meta);
-
-    if (t.enabled){
-      const a = document.createElement("a");
-      a.href = t.href;
-      a.className = "pill";
-      a.textContent = "Aç";
-      a.onclick = (e) => e.stopPropagation();
-      footer.appendChild(a);
-
-      card.onclick = () => location.href = t.href;
-    }
-
-    card.appendChild(footer);
-    grid.appendChild(card);
-  });
-}
-
-function normTR(s){
-  return (s || "").toLowerCase()
-    .replace(/[ıİ]/g,"i").replace(/[şŞ]/g,"s")
-    .replace(/[ğĞ]/g,"g").replace(/[üÜ]/g,"u")
-    .replace(/[öÖ]/g,"o").replace(/[çÇ]/g,"c");
-}
-
-searchInput.addEventListener("input", () => {
-  const q = normTR(searchInput.value);
-  const filtered = TOOLS.filter(t => normTR((t.title||"") + " " + (t.description||"")).includes(q));
-  render(filtered);
-});
-
-clearBtn.addEventListener("click", () => {
-  searchInput.value = "";
-  render(TOOLS);
-});
-
-render(TOOLS);
-</script>
+<footer class="wrap foot rule">
+  <div>Senkon Mühendislik · İstanbul</div>
+  <div>© 2026</div>
+</footer>
+<script src="assets/senkon/hero.js" defer></script>
 </body>
 </html>
