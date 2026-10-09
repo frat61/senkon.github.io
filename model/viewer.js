@@ -55,9 +55,6 @@
     // ---- theme: clear colour follows the page's --bg variable
     const css = n => getComputedStyle(document.documentElement).getPropertyValue(n).trim();
     function applyTheme() { renderer.setClearColor(new THREE.Color(css('--bg') || '#e9ecef'), 1); }
-    const mq = matchMedia('(prefers-color-scheme: dark)'), onTheme = () => { applyTheme(); draw(); };
-    mq.addEventListener('change', onTheme);
-    const mo = new MutationObserver(onTheme); mo.observe(document.documentElement, { attributes: true, attributeFilter: ['data-theme'] });
 
     // ---- sprites
     function makeTag(t, p, col, k) {
@@ -239,7 +236,7 @@
     }
 
     function dispose() {
-      window.removeEventListener('resize', resize); mq.removeEventListener('change', onTheme); mo.disconnect();
+      window.removeEventListener('resize', resize);
       canvas.removeEventListener('contextmenu', onCtx); canvas.removeEventListener('pointerdown', onDown); canvas.removeEventListener('pointerup', onUp);
       canvas.removeEventListener('pointercancel', onCancel); canvas.removeEventListener('pointermove', onMove); canvas.removeEventListener('wheel', onWheel);
       clear(); renderer.dispose(); if (canvas.parentNode) canvas.parentNode.removeChild(canvas);
