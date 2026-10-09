@@ -7,7 +7,15 @@
   if (!fig) return;
   const reduce = matchMedia('(prefers-reduced-motion: reduce)');
   if (reduce.matches) return;
-  if (!(function () { try { const c = document.createElement('canvas'); return !!(c.getContext('webgl') || c.getContext('experimental-webgl')); } catch (e) { return false; } })()) return;
+  function hasWebGL() {
+    try {
+      const gl = document.createElement('canvas').getContext('webgl') || document.createElement('canvas').getContext('experimental-webgl');
+      if (!gl) return false;
+      const ext = gl.getExtension('WEBGL_lose_context'); if (ext) ext.loseContext();   // release the probe context
+      return true;
+    } catch (e) { return false; }
+  }
+  if (!hasWebGL()) return;
 
   const ROLES = { column: 'ink', rafter: 'accent', tie: 'ink', purlin: 'faint', brace: 'faint', windpost: 'ink' };
   const PERIOD = 40;   // seconds per rotation
@@ -18,7 +26,7 @@
   }
   function colors() {
     const cs = getComputedStyle(document.documentElement);
-    return { ink: cs.getPropertyValue('--ink').trim() || '#1d2b33', accent: cs.getPropertyValue('--accent').trim() || '#c47a5a', faint: cs.getPropertyValue('--rule').trim() || '#b9c2c7', ground: cs.getPropertyValue('--ground').trim() || '#ffffff' };
+    return { ink: cs.getPropertyValue('--ink').trim() || '#1d2b33', accent: cs.getPropertyValue('--accent').trim() || '#c47a5a', faint: cs.getPropertyValue('--muted').trim() || '#6b7a83' };
   }
 
   async function start() {
@@ -53,13 +61,13 @@
     });
     Object.keys(groups).forEach(k => {
       const g = new THREE.BufferGeometry(); g.setAttribute('position', new THREE.Float32BufferAttribute(groups[k], 3));
-      const m = new THREE.LineBasicMaterial({ color: new THREE.Color(c[k]), transparent: k === 'faint', opacity: k === 'faint' ? 0.7 : 1 });
+      const m = new THREE.LineBasicMaterial({ color: new THREE.Color(c[k]), transparent: k === 'faint', opacity: k === 'faint' ? 0.6 : 1 });
       lines[k] = new THREE.LineSegments(g, m); inner.add(lines[k]);
     });
     // centre the frame on the pivot so it turns about its own middle
     const box = new THREE.Box3().setFromObject(inner), ctr = new THREE.Vector3(); box.getCenter(ctr); inner.position.sub(ctr);
-    const dims = box.getSize(new THREE.Vector3()), size = dims.length();
-    const rxz = Math.hypot(dims.x, dims.z) / 2, rv = dims.y / 2 + rxz * 0.4;   // turning-circle radius and vertical reach
+    const dims = box.getSize(new THREE.Vector3());
+    const rxz = Math.hypot(dims.x, dims.z) / 2, rv = dims.y / 2 + rxz * 0.6;   // turning-circle radius and vertical reach
     const dir = new THREE.Vector3(0, 0.42, 1.15).normalize();
     // back the camera off until the whole turning frame fits the figure at any angle, tall or wide
     function place() {
@@ -68,7 +76,6 @@
       cam.lookAt(0, 0, 0);
     }
     place();
-    pivot.rotation.x = 0.0;
 
     fig.appendChild(canvas); fig.dataset.live = '1';
     if (stat) stat.setAttribute('aria-hidden', 'true');
@@ -76,7 +83,7 @@
     resize(); window.addEventListener('resize', resize);
     matchMedia('(prefers-color-scheme: dark)').addEventListener('change', () => { c = colors(); Object.keys(lines).forEach(k => lines[k].material.color.set(c[k])); });
 
-    let visible = true, last = performance.now(), angle = -0.6, raf = 0;
+    let visible = true, stopped = false, last = performance.now(), angle = -0.6, raf = 0;
     function frame(now) {
       raf = 0;
       if (!visible || document.hidden) return;
@@ -85,10 +92,10 @@
       renderer.render(scene, cam);
       raf = requestAnimationFrame(frame);
     }
-    function wake() { if (!raf && visible && !document.hidden) { last = performance.now(); raf = requestAnimationFrame(frame); } }
-    new IntersectionObserver(es => { visible = es[0].isIntersecting; wake(); }, { threshold: 0.05 }).observe(fig);
-    document.addEventListener('visibilitychange', wake);
-    reduce.addEventListener('change', () => { if (reduce.matches) { visible = false; fig.dataset.live = ''; if (stat) stat.removeAttribute('aria-hidden'); } });
+    function wake() { if (stopped) return; if (!raf && visible && !document.hidden) { last = performance.now(); raf = requestAnimationFrame(frame); } }
+    new IntersectionObserver(es => { if (stopped) return; visible = es[0].isIntersecting; wake(); }, { threshold: 0.05 }).observe(fig);
+    document.addEventListener('visibilitychange', () => { if (!stopped) wake(); });
+    reduce.addEventListener('change', () => { if (reduce.matches) { stopped = true; visible = false; fig.dataset.live = ''; if (stat) stat.removeAttribute('aria-hidden'); } });
     wake();
   }
 
