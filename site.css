@@ -31,16 +31,20 @@ p{margin:0}
 .top-contact{display:none}
 @media (max-width:700px){ .nav{display:none} .top .btn{min-height:44px;padding:0 14px;font-size:14px} .top-contact{display:inline-flex} }
 /* hero */
-.hero{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:56px;align-items:center;padding-top:72px;padding-bottom:72px}
-.hero-text{display:flex;flex-direction:column;gap:22px}
-.hero-figure{margin:0;position:relative;aspect-ratio:520/360}
-@supports not (aspect-ratio: 1){ .hero-figure{height:0;padding-bottom:69.23%} }
-.hero-figure img,.hero-figure canvas{position:absolute;inset:0;width:100%;height:100%}
-.hero-figure img{transition:opacity .4s}
-.hero-figure[data-live="1"] img{opacity:0}
-.hero-figure canvas{display:none} .hero-figure[data-live="1"] canvas{display:block}
-.hero-caption{position:absolute;left:0;bottom:-22px;font-size:12px;color:var(--muted)}
-@media (max-width:860px){ .hero{grid-template-columns:1fr;gap:28px;padding-top:24px;padding-bottom:44px} .hero-figure{order:-1;max-height:42vh;aspect-ratio:auto;height:42vh;height:42svh;margin-bottom:26px} }
+.hero{padding-top:72px;padding-bottom:24px}
+.hero-text{display:flex;flex-direction:column;gap:22px;max-width:720px}
+/* skyline band: the static picture; skyline.js layers the build animation over it */
+.skyline{margin:0 auto;padding-bottom:64px}
+.skyline-stage{position:relative;overflow:hidden}
+.skyline-static{width:100%;height:auto;display:block}
+.skyline[data-live="1"] .skyline-static{visibility:hidden}
+.sk-ground,.sk-b{position:absolute;top:0;height:100%;overflow:hidden}
+.sk-ground{left:0;width:100%}
+.sk-ground img,.sk-b img{position:absolute;top:0;height:100%;width:auto;max-width:none}
+.sk-edge{position:absolute;left:0;width:100%;background:linear-gradient(to bottom,#fff,rgba(255,255,255,0));pointer-events:none}
+.sk-cranes{position:absolute;inset:0;width:100%;height:100%;pointer-events:none;overflow:visible}
+.skyline-caption{font-size:12px;color:var(--muted);margin-top:10px}
+@media (max-width:860px){ .hero{padding-top:24px;padding-bottom:12px} .skyline{padding-bottom:40px} }
 /* sections */
 .section{padding-top:64px;padding-bottom:8px}
 .list2{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:0 48px;margin-top:20px;border-bottom:1px solid var(--rule)}
@@ -52,6 +56,13 @@ p{margin:0}
 .card h3{margin:12px 0 0;font-size:17px;font-weight:600} .card p{margin-top:2px;color:var(--muted)}
 @media (max-width:860px){ .cards{grid-template-columns:repeat(2,minmax(0,1fr))} } @media (max-width:560px){ .cards{grid-template-columns:1fr;gap:20px} }
 .note{margin-top:18px;color:var(--muted);font-size:14px}
+/* featured project: text beside a build-animated drawing */
+.featured{display:grid;grid-template-columns:minmax(0,1.15fr) minmax(0,1fr);gap:48px;align-items:end;margin-top:28px;padding-bottom:36px;border-bottom:1px solid var(--rule)}
+.featured-text h3{margin:0 0 12px;font-size:22px;font-weight:600;font-family:var(--serif);letter-spacing:-.01em}
+.featured-text p{color:var(--body);max-width:520px}
+.featured-meta{margin-top:12px;color:var(--muted);font-size:14px}
+.featured-figure{padding:0;max-width:420px;justify-self:end}
+@media (max-width:860px){ .featured{grid-template-columns:1fr;gap:24px} .featured-figure{max-width:340px;justify-self:start} }
 .about{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:40px;margin-top:24px}
 .about dl{margin:0} .about dt{font-weight:600;margin-top:14px} .about dd{margin:2px 0 0;color:var(--body)}
 .chips{display:flex;flex-wrap:wrap;gap:8px;margin-top:10px} .chips span{background:var(--tint);border-radius:999px;padding:6px 12px;font-size:14px}
