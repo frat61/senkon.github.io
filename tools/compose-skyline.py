@@ -3,6 +3,7 @@ single-building drawings, then write a new picture of the same size.
 
 Usage: python tools/compose-skyline.py <in.webp> <out.webp> [--gap 40] [--margin 24]
          [--insert index:file.png:height_px ...] [--split x1,x2] [--drop i,j,...]
+       python tools/compose-skyline.py --blank WxH <out.webp> --insert 0:file.png:height_px [--margin 24]
 
 The source is black ink on white with one ground line. Buildings are found the same way as in
 measure-skyline.py (ink columns above the ground line, split by white gaps; --split forces a cut).
@@ -10,7 +11,8 @@ Each building is cut out above the ground line and pasted back at a new x with t
 row does not fit, every cut-out is scaled down to fit. --drop leaves out buildings by their 0-based
 index in the source (counted before any insert). --insert places another drawing (alone on
 white, any size) before building <index> (0-based), scaled to <height_px> above the ground line.
-Empty sky above the tallest building is trimmed, so the output can be shorter than the input;
+--blank starts from an empty canvas of that size with a ground line 30 px above the bottom, for a
+picture made only of inserted drawings. Empty sky above the tallest building is trimmed, so the output can be shorter than the input;
 update the width/height attributes of the <img> in index.html to the printed size.
 Run measure-skyline.py on the result to write skyline.json.
 """
@@ -61,12 +63,15 @@ inserts = []
 while '--insert' in args:
     i = args.index('--insert'); idx, f, hpx = args[i + 1].split(':'); del args[i:i + 2]
     inserts.append((int(idx), f, int(hpx)))
-src, out = args[0], args[1]
-
-im = Image.open(src).convert('L')
-w, h = im.size
-ground, runs = columns(im, splits)
-pieces = [im.crop((max(0, x0 - PAD), 0, min(w, x1 + 1 + PAD), ground)) for i, (x0, x1) in enumerate(runs) if i not in drops]   # above the ground line
+blank = opt('--blank', '')
+if blank:
+    out = args[0]; w, h = (int(v) for v in blank.lower().split('x')); ground, pieces = h - 30, []
+else:
+    src, out = args[0], args[1]
+    im = Image.open(src).convert('L')
+    w, h = im.size
+    ground, runs = columns(im, splits)
+    pieces = [im.crop((max(0, x0 - PAD), 0, min(w, x1 + 1 + PAD), ground)) for i, (x0, x1) in enumerate(runs) if i not in drops]   # above the ground line
 for idx, f, hpx in sorted(inserts, reverse=True):
     extra = crop_ink(Image.open(f).convert('L'))
     scale = hpx / extra.height
@@ -83,7 +88,7 @@ for p in pieces:
     canvas.paste(p, (x, ground - p.height))
     x += p.width + gap
 d = ImageDraw.Draw(canvas)
-d.line([(margin // 2, ground), (w - margin // 2, ground)], fill=0, width=2)
+d.line([(margin // 2, ground), (w - margin // 2, ground)], fill=0, width=3 if blank else 2)
 sky = ground - max(p.height for p in pieces) - 16          # trim empty sky so the band keeps its height
 if sky > 0: canvas = canvas.crop((0, sky, w, h)); ground -= sky
 canvas.save(out, quality=92)
