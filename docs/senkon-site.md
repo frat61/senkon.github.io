@@ -9,4 +9,4 @@ Static site on GitHub Pages (branch `main`). No build step.
 - `tools/`: `make-logo.py`, `fetch-fonts.js`, `measure-skyline.py`, `make-model-sql.js`.
 - `tests/`: `node --test` (bare) runs everything.
 
-After replacing `assets/senkon/skyline.webp`, re-measure the building columns: `python tools/measure-skyline.py assets/senkon/skyline.webp assets/senkon/skyline.json assets/senkon/skyline-names.txt` (add `--split x` where two neighbours touch). Names in `skyline-names.txt` are in left-to-right order.
+The skyline picture is composed from the ChatGPT drawing kept outside the repo (`local/skyline-chatgpt-v3.webp`): `python tools/compose-skyline.py <drawing> assets/senkon/skyline.webp --gap 60 --drop 1,10,11,15` (drops Flatiron, the Gherkin, SWFC and One WTC; `--insert 7:esenboga.png:<height_px>` adds the Esenboğa drawing before Çamlıca). Then re-measure the building columns: `python tools/measure-skyline.py assets/senkon/skyline.webp assets/senkon/skyline.json assets/senkon/skyline-names.txt` (add `--split x` where two neighbours touch). Names in `skyline-names.txt` are in left-to-right order.

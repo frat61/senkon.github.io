@@ -2,12 +2,13 @@
 single-building drawings, then write a new picture of the same size.
 
 Usage: python tools/compose-skyline.py <in.webp> <out.webp> [--gap 40] [--margin 24]
-         [--insert index:file.png:height_px ...] [--split x1,x2]
+         [--insert index:file.png:height_px ...] [--split x1,x2] [--drop i,j,...]
 
 The source is black ink on white with one ground line. Buildings are found the same way as in
 measure-skyline.py (ink columns above the ground line, split by white gaps; --split forces a cut).
 Each building is cut out above the ground line and pasted back at a new x with the given gap; if the
-row does not fit, every cut-out is scaled down to fit. --insert places another drawing (alone on
+row does not fit, every cut-out is scaled down to fit. --drop leaves out buildings by their 0-based
+index in the source (counted before any insert). --insert places another drawing (alone on
 white, any size) before building <index> (0-based), scaled to <height_px> above the ground line.
 Empty sky above the tallest building is trimmed, so the output can be shorter than the input;
 update the width/height attributes of the <img> in index.html to the printed size.
@@ -55,6 +56,7 @@ def opt(name, default):
     return default
 gap = int(opt('--gap', 40)); margin = int(opt('--margin', 24))
 splits = {int(v) for v in opt('--split', '').split(',') if v}
+drops = {int(v) for v in opt('--drop', '').split(',') if v}
 inserts = []
 while '--insert' in args:
     i = args.index('--insert'); idx, f, hpx = args[i + 1].split(':'); del args[i:i + 2]
@@ -64,7 +66,7 @@ src, out = args[0], args[1]
 im = Image.open(src).convert('L')
 w, h = im.size
 ground, runs = columns(im, splits)
-pieces = [im.crop((x0, 0, x1 + 1, ground)) for x0, x1 in runs]      # everything above the ground line
+pieces = [im.crop((x0, 0, x1 + 1, ground)) for i, (x0, x1) in enumerate(runs) if i not in drops]   # above the ground line
 for idx, f, hpx in sorted(inserts, reverse=True):
     extra = crop_ink(Image.open(f).convert('L'))
     scale = hpx / extra.height
