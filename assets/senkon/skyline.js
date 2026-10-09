@@ -1,8 +1,8 @@
-/* Skyline band: raises every building of assets/senkon/skyline.webp at once, each with its own tower
-   crane and a little dust at the working level, once per page load, then leaves the finished picture.
-   assets/senkon/skyline.json (written by tools/measure-skyline.py) gives each building's column and
-   top in image pixels. Without JavaScript, with reduced motion, or if anything fails, the static
-   picture simply shows. */
+/* Skyline band: raises every building of assets/senkon/skyline.webp at once, each with its own small
+   tower cranes working a lifting cycle, a soft unfinished edge and a little dust, once per page load,
+   then leaves the finished picture. assets/senkon/skyline.json (written by tools/measure-skyline.py)
+   gives each building's column and top in image pixels. Without JavaScript, with reduced motion, or
+   if anything fails, the static picture simply shows. */
 (function () {
   'use strict';
   const fig = document.getElementById('skyline');
@@ -12,29 +12,36 @@
   const stat = fig.querySelector('.skyline-static');
   if (!stage || !stat) return;
   const SRC = stat.getAttribute('src'), V = SRC.indexOf('?') > -1 ? SRC.slice(SRC.indexOf('?')) : '';
+  const HERE = document.currentScript && document.currentScript.src ? document.currentScript.src : location.href;
 
-  const SETUP = 1.0, TEARDOWN = 1.0;        // seconds to erect / dismantle a crane
-  const MIN_BUILD = 3.2, MAX_BUILD = 7.0;   // seconds per building, scaled by its height
+  const SETUP = 1.2, TEARDOWN = 1.6;        // seconds to erect / climb down a crane
+  const MIN_BUILD = 6, MAX_BUILD = 11;      // seconds per building, scaled by its height
   const STAGGER = 0.05;                     // seconds between neighbouring starts, a ripple left to right
-  const LEAD = 48;                          // crane mast stays this far (image px) above the current top
-  const PUFFS = 6, PUFF_CYCLE = 1.8;        // dust puffs per building and seconds per puff
+  const CYCLE = 7;                          // seconds per lifting cycle
+  const TALLEST_M = 828;                    // metres of the tallest building, sets the metre scale
+  const JIB_M = 70, LUFF_M = 60, MAST_M = 28, TWO_CRANES_PX = 40;
+  const PUFFS = 3, PUFF_CYCLE = 2.2, EDGE_PX = 10;
 
-  fetch('assets/senkon/skyline.json' + V).then(r => r.ok ? r.json() : Promise.reject(r.status)).then(prepare).catch(() => {});
+  fetch(new URL('skyline.json' + V, HERE).href).then(r => r.ok ? r.json() : Promise.reject(r.status)).then(prepare).catch(() => {});
 
   function prepare(data) {
     const W = data.w, H = data.h, G = data.ground, cols = data.cols || [];
     if (!cols.length) return;
     const hmax = Math.max.apply(null, cols.map(c => G - c.top));
+    const m = hmax / TALLEST_M;                                  // image pixels per metre
 
     const jobs = cols.map((c, i) => {
       const dur = MIN_BUILD + (MAX_BUILD - MIN_BUILD) * (G - c.top) / hmax;
-      const next = cols[i + 1], prev = cols[i - 1];
-      const gapR = (next ? next.x0 : W) - c.x1, gapL = c.x0 - (prev ? prev.x1 : 0);
-      const side = gapR >= 20 || gapR >= gapL ? 1 : -1;        // cranes stand to the right, so no two share a gap
-      const off = Math.min(Math.max(side > 0 ? gapR : gapL, 14) / 2, 18);
-      const t0 = i * STAGGER;
-      return { c: c, t0: t0, b0: t0 + SETUP, b1: t0 + SETUP + dur, t1: t0 + SETUP + dur + TEARDOWN, side: side,
-        mx: side > 0 ? c.x1 + off : c.x0 - off, jib: Math.min(c.x1 - c.x0 + 24 + off, 170), phase: i * 1.7 };
+      const t0 = i * STAGGER, w = c.x1 - c.x0;
+      const cranes = [];
+      if (w >= TWO_CRANES_PX) {                                  // climbing cranes riding on the deck
+        cranes.push({ kind: 'hammer', fx: 0.3, dir: -1, mast: MAST_M * m, phase: i * 2.3, climb: true });
+        cranes.push({ kind: 'luff', fx: 0.72, dir: 1, mast: MAST_M * 1.35 * m, phase: i * 2.3 + 3.1, climb: true });
+      } else {                                                   // one crane beside a slender tower, tied to it
+        cranes.push({ kind: i % 2 ? 'luff' : 'hammer', fx: 1, x: c.x1 + 9, dir: -1, mast: MAST_M * m, phase: i * 2.3, climb: false });
+      }
+      cranes.forEach(k => { if (k.x === undefined) k.x = c.x0 + w * k.fx; });
+      return { c: c, i: i, t0: t0, b0: t0 + SETUP, b1: t0 + SETUP + dur, t1: t0 + SETUP + dur + TEARDOWN, cranes: cranes };
     });
     const total = Math.max.apply(null, jobs.map(j => j.t1)) + 0.2;
 
@@ -57,7 +64,11 @@
       const ground = layer(0, W - 1, (G - 2) / H * 100); ground.className = 'sk-ground';
       const wrap = document.createElement('div'); wrap.setAttribute('aria-hidden', 'true');
       wrap.appendChild(ground);
-      jobs.forEach(j => { j.el = layer(j.c.x0, j.c.x1, G / H * 100); j.el.className = 'sk-b'; if (j.c.name) j.el.title = j.c.name; wrap.appendChild(j.el); });
+      jobs.forEach(j => {
+        j.el = layer(j.c.x0, j.c.x1, G / H * 100); j.el.className = 'sk-b'; if (j.c.name) j.el.title = j.c.name;
+        j.edge = document.createElement('div'); j.edge.className = 'sk-edge'; j.edge.style.height = (EDGE_PX / H * 100) + '%';
+        j.el.appendChild(j.edge); wrap.appendChild(j.el);
+      });
       const svg = el('svg');
       svg.setAttribute('class', 'sk-cranes'); svg.setAttribute('viewBox', '0 0 ' + W + ' ' + H); svg.setAttribute('preserveAspectRatio', 'none');
       const cs = getComputedStyle(document.documentElement);
@@ -66,9 +77,11 @@
       jobs.forEach(j => {
         j.puffs = [];
         for (let q = 0; q < PUFFS; q++) { const o = el('circle'); o.setAttribute('r', '0'); dustG.appendChild(o); j.puffs.push(o); }
-        const p = el('path');
-        p.setAttribute('fill', 'none'); p.setAttribute('stroke', ink); p.setAttribute('stroke-width', '1.1'); p.setAttribute('stroke-linejoin', 'round');
-        svg.appendChild(p); j.path = p;
+        j.cranes.forEach(k => {
+          const p = el('path');
+          p.setAttribute('fill', 'none'); p.setAttribute('stroke', ink); p.setAttribute('stroke-width', '1.1'); p.setAttribute('stroke-linejoin', 'round');
+          svg.appendChild(p); k.path = p;
+        });
       });
       wrap.appendChild(svg); stage.appendChild(wrap); fig.setAttribute('data-live', '1');
 
@@ -87,11 +100,12 @@
           const curTop = G - p * (G - j.c.top);
           if (p > 0 && !j.done) {
             j.el.style.clipPath = 'inset(' + (curTop / H * 100).toFixed(3) + '% 0 0 0)';
-            if (p === 1) j.done = true;
+            j.edge.style.top = (curTop / H * 100).toFixed(3) + '%';
+            if (p === 1) { j.done = true; j.edge.style.display = 'none'; }
           }
           puffs(j, t, p, curTop);
-          if (t < j.t1) j.path.setAttribute('d', crane(j, t, p, curTop));
-          else { j.path.setAttribute('d', ''); j.finished = true; }
+          if (t < j.t1) j.cranes.forEach(k => k.path.setAttribute('d', crane(j, k, t, p, curTop)));
+          else { j.cranes.forEach(k => k.path.setAttribute('d', '')); j.finished = true; }
         });
         if (t < total) requestAnimationFrame(frame);
         else { svg.remove(); fig.setAttribute('data-done', '1'); }
@@ -106,51 +120,83 @@
       for (let q = 0; q < PUFFS; q++) {
         const o = j.puffs[q];
         if (p <= 0 || p >= 1) { o.setAttribute('r', '0'); continue; }
-        const u = (t + q * PUFF_CYCLE / PUFFS + j.phase) / PUFF_CYCLE, cycle = Math.floor(u), age = u - cycle;
-        const seed = cycle * PUFFS + q + j.phase;
-        const x = c.x0 + w * (0.1 + 0.8 * hash(seed)) + (hash(seed + 0.5) - 0.5) * 10 * age;
-        const y = curTop + 3 - age * 16;
+        const u = (t + q * PUFF_CYCLE / PUFFS + j.i) / PUFF_CYCLE, cycle = Math.floor(u), age = u - cycle;
+        const seed = cycle * PUFFS + q + j.i;
+        const x = c.x0 + w * (0.1 + 0.8 * hash(seed)) + (hash(seed + 0.5) - 0.5) * 8 * age;
+        const y = curTop + 2 - age * 12;
         o.setAttribute('cx', x.toFixed(1)); o.setAttribute('cy', y.toFixed(1));
-        o.setAttribute('r', (2 + age * 6).toFixed(1)); o.setAttribute('opacity', (0.22 * (1 - age)).toFixed(3));
+        o.setAttribute('r', (1.5 + age * 4.5).toFixed(1)); o.setAttribute('opacity', (0.2 * (1 - age)).toFixed(3));
       }
+    }
+
+    // lifting cycle: slew out, hook down to the ground, lift, slew back, set the load on the deck
+    function ease(u) { u = Math.min(Math.max(u, 0), 1); return u * u * (3 - 2 * u); }
+    function seg(u, a, b) { return ease((u - a) / (b - a)); }
+    function cycle(t, phase) {
+      const u = ((t + phase) / CYCLE) % 1;
+      let out, hook, target = 'ground', load = false;
+      if (u < 0.15) out = seg(u, 0, 0.15);
+      else if (u < 0.62) out = 1;
+      else if (u < 0.78) out = 1 - seg(u, 0.62, 0.78);
+      else out = 0;
+      if (u < 0.2) hook = 0.1;
+      else if (u < 0.33) hook = 0.1 + 0.9 * seg(u, 0.2, 0.33);
+      else if (u < 0.4) hook = 1;
+      else if (u < 0.62) hook = 1 - 0.85 * seg(u, 0.4, 0.62);
+      else if (u < 0.78) hook = 0.15;
+      else if (u < 0.86) { hook = 0.15 + 0.85 * seg(u, 0.78, 0.86); target = 'deck'; }
+      else if (u < 0.95) { hook = 1 - 0.9 * seg(u, 0.86, 0.95); target = 'deck'; }
+      else { hook = 0.1; target = 'deck'; }
+      load = u >= 0.36 && u < 0.84;
+      return { out: out, hook: hook, target: target, load: load };
     }
 
     // one crane's line drawing at time t, in image pixels
     function L(a, b, c, d) { return 'M' + a.toFixed(1) + ' ' + b.toFixed(1) + 'L' + c.toFixed(1) + ' ' + d.toFixed(1); }
-    function crane(j, t, p, curTop) {
-      const c = j.c, x = j.mx, s = j.side;
-      let mastTop = Math.max(curTop - LEAD, c.top - LEAD, 8);
-      let scale = 1;
+    function crane(j, k, t, p, curTop) {
       if (t < j.t0) return '';
-      if (t < j.b0) { scale = (t - j.t0) / SETUP; mastTop = G - LEAD; }
-      else if (t >= j.b1) { scale = 1 - (t - j.b1) / TEARDOWN; }
-      scale = Math.min(Math.max(scale, 0), 1);
-      const e = scale * scale * (3 - 2 * scale);                 // smooth erect / dismantle
-      const top = G - e * (G - mastTop);
-      const mw = 9, half = mw / 2;
-      let d = L(x - half, G, x - half, top) + L(x + half, G, x + half, top);
-      for (let y = G - 14; y > top + 6; y -= 14) d += L(x - half, y, x + half, y - 14) + L(x + half, y, x - half, y - 14);
-      if (e < 0.3) return d;                                     // only the mast while erecting / dismantling
-      const jibScale = Math.min((e - 0.3) / 0.5, 1);
-      const sw = 0.5 + 0.5 * Math.cos(t * 0.33 + j.phase);       // slewing: projected jib length
-      const jl = j.jib * (0.45 + 0.55 * sw) * jibScale * -s;      // jib points over the building
-      const cl = -jl * 0.38;                                     // counter-jib
-      const ty = top - 2;
-      d += L(x - half, ty, x + jl, ty) + L(x + half, ty + 5, x + jl * 0.97, ty + 5);       // jib chords
-      const n = Math.max(2, Math.floor(Math.abs(jl) / 12));
-      for (let i = 0; i < n; i++) { const a = x + jl * i / n, b = x + jl * (i + 1) / n; d += L(a, ty + 5, b, ty); }
-      d += L(x + half, ty, x + cl, ty) + L(x + half, ty + 5, x + cl, ty + 5) + L(x + cl, ty, x + cl, ty + 5);   // counter-jib
-      const cw = 7 * (Math.sign(cl) || 1);
-      d += L(x + cl, ty + 5, x + cl, ty + 13) + L(x + cl, ty + 13, x + cl - cw, ty + 13) + L(x + cl - cw, ty + 13, x + cl - cw, ty + 5);  // counterweight
-      const apex = ty - 16;
-      d += L(x - half, ty, x, apex) + L(x + half, ty, x, apex) + L(x, apex, x + jl * 0.95, ty) + L(x, apex, x + cl, ty);   // tower top and ties
-      const cx = x + half * s, cx2 = cx - 7 * s;
-      d += L(cx, ty + 5, cx2, ty + 5) + L(cx2, ty + 5, cx2, ty + 12) + L(cx2, ty + 12, cx, ty + 12);  // cab
-      if (p > 0 && p < 1) {                                      // trolley, hook cable and a lifted beam
-        const f = 0.45 + 0.4 * Math.sin(t * 0.5 + j.phase), tx = x + jl * f;
-        const hy = Math.max(curTop - 10, ty + 20);
-        d += L(tx - 3, ty + 5, tx + 3, ty + 5) + L(tx, ty + 5, tx, hy) + L(tx - 7, hy, tx + 7, hy) + L(tx - 7, hy + 3, tx + 7, hy + 3);
+      const c = j.c, x = k.x, dir = k.dir;
+      let base = k.climb ? (p > 0 ? curTop : G) : G;             // climbing cranes ride on the deck
+      let mastH = k.climb ? k.mast : (G - curTop) + k.mast;        // tied cranes stand on the ground
+      let e = 1, cyc = cycle(t, k.phase);
+      if (t < j.b0) { e = ease((t - j.t0) / SETUP); cyc = { out: 0, hook: 0.1, target: 'deck', load: false }; base = G; mastH = k.mast; }
+      else if (t >= j.b1) {                                        // climb down the facade, jib pulled in
+        const d = ease((t - j.b1) / TEARDOWN);
+        cyc = { out: 0, hook: 0.1, target: 'deck', load: false };
+        if (k.climb) base = curTop + d * (G - curTop); else mastH = mastH * (1 - d);
+        if (k.climb) e = 1 - Math.max(0, (d - 0.8) / 0.2); else e = 1;
       }
+      if (e <= 0 || mastH <= 0) return '';
+      const top = base - mastH * e, mw = 5, half = mw / 2;
+      let d = L(x - half, base, x - half, top) + L(x + half, base, x + half, top);
+      for (let y = base - 7; y > top + 3; y -= 7) d += L(x - half, y, x + half, y - 7) + L(x + half, y, x - half, y - 7);
+      if (!k.climb) for (let y = base - 30; y > Math.max(curTop, top) + 10; y -= 30) d += L(x - half, y, c.x1, y);   // ties to the shaft
+      if (e < 0.6) return d;
+      const ty = top - 1, cabX = x + half * dir;
+      d += L(cabX, ty + 2, cabX + 3 * dir, ty + 2) + L(cabX + 3 * dir, ty + 2, cabX + 3 * dir, ty + 6) + L(cabX + 3 * dir, ty + 6, cabX, ty + 6);   // cab
+      let hookX, hookTopY, apex = ty - 7;
+      if (k.kind === 'hammer') {
+        const jl = JIB_M * m * (0.45 + 0.55 * cyc.out) * dir, cl = -jl * 0.35;
+        d += L(x - half, ty, x + jl, ty) + L(x + half, ty + 2.5, x + jl * 0.97, ty + 2.5);
+        const n = Math.max(2, Math.floor(Math.abs(jl) / 6));
+        for (let i = 0; i < n; i++) d += L(x + jl * i / n, ty + 2.5, x + jl * (i + 1) / n, ty);
+        d += L(x + half, ty, x + cl, ty) + L(x + half, ty + 2.5, x + cl, ty + 2.5) + L(x + cl, ty, x + cl, ty + 7) + L(x + cl, ty + 7, x + cl + 3 * dir, ty + 7) + L(x + cl + 3 * dir, ty + 7, x + cl + 3 * dir, ty + 2.5);
+        d += L(x - half, ty, x, apex) + L(x + half, ty, x, apex) + L(x, apex, x + jl * 0.95, ty) + L(x, apex, x + cl, ty);
+        hookX = x + jl * 0.8; hookTopY = ty + 2.5;
+      } else {
+        const ang = (62 - 34 * cyc.out) * Math.PI / 180, lj = LUFF_M * m;
+        const tipX = x + Math.cos(ang) * lj * dir, tipY = ty - Math.sin(ang) * lj;
+        d += L(x - half, ty, tipX, tipY) + L(x + half, ty + 2, tipX, tipY) + L(x, apex, tipX, tipY);   // jib and pendant
+        const cl = -lj * 0.22 * dir;
+        d += L(x, ty, x + cl, ty) + L(x + cl, ty, x + cl, ty + 6) + L(x + cl, ty + 6, x + cl + 3 * dir, ty + 6) + L(x + cl + 3 * dir, ty + 6, x + cl + 3 * dir, ty);
+        d += L(x - half, ty, x, apex) + L(x + half, ty, x, apex);
+        hookX = tipX; hookTopY = tipY;
+      }
+      const targetY = cyc.target === 'ground' ? G - 3 : Math.max(curTop - 3, hookTopY + 6);
+      const hookY = hookTopY + (targetY - hookTopY) * cyc.hook;
+      d += L(hookX, hookTopY, hookX, hookY);
+      if (cyc.load) d += L(hookX - 4, hookY, hookX + 4, hookY) + L(hookX - 4, hookY + 2, hookX + 4, hookY + 2) + L(hookX - 4, hookY, hookX - 4, hookY + 2) + L(hookX + 4, hookY, hookX + 4, hookY + 2);
+      else d += L(hookX - 1.5, hookY, hookX + 1.5, hookY);
       return d;
     }
   }

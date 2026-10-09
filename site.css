@@ -41,6 +41,7 @@ p{margin:0}
 .sk-ground,.sk-b{position:absolute;top:0;height:100%;overflow:hidden}
 .sk-ground{left:0;width:100%}
 .sk-ground img,.sk-b img{position:absolute;top:0;height:100%;width:auto;max-width:none}
+.sk-edge{position:absolute;left:0;width:100%;background:linear-gradient(to bottom,#fff,rgba(255,255,255,0));pointer-events:none}
 .sk-cranes{position:absolute;inset:0;width:100%;height:100%;pointer-events:none;overflow:visible}
 .sk-cranes *{vector-effect:non-scaling-stroke}
 .skyline-caption{font-size:12px;color:var(--muted);margin-top:10px}
