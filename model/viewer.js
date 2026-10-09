@@ -38,7 +38,8 @@
     if (typeof SenkonBuilder === 'undefined' || typeof THREE === 'undefined') throw new Error('SenkonBuilder and THREE must be loaded first');
 
     const renderer = new THREE.WebGLRenderer({ antialias: true });
-    renderer.setPixelRatio(Math.min(window.devicePixelRatio || 1, 2));
+    renderer.setPixelRatio(opts.pixelRatio || Math.min(window.devicePixelRatio || 1, 2));
+    if (model && model.isObject3D) renderer.outputEncoding = THREE.sRGBEncoding;
     const canvas = renderer.domElement; canvas.style.touchAction = 'none'; container.appendChild(canvas);
     const scene = new THREE.Scene(), cam = new THREE.PerspectiveCamera(38, 1, 0.1, 4000);
     const hemi = new THREE.HemisphereLight(0xffffff, 0x8a9099, 0.85); scene.add(hemi);
@@ -110,7 +111,8 @@
       Object.keys(G).forEach(k => delete G[k]); tags.length = 0; clearMeas();
     }
     function build(m) {
-      const next = SenkonBuilder.build(m); clear(); built = next; snaps = built.snaps.map(V);
+      if (m && m.isObject3D) { clear(); buildObject(m); return; }
+      const next = SenkonBuilder.build(m); clear(); built = next; built.up = 2.6; snaps = built.snaps.map(V);
       built.layers.forEach(l => {
         const g = new THREE.Group(); g.name = l.key;
         g.visible = l.key in layerState ? layerState[l.key] : l.visible !== false;
@@ -118,6 +120,21 @@
       });
       built.items.forEach(it => { const g = G[it.layer] || G.steel; const o = toObject(it); if (o && g) g.add(o); });
       tgt.set(built.center[0], 2.6, built.center[1]);
+      fitTags();
+    }
+    // File mode: an already-built three.js object (a loaded GLB scene). No builder, no snaps,
+    // one always-on layer. The orbit target is the bounding-box centre.
+    function buildObject(obj) {
+      const box = new THREE.Box3().setFromObject(obj);
+      if (box.isEmpty()) throw new Error('empty model');
+      const size = new THREE.Vector3(), c = new THREE.Vector3(); box.getSize(size); box.getCenter(c);
+      cam.near = Math.max(0.01, Math.max(size.x, size.y, size.z) / 1000); cam.far = Math.max(4000, Math.max(size.x, size.y, size.z) * 20); cam.updateProjectionMatrix();
+      built = { v: 0, items: [], snaps: [], layers: [{ key: 'model', label: 'Model', visible: true, button: false }],
+        center: [c.x, c.z], size: size.length(), levels: {}, model: null, up: c.y,
+        bounds: { min: box.min.toArray(), max: box.max.toArray() } };
+      snaps = [];
+      const g = new THREE.Group(); g.name = 'model'; g.visible = true; G.model = g; g.add(obj); rootG.add(g);
+      tgt.set(c.x, c.y, c.z);
       fitTags();
     }
 
@@ -129,7 +146,8 @@
     }
     function place() {
       const s = built ? built.size : 35;
-      el = Math.max(0.03, Math.min(1.55, el)); dist = Math.max(8, Math.min(140 * s / 35, dist));
+      const minD = built && !built.model ? Math.max(0.05, 0.1 * s) : 8, maxD = built && !built.model ? Math.max(6 * s, 1) : 140 * s / 35;
+      el = Math.max(0.03, Math.min(1.55, el)); dist = Math.max(minD, Math.min(maxD, dist));
       cam.position.set(tgt.x + dist * Math.cos(el) * Math.sin(az), tgt.y + dist * Math.sin(el), tgt.z + dist * Math.cos(el) * Math.cos(az));
       cam.lookAt(tgt);
     }
@@ -146,7 +164,7 @@
     }
     function setView(name) {
       const vw = views()[name] || views().iso; az = vw[0]; el = vw[1]; dist = vw[2];
-      if (built) tgt.set(built.center[0], 2.6, built.center[1]); draw();
+      if (built) tgt.set(built.center[0], built.up !== undefined ? built.up : 2.6, built.center[1]); draw();
     }
 
     // ---- measuring: tap two points, snap to column bases, tops and levels
@@ -156,11 +174,11 @@
     function pickAt(cx, cy) {
       const r = canvas.getBoundingClientRect(), rc = new THREE.Raycaster();
       rc.setFromCamera(new THREE.Vector2((cx - r.left) / r.width * 2 - 1, -(cy - r.top) / r.height * 2 + 1), cam);
-      const list = []; rootG.traverse(o => { if (o.isMesh && !o.material.transparent && shown(o)) list.push(o); });
+      const list = []; rootG.traverse(o => { const mat = Array.isArray(o.material) ? o.material[0] : o.material; if (o.isMesh && mat && !mat.transparent && shown(o)) list.push(o); });
       const hit = rc.intersectObjects(list, false)[0]; if (!hit) return;
       let p = hit.point.clone(), best = 0.8; snaps.forEach(q => { const d = q.distanceTo(hit.point); if (d < best) { best = d; p = q.clone(); } });
       if (mPts.length === 2) clearMeas();
-      mPts.push(p); const mk = new THREE.Mesh(new THREE.SphereGeometry(0.16, 16, 12), M.meas); mk.position.copy(p); mk.renderOrder = 9; measG.add(mk);
+      mPts.push(p); const mk = new THREE.Mesh(new THREE.SphereGeometry(Math.max(0.02, (built ? built.size : 35) * 0.0045), 16, 12), M.meas); mk.position.copy(p); mk.renderOrder = 9; measG.add(mk);
       if (mPts.length === 2) {
         const a = mPts[0], b = mPts[1], d = a.distanceTo(b), hz = Math.hypot(a.x - b.x, a.z - b.z), vt = Math.abs(a.y - b.y);
         measG.add(new THREE.Line(new THREE.BufferGeometry().setFromPoints([a, b]), M.measLine));
@@ -201,7 +219,7 @@
         M.glassPane.opacity = 0.5; M.glassPane.color.set(0x4f8fae); M.door.color.set(0x3a4149);
         scene.background = new THREE.Color(0xcfdde9); hemi.intensity = 0.68;
         scene.traverse(x => { if (x.isMesh && x.material === M.fix) x.visible = false; });
-        const c = built.center, ol = built.model.outline;
+        const c = built.center, ol = built.model ? built.model.outline : { x: built.size, y: built.size };
         const ground = new THREE.Mesh(new THREE.PlaneGeometry(3000, 3000), new THREE.MeshStandardMaterial({ color: 0xb3b9ab, roughness: 1 }));
         ground.rotation.x = -Math.PI / 2; ground.position.set(c[0], -0.13, c[1]); siteG.add(ground);
         const apron = new THREE.Mesh(new THREE.BoxGeometry(ol.x + 6, 0.05, ol.y + 6), new THREE.MeshStandardMaterial({ color: 0xa3a8ad, roughness: 1 }));
@@ -244,5 +262,5 @@
     };
   }
 
-  root.SenkonViewer = { mount: mount };
+  root.SenkonViewer = { mount: mount, mountFile: function (container, object, opts) { return mount(container, object, opts); } };
 })(window);

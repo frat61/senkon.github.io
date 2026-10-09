@@ -8,15 +8,7 @@ if (!file || !email) { console.error('usage: node tools/make-model-sql.js <row.j
 const row = JSON.parse(fs.readFileSync(file, 'utf8'));
 if (!row.name || !row.data) { console.error('row.json needs name and data'); process.exit(1); }
 
-const ALPHABET = 'abcdefghjkmnpqrstuvwxyz23456789';   // 31 symbols, no look-alikes
-function randomSlug(n) {
-  const out = [];
-  while (out.length < n) {
-    const buf = crypto.getRandomValues(new Uint8Array(n * 2));
-    for (const b of buf) if (b < 248 && out.length < n) out.push(ALPHABET[b % 31]);   // 248 = 8 * 31, avoids modulo bias
-  }
-  return out.join('');
-}
+const { randomSlug } = require('../model/slug.js');
 const q = s => "'" + String(s).replace(/'/g, "''") + "'";
 const json = JSON.stringify(row.data);
 if (json.indexOf('$j$') >= 0) throw new Error('data contains the $j$ delimiter');

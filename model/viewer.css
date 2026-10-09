@@ -46,3 +46,7 @@ button[hidden]{display:none}
   button{padding:8px 11px;font-size:13.5px}
   body.compact #status{display:block} body.compact.measuring #status{bottom:calc(76px + env(safe-area-inset-bottom,0px))}
 }
+
+.file-only{display:none;margin:0;font-size:12.5px}
+body.file #legend ul{display:none} body.file .file-only{display:block}
+.row[hidden]{display:none}

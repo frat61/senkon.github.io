@@ -49,6 +49,7 @@
     <li><i style="background:#cfd4d9"></i>Sandviç paneller</li>
     <li><i style="background:#3d6f8a"></i>Saçak olukları</li>
   </ul>
+  <p id="legendFile" class="file-only">Yüklenmiş 3B model. Renkler kaynak dosyadan gelir.</p>
   <p id="note"></p>
 </div>
 <div id="status" class="ui">Ön tasarım modelidir, uygulama için değildir.</div>
@@ -65,57 +66,58 @@
   const $ = id => document.getElementById(id);
   const state = $('state'), C = window.SENKON_CONFIG || {};
   const q = new URLSearchParams(location.search), slug = (q.get('m') || '').trim();
-  const SLUG_RE = /^[a-z0-9]{8,32}$/;
-  const FIXED = 'Ön tasarım modelidir, uygulama için değildir. Ölçüler metre, aks–aks; kotlar çelik üst kotudur.';
+  const SLUG_RE = /^[a-z0-9]{8,32}$/, PATH_RE = /^[a-z0-9]{8,32}\/model\.glb$/;
+  const FIXED_PARAM = 'Ön tasarım modelidir, uygulama için değildir. Ölçüler metre, aks–aks; kotlar çelik üst kotudur.';
+  const FIXED_FILE = 'Ön tasarım modelidir, uygulama için değildir.';
+  const dev = ['localhost', '127.0.0.1', '[::1]'].indexOf(location.hostname) >= 0;
 
   function show(msg, retry) {
     state.hidden = false; state.innerHTML = '';
     const p = document.createElement('p'); p.textContent = msg; state.appendChild(p);
     if (retry) { const b = document.createElement('button'); b.textContent = 'Tekrar dene'; b.onclick = () => location.reload(); state.appendChild(b); }
   }
+  function progress(msg) { state.hidden = false; const p = state.querySelector('p') || state.appendChild(document.createElement('p')); p.textContent = msg; }
   function hasWebGL() {
     try { const c = document.createElement('canvas'); return !!(window.WebGLRenderingContext && (c.getContext('webgl') || c.getContext('experimental-webgl'))); }
     catch (e) { return false; }
   }
+  function loadScript(src) {
+    return new Promise((res, rej) => { const s = document.createElement('script'); s.src = src; s.onload = res; s.onerror = () => rej(new Error('script ' + src)); document.head.appendChild(s); });
+  }
+  async function fetchWithProgress(url, onProgress) {
+    const r = await fetch(url); if (!r.ok) throw new Error('http ' + r.status);
+    const total = +r.headers.get('content-length') || 0;
+    if (!r.body || !total) return await r.arrayBuffer();
+    const reader = r.body.getReader(), chunks = []; let got = 0;
+    for (;;) { const { done, value } = await reader.read(); if (done) break; chunks.push(value); got += value.length; onProgress(Math.min(1, got / total)); }
+    const out = new Uint8Array(got); let o = 0; chunks.forEach(c => { out.set(c, o); o += c.length; });
+    return out.buffer;
+  }
   async function load() {
-    // Development only: ?src=<same-origin JSON file> on localhost draws a row-shaped file instead of the database.
-    const src = q.get('src'), dev = ['localhost', '127.0.0.1', '[::1]'].indexOf(location.hostname) >= 0;
+    const src = q.get('src');
     if (src && dev) { const r = await fetch(src); if (!r.ok) throw new Error('http ' + r.status); return await r.json(); }
     if (!SLUG_RE.test(slug)) return null;
     if (!C.SUPABASE_URL || !C.SUPABASE_ANON_KEY) throw new Error('config');
     const r = await fetch(C.SUPABASE_URL.replace(/\/$/, '') + '/rest/v1/rpc/get_model', {
-      method: 'POST',
-      headers: { 'Content-Type': 'application/json', apikey: C.SUPABASE_ANON_KEY },
-      body: JSON.stringify({ p_slug: slug })
+      method: 'POST', headers: { 'Content-Type': 'application/json', apikey: C.SUPABASE_ANON_KEY }, body: JSON.stringify({ p_slug: slug })
     });
     if (!r.ok) throw new Error('http ' + r.status);
     const rows = await r.json();
     return Array.isArray(rows) && rows.length ? rows[0] : null;
   }
-  function render(row) {
-    const name = typeof row.name === 'string' && row.name ? row.name : '3B model';
-    document.title = name + ' – SENKON';
-    $('title').textContent = name; $('desc').textContent = typeof row.description === 'string' ? row.description : '';
-    if (row.kind !== 'parametric') return show('Bu model türü henüz desteklenmiyor');
-    const data = row.data || {};
-    if ((data.v || 1) > SenkonBuilder.VERSION) return show('Model sürümü desteklenmiyor');
-    if (!hasWebGL()) return show('Tarayıcınız 3B görüntülemeyi desteklemiyor');
-    let v;
-    try { v = SenkonViewer.mount($('stage'), data); }
-    catch (e) { console.error(e); return show('Model çizilemedi'); }
+  // Shared wiring once a viewer handle exists: status line, buttons, menu, still-render hook.
+  function wire(v, row, fixed, sourceSentence) {
     state.hidden = true; document.body.classList.add('ready');
-
     const d = row.updated_at ? new Date(row.updated_at) : null, when = d && !isNaN(d) ? d.toLocaleDateString('tr-TR') : '';
-    $('note').textContent = FIXED + (data.source ? ' Mimari plan ' + data.source + ' esas alınmıştır.' : '') + (when ? ' Güncelleme ' + when + '.' : '');
-
+    $('note').textContent = fixed + sourceSentence + (when ? ' Güncelleme ' + when + '.' : '');
     document.querySelectorAll('[data-layer]').forEach(b => {
-      const l = v.layers.find(x => x.key === b.dataset.layer);
+      const l = v.layers.find(x => x.key === b.dataset.layer && x.button);
       if (!l) { b.hidden = true; return; }
       b.setAttribute('aria-pressed', String(l.visible));
       b.onclick = () => b.setAttribute('aria-pressed', String(v.setLayer(l.key, b.getAttribute('aria-pressed') !== 'true')));
     });
+    document.querySelectorAll('.row').forEach(r => { if (r.querySelectorAll('button:not([hidden])').length === 0) r.hidden = true; });
     document.querySelectorAll('[data-view]').forEach(b => { b.onclick = () => v.setView(b.dataset.view); });
-
     const measBtn = $('meas'), read = $('read');
     measBtn.onclick = () => {
       const on = measBtn.getAttribute('aria-pressed') !== 'true';
@@ -127,14 +129,54 @@
       if (r.pending) read.textContent = 'İkinci noktaya dokunun';
       else read.innerHTML = '<b>' + r.d.toFixed(2) + ' m</b><br>yatay ' + r.hz.toFixed(2) + ' m, düşey ' + r.vt.toFixed(2) + ' m';
     });
-
     const menu = $('menu');
     if (matchMedia('(max-width:640px)').matches) document.body.classList.add('compact');
     menu.onclick = () => { const c = document.body.classList.toggle('compact'); menu.setAttribute('aria-expanded', String(!c)); menu.textContent = c ? 'Seçenekler' : 'Kapat'; };
     window.__shot = o => { document.body.classList.add('shot'); v.shot(o); };
     v.resize();
   }
-  load().then(row => { if (!row) return show('Model bulunamadı'); render(row); })
+  function header(row) {
+    const name = typeof row.name === 'string' && row.name ? row.name : '3B model';
+    document.title = name + ' – SENKON';
+    $('title').textContent = name; $('desc').textContent = typeof row.description === 'string' ? row.description : '';
+  }
+  function renderParametric(row) {
+    const data = row.data || {};
+    if ((data.v || 1) > SenkonBuilder.VERSION) return show('Model sürümü desteklenmiyor');
+    if (!hasWebGL()) return show('Tarayıcınız 3B görüntülemeyi desteklemiyor');
+    let v;
+    try { v = SenkonViewer.mount($('stage'), data); }
+    catch (e) { console.error(e); return show('Model çizilemedi'); }
+    wire(v, row, FIXED_PARAM, data.source ? ' Mimari plan ' + data.source + ' esas alınmıştır.' : '');
+  }
+  async function renderFile(row) {
+    if (!hasWebGL()) return show('Tarayıcınız 3B görüntülemeyi desteklemiyor');
+    const url = dev && row.file_url ? row.file_url : (PATH_RE.test(row.file_path || '') ? C.SUPABASE_URL.replace(/\/$/, '') + '/storage/v1/object/public/models/' + row.file_path + '?v=' + encodeURIComponent(row.updated_at || '') : null);
+    if (!url) return show('Model dosyası bulunamadı');
+    let v, stage = 'net';
+    try {
+      progress('Model yükleniyor…');
+      await loadScript('vendor/GLTFLoader.r128.js');
+      const buf = await fetchWithProgress(url, p => progress('Model yükleniyor… ' + Math.round(p * 100) + ' %'));
+      stage = 'parse';
+      const gltf = await new Promise((res, rej) => new THREE.GLTFLoader().parse(buf, '', res, rej));
+      stage = 'mount';
+      v = SenkonViewer.mountFile($('stage'), gltf.scene);
+    } catch (e) {
+      console.error(e);
+      return stage === 'net' ? show('Model yüklenemedi, lütfen tekrar deneyin', true) : show('Model dosyası okunamadı');
+    }
+    document.body.classList.add('file');
+    const meta = row.data && row.data.metadata ? row.data.metadata : {};
+    wire(v, row, FIXED_FILE, typeof meta.source === 'string' && meta.source ? ' Kaynak: ' + meta.source + '.' : '');
+  }
+  function render(row) {
+    header(row);
+    if (row.kind === 'parametric') return renderParametric(row);
+    if (row.kind === 'file') return renderFile(row);
+    return show('Bu model türü henüz desteklenmiyor');
+  }
+  load().then(row => { if (!row) return show('Model bulunamadı'); return render(row); })
     .catch(e => { console.error(e); if (e.message === 'config') show('Yapılandırma eksik: model/config.js dosyasını doldurun'); else show('Model yüklenemedi, lütfen tekrar deneyin', true); });
 })();
 </script>
