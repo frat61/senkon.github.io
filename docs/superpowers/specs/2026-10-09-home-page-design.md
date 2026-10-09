@@ -122,6 +122,6 @@ Removed: `fiyat-listesi.html`, `alternatif_urunler.html`, `stargill_fiyat.html`,
 
 ## 8. Open points
 
-1. Visual direction: resolved, direction C (see Decisions).
-2. Content from Fırat: project list, title line, founding year, wording corrections.
+1. Resolved: direction C (see Decisions).
+2. Resolved: content from Fırat's CV; title line "İnşaat Yüksek Mühendisi"; no founding year.
 3. Whether StructKit's own pages get the same visual system later (separate piece of work).
