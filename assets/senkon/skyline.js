@@ -38,12 +38,12 @@
       let cranes;
       if (c.cranes) {                                            // placed by hand in the JSON
         cranes = c.cranes.map((k, n) => ({ kind: k.kind || 'hammer', x: c.x0 + w * k.fx, dir: k.dir || -1, cap: k.cap || 1,
-          mast: (k.mastM || MAST_M) * m, phase: i * 2.3 + n * 3.1, tie: k.tieFx === undefined ? null : c.x0 + w * k.tieFx }));
+          mast: (k.mastM || MAST_M) * m, phase: i * 2.3 + n * 3.1, tie: k.tieFx === undefined ? null : c.x0 + w * k.tieFx, tieCap: k.tieCap || 1 }));
       } else if (w >= TWO_CRANES_PX) {                           // two cranes up the facade, anchored at the ground
         cranes = [{ kind: 'hammer', x: c.x0 + w * 0.3, dir: -1, mast: MAST_M * m, phase: i * 2.3, tie: null },
                   { kind: 'luff', x: c.x0 + w * 0.72, dir: 1, mast: MAST_M * 1.35 * m, phase: i * 2.3 + 3.1, tie: null }];
       } else {                                                   // one crane beside a slender tower, tied to it
-        cranes = [{ kind: i % 2 ? 'luff' : 'hammer', x: c.x1 + 9, dir: -1, mast: MAST_M * m, phase: i * 2.3, tie: c.x1 }];
+        cranes = [{ kind: i % 2 ? 'luff' : 'hammer', x: c.x1 + 9, dir: -1, mast: MAST_M * m, phase: i * 2.3, tie: c.x1, tieCap: 1 }];
       }
       return { c: c, i: i, t0: t0, b0: t0 + SETUP, b1: t0 + SETUP + dur, t1: t0 + SETUP + dur + TEARDOWN, cranes: cranes };
     });
@@ -171,7 +171,7 @@
       const top = base - mastH * e, half = 2.5 * s, step = 7 * s;
       let d = L(x - half, base, x - half, top) + L(x + half, base, x + half, top);
       for (let y = base - step; y > top + 3; y -= step) d += L(x - half, y, x + half, y - step) + L(x + half, y, x - half, y - step);
-      if (k.tie !== null) for (let y = base - 30 * s; y > Math.max(curTop, top) + 10 * s; y -= 30 * s) d += L(x - half * Math.sign(k.tie - x || 1) * -1, y, k.tie, y);   // ties to the shaft
+      if (k.tie !== null) for (let y = base - 30 * s; y > Math.max(curTop, top, G - (k.tieCap || 1) * (G - j.c.top)) + 10 * s; y -= 30 * s) d += L(x - half * Math.sign(k.tie - x || 1) * -1, y, k.tie, y);   // ties to the shaft
       if (e < 0.6) return d;
       const ty = top - 1 * s, cabX = x + half * dir, u = s;
       d += L(cabX, ty + 2 * u, cabX + 3 * u * dir, ty + 2 * u) + L(cabX + 3 * u * dir, ty + 2 * u, cabX + 3 * u * dir, ty + 6 * u) + L(cabX + 3 * u * dir, ty + 6 * u, cabX, ty + 6 * u);   // cab

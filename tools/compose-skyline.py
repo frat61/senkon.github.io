@@ -3,7 +3,7 @@ single-building drawings, then write a new picture of the same size.
 
 Usage: python tools/compose-skyline.py <in.webp> <out.webp> [--gap 40] [--margin 24]
          [--insert index:file.png:height_px ...] [--split x1,x2] [--drop i,j,...]
-       python tools/compose-skyline.py --blank WxH <out.webp> --insert 0:file.png:height_px [--margin 24]
+       python tools/compose-skyline.py --blank WxH <out.webp> --insert 0:file.png:height_px [--margin 24] [--sky 16]
 
 The source is black ink on white with one ground line. Buildings are found the same way as in
 measure-skyline.py (ink columns above the ground line, split by white gaps; --split forces a cut).
@@ -56,7 +56,7 @@ def opt(name, default):
     if name in args:
         i = args.index(name); v = args[i + 1]; del args[i:i + 2]; return v
     return default
-gap = int(opt('--gap', 40)); margin = int(opt('--margin', 24))
+gap = int(opt('--gap', 40)); margin = int(opt('--margin', 24)); skypx = int(opt('--sky', 16))
 splits = {int(v) for v in opt('--split', '').split(',') if v}
 drops = {int(v) for v in opt('--drop', '').split(',') if v}
 inserts = []
@@ -89,7 +89,7 @@ for p in pieces:
     x += p.width + gap
 d = ImageDraw.Draw(canvas)
 d.line([(margin // 2, ground), (w - margin // 2, ground)], fill=0, width=3 if blank else 2)
-sky = ground - max(p.height for p in pieces) - 16          # trim empty sky so the band keeps its height
+sky = ground - max(p.height for p in pieces) - skypx       # trim empty sky (keep --sky px for cranes)
 if sky > 0: canvas = canvas.crop((0, sky, w, h)); ground -= sky
 canvas.save(out, quality=92)
 print(f'{len(pieces)} buildings, gap {gap}px, scale {f:.3f}, size {canvas.width}x{canvas.height}, ground {ground} -> {out}')
