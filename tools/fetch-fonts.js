@@ -11,7 +11,7 @@ const KEEP = new Set(['latin', 'latin-ext']);
   fs.mkdirSync(OUT, { recursive: true });
   const css = await (await fetch(CSS_URL, { headers: { 'User-Agent': UA } })).text();
   const blocks = css.split('/* ').slice(1);     // "subset */\n@font-face {...}"
-  const out = [], hashes = [];
+  const out = [], hashes = [], seen = new Map();   // sha256 -> file name already written
   for (const b of blocks) {
     const subset = b.slice(0, b.indexOf(' */'));
     if (!KEEP.has(subset)) continue;
@@ -19,13 +19,20 @@ const KEEP = new Set(['latin', 'latin-ext']);
     const family = /font-family: '([^']+)'/.exec(face)[1];
     const weight = /font-weight: ([0-9 ]+);/.exec(face)[1].replace(' ', '-');
     const url = /url\(([^)]+)\)/.exec(face)[1];
-    const name = `${family.toLowerCase().replace(/\s+/g, '-')}-${weight}-${subset}.woff2`;
     const buf = Buffer.from(await (await fetch(url)).arrayBuffer());
-    fs.writeFileSync(path.join(OUT, name), buf);
-    hashes.push(`${name}  ${crypto.createHash('sha256').update(buf).digest('hex')}  ${buf.length}`);
+    const sha = crypto.createHash('sha256').update(buf).digest('hex');
+    let name = seen.get(sha);
+    if (name) {
+      hashes.push(`${family.toLowerCase().replace(/\s+/g, '-')}-${weight}-${subset}  (same file as ${name})`);
+    } else {
+      name = `${family.toLowerCase().replace(/\s+/g, '-')}-${subset}-${sha.slice(0, 8)}.woff2`;
+      seen.set(sha, name);
+      fs.writeFileSync(path.join(OUT, name), buf);
+      hashes.push(`${name}  ${sha}  ${buf.length}`);
+    }
     out.push('/* ' + subset + ' */\n' + face.replace(url, './' + name).trim());
   }
   fs.writeFileSync(path.join(OUT, 'fonts.css'), out.join('\n') + '\n');
   fs.writeFileSync(path.join(OUT, 'SOURCES.txt'), `Downloaded ${new Date().toISOString()} from\n${CSS_URL}\n\n${hashes.join('\n')}\n`);
-  console.log(hashes.length + ' font files written to ' + OUT);
+  console.log(seen.size + ' font files written to ' + OUT + ' (' + out.length + ' @font-face blocks)');
 })().catch(e => { console.error(e); process.exit(1); });
