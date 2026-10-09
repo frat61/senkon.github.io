@@ -88,6 +88,7 @@ p{margin:0}
 .open-form input::placeholder{color:var(--muted)}
 .form-msg{min-height:1.4em;margin-top:10px;color:#b3261e;font-size:14px}
 .sr-only{position:absolute;width:1px;height:1px;overflow:hidden;clip:rect(0 0 0 0);white-space:nowrap}
+.aside{margin-top:28px;padding-top:18px;border-top:1px solid var(--rule);color:var(--muted);font-size:14px;max-width:640px}
 .foot-link{color:var(--muted);text-decoration:none} .foot-link:hover{color:var(--link);text-decoration:underline}
 @media (max-width:640px){ .open-form{flex-direction:column} .open-form .btn{width:100%} }
 .contact{padding-top:64px;padding-bottom:48px}

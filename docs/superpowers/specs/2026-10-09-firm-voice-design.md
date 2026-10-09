@@ -24,9 +24,9 @@ page is deferred; no placeholder link for now.
 | Not added | No code chip row, no deliverables list, no "how we work" steps, no analysis-type list (Fırat, 2026-10-09). |
 | Projects | Kept but demoted below the tools, retitled "Deneyim", firm-voice note: "Ekibimizin GVN Tasarım ve Mühendislik ile Yapı Akademisi Mühendislik bünyesinde görev aldığı projelerden." Esenboğa featured figure and the six cards stay; the Esenboğa text loses "görev aldığım". Tentative: may be removed later. |
 | Hakkında | Becomes "Senkon Mühendislik": one paragraph about the practice (İstanbul, what it designs, codes, how it works with clients). Education and employment list removed. Software chips stay. |
-| Tools | StructKit and Model sections unchanged in function; wording made firm-voice ("Senkon'un paylaştığı model"). |
+| Tools | Model section unchanged in function, wording firm-voice. StructKit is not a main instrument (Fırat, 2026-10-09): its section and hero button are removed; it survives as one line at the end of the Model section and a footer link. Hero's second button points to #performans. |
 | Contact, footer | Unchanged. Personal e-mail stays. |
-| Nav | Hizmetler · Performans · Deneyim · Hakkında · Model · StructKit · İletişim. |
+| Nav | Performans · Hizmetler · Model · Deneyim · Hakkında · İletişim. |
 | Metadata | `<title>`, description and og tags updated to the new headline. |
 | Facts to confirm | Which international codes to name (candidates: ASCE 41, Eurocode 8). Until confirmed the copy says "uluslararası yönetmelikler" without naming any. Analysis software is not named. |
 
@@ -38,8 +38,7 @@ page is deferred; no placeholder link for now.
 3. Skyline band, unchanged.
 4. **Performans** (new, `#performans`).
 5. Hizmetler, five items; item 03 points to the section above.
-6. StructKit.
-7. Model.
+6. Model, ending with the one-line StructKit pointer.
 8. **Deneyim** (`#deneyim`, was `#projeler`).
 9. Hakkında: Senkon Mühendislik.
 10. İletişim, footer.
