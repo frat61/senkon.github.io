@@ -17,7 +17,7 @@ with the logo and distinct from template sites.
 |---|---|
 | Audience | Project owners, architects and contractors in Turkey. Turkish, formal but plain. No English version in this round. |
 | Sections | Giriş (hero), Hizmetler, Seçilmiş projeler, StructKit, İletişim. One page. |
-| Look | From the logo: light paper background with a faint drafting grid and a few construction lines, slate-teal text and headings, terracotta for actions, sage for secondary marks, the mammoth as the hero mark. Dark mode follows the system. |
+| Look | **Direction C "Sade beyaz", chosen 2026-10-09 from three mockups** (canvas: https://claude.ai/artifact/48K38jL1ANn642vPSZFXmi). White ground, ink text `#1d2b33`, a serif display face (Fraunces) for the headline and section titles, Work Sans for text, pill buttons (ink fill for the primary, ink outline for secondary), thin rules between items instead of boxes, terracotta `#c47a5a` only inside the hero drawing and on hover, the mammoth mark at 40 px in the header. Dark mode follows the system: ground `#15191c`, text `#e6e2da`, rules `#2a3136`, primary button inverted. The drafting-grid idea from direction A is dropped. |
 | Signature element | A three.js hero: a generic steel frame drawn by the existing `model/builder.js` as a slowly turning line drawing. Generic, not a client model. Lazy-loaded, one slow rotation, paused when off-screen, still image fallback. Nothing else on the page animates beyond hover and focus states. |
 | Contact | Phone +90 530 925 04 61, WhatsApp on the same number (`wa.me/905309250461`), e-mail `firatsenturk@senkonmuhendislik.com`. No street address. |
 | Projects | Three to six text cards from Fırat's list (type, size, location, year; no client names) with a photo slot per card, filled later. |
@@ -55,14 +55,14 @@ optional photo. Order and wording from Fırat. No client names, no model links.
 
 ## 4. Visual system
 
-- Colours from the logo: slate teal `#2f5f6f` (text, headings), ink `#1d2b33`, paper `#f6f4ef`,
-  grid lines `#d9d3c7`, terracotta `#c47a5a` (buttons, highlights), sage `#9bb89a` (secondary).
-  Dark mode: paper `#15191c`, text `#e6e2da`, grid `#2a3136`, accents unchanged. Exact values are
-  tuned in the mockups.
-- Type: one family with a condensed heavy weight for headings and a regular weight for text
-  (candidates: Barlow Condensed + Barlow, or Archivo Narrow + Archivo, from Google Fonts, or
-  self-hosted). Decided in the mockups.
-- Grid and construction lines are CSS backgrounds (no images), faint enough to pass contrast.
+- Colours (final, from the C mockups): ground `#ffffff`, ink `#1d2b33`, body text `#3d4a52`,
+  muted `#6b7a83`, rules `#e3e6e8`, tint panels `#f1f3f4`, link `#2f5f6f`, accent
+  `#c47a5a` (hero drawing, hover). Dark mode: ground `#15191c`, text `#e6e2da`, body
+  `#b7c2c8`, muted `#9aa6ad`, rules `#2a3136`, tint `#1f262b`, link `#9fd0dc`, accent `#e0936f`.
+- Type: Fraunces (600, optical size axis) for h1 and h2; Work Sans 400/500/600 for everything
+  else. Self-hosted woff2 under `assets/senkon/fonts/` (downloaded from Google Fonts once,
+  recorded in the README with hashes) so the page has no third-party request.
+- No background grid; the hero drawing carries the engineering character on its own.
 - Layout: 16 px gutters on phones, a 1100 px content width on desktop, sections separated by
   generous space rather than boxes. Cards have a thin slate border, no shadows.
 - Accessibility: contrast at least 4.5:1 for text, focus rings visible, images with alt text,
@@ -74,7 +74,8 @@ optional photo. Order and wording from Fırat. No client names, no model links.
   `assets/senkon/hero-model.json`, drawn with `model/builder.js` into a line-only scene:
   columns, rafters, ties and purlins as thin lines, no cladding, no labels, no dimensions.
 - Rendering: three.js r128 from `model/vendor/`, loaded only after the page's first paint and
-  only when the hero is visible; `LineSegments` in slate teal on the paper background, an
+  only when the hero is visible; `LineSegments` in ink (rafters in terracotta) on the white
+  ground (inverted in dark mode), an
   orthographic or long-lens perspective view, one rotation about every 40 s.
 - Fallback: a static SVG or PNG of the same frame shown until three.js is ready and kept when
   WebGL is missing or `prefers-reduced-motion` is set. Rotation pauses when the hero leaves
@@ -91,6 +92,7 @@ assets/senkon/
   hero-model.json       generic frame data sheet for the hero
   hero.svg              static fallback drawing of the frame
   hero.js               loads three.js lazily, builds the line scene, rotates, pauses
+  fonts/                Fraunces and Work Sans woff2 (self-hosted)
 site.css                home page styles (not shared with model/ or structkit/)
 docs/superpowers/specs/2026-10-09-home-page-design.md   this document
 ```
@@ -110,6 +112,6 @@ Removed: `fiyat-listesi.html`, `alternatif_urunler.html`, `stargill_fiyat.html`,
 
 ## 8. Open points
 
-1. Visual direction: two or three mockups (hero layout, card style, type) for Fırat to pick.
+1. Visual direction: resolved, direction C (see Decisions).
 2. Content from Fırat: project list, title line, founding year, wording corrections.
 3. Whether StructKit's own pages get the same visual system later (separate piece of work).
