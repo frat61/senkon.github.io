@@ -2,11 +2,8 @@
   --ground:#ffffff; --ink:#1d2b33; --body:#3d4a52; --muted:#5b6a73; --rule:#e3e6e8; --tint:#f1f3f4;
   --link:#2f5f6f; --accent:#c47a5a; --btn:#1d2b33; --btn-ink:#ffffff;
   --serif:"Fraunces",Georgia,"Times New Roman",serif; --sans:"Work Sans",system-ui,-apple-system,"Segoe UI",Roboto,sans-serif;
-  color-scheme:light dark;
+  color-scheme:light;
 }
-@media (prefers-color-scheme: dark){ :root{
-  --ground:#15191c; --ink:#e6e2da; --body:#b7c2c8; --muted:#9aa6ad; --rule:#2a3136; --tint:#1f262b;
-  --link:#9fd0dc; --accent:#e0936f; --btn:#e6e2da; --btn-ink:#15191c; } }
 *{box-sizing:border-box}
 html{scroll-behavior:smooth}
 @media (prefers-reduced-motion: reduce){ html{scroll-behavior:auto} }
