@@ -1,0 +1,133 @@
+{
+ "w": 2000,
+ "h": 500,
+ "ground": 453,
+ "cols": [
+  {
+   "x0": 29,
+   "x1": 80,
+   "top": 273,
+   "name": "Galata Kulesi"
+  },
+  {
+   "x0": 90,
+   "x1": 193,
+   "top": 172,
+   "name": "Eyfel Kulesi"
+  },
+  {
+   "x0": 206,
+   "x1": 283,
+   "top": 245,
+   "name": "Flatiron"
+  },
+  {
+   "x0": 299,
+   "x1": 383,
+   "top": 114,
+   "name": "Empire State"
+  },
+  {
+   "x0": 398,
+   "x1": 468,
+   "top": 124,
+   "name": "John Hancock Center"
+  },
+  {
+   "x0": 483,
+   "x1": 554,
+   "top": 113,
+   "name": "Willis Tower"
+  },
+  {
+   "x0": 570,
+   "x1": 627,
+   "top": 173,
+   "name": "Bank of China Tower"
+  },
+  {
+   "x0": 645,
+   "x1": 755,
+   "top": 160,
+   "name": "Petronas Kuleleri"
+  },
+  {
+   "x0": 789,
+   "x1": 843,
+   "top": 121,
+   "name": "Taipei 101"
+  },
+  {
+   "x0": 865,
+   "x1": 938,
+   "top": 256,
+   "name": "30 St Mary Axe"
+  },
+  {
+   "x0": 969,
+   "x1": 1019,
+   "top": 196,
+   "name": "Shanghai World Financial Center"
+  },
+  {
+   "x0": 1051,
+   "x1": 1124,
+   "top": 10,
+   "name": "Burj Khalifa"
+  },
+  {
+   "x0": 1132,
+   "x1": 1364,
+   "top": 285,
+   "name": "Marina Bay Sands"
+  },
+  {
+   "x0": 1366,
+   "x1": 1472,
+   "top": 304,
+   "name": "CCTV Genel Merkezi"
+  },
+  {
+   "x0": 1484,
+   "x1": 1541,
+   "top": 182,
+   "name": "The Shard"
+  },
+  {
+   "x0": 1561,
+   "x1": 1622,
+   "top": 153,
+   "name": "Shanghai Tower"
+  },
+  {
+   "x0": 1641,
+   "x1": 1695,
+   "top": 315,
+   "name": "İstanbul Havalimanı Kulesi"
+  },
+  {
+   "x0": 1739,
+   "x1": 1765,
+   "top": 252,
+   "name": "(fazladan kule)"
+  },
+  {
+   "x0": 1801,
+   "x1": 1837,
+   "top": 87,
+   "name": "Çamlıca Kulesi"
+  },
+  {
+   "x0": 1854,
+   "x1": 1911,
+   "top": 305,
+   "name": "Esenboğa Kulesi"
+  },
+  {
+   "x0": 1923,
+   "x1": 1971,
+   "top": 102,
+   "name": "One World Trade Center"
+  }
+ ]
+}
