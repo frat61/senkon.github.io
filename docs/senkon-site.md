@@ -6,7 +6,7 @@ Static site on GitHub Pages (branch `main`). No build step.
 - `assets/senkon/`: logo, favicon, self-hosted fonts (`fonts/SOURCES.txt` records origin and hashes), the skyline band (`skyline.webp` picture, `skyline.json` building columns, `skyline-names.txt`) and the Esenboğa project figure (`esenboga.webp`, `esenboga.json` with hand-placed cranes); `skyline.js` animates every `figure[data-skyline]`.
 - `structkit/`: engineering calculators (own styles, own logo copy).
 - `model/`: 3D model viewer and owner page (`docs/model/README.md`).
-- `tools/`: `make-logo.py`, `fetch-fonts.js`, `measure-skyline.py`, `make-model-sql.js`, `versions.js` (cache-busting tags, below).
+- `tools/`: `make-logo.py`, `fetch-fonts.js`, `measure-skyline.py`, `make-og.py` (the 1200×630 share picture `assets/senkon/og.png`, from the skyline and the site's fonts; rerun after changing either), `make-model-sql.js`, `versions.js` (cache-busting tags, below).
 - `tests/`: `node --test` (bare) runs everything.
 
 GitHub Pages caches files for four hours, so `index.html` links `site.css`, the fonts, `skyline.js` and the two drawings with a `?v=` tag that is the hash of the file's content (a drawing's tag also covers its JSON). After changing any of them run `node tools/versions.js`; `tests/versions.test.js` fails until the tags match.

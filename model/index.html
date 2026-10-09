@@ -5,7 +5,7 @@
 <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
 <meta name="robots" content="noindex, nofollow">
 <title>3B model – SENKON</title>
-<link rel="stylesheet" href="viewer.css?v=20261009">
+<link rel="stylesheet" href="viewer.css?v=20261009b">
 </head>
 <body>
 <div id="stage"></div>
@@ -71,10 +71,15 @@
   const FIXED_FILE = 'Ön tasarım modelidir, uygulama için değildir.';
   const dev = ['localhost', '127.0.0.1', '[::1]'].indexOf(location.hostname) >= 0;
 
-  function show(msg, retry) {
+  // show(msg, retry, lost): retry adds a reload button; lost adds the way back for a link that no longer opens
+  function show(msg, retry, lost) {
     state.hidden = false; state.innerHTML = '';
     const p = document.createElement('p'); p.textContent = msg; state.appendChild(p);
     if (retry) { const b = document.createElement('button'); b.textContent = 'Tekrar dene'; b.onclick = () => location.reload(); state.appendChild(b); }
+    if (lost) {
+      const q = document.createElement('p'); q.className = 'lost'; q.textContent = 'Bağlantı eskimiş olabilir; modeli size gönderen kişiden yeni bir bağlantı isteyin.'; state.appendChild(q);
+      const a = document.createElement('a'); a.href = 'https://senkonmuhendislik.com/'; a.textContent = 'senkonmuhendislik.com'; state.appendChild(a);
+    }
   }
   function progress(msg) { state.hidden = false; const p = state.querySelector('p') || state.appendChild(document.createElement('p')); p.textContent = msg; }
   function hasWebGL() {
@@ -176,8 +181,8 @@
     if (row.kind === 'file') return renderFile(row);
     return show('Bu model türü henüz desteklenmiyor');
   }
-  load().then(row => { if (!row) return show('Model bulunamadı'); return render(row); })
-    .catch(e => { console.error(e); if (e.message === 'config') show('Yapılandırma eksik: model/config.js dosyasını doldurun'); else show('Model yüklenemedi, lütfen tekrar deneyin', true); });
+  load().then(row => { if (!row) return show('Model bulunamadı', false, true); return render(row); })
+    .catch(e => { console.error(e); if (e.message === 'config') show('Yapılandırma eksik: model/config.js dosyasını doldurun'); else show('Model yüklenemedi, lütfen tekrar deneyin', true, true); });
 })();
 </script>
 </body>

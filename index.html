@@ -10,19 +10,35 @@
 <meta name="theme-color" content="#ffffff">
 <meta property="og:title" content="Senkon Mühendislik">
 <meta property="og:description" content="Taşıyıcı sistem tasarımı ve mevcut binalar için deprem performans değerlendirmesi. İstanbul.">
-<meta property="og:image" content="https://senkonmuhendislik.com/assets/senkon/apple-touch-icon.png">
+<meta property="og:image" content="https://senkonmuhendislik.com/assets/senkon/og.png">
+<meta property="og:image:width" content="1200">
+<meta property="og:image:height" content="630">
 <meta property="og:url" content="https://senkonmuhendislik.com/">
 <meta property="og:type" content="website">
+<meta name="twitter:card" content="summary_large_image">
+<link rel="canonical" href="https://senkonmuhendislik.com/">
+<script type="application/ld+json">
+{
+  "@context": "https://schema.org",
+  "@type": "ProfessionalService",
+  "name": "Senkon Mühendislik",
+  "url": "https://senkonmuhendislik.com/",
+  "telephone": "+90 530 925 04 61",
+  "email": "firatsenturk@senkonmuhendislik.com",
+  "areaServed": "İstanbul",
+  "description": "Çelik ve betonarme yapılar için taşıyıcı sistem tasarımı; mevcut binaların TBDY 2018 ve uluslararası yönetmeliklere göre deprem performans değerlendirmesi."
+}
+</script>
 <link rel="stylesheet" href="assets/senkon/fonts/fonts.css?v=5a84d35c">
-<link rel="stylesheet" href="site.css?v=b0336c84">
+<link rel="stylesheet" href="site.css?v=2360a984">
 </head>
 <body>
-<header class="wrap top">
+<header id="top" class="wrap top">
   <a class="brand" href="#"><img src="assets/senkon/logo.png" alt=""><span>Senkon Mühendislik</span></a>
-  <nav class="nav" aria-label="Sayfa içi">
+  <nav id="nav" class="nav" aria-label="Sayfa içi">
     <a href="#performans">Performans</a><a href="#hizmetler">Hizmetler</a><a href="#model">Model</a><a href="#deneyim">Deneyim</a><a href="#hakkinda">Hakkında</a><a href="#iletisim">İletişim</a>
   </nav>
-  <a class="btn btn-line top-contact" href="#iletisim">İletişim</a>
+  <button class="btn btn-line menu-btn" type="button" aria-expanded="false" aria-controls="nav">Menü</button>
 </header>
 
 <main>
@@ -136,9 +152,17 @@
 
 <footer class="wrap foot rule">
   <div>Senkon Mühendislik · İstanbul</div>
-  <div><a class="foot-link" href="structkit/">StructKit</a> · <a class="foot-link" href="model/panel.html">Giriş</a> · © 2026</div>
+  <div><a class="foot-link" href="structkit/">StructKit</a> · © 2026</div>
 </footer>
 <script>
+(function () {
+  // phone menu: the Menü button shows the page's nav as a column under the header
+  var top = document.getElementById('top'), btn = top.querySelector('.menu-btn');
+  function set(open) { top.classList.toggle('open', open); btn.setAttribute('aria-expanded', String(open)); btn.textContent = open ? 'Kapat' : 'Menü'; }
+  btn.addEventListener('click', function () { set(!top.classList.contains('open')); });
+  top.querySelectorAll('.nav a').forEach(function (a) { a.addEventListener('click', function () { set(false); }); });
+  document.addEventListener('keydown', function (e) { if (e.key === 'Escape' && top.classList.contains('open')) { set(false); btn.focus(); } });
+})();
 (function () {
   var form = document.getElementById('openModel'), input = document.getElementById('modelCode'), msg = document.getElementById('openMsg');
   if (!form) return;
