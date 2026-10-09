@@ -16,7 +16,7 @@ with the logo and distinct from template sites.
 | Topic | Decision |
 |---|---|
 | Audience | Project owners, architects and contractors in Turkey. Turkish, formal but plain. No English version in this round. |
-| Sections | Giriş (hero), Hizmetler, Seçilmiş projeler, StructKit, İletişim. One page. |
+| Sections | Giriş (hero), Hizmetler, Seçilmiş projeler, Hakkında, StructKit, İletişim. One page. |
 | Look | **Direction C "Sade beyaz", chosen 2026-10-09 from three mockups** (canvas: https://claude.ai/artifact/48K38jL1ANn642vPSZFXmi). White ground, ink text `#1d2b33`, a serif display face (Fraunces) for the headline and section titles, Work Sans for text, pill buttons (ink fill for the primary, ink outline for secondary), thin rules between items instead of boxes, terracotta `#c47a5a` only inside the hero drawing and on hover, the mammoth mark at 40 px in the header. Dark mode follows the system: ground `#15191c`, text `#e6e2da`, rules `#2a3136`, primary button inverted. The drafting-grid idea from direction A is dropped. |
 | Signature element | A three.js hero: a generic steel frame drawn by the existing `model/builder.js` as a slowly turning line drawing. Generic, not a client model. Lazy-loaded, one slow rotation, paused when off-screen, still image fallback. Nothing else on the page animates beyond hover and focus states. |
 | Contact | Phone +90 530 925 04 61, WhatsApp on the same number (`wa.me/905309250461`), e-mail `firatsenturk@senkonmuhendislik.com`. No street address. |
@@ -43,8 +43,18 @@ text on desktop and above it on phones, at most 45 % of the first screen's heigh
 - Teknik rapor ve danışmanlık: statik rapor, güçlendirme önerileri, ikinci görüş.
 - 3B ön tasarım modelleri: konsept aşamasında, telefonda açılan paylaşılabilir modeller.
 
-**Seçilmiş projeler.** Cards: project type (bold), one line with size, location and year, an
-optional photo. Order and wording from Fırat. No client names, no model links.
+**Seçilmiş projeler.** Six cards from Fırat's CV (decided 2026-10-09: names as in the CV, with
+a line saying they were done at GVN Tasarım ve Mühendislik and Yapı Akademisi Mühendislik):
+Antalya Havalimanı yeni terminal (statik tasarım, 10.000 m²), Esenboğa Havalimanı teknik blok
+(12.000 m²), Vem İlaç fabrikası (200.000 m²), Alfraganus AVM Taşkent (54.000 m²), Karmall
+Rezidans (27.000 m²), Koç Üniversitesi TBDY 2018 değerlendirmesi (25.000 m²). Photo slot per
+card for later. No model links.
+
+**Hakkında.** Compact block (decided 2026-10-09): education (İTÜ and SUNY Buffalo, İnşaat
+Mühendisliği, 2018; GTÜ Deprem ve Yapı Mühendisliği yüksek lisans, 2025), experience (GVN
+Tasarım ve Mühendislik 2023–2024, Yapı Akademisi Mühendislik 2021–2023) and the software
+list (ETABS, SAP2000, IDEA StatiCa, ProtaStructure, Sta4CAD, Staad.Pro, AutoCAD, Python).
+Title line: "İnşaat Yüksek Mühendisi"; full name Süleyman Fırat Şentürk. No founding year.
 
 **StructKit.** One block: "Tarayıcıda çalışan mühendislik araçları", four named tools
 (Kiriş tasarımı, Zımbalama, Temel donatısı, Rüzgar yükleri ASCE/Eurocode) and a link to
