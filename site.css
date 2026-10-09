@@ -33,6 +33,7 @@ p{margin:0}
 /* hero */
 .hero{padding-top:72px;padding-bottom:24px}
 .hero-text{display:flex;flex-direction:column;gap:22px;max-width:720px}
+.missing{min-height:calc(100vh - 220px);padding-bottom:96px}   /* 404.html: keeps the footer at the bottom of a short page */
 /* skyline band: the static picture; skyline.js layers the build animation over it */
 .skyline{margin:0 auto;padding-bottom:64px}
 .skyline-stage{position:relative;overflow:hidden}
