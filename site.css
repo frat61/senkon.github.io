@@ -28,8 +28,17 @@ p{margin:0}
 .brand{display:flex;align-items:center;gap:12px;min-height:44px;color:var(--ink);text-decoration:none;font-weight:600;font-size:17px}
 .brand img{width:40px;height:40px;object-fit:contain}
 .nav{display:flex;gap:22px;font-weight:500;font-size:15px} .nav a{color:var(--ink);text-decoration:none;padding:10px 0} .nav a:hover{color:var(--link)}
-.top-contact{display:none}
-@media (max-width:700px){ .nav{display:none} .top .btn{min-height:44px;padding:0 14px;font-size:14px} .top-contact{display:inline-flex} }
+.top-contact,.menu-btn{display:none}
+/* phone: the nav folds away; the Menü button opens it as a column under the header */
+@media (max-width:700px){
+  .top{flex-wrap:wrap;gap:10px}
+  .brand{margin-right:auto;font-size:16px}
+  .top .btn{min-height:44px;padding:0 14px;font-size:14px} .top-contact,.menu-btn{display:inline-flex}
+  .menu-btn{font:inherit;font-weight:600;font-size:14px;background:none;cursor:pointer}
+  .nav{display:none;order:9;flex-direction:column;gap:0;width:100%;margin-top:8px;padding-top:4px;border-top:1px solid var(--rule)}
+  .top.open .nav{display:flex}
+  .nav a{padding:13px 0;font-size:17px;border-bottom:1px solid var(--rule)} .nav a:last-child{border-bottom:0}
+}
 /* hero */
 .hero{padding-top:72px;padding-bottom:24px}
 .hero-text{display:flex;flex-direction:column;gap:22px;max-width:720px}
