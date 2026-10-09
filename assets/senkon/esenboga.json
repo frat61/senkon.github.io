@@ -4,24 +4,24 @@
  "ground": 1015,
  "cols": [
   {
-   "x0": 145,
-   "x1": 889,
+   "x0": 153,
+   "x1": 868,
    "top": 16,
    "name": "Esenboğa Havalimanı Kontrol Kulesi ve teknik blok, Ankara",
    "cranes": [
     {
-     "fx": 0.985,
+     "fx": 0.9,
      "kind": "luff",
      "dir": -1,
-     "tieFx": 0.93,
+     "tieFx": 0.76,
      "mastM": 30
     },
     {
-     "fx": 0.1,
+     "fx": 0.18,
      "kind": "hammer",
      "dir": 1,
      "mastM": 18,
-     "cap": 0.24
+     "cap": 0.16
     }
    ]
   }
