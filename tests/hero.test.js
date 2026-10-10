@@ -26,3 +26,13 @@ test('Deneyim keeps the project text with a placeholder', () => {
   assert.match(deneyim(), /Esenboğa Havalimanı Kontrol Kulesi/);
   assert.match(deneyim(), /class="ph featured-ph"/);
 });
+
+const css = fs.readFileSync(path.join(__dirname, '..', 'site.css'), 'utf8');
+
+test('hero figure rule beats the generic .skyline margin and padding', () => {
+  assert.match(css, /\.skyline\.hero-figure\{[^}]*padding:0/);
+});
+
+test('phones do not download the hidden hero picture', () => {
+  assert.match(hero(), /<img class="skyline-static"[^>]*loading="lazy"/);
+});
