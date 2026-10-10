@@ -31,7 +31,7 @@
 </script>
 <script>if(!matchMedia("(prefers-reduced-motion: reduce)").matches)document.documentElement.classList.add("sketch")</script>
 <link rel="stylesheet" href="assets/senkon/fonts/fonts.css?v=5a84d35c">
-<link rel="stylesheet" href="site.css?v=5c3e4a5c">
+<link rel="stylesheet" href="site.css?v=739dd823">
 </head>
 <body>
 <header id="top" class="wrap top">
@@ -379,9 +379,40 @@
 <main>
   <section class="wrap hero">
     <div class="hero-text">
-      <h1>Taşıyıcı sistem tasarımı ve deprem performans değerlendirmesi</h1>
-      <p class="lead">Çelik ve betonarme yapıların taşıyıcı sistemlerini tasarlıyor, mevcut binaların depremde nasıl davranacağını hesaplıyoruz. Konsept aşamasındaki modelleri telefonda açılan bir bağlantıyla paylaşıyoruz.</p>
-      <div class="btns"><a class="btn btn-main" href="#iletisim">İletişim</a><a class="btn btn-line" href="#performans">Performans değerlendirmesi</a></div>
+      <!-- hero text: the overview shows on load; each button below swaps in its own panel. Edit the wording freely,
+           but keep each panel's id and its button's aria-controls the same. -->
+      <div class="hero-stage">
+        <div class="hero-panel on" id="hero-overview">
+          <h1 class="hero-title">Taşıyıcı sistem tasarımı ve deprem performans değerlendirmesi</h1>
+          <p class="lead">Çelik ve betonarme yapıların taşıyıcı sistemlerini tasarlıyor, mevcut binaların depremde nasıl davranacağını hesaplıyoruz. Konsept aşamasındaki modelleri telefonda açılan bir bağlantıyla paylaşıyoruz.</p>
+        </div>
+        <div class="hero-panel" id="hero-tasarim">
+          <h2 class="hero-title">Çelik ve betonarme yapı tasarımı</h2>
+          <p class="lead">Yeni yapıların taşıyıcı sistemini konseptten uygulama projesine kadar tasarlıyoruz. Endüstriyel yapılar, laboratuvar ve ofis binaları, çatı ve platformlar için TS 500 ve TBDY 2018'e uygun hesap ve çizimler hazırlıyoruz. Konsept aşamasındaki modeli telefonda açılan bir bağlantıyla paylaşıyor, kararları birlikte veriyoruz.</p>
+          <a class="hero-more" href="#iletisim">İletişim →</a>
+        </div>
+        <div class="hero-panel" id="hero-performans">
+          <h2 class="hero-title">Mevcut binanız depremde nasıl davranır?</h2>
+          <p class="lead">Mevcut binayı yerinde tespitler ve malzeme verileriyle modelliyor, doğrusal olmayan analizle deprem davranışını hesaplıyoruz. Sonuçta binanın hangi performans düzeyini sağladığını ve hangi elemanların yetersiz kaldığını açık bir raporla gösteriyoruz.</p>
+          <a class="hero-more" href="#iletisim">İletişim →</a>
+        </div>
+        <div class="hero-panel" id="hero-guclendirme">
+          <h2 class="hero-title">Yetersiz çıkan binalar için güçlendirme</h2>
+          <p class="lead">Performans değerlendirmesi binanın yetersiz kaldığını gösterirse güçlendirme seçeneklerini karşılaştırıyor, uygun olanın projesini hazırlıyoruz. Amaç, binaya gereğinden fazla müdahale etmeden onu hedef performans düzeyine taşımak.</p>
+          <a class="hero-more" href="#iletisim">İletişim →</a>
+        </div>
+        <div class="hero-panel" id="hero-danismanlik">
+          <h2 class="hero-title">Statik rapor, danışmanlık ve ikinci görüş</h2>
+          <p class="lead">Statik rapor hazırlıyor, tasarım ve uygulama sürecinde teknik danışmanlık veriyoruz. Başka bir mühendisin hazırladığı projeye bağımsız ikinci görüş istediğinizde hesapları ve çizimleri inceleyip bulguları yazılı olarak iletiyoruz.</p>
+          <a class="hero-more" href="#iletisim">İletişim →</a>
+        </div>
+      </div>
+      <div class="btns hero-tabs" role="group" aria-label="Hizmetler">
+        <button class="btn btn-line hero-tab" type="button" aria-pressed="false" aria-controls="hero-tasarim">Yapı tasarımı</button>
+        <button class="btn btn-line hero-tab" type="button" aria-pressed="false" aria-controls="hero-performans">Performans</button>
+        <button class="btn btn-line hero-tab" type="button" aria-pressed="false" aria-controls="hero-guclendirme">Güçlendirme</button>
+        <button class="btn btn-line hero-tab" type="button" aria-pressed="false" aria-controls="hero-danismanlik">Danışmanlık</button>
+      </div>
     </div>
     <div class="hero-media">
       <figure class="skyline hero-figure" data-skyline="assets/senkon/esenboga.json" data-tallest-m="280" aria-label="Esenboğa Havalimanı Kontrol Kulesi çizimi">
@@ -499,6 +530,18 @@
   btn.addEventListener('click', function () { set(!top.classList.contains('open')); });
   top.querySelectorAll('.nav a').forEach(function (a) { a.addEventListener('click', function () { set(false); }); });
   document.addEventListener('keydown', function (e) { if (e.key === 'Escape' && top.classList.contains('open')) { set(false); btn.focus(); } });
+})();
+(function () {
+  // hero services: a button swaps its panel in for the overview; pressing it again brings the overview back
+  var tabs = document.querySelectorAll('.hero-tab'), panels = document.querySelectorAll('.hero-panel');
+  function show(id) {
+    panels.forEach(function (p) { var on = p.id === id; p.classList.toggle('on', on); p.toggleAttribute('inert', !on); });
+    tabs.forEach(function (t) { t.setAttribute('aria-pressed', String(t.getAttribute('aria-controls') === id)); });
+  }
+  panels.forEach(function (p) { if (!p.classList.contains('on')) p.setAttribute('inert', ''); });
+  tabs.forEach(function (t) {
+    t.addEventListener('click', function () { show(t.getAttribute('aria-pressed') === 'true' ? 'hero-overview' : t.getAttribute('aria-controls')); });
+  });
 })();
 (function () {
   var form = document.getElementById('openModel'), input = document.getElementById('modelCode'), msg = document.getElementById('openMsg');
