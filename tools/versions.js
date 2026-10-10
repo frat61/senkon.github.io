@@ -1,7 +1,7 @@
 #!/usr/bin/env node
 'use strict';
 /* Cache-busting tags for the home page. GitHub Pages caches every file for four hours, so index.html
-   links site.css, the fonts, the skyline script and the two drawings with a ?v= tag that must change
+   links site.css, the fonts, the skyline and logo scripts and the two drawings with a ?v= tag that must change
    whenever the file does. The tag is the first eight hex digits of the file's SHA-1; a drawing's tag
    also covers its JSON sidecar, because skyline.js fetches the JSON with the picture's tag.
    404.html links a subset of the same files (with a leading slash, since GitHub Pages serves it at
@@ -19,6 +19,7 @@ const LINKS = {
   'site.css': ['site.css'],
   'assets/senkon/fonts/fonts.css': ['assets/senkon/fonts/fonts.css'],
   'assets/senkon/skyline.js': ['assets/senkon/skyline.js'],
+  'assets/senkon/logo-sketch.js': ['assets/senkon/logo-sketch.js'],
   'assets/senkon/skyline.webp': ['assets/senkon/skyline.webp', 'assets/senkon/skyline.json'],
   'assets/senkon/esenboga.webp': ['assets/senkon/esenboga.webp', 'assets/senkon/esenboga.json'],
 };
