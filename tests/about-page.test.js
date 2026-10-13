@@ -37,3 +37,14 @@ test('no personal names, premium, 6306 or Amazon', () => {
 test('the sitemap lists the page', () => {
   assert.match(fs.readFileSync(path.join(__dirname, '..', 'sitemap.xml'), 'utf8'), /<loc>https:\/\/senkonmuhendislik\.com\/hakkinda\/<\/loc>/);
 });
+
+test('Misyonumuz and Vizyonumuz, with the owner question in Fırat words', () => {
+  assert.match(html, /<p class="eyebrow">Misyonumuz<\/p>/);
+  assert.match(html, /<p class="eyebrow">Vizyonumuz<\/p>/);
+  assert.ok(html.includes('"binam, içinde yaşamak için güvenli mi?"'));
+});
+
+test('three working principles, in order', () => {
+  const p = [...html.matchAll(/<li class="item"><span class="num"[^>]*>\d\d<\/span><h3>([^<]+)<\/h3>/g)].map(m => m[1]);
+  assert.deepEqual(p, ['Veriye dayanan kararlar', 'Anlaşılır raporlar', 'Gereğinden fazla müdahale yok']);
+});
