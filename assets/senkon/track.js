@@ -11,7 +11,7 @@
       email: 'kSRHCISD45sdELmE-PpE',
       form: 'uUi3CIeD45sdELmE-PpE'
     },
-    FORM_ENDPOINT: ''                      // Formspree form adresi, ör. 'https://formspree.io/f/abcdwxyz' (boşsa form gizlenir)
+    FORM_ENDPOINT: 'https://formspree.io/f/mvkzwbeb'                    // Formspree form adresi, ör. 'https://formspree.io/f/abcdwxyz' (boşsa form gizlenir)
   };
   var KEY = 'senkon-consent';              // localStorage: 'granted' | 'denied'
 
