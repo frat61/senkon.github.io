@@ -31,7 +31,7 @@
 </script>
 <script>if(!matchMedia("(prefers-reduced-motion: reduce)").matches)document.documentElement.classList.add("sketch")</script>
 <link rel="stylesheet" href="assets/senkon/fonts/fonts.css?v=5a84d35c">
-<link rel="stylesheet" href="site.css?v=cebdbff4">
+<link rel="stylesheet" href="site.css?v=685c9da5">
 </head>
 <body>
 <header id="top" class="wrap top">
@@ -377,30 +377,36 @@
 </header>
 
 <main>
+  <!-- METİN 1 · ÜST BÖLÜM (hero): ana başlık ve dört düğmenin açtığı yazılar. Her panelde başlık (h1/h2) ve paragraf (p) değiştirilebilir. -->
   <section class="wrap hero">
     <div class="hero-text">
       <!-- hero text: the overview shows on load; each button below swaps in its own panel. Edit the wording freely,
            but keep each panel's id and its button's aria-controls the same. -->
       <div class="hero-stage">
+        <!-- METİN 1a · Açılışta görünen başlık ve paragraf -->
         <div class="hero-panel on" id="hero-overview">
           <h1 class="hero-title">Taşıyıcı sistem tasarımı ve deprem performans değerlendirmesi</h1>
           <p class="lead">Çelik ve betonarme yapıların taşıyıcı sistemlerini tasarlıyor, mevcut binaların depremde nasıl davranacağını hesaplıyoruz. Konsept aşamasındaki modelleri telefonda açılan bir bağlantıyla paylaşıyoruz.</p>
         </div>
+        <!-- METİN 1b · "Yapı tasarımı" düğmesinin yazısı -->
         <div class="hero-panel" id="hero-tasarim">
           <h2 class="hero-title">Çelik ve betonarme yapı tasarımı</h2>
           <p class="lead">Yeni yapıların taşıyıcı sistemini konseptten uygulama projesine kadar tasarlıyoruz. Endüstriyel yapılar, laboratuvar ve ofis binaları, çatı ve platformlar için TBDY 2018, ACI ve Eurocode'a uygun hesap ve çizimler hazırlıyoruz. Konsept aşamasındaki modeli telefonda açılan bir bağlantıyla paylaşıyor, kararları birlikte veriyoruz.</p>
           <a class="hero-more" href="#iletisim">İletişim →</a>
         </div>
+        <!-- METİN 1c · "Performans" düğmesinin yazısı -->
         <div class="hero-panel" id="hero-performans">
           <h2 class="hero-title">Mevcut binanız depremde nasıl davranır?</h2>
-          <p class="lead">Mevcut binayı yerinde tespitler ve malzeme verileriyle modelliyor, doğrusal olmayan analizle deprem davranışını hesaplıyoruz. Sonuçta binanın hangi performans düzeyini sağladığını ve hangi elemanların yetersiz kaldığını açık bir raporla gösteriyoruz.</p>
-          <a class="hero-more" href="#iletisim">İletişim →</a>
+          <p class="lead">Zemin etüdü, karot testi, röntgen ve donatı okumasıyla binanızı yerinde inceliyor; TBDY 2018 ve ASCE 41'e göre üç boyutlu analizle deprem davranışını hesaplıyoruz. Gerektiğinde gerçek deprem kayıtlarıyla analiz ve güçlendirme projesi.</p>
+          <a class="hero-more" href="#performans">Nasıl çalışıyoruz →</a>
         </div>
+        <!-- METİN 1d · "Güçlendirme" düğmesinin yazısı -->
         <div class="hero-panel" id="hero-guclendirme">
           <h2 class="hero-title">Yetersiz çıkan binalar için güçlendirme</h2>
           <p class="lead">Performans değerlendirmesi binanın yetersiz kaldığını gösterirse güçlendirme seçeneklerini karşılaştırıyor, uygun olanın projesini hazırlıyoruz. Amaç, binaya gereğinden fazla müdahale etmeden onu hedef performans düzeyine taşımak.</p>
           <a class="hero-more" href="#iletisim">İletişim →</a>
         </div>
+        <!-- METİN 1e · "Danışmanlık" düğmesinin yazısı -->
         <div class="hero-panel" id="hero-danismanlik">
           <h2 class="hero-title">Statik rapor, danışmanlık ve ikinci görüş</h2>
           <p class="lead">Statik rapor hazırlıyor, tasarım ve uygulama sürecinde teknik danışmanlık veriyoruz. Başka bir mühendisin hazırladığı projeye bağımsız ikinci görüş istediğinizde hesapları ve çizimleri inceleyip bulguları yazılı olarak iletiyoruz.</p>
@@ -427,26 +433,35 @@
     <figcaption class="skyline-caption">Yapı mühendisliğinin simge yapıları.</figcaption>
   </figure>
 
+  <!-- METİN 2 · DEPREM PERFORMANSI: başlık, giriş paragrafı, altı adım (h3 = adım adı, p = açıklama), "Çalışmanın sonunda" listesi -->
   <section id="performans" class="wrap section perf rule">
     <p class="eyebrow">Deprem performansı</p>
     <h2>Mevcut binalar depremde nasıl davranır?</h2>
-    <p class="lead">Mevcut betonarme ve çelik binaları TBDY 2018'in yanında ASCE ve Eurocode'a göre değerlendiriyor, binanın beklenen depremde hangi performans düzeyinde kalacağını hesaplıyoruz.</p>
-    <div class="perf-grid">
-      <div>
-        <h3>Gerçek deprem kayıtlarıyla</h3>
-        <p>Binanın doğrusal olmayan modelini kuruyor; itme analizinin yanında zaman tanım alanında analizle gerçek deprem kayıtlarını binaya etkitiyoruz. Örneğin 6 Şubat 2023 Kahramanmaraş depremlerinin kayıtları, sahanın deprem tehlikesine göre ölçeklenerek uygulanır.</p>
-      </div>
-      <div>
-        <h3>Hasar nerede toplanıyor</h3>
-        <p>Sonuç tek bir sayı değil. Hangi katta ve hangi elemanlarda hasarın yoğunlaştığını, hangi mekanizmanın belirleyici olduğunu ve binanın hedeflenen performans düzeyini sağlayıp sağlamadığını gösteriyoruz.</p>
-      </div>
-      <div>
-        <h3>Güçlendirme kararı</h3>
-        <p>Değerlendirme, güçlendirmenin gerekip gerekmediğini ve gerekiyorsa hangi seçeneğin en az müdahaleyle hedefe ulaştırdığını ortaya koyan bir raporla tamamlanır.</p>
-      </div>
+    <p class="lead">Binanızı yerinde inceliyor, zemini, betonu ve donatıyı ölçüyor; bu verilerle kurduğumuz üç boyutlu modelde binanın beklenen depremde hangi performans düzeyinde kalacağını hesaplıyoruz.</p>
+    <!-- one service, no package names or levels on the page (Fırat's choice); the level of each job is agreed when quoting -->
+    <h3 class="perf-sub">Nasıl çalışıyoruz</h3>
+    <ol class="list2 steps">
+      <li class="item"><span class="num" aria-hidden="true">01</span><h3>Sismik zemin etüdü</h3><p>Binanın oturduğu zemin incelenir; zeminin deprem dalgalarını nasıl büyüttüğü belirlenir.</p></li>
+      <li class="item"><span class="num" aria-hidden="true">02</span><h3>Karot testi</h3><p>Kolon ve perdelerden silindir beton numuneler alınır; betonun gerçek dayanımı laboratuvarda ölçülür.</p></li>
+      <li class="item"><span class="num" aria-hidden="true">03</span><h3>Röntgen</h3><p>Betonu kırmadan, tarama cihazıyla kolon ve kirişlerdeki donatının yeri ve aralığı belirlenir.</p></li>
+      <li class="item"><span class="num" aria-hidden="true">04</span><h3>Donatı okuması</h3><p>Seçilen noktalarda pas payı açılır; donatının çapı, adedi ve korozyon durumu yerinde görülür.</p></li>
+      <li class="item"><span class="num" aria-hidden="true">05</span><h3>Üç boyutlu analiz</h3><p>Toplanan verilerle binanın 3B modeli kurulur; TBDY 2018 ve ASCE 41'e göre doğrusal olmayan analizle performans düzeyi hesaplanır.</p></li>
+      <li class="item"><span class="num" aria-hidden="true">06</span><h3>Gerçek deprem kayıtlarıyla analiz</h3><p>Gerektiğinde binaya gerçek deprem kayıtları etkitilir; örneğin 6 Şubat 2023 Kahramanmaraş depremlerinin kayıtları, sahanın deprem tehlikesine göre ölçeklenerek uygulanır.</p></li>
+    </ol>
+    <div class="perf-get">
+      <h3>Çalışmanın sonunda</h3>
+      <ul>
+        <li>Binanın performans düzeyini sade bir dille anlatan yazılı rapor</li>
+        <li>Hasarın hangi katta ve hangi elemanlarda toplandığı</li>
+        <li>Gerekirse, en az müdahaleyle hedefe ulaştıran güçlendirme projesi</li>
+        <li>Binanızın 3B modeli, telefonunuzda açılan bir bağlantıyla</li>
+      </ul>
+      <p class="perf-calm">Çalışma sırasında binada yaşamaya devam edebilirsiniz; karot alınan ve donatı okuması yapılan noktalar onarılarak kapatılır.</p>
+      <a class="btn btn-main" href="https://wa.me/905309250461?text=Merhaba%2C%20binam%20i%C3%A7in%20deprem%20performans%20de%C4%9Ferlendirmesi%20teklifi%20almak%20istiyorum.">Binanız için teklif alın</a>
     </div>
   </section>
 
+  <!-- METİN 3 · HİZMETLER: beş hizmet (h3 = hizmet adı, p = açıklama) -->
   <section id="hizmetler" class="wrap section rule">
     <p class="eyebrow">Hizmetler</p>
     <h2>Ne yapıyoruz</h2>
@@ -459,6 +474,7 @@
     </div>
   </section>
 
+  <!-- METİN 4 · 3B MODEL: başlık ve açıklama -->
   <section id="model" class="wrap viewer rule">
     <p class="eyebrow">3B model görüntüleyici</p>
     <h2>Paylaşılan modeli açın</h2>
@@ -473,6 +489,7 @@
     <p class="aside"><a href="structkit/">StructKit</a>, tarayıcıda çalışan küçük hesap araçlarımız: çelik, betonarme, deprem ve rüzgar.</p>
   </section>
 
+  <!-- METİN 5 · DENEYİM: büyük rakam, altı yapı türü kartı (h3 = başlık, p = açıklama, li = proje satırları), alttaki not -->
   <section id="deneyim" class="wrap section rule">
     <p class="eyebrow">Deneyim</p>
     <h2>Ekibimizin çalıştığı yapı türleri</h2>
@@ -490,6 +507,7 @@
     <p class="note">Ekibimizin GVN Tasarım ve Mühendislik ile Yapı Akademisi Mühendislik bünyesinde görev aldığı projelerden. Referanslar talep üzerine iletilir.</p>
   </section>
 
+  <!-- METİN 6 · HAKKINDA: tanıtım paragrafı, yönetmelik ve yazılım etiketleri (her <span>…</span> bir etiket) -->
   <section id="hakkinda" class="wrap section rule">
     <p class="eyebrow">Hakkında</p>
     <h2>Senkon Mühendislik</h2>
@@ -504,6 +522,7 @@
     </div>
   </section>
 
+  <!-- METİN 7 · İLETİŞİM: başlık ve düğme yazıları (telefon ve e-posta değişirse href="…" içindekini de değiştirin) -->
   <section id="iletisim" class="wrap contact rule">
     <p class="eyebrow">İletişim</p>
     <h2>Bir projeniz mi var?</h2>

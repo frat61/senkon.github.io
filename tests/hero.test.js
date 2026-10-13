@@ -63,10 +63,10 @@ test('the overview panel is the one shown on load and holds the only h1', () => 
   assert.equal(html.split('<h1').length - 1, 1);
 });
 
-test('every service panel ends with a contact link', () => {
+test('every service panel ends with a link onward (Performans to its steps, the others to contact)', () => {
   const services = hero().split('<div class="hero-panel" ').slice(1);
   assert.equal(services.length, 4);
-  for (const s of services) assert.match(s, /href="#iletisim"/);
+  for (const s of services) assert.match(s, s.startsWith('id="hero-performans"') ? /href="#performans"/ : /href="#iletisim"/);
 });
 
 test('panels share one grid cell so swapping text never moves the buttons', () => {
@@ -90,4 +90,23 @@ test('the site names the codes it works to: TBDY 2018, ASCE, ACI and Eurocode (T
   assert.doesNotMatch(html, /TS 500/);
   for (const code of ['ASCE', 'ACI', 'Eurocode']) assert.match(html, new RegExp('<span>' + code + '</span>'));
   assert.doesNotMatch(html, /uluslararası yönetmelik/);   // the vague wording is replaced by the code names
+});
+
+// Performans: the main target. Six plain steps, what the owner gets, and a quote button; no package names, no legal note
+const perf = () => block(/<section id="performans"[\s\S]*?<\/section>/);
+
+test('Performans lists the six assessment steps in order', () => {
+  const steps = [...perf().matchAll(/<li class="item"><span class="num"[^>]*>(\d\d)<\/span><h3>([^<]+)<\/h3>/g)].map(m => m[2]);
+  assert.deepEqual(steps, ['Sismik zemin etüdü', 'Karot testi', 'Röntgen', 'Donatı okuması', 'Üç boyutlu analiz', 'Gerçek deprem kayıtlarıyla analiz']);
+});
+
+test('Performans ends with what the owner receives and a WhatsApp quote button', () => {
+  assert.match(perf(), /<h3>Çalışmanın sonunda<\/h3>/);
+  assert.match(perf(), /güçlendirme projesi/);
+  assert.match(perf(), /<a class="btn btn-main" href="https:\/\/wa\.me\/905309250461\?text=[^"]+">Binanız için teklif alın<\/a>/);
+});
+
+test('the page never says premium and never cites law 6306', () => {
+  assert.doesNotMatch(html, /premium/i);
+  assert.doesNotMatch(html, /6306/);
 });
