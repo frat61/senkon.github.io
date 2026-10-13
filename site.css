@@ -58,6 +58,12 @@ p{margin:0}
 .hero-tab[aria-pressed="true"]{background:var(--btn);color:var(--btn-ink);border-color:var(--btn)}
 @media (prefers-reduced-motion: reduce){ .hero-panel{transition:none;transform:none} }
 @media (max-width:560px){ .hero-tabs{display:grid;grid-template-columns:1fr 1fr;gap:8px} .hero-tab{padding:0 10px;font-size:14px} }
+/* phone: the buttons go above the text like ordinary tabs and the stage is only as tall as the panel showing,
+   so a short panel leaves no gap and a tap never moves the button under the finger */
+@media (max-width:560px){
+  .hero-text{gap:20px} .hero-tabs{order:-1}
+  .hero-panel:not(.on){display:none}
+}
 .hero-media{min-width:0;display:flex;justify-content:flex-end}
 .skyline.hero-figure{margin:0;padding:0;width:100%;max-width:340px}
 .hero-figure .skyline-caption{display:none}
@@ -123,4 +129,14 @@ p{margin:0}
 @media (max-width:640px){ .open-form{flex-direction:column} .open-form .btn{width:100%} }
 .contact{padding-top:64px;padding-bottom:48px}
 .contact .btns{margin-top:24px} @media (max-width:640px){ .contact .btns{flex-direction:column} .contact .btn{width:100%} }
-.foot{display:flex;justify-content:space-between;gap:16px;padding-top:22px;padding-bottom:calc(28px + env(safe-area-inset-bottom,0px));font-size:14px;color:var(--muted);flex-wrap:wrap}
+.foot{display:flex;justify-content:space-between;align-items:center;gap:16px;padding-top:22px;padding-bottom:calc(28px + env(safe-area-inset-bottom,0px));font-size:14px;color:var(--muted);flex-wrap:wrap}
+.foot-link,.foot-quiet{display:inline-block;padding:12px 4px}   /* 44 px tall tap area, same look */
+/* phone: WhatsApp and e-mail pinned to the bottom of the screen; hidden while the hero or the İletişim section is on screen */
+.dock{display:none}
+@media (max-width:700px){
+  .dock{display:grid;grid-template-columns:1fr 1fr;gap:8px;position:fixed;left:0;right:0;bottom:0;z-index:20;padding:10px 16px calc(10px + env(safe-area-inset-bottom,0px));background:rgba(255,255,255,.96);border-top:1px solid var(--rule);transition:transform .25s ease}
+  .dock .btn{min-height:46px;padding:0 10px;font-size:15px}
+  .dock.away{transform:translateY(110%)}
+  body.has-dock .foot{padding-bottom:calc(96px + env(safe-area-inset-bottom,0px))}
+}
+@media (prefers-reduced-motion: reduce){ .dock{transition:none} }
