@@ -143,4 +143,112 @@ function bundle(edges, opts) {
   return members;
 }
 
-module.exports = { parseGlb, weld, featureEdges, bundle };
+// ---- member geometry helpers
+const mlen = m => len(sub(m.b, m.a));
+const mid = m => mul(add(m.a, m.b), 0.5);
+const kind = m => {                                       // 'vertical' | 'horizontal' | 'diagonal', by the member's slope
+  const L = mlen(m), dy = Math.abs(m.b[1] - m.a[1]);
+  return dy > 0.9 * L ? 'vertical' : dy < 0.1 * L ? 'horizontal' : 'diagonal';
+};
+const along = (m, axis) => Math.abs(m.b[axis] - m.a[axis]) > 0.9 * mlen(m);
+const r1 = v => Math.round(v * 10) / 10;
+
+// ---- the plan grid: tower x positions and the chord rows, from the tall column members
+function findGrid(members) {
+  const tall = members.filter(m => m.mesh === 'col' && mlen(m) > 30);
+  const xs = [...new Set(tall.map(m => r1(mid(m)[0])))].sort((a, b) => a - b);
+  const zs = [...new Set(tall.flatMap(m => [r1(m.a[2]), r1(m.b[2])]))].sort((a, b) => a - b);
+  const rows = [];
+  zs.forEach(z => { const r = rows[rows.length - 1]; if (r && z - r.z1 <= 5) r.z1 = z; else rows.push({ z0: z, z1: z }); });   // chords of one tower sit 3 m apart, rows 93 m
+  const allZ = members.flatMap(m => [m.a[2], m.b[2]]);
+  return { xs, rows, zMin: Math.min(...allZ), zMax: Math.max(...allZ) };
+}
+
+// ---- cut long members at the grid so a piece is one bay
+function splitAtGrid(members, grid, opts) {
+  const maxLen = (opts && opts.maxLen !== undefined) ? opts.maxLen : 12;
+  const stepZ = (opts && opts.stepZ !== undefined) ? opts.stepZ : 10;
+  const out = [];
+  members.forEach(m => {
+    const L = mlen(m);
+    let axis = null, planes = [];
+    if (L > maxLen && along(m, 0)) { axis = 0; planes = grid.xs; }
+    else if (L > maxLen && along(m, 2)) { axis = 2; for (let z = grid.zMin; z <= grid.zMax; z += stepZ) planes.push(z); }
+    if (axis === null) { out.push(m); return; }
+    const lo = Math.min(m.a[axis], m.b[axis]), hi = Math.max(m.a[axis], m.b[axis]);
+    const cuts = planes.filter(p => p > lo + 1e-6 && p < hi - 1e-6).map(p => (p - m.a[axis]) / (m.b[axis] - m.a[axis])).sort((a, b) => a - b);
+    const ts = [0, ...cuts, 1];
+    for (let i = 0; i + 1 < ts.length; i++) {
+      if ((ts[i + 1] - ts[i]) * L < 0.05) continue;
+      out.push({ a: add(m.a, mul(sub(m.b, m.a), ts[i])), b: add(m.a, mul(sub(m.b, m.a), ts[i + 1])), w: m.w, mesh: m.mesh });
+    }
+  });
+  return out;
+}
+
+// ---- erection pieces: towers, end-wall posts, floor beams and bracing by level and bay, roof trusses by line
+function group(members, grid) {
+  const pieces = new Map();
+  const piece = (t, key) => { const k = t + JSON.stringify(key); let p = pieces.get(k); if (!p) { p = { t, key, m: [] }; pieces.set(k, p); } return p; };
+  const assigned = new Array(members.length).fill(false);
+  const mids = members.map(mid), kinds = members.map(kind);
+  grid.rows.forEach((row, ri) => grid.xs.forEach(x => {
+    members.forEach((m, i) => {
+      if (assigned[i]) return;
+      const c = mids[i];
+      if (Math.abs(c[0] - x) <= 1.6 && c[2] >= row.z0 - 0.6 && c[2] <= row.z1 + 0.6) { piece('tower', { row: ri, x }).m.push(i); assigned[i] = true; }
+    });
+  }));
+  const ends = [grid.xs[0], grid.xs[grid.xs.length - 1]];
+  const posts = [];
+  members.forEach((m, i) => {
+    if (assigned[i] || kinds[i] !== 'vertical') return;
+    const c = mids[i];
+    if (!ends.some(x => Math.abs(c[0] - x) <= 1)) return;
+    const key = { x: r1(c[0]), z: r1(c[2]) }; piece('post', key).m.push(i); assigned[i] = true; posts.push({ key, x: c[0], z: c[2] });
+  });
+  members.forEach((m, i) => {
+    if (assigned[i] || kinds[i] === 'vertical') return;
+    const c = mids[i], post = posts.find(p => Math.abs(c[0] - p.x) <= 0.6 && Math.abs(c[2] - p.z) <= 0.6);
+    if (post) { piece('post', post.key).m.push(i); assigned[i] = true; }
+  });
+  // floor levels: peaks of the horizontal members' y histogram, 0.5 m bins, at least 20 members
+  const bins = new Map();
+  members.forEach((m, i) => { if (!assigned[i] && kinds[i] === 'horizontal' && mids[i][1] <= 0.5) { const b = Math.round(mids[i][1] / 0.5); bins.set(b, (bins.get(b) || 0) + 1); } });
+  const levels = [...bins.keys()].filter(b => bins.get(b) >= 20 && bins.get(b) >= (bins.get(b - 1) || 0) && bins.get(b) >= (bins.get(b + 1) || 0)).map(b => b * 0.5).sort((a, b) => a - b);
+  const nearestLevel = y => levels.length ? levels.reduce((best, l) => Math.abs(l - y) < Math.abs(best - y) ? l : best, levels[0]) : Math.round(y);
+  const bay = x => { let i = 0; while (i + 1 < grid.xs.length - 1 && x >= grid.xs[i + 1]) i++; return i; };
+  const strip = z => Math.floor((z - grid.zMin) / 10);
+  members.forEach((m, i) => {
+    if (assigned[i]) return;
+    const c = mids[i];
+    if (c[1] <= 0.5) {
+      const band = kinds[i] !== 'horizontal';
+      const level = band ? nearestLevel(Math.min(m.a[1], m.b[1])) : nearestLevel(c[1]);
+      piece('floor', { level, band, x: bay(c[0]), z: strip(c[2]) }).m.push(i);
+    } else if (along(m, 2)) {
+      const x = grid.xs.reduce((best, v) => Math.abs(v - c[0]) < Math.abs(best - c[0]) ? v : best, grid.xs[0]);
+      piece('roof', { x, z: strip(c[2]) }).m.push(i);
+    } else piece('roofx', { x: bay(c[0]), z: strip(c[2]) }).m.push(i);
+    assigned[i] = true;
+  });
+  return [...pieces.values()];
+}
+
+// ---- site order: towers, posts, floors bottom up (beams of a level, then the bracing band above it), roof trusses, roof bracing
+function order(pieces) {
+  const sortKey = p => {
+    const k = p.key;
+    switch (p.t) {
+      case 'tower': return [0, k.row, k.x, 0];
+      case 'post': return [1, k.x, k.z, 0];
+      case 'floor': return [2, k.level, k.band ? 1 : 0, k.x, k.z];
+      case 'roof': return [3, k.x, k.z, 0];
+      default: return [4, k.x, k.z, 0];
+    }
+  };
+  const keys = pieces.map(sortKey);
+  return pieces.map((_, i) => i).sort((i, j) => { const a = keys[i], b = keys[j]; for (let n = 0; n < Math.max(a.length, b.length); n++) { const d = (a[n] || 0) - (b[n] || 0); if (d) return d; } return i - j; });
+}
+
+module.exports = { parseGlb, weld, featureEdges, bundle, findGrid, splitAtGrid, group, order };

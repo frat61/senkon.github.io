@@ -90,4 +90,50 @@ test('bundle turns the four long edges of a prism into one member with the prism
   assert.equal(collinear.length, 1);                                // gap 0.1 < 0.3 joins them
 });
 
+const M = (a, b, w, mesh) => ({ a, b, w, mesh });
+const towers = () => [M([0, -35, -43], [0, 3, -43], 0.3, 'col'), M([0, -35, -40], [0, 3, -40], 0.3, 'col'),
+  M([10, -35, -43], [10, 3, -43], 0.3, 'col'), M([10, -35, -40], [10, 3, -40], 0.3, 'col'),
+  M([0, -35, 50], [0, 3, 50], 0.3, 'col'), M([10, -35, 50], [10, 3, 50], 0.3, 'col')];
+
+test('findGrid reads the tower x positions and the two rows from the tall columns', () => {
+  const g = H.findGrid([...towers(), M([5, -20, -41.5], [5, -20, 51.5], 0.2, 'beam')]);
+  assert.deepEqual(g.xs, [0, 10]);
+  assert.equal(g.rows.length, 2);
+  assert.ok(g.rows[0].z0 <= -43 && g.rows[0].z1 >= -40);
+  assert.equal(g.zMin, -43); assert.equal(g.zMax, 51.5);
+});
+
+test('splitAtGrid cuts a long x member at the grid, leaves short ones, and never emits zero-length pieces', () => {
+  const g = { xs: [0, 10, 20, 30], rows: [], zMin: -43, zMax: 53 };
+  const out = H.splitAtGrid([M([0, -20, -41.5], [25, -20, -41.5], 0.2, 'beam'), M([2, -20, -41.5], [8, -20, -41.5], 0.2, 'beam')], g);
+  assert.deepEqual(out.map(m => [m.a[0], m.b[0]]), [[0, 10], [10, 20], [20, 25], [2, 8]]);
+  const onPlane = H.splitAtGrid([M([10, -20, -41.5], [30, -20, -41.5], 0.2, 'beam')], g);
+  assert.deepEqual(onPlane.map(m => [m.a[0], m.b[0]]), [[10, 20], [20, 30]]);
+  const alongZ = H.splitAtGrid([M([5, 2, -43], [5, 2, 53], 0.2, 'beam')], g);
+  assert.equal(alongZ.length, 10);                                  // 96 m in 10 m steps from zMin
+});
+
+test('group makes a tower of chords plus lacing, floors by level and bay, roof by truss line; order lists towers, floors, roof', () => {
+  const ms = [...towers(),
+    M([0.2, -30, -43], [0.2, -27, -40], 0.1, 'beam'),              // lacing inside tower x=0 front
+    M([0, -20, -41.5], [10, -20, -41.5], 0.2, 'beam'),             // floor beam, level -20
+    M([0, -20, -41.5], [10, -10, -41.5], 0.15, 'beam'),            // bracing between -20 and -10
+    M([0, -10, -41.5], [10, -10, -41.5], 0.2, 'beam'),             // floor beam, level -10
+    M([5, 3, -43], [5, 3, -33], 0.3, 'beam'),                      // roof truss chord along z at x=5
+    M([0, 5, -41.5], [10, 5, -41.5], 0.1, 'beam')];                // roof purlin along x
+  for (let i = 0; i < 25; i++) ms.push(M([i, -20, 0], [i + 0.5, -20, 0], 0.1, 'beam'), M([i, -10, 0], [i + 0.5, -10, 0], 0.1, 'beam'));   // enough horizontals to make levels -20 and -10 peaks
+  const pieces = H.group(ms, H.findGrid(ms));
+  const tower0 = pieces.find(p => p.t === 'tower' && p.key.x === 0 && p.key.row === 0);
+  assert.deepEqual(tower0.m.sort((a, b) => a - b), [0, 1, 6]);
+  assert.ok(pieces.some(p => p.t === 'floor' && p.key.level === -20 && !p.key.band && p.m.includes(7)));
+  assert.ok(pieces.some(p => p.t === 'floor' && p.key.band && p.m.includes(8)));
+  assert.ok(pieces.some(p => p.t === 'roof' && p.m.includes(10)));
+  assert.ok(pieces.some(p => p.t === 'roofx' && p.m.includes(11)));
+  assert.ok(pieces.every(p => p.m.length > 0));
+  const o = H.order(pieces);
+  assert.equal(new Set(o).size, pieces.length);
+  const types = o.map(i => pieces[i].t);
+  assert.ok(types.lastIndexOf('tower') < types.indexOf('floor') && types.lastIndexOf('floor') < types.indexOf('roof'));
+});
+
 module.exports = { makeGlb, prism };
