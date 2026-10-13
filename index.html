@@ -31,7 +31,7 @@
 </script>
 <script>if(!matchMedia("(prefers-reduced-motion: reduce)").matches)document.documentElement.classList.add("sketch")</script>
 <link rel="stylesheet" href="assets/senkon/fonts/fonts.css?v=5a84d35c">
-<link rel="stylesheet" href="site.css?v=685c9da5">
+<link rel="stylesheet" href="site.css?v=3989ba04">
 </head>
 <body>
 <header id="top" class="wrap top">
@@ -371,7 +371,7 @@
 <!-- /logo-lockup -->
 </a>
   <nav id="nav" class="nav" aria-label="Sayfa içi">
-    <a href="#performans">Performans</a><a href="#hizmetler">Hizmetler</a><a href="#model">Model</a><a href="#deneyim">Deneyim</a><a href="#hakkinda">Hakkında</a><a href="#iletisim">İletişim</a>
+    <a href="deprem-performans/">Performans</a><a href="#hizmetler">Hizmetler</a><a href="#deneyim">Deneyim</a><a href="hakkinda/">Hakkında</a><a href="#iletisim">İletişim</a><a href="#model">Model</a>
   </nav>
   <button class="btn btn-line menu-btn" type="button" aria-expanded="false" aria-controls="nav">Menü</button>
 </header>
@@ -398,7 +398,7 @@
         <div class="hero-panel" id="hero-performans">
           <h2 class="hero-title">Mevcut binanız depremde nasıl davranır?</h2>
           <p class="lead">Zemin etüdü, karot testi, röntgen ve donatı okumasıyla binanızı yerinde inceliyor; TBDY 2018 ve ASCE 41'e göre üç boyutlu analizle deprem davranışını hesaplıyoruz. Gerektiğinde gerçek deprem kayıtlarıyla analiz ve güçlendirme projesi.</p>
-          <a class="hero-more" href="#performans">Nasıl çalışıyoruz →</a>
+          <a class="hero-more" href="deprem-performans/">Nasıl çalışıyoruz →</a>
         </div>
         <!-- METİN 1d · "Güçlendirme" düğmesinin yazısı -->
         <div class="hero-panel" id="hero-guclendirme">
@@ -433,32 +433,13 @@
     <figcaption class="skyline-caption">Yapı mühendisliğinin simge yapıları.</figcaption>
   </figure>
 
-  <!-- METİN 2 · DEPREM PERFORMANSI: başlık, giriş paragrafı, altı adım (h3 = adım adı, p = açıklama), "Çalışmanın sonunda" listesi -->
+  <!-- METİN 2 · DEPREM PERFORMANSI (kısa): başlık, paragraf, adımların tek satırlık özeti. Adımların ayrıntısı deprem-performans/index.html sayfasında (METİN P2). -->
   <section id="performans" class="wrap section perf rule">
     <p class="eyebrow">Deprem performansı</p>
     <h2>Mevcut binalar depremde nasıl davranır?</h2>
     <p class="lead">Binanızı yerinde inceliyor, zemini, betonu ve donatıyı ölçüyor; bu verilerle kurduğumuz üç boyutlu modelde binanın beklenen depremde hangi performans düzeyinde kalacağını hesaplıyoruz.</p>
-    <!-- one service, no package names or levels on the page (Fırat's choice); the level of each job is agreed when quoting -->
-    <h3 class="perf-sub">Nasıl çalışıyoruz</h3>
-    <ol class="list2 steps">
-      <li class="item"><span class="num" aria-hidden="true">01</span><h3>Sismik zemin etüdü</h3><p>Binanın oturduğu zemin incelenir; zeminin deprem dalgalarını nasıl büyüttüğü belirlenir.</p></li>
-      <li class="item"><span class="num" aria-hidden="true">02</span><h3>Karot testi</h3><p>Kolon ve perdelerden silindir beton numuneler alınır; betonun gerçek dayanımı laboratuvarda ölçülür.</p></li>
-      <li class="item"><span class="num" aria-hidden="true">03</span><h3>Röntgen</h3><p>Betonu kırmadan, tarama cihazıyla kolon ve kirişlerdeki donatının yeri ve aralığı belirlenir.</p></li>
-      <li class="item"><span class="num" aria-hidden="true">04</span><h3>Donatı okuması</h3><p>Seçilen noktalarda pas payı açılır; donatının çapı, adedi ve korozyon durumu yerinde görülür.</p></li>
-      <li class="item"><span class="num" aria-hidden="true">05</span><h3>Üç boyutlu analiz</h3><p>Toplanan verilerle binanın 3B modeli kurulur; TBDY 2018 ve ASCE 41'e göre doğrusal olmayan analizle performans düzeyi hesaplanır.</p></li>
-      <li class="item"><span class="num" aria-hidden="true">06</span><h3>Gerçek deprem kayıtlarıyla analiz</h3><p>Gerektiğinde binaya gerçek deprem kayıtları etkitilir; örneğin 6 Şubat 2023 Kahramanmaraş depremlerinin kayıtları, sahanın deprem tehlikesine göre ölçeklenerek uygulanır.</p></li>
-    </ol>
-    <div class="perf-get">
-      <h3>Çalışmanın sonunda</h3>
-      <ul>
-        <li>Binanın performans düzeyini sade bir dille anlatan yazılı rapor</li>
-        <li>Hasarın hangi katta ve hangi elemanlarda toplandığı</li>
-        <li>Gerekirse, en az müdahaleyle hedefe ulaştıran güçlendirme projesi</li>
-        <li>Binanızın 3B modeli, telefonunuzda açılan bir bağlantıyla</li>
-      </ul>
-      <p class="perf-calm">Çalışma sırasında binada yaşamaya devam edebilirsiniz; karot alınan ve donatı okuması yapılan noktalar onarılarak kapatılır.</p>
-      <a class="btn btn-main" href="https://wa.me/905309250461?text=Merhaba%2C%20binam%20i%C3%A7in%20deprem%20performans%20de%C4%9Ferlendirmesi%20teklifi%20almak%20istiyorum.">Binanız için teklif alın</a>
-    </div>
+    <p class="perf-line">Sismik zemin etüdü · Karot testi · Röntgen · Donatı okuması · TBDY 2018 ve ASCE 41'e göre 3B analiz · Gerektiğinde gerçek deprem kayıtlarıyla analiz ve güçlendirme projesi</p>
+    <div class="btns perf-btns"><a class="btn btn-main" href="deprem-performans/">Nasıl çalışıyoruz, tüm adımlar →</a></div>
   </section>
 
   <!-- METİN 3 · HİZMETLER: beş hizmet (h3 = hizmet adı, p = açıklama) -->
@@ -471,6 +452,31 @@
       <div class="item"><span class="num" aria-hidden="true">03</span><h3>Deprem performans değerlendirmesi</h3><p>Mevcut binalar için doğrusal olmayan analiz, performans düzeyi tespiti ve güçlendirme projeleri.</p></div>
       <div class="item"><span class="num" aria-hidden="true">04</span><h3>Teknik rapor ve danışmanlık</h3><p>Statik rapor, güçlendirme önerileri, ikinci görüş.</p></div>
       <div class="item"><span class="num" aria-hidden="true">05</span><h3>3B ön tasarım modelleri</h3><p>Konsept aşamasında, telefonda açılan paylaşılabilir modeller.</p></div>
+    </div>
+  </section>
+
+  <!-- METİN 5 · DENEYİM (bant): büyük rakam, altı yapı türü (li), kayan proje adları (li; aynı liste iki kez yazılır, ikisini de değiştirin), alttaki not -->
+  <section id="deneyim" class="wrap section rule">
+    <p class="eyebrow">Deneyim</p>
+    <!-- one real figure from the CV (11 projects, 409.500 m² in total); project names cleared by Fırat on 2026-10-13; the Tuzla client is never named -->
+    <div class="xp">
+      <div class="xp-top">
+        <p class="xp-fig"><b>400.000+ m²</b><span>Türkiye ve yurt dışında tasarım ve değerlendirme alanı</span></p>
+        <ul class="xp-types"><li><b>01</b>Havalimanı ve ulaşım</li><li><b>02</b>Endüstriyel</li><li><b>03</b>Ticari</li><li><b>04</b>Konut ve ofis</li><li><b>05</b>Bina değerlendirme</li><li><b>06</b>Güçlendirme</li></ul>
+      </div>
+      <div class="xp-run"><div class="xp-track"><ul class="xp-list"><li>Esenboğa Havalimanı Kontrol Kulesi<small>Ankara</small></li><li>Antalya Havalimanı yeni terminal</li><li>Vem İlaç fabrikası<small>200.000 m²</small></li><li>Alfraganus AVM<small>Taşkent</small></li><li>Karmall Rezidans</li><li>Koç Üniversitesi<small>performans</small></li><li>Malatya Havalimanı<small>performans</small></li><li>Biem İlaç fabrikası</li><li>Tuzla lojistik depo<small>güçlendirme</small></li></ul><ul class="xp-list" aria-hidden="true"><li>Esenboğa Havalimanı Kontrol Kulesi<small>Ankara</small></li><li>Antalya Havalimanı yeni terminal</li><li>Vem İlaç fabrikası<small>200.000 m²</small></li><li>Alfraganus AVM<small>Taşkent</small></li><li>Karmall Rezidans</li><li>Koç Üniversitesi<small>performans</small></li><li>Malatya Havalimanı<small>performans</small></li><li>Biem İlaç fabrikası</li><li>Tuzla lojistik depo<small>güçlendirme</small></li></ul></div></div>
+    </div>
+    <p class="note">Ekibimizin GVN Tasarım ve Mühendislik ile Yapı Akademisi Mühendislik bünyesinde görev aldığı projelerden. Referanslar talep üzerine iletilir.</p>
+  </section>
+
+  <!-- METİN 7 · İLETİŞİM: başlık ve düğme yazıları (telefon ve e-posta değişirse href="…" içindekini de değiştirin) -->
+  <section id="iletisim" class="wrap contact rule">
+    <p class="eyebrow">İletişim</p>
+    <h2>Bir projeniz mi var?</h2>
+    <div class="btns">
+      <a class="btn btn-main" href="https://wa.me/905309250461">WhatsApp ile yazın</a>
+      <a class="btn btn-line" href="tel:+905309250461">+90 530 925 04 61</a>
+      <a class="btn btn-line" href="mailto:firatsenturk@senkonmuhendislik.com">firatsenturk@senkonmuhendislik.com</a>
     </div>
   </section>
 
@@ -487,50 +493,6 @@
     <p id="openMsg" class="form-msg" role="alert"></p>
     <p class="note">Modeller yalnızca bağlantıyı alan kişilerce görüntülenir; herkese açık bir liste yoktur.</p>
     <p class="aside"><a href="structkit/">StructKit</a>, tarayıcıda çalışan küçük hesap araçlarımız: çelik, betonarme, deprem ve rüzgar.</p>
-  </section>
-
-  <!-- METİN 5 · DENEYİM: büyük rakam, altı yapı türü kartı (h3 = başlık, p = açıklama, li = proje satırları), alttaki not -->
-  <section id="deneyim" class="wrap section rule">
-    <p class="eyebrow">Deneyim</p>
-    <h2>Ekibimizin çalıştığı yapı türleri</h2>
-    <!-- one real figure from the CV (11 projects, 409.500 m² in total); the small counts (countries, years) are left out on purpose -->
-    <p class="stat"><b>400.000+ m²</b><span>Türkiye ve yurt dışında tasarım ve değerlendirme alanı</span></p>
-    <!-- projects from the CV; Fırat cleared these names on 2026-10-13. the Tuzla client is never named (it stays "Tuzla lojistik depo"). -->
-    <div class="types">
-      <article class="type"><p class="type-num">01 / Ulaşım</p><h3>Havalimanı ve ulaşım yapıları</h3><p>Terminal binaları, hava trafik kontrol kulesi ve teknik bloklar; hafif raylı sistem hatlarının ön tasarım incelemesi.</p><ul class="type-ex"><li>Esenboğa Havalimanı Kontrol Kulesi, Ankara · 12.000 m² · inşa edildi</li><li>Antalya Havalimanı yeni terminal · 10.000 m²</li></ul></article>
-      <article class="type"><p class="type-num">02 / Endüstriyel</p><h3>Endüstriyel tesisler</h3><p>İlaç fabrikaları ve üretim yapıları; tek tesiste 200.000 m²'ye varan ölçek.</p><ul class="type-ex"><li>Vem İlaç fabrikası, İstanbul · 200.000 m²</li><li>Biem İlaç fabrikası, İstanbul · 28.000 m²</li></ul></article>
-      <article class="type"><p class="type-num">03 / Ticari</p><h3>Ticari yapılar</h3><p>Alışveriş merkezleri ve büyük açıklıklı ticari yapılar, yurt dışı projeler dahil.</p><ul class="type-ex"><li>Alfraganus Alışveriş Merkezi, Taşkent · 54.000 m²</li></ul></article>
-      <article class="type"><p class="type-num">04 / Konut ve ofis</p><h3>Konut ve ofis yapıları</h3><p>Yüksek katlı karma kullanımlı yapılardan, tasarımı ve uygulaması birlikte yürütülen betonarme villalara.</p><ul class="type-ex"><li>Karmall Rezidans, İstanbul · 27.000 m²</li><li>İki betonarme villa, İstanbul · tasarım ve uygulama</li></ul></article>
-      <article class="type"><p class="type-num">05 / Değerlendirme</p><h3>Mevcut bina değerlendirme</h3><p>Havalimanı ve üniversite kampüsünde TBDY 2018'e göre deprem performans değerlendirmesi.</p><ul class="type-ex"><li>Koç Üniversitesi, İstanbul · 25.000 m²</li><li>Malatya Havalimanı · 10.000 m²</li></ul></article>
-      <article class="type"><p class="type-num">06 / Güçlendirme</p><h3>Güçlendirme ve saha</h3><p>Güçlendirme uygulamasında saha kalite kontrolü; tasarımın sahada doğru uygulanması.</p><ul class="type-ex"><li>Tuzla lojistik depo · 40.000 m²</li></ul></article>
-    </div>
-    <p class="note">Ekibimizin GVN Tasarım ve Mühendislik ile Yapı Akademisi Mühendislik bünyesinde görev aldığı projelerden. Referanslar talep üzerine iletilir.</p>
-  </section>
-
-  <!-- METİN 6 · HAKKINDA: tanıtım paragrafı, yönetmelik ve yazılım etiketleri (her <span>…</span> bir etiket) -->
-  <section id="hakkinda" class="wrap section rule">
-    <p class="eyebrow">Hakkında</p>
-    <h2>Senkon Mühendislik</h2>
-    <div class="about">
-      <p class="about-text">İstanbul'da kurulu bir yapı mühendisliği ofisiyiz. Çelik ve betonarme yapıların taşıyıcı sistemlerini TBDY 2018'in yanında ASCE, ACI ve Eurocode'a göre tasarlıyor, mevcut binaların deprem performansını değerlendiriyoruz. Mimar, yüklenici ve yatırımcılarla konsept aşamasından uygulama projesine kadar birlikte çalışıyor, her kararı hesapla ve açık bir raporla destekliyoruz.</p>
-      <div>
-        <p class="eyebrow">Yönetmelikler</p>
-        <div class="chips"><span>TBDY 2018</span><span>ASCE</span><span>ACI</span><span>Eurocode</span></div>
-        <p class="eyebrow chips-next">Yazılımlar</p>
-        <div class="chips"><span>ETABS</span><span>SAP2000</span><span>IDEA StatiCa</span><span>ProtaStructure</span><span>Sta4CAD</span><span>Staad.Pro</span><span>AutoCAD</span><span>Python</span></div>
-      </div>
-    </div>
-  </section>
-
-  <!-- METİN 7 · İLETİŞİM: başlık ve düğme yazıları (telefon ve e-posta değişirse href="…" içindekini de değiştirin) -->
-  <section id="iletisim" class="wrap contact rule">
-    <p class="eyebrow">İletişim</p>
-    <h2>Bir projeniz mi var?</h2>
-    <div class="btns">
-      <a class="btn btn-main" href="https://wa.me/905309250461">WhatsApp ile yazın</a>
-      <a class="btn btn-line" href="tel:+905309250461">+90 530 925 04 61</a>
-      <a class="btn btn-line" href="mailto:firatsenturk@senkonmuhendislik.com">firatsenturk@senkonmuhendislik.com</a>
-    </div>
   </section>
 </main>
 

@@ -1,0 +1,92 @@
+<!doctype html>
+<html lang="tr">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>Hakkında · Senkon Mühendislik</title>
+<meta name="description" content="Senkon Mühendislik, İstanbul'da kurulu bir yapı mühendisliği ofisidir. Çelik ve betonarme taşıyıcı sistem tasarımı ve mevcut binaların deprem performans değerlendirmesi; TBDY 2018, ASCE, ACI ve Eurocode.">
+<link rel="icon" type="image/png" href="/assets/senkon/favicon.png">
+<link rel="apple-touch-icon" href="/assets/senkon/apple-touch-icon.png">
+<meta name="theme-color" content="#ffffff">
+<meta property="og:title" content="Hakkında · Senkon Mühendislik">
+<meta property="og:description" content="İstanbul'da kurulu bir yapı mühendisliği ofisi.">
+<meta property="og:image" content="https://senkonmuhendislik.com/assets/senkon/og.png">
+<meta property="og:image:width" content="1200">
+<meta property="og:image:height" content="630">
+<meta property="og:url" content="https://senkonmuhendislik.com/hakkinda/">
+<meta property="og:type" content="website">
+<meta name="twitter:card" content="summary_large_image">
+<link rel="canonical" href="https://senkonmuhendislik.com/hakkinda/">
+<link rel="stylesheet" href="/assets/senkon/fonts/fonts.css?v=5a84d35c">
+<link rel="stylesheet" href="/site.css?v=3989ba04">
+</head>
+<body>
+<!-- Hakkında sayfası. Yazılar METİN H1-H2 işaretleriyle gruplanmıştır. -->
+<header id="top" class="wrap top">
+  <a class="brand" href="/" aria-label="Senkon Mühendislik ana sayfa"><img class="lockup" src="/assets/senkon/logo-lockup.svg" alt="Senkon Mühendislik"></a>
+  <nav id="nav" class="nav" aria-label="Site">
+    <a href="/">Ana sayfa</a><a href="/deprem-performans/">Performans</a><a href="/#hizmetler">Hizmetler</a><a href="/#deneyim">Deneyim</a><a href="#iletisim">İletişim</a>
+  </nav>
+  <button class="btn btn-line menu-btn" type="button" aria-expanded="false" aria-controls="nav">Menü</button>
+</header>
+
+<main>
+  <!-- METİN H1 · HAKKINDA: tanıtım paragrafı, yönetmelik ve yazılım etiketleri (her <span>…</span> bir etiket) -->
+  <section class="wrap page-hero">
+    <p class="eyebrow">Hakkında</p>
+    <h1>Senkon Mühendislik</h1>
+    <div class="about">
+      <p class="about-text">İstanbul'da kurulu bir yapı mühendisliği ofisiyiz. Çelik ve betonarme yapıların taşıyıcı sistemlerini TBDY 2018'in yanında ASCE, ACI ve Eurocode'a göre tasarlıyor, mevcut binaların deprem performansını değerlendiriyoruz. Mimar, yüklenici ve yatırımcılarla konsept aşamasından uygulama projesine kadar birlikte çalışıyor, her kararı hesapla ve açık bir raporla destekliyoruz.</p>
+      <div>
+        <p class="eyebrow">Yönetmelikler</p>
+        <div class="chips"><span>TBDY 2018</span><span>ASCE</span><span>ACI</span><span>Eurocode</span></div>
+        <p class="eyebrow chips-next">Yazılımlar</p>
+        <div class="chips"><span>ETABS</span><span>SAP2000</span><span>IDEA StatiCa</span><span>ProtaStructure</span><span>Sta4CAD</span><span>Staad.Pro</span><span>AutoCAD</span><span>Python</span></div>
+      </div>
+    </div>
+  </section>
+
+  <!-- METİN H2 · İLETİŞİM: başlık ve düğmeler (telefon/e-posta değişirse href="…" içini de değiştirin) -->
+  <section id="iletisim" class="wrap contact rule">
+    <p class="eyebrow">İletişim</p>
+    <h2>Bir projeniz mi var?</h2>
+    <div class="btns">
+      <a class="btn btn-main" href="https://wa.me/905309250461">WhatsApp ile yazın</a>
+      <a class="btn btn-line" href="tel:+905309250461">+90 530 925 04 61</a>
+      <a class="btn btn-line" href="mailto:firatsenturk@senkonmuhendislik.com">firatsenturk@senkonmuhendislik.com</a>
+    </div>
+  </section>
+</main>
+
+<footer class="wrap foot rule">
+  <div><a class="foot-link" href="/">Senkon Mühendislik</a> · İstanbul</div>
+  <div><a class="foot-link" href="/structkit/">StructKit</a> · © 2026</div>
+</footer>
+<nav class="dock away" inert aria-label="Hızlı iletişim">
+  <a class="btn btn-main" href="https://wa.me/905309250461">WhatsApp</a>
+  <a class="btn btn-line" href="mailto:firatsenturk@senkonmuhendislik.com">E-posta</a>
+</nav>
+<script>
+(function () {
+  // phone menu: the Menü button shows the nav as a column under the header
+  var top = document.getElementById('top'), btn = top.querySelector('.menu-btn');
+  function set(open) { top.classList.toggle('open', open); btn.setAttribute('aria-expanded', String(open)); btn.textContent = open ? 'Kapat' : 'Menü'; }
+  btn.addEventListener('click', function () { set(!top.classList.contains('open')); });
+  top.querySelectorAll('.nav a').forEach(function (a) { a.addEventListener('click', function () { set(false); }); });
+})();
+(function () {
+  // phone contact dock: hidden while the top of the page or İletişim is on screen
+  var dock = document.querySelector('.dock'), hero = document.querySelector('.page-hero'), contact = document.getElementById('iletisim');
+  if (!dock || !('IntersectionObserver' in window)) return;
+  var seen = new Map();
+  var io = new IntersectionObserver(function (es) {
+    es.forEach(function (e) { seen.set(e.target, e.isIntersecting); });
+    var away = seen.get(hero) !== false || seen.get(contact) === true;
+    dock.classList.toggle('away', away); dock.toggleAttribute('inert', away);
+  });
+  io.observe(hero); io.observe(contact);
+  document.body.classList.add('has-dock');
+})();
+</script>
+</body>
+</html>

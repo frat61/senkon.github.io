@@ -22,13 +22,19 @@ test('Esenboğa is animated only once on the page', () => {
   assert.equal(html.split('esenboga.json').length - 1, 1);
 });
 
-test('Deneyim shows six building types with the cleared project names, and never Amazon', () => {
+test('Deneyim is a banner: the figure, six still building types, and the cleared project names sliding, never Amazon', () => {
   const d = deneyim();
-  assert.equal([...d.matchAll(/<article class="type">/g)].length, 6);
-  assert.match(d, /Esenboğa Havalimanı Kontrol Kulesi/);
-  for (const name of ['Koç Üniversitesi', 'Antalya', 'Malatya', 'Vem', 'Biem', 'Alfraganus', 'Karmall', 'Tuzla']) assert.match(d, new RegExp(name));
+  assert.match(d, /<b>400\.000\+ m²<\/b>/);
+  const types = [...d.matchAll(/<li><b>\d\d<\/b>([^<]+)<\/li>/g)].map(m => m[1]);
+  assert.deepEqual(types, ['Havalimanı ve ulaşım', 'Endüstriyel', 'Ticari', 'Konut ve ofis', 'Bina değerlendirme', 'Güçlendirme']);
+  for (const name of ['Esenboğa Havalimanı Kontrol Kulesi', 'Koç Üniversitesi', 'Antalya', 'Malatya', 'Vem', 'Biem', 'Alfraganus', 'Karmall', 'Tuzla']) assert.match(d, new RegExp(name));
+  assert.match(d, /<ul class="xp-list" aria-hidden="true">/);   // the loop's second copy is hidden from screen readers
   assert.doesNotMatch(d, /Amazon/);
-  assert.doesNotMatch(d, /class="ph/);   // no grey picture placeholders
+});
+
+test('the sliding names stop for visitors who ask for less motion, and pause on hover', () => {
+  assert.match(css, /prefers-reduced-motion: reduce\)\{ \.xp-run\{[^}]*\} \.xp-track\{animation:none\}/);
+  assert.match(css, /\.xp-run:hover \.xp-track\{animation-play-state:paused\}/);
 });
 
 const css = fs.readFileSync(path.join(__dirname, '..', 'site.css'), 'utf8');
@@ -66,7 +72,7 @@ test('the overview panel is the one shown on load and holds the only h1', () => 
 test('every service panel ends with a link onward (Performans to its steps, the others to contact)', () => {
   const services = hero().split('<div class="hero-panel" ').slice(1);
   assert.equal(services.length, 4);
-  for (const s of services) assert.match(s, s.startsWith('id="hero-performans"') ? /href="#performans"/ : /href="#iletisim"/);
+  for (const s of services) assert.match(s, s.startsWith('id="hero-performans"') ? /href="deprem-performans\/"/ : /href="#iletisim"/);
 });
 
 test('panels share one grid cell so swapping text never moves the buttons', () => {
@@ -86,24 +92,23 @@ test('the phone dock offers WhatsApp and e-mail, and starts hidden', () => {
   assert.match(dock, /href="mailto:firatsenturk@senkonmuhendislik\.com"/);
 });
 
-test('the site names the codes it works to: TBDY 2018, ASCE, ACI and Eurocode (TS 500 dropped by choice)', () => {
+test('the home page names no TS 500 and no vague "uluslararası yönetmelik" (the code tags live on hakkinda/)', () => {
   assert.doesNotMatch(html, /TS 500/);
-  for (const code of ['ASCE', 'ACI', 'Eurocode']) assert.match(html, new RegExp('<span>' + code + '</span>'));
-  assert.doesNotMatch(html, /uluslararası yönetmelik/);   // the vague wording is replaced by the code names
+  assert.doesNotMatch(html, /uluslararası yönetmelik/);
+  assert.match(html, /<a href="hakkinda\/">Hakkında<\/a>/);
+  assert.doesNotMatch(html, /id="hakkinda"/);
 });
 
-// Performans: the main target. Six plain steps, what the owner gets, and a quote button; no package names, no legal note
+// Performans on the home page is a short summary; the six steps live on deprem-performans/ (tests/perf-page.test.js)
 const perf = () => block(/<section id="performans"[\s\S]*?<\/section>/);
 
-test('Performans lists the six assessment steps in order', () => {
-  const steps = [...perf().matchAll(/<li class="item"><span class="num"[^>]*>(\d\d)<\/span><h3>([^<]+)<\/h3>/g)].map(m => m[2]);
-  assert.deepEqual(steps, ['Sismik zemin etüdü', 'Karot testi', 'Röntgen', 'Donatı okuması', 'Üç boyutlu analiz', 'Gerçek deprem kayıtlarıyla analiz']);
+test('home Performans is a short summary that links to the full page', () => {
+  assert.match(perf(), /href="deprem-performans\/"/);
+  assert.doesNotMatch(perf(), /<li class="item">/);   // the steps are not duplicated here
 });
 
-test('Performans ends with what the owner receives and a WhatsApp quote button', () => {
-  assert.match(perf(), /<h3>Çalışmanın sonunda<\/h3>/);
-  assert.match(perf(), /güçlendirme projesi/);
-  assert.match(perf(), /<a class="btn btn-main" href="https:\/\/wa\.me\/905309250461\?text=[^"]+">Binanız için teklif alın<\/a>/);
+test('the 3B model section sits at the bottom of the page, after İletişim', () => {
+  assert.ok(html.indexOf('id="model"') > html.indexOf('id="iletisim"'));
 });
 
 test('the page never says premium and never cites law 6306', () => {
