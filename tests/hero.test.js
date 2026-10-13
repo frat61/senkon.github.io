@@ -22,12 +22,12 @@ test('Esenboğa is animated only once on the page', () => {
   assert.equal(html.split('esenboga.json').length - 1, 1);
 });
 
-test('Deneyim shows building types with only Esenboğa and Koç Üniversitesi named', () => {
+test('Deneyim shows six building types with the cleared project names, and never Amazon', () => {
   const d = deneyim();
   assert.equal([...d.matchAll(/<article class="type">/g)].length, 6);
   assert.match(d, /Esenboğa Havalimanı Kontrol Kulesi/);
-  assert.match(d, /Koç Üniversitesi/);
-  for (const anon of ['Antalya', 'Vem', 'Biem', 'Malatya', 'Tuzla', 'Amazon', 'Alfraganus', 'Karmall', 'Taşkent', 'Vaniköy']) assert.doesNotMatch(d, new RegExp(anon));
+  for (const name of ['Koç Üniversitesi', 'Antalya', 'Malatya', 'Vem', 'Biem', 'Alfraganus', 'Karmall', 'Tuzla']) assert.match(d, new RegExp(name));
+  assert.doesNotMatch(d, /Amazon/);
   assert.doesNotMatch(d, /class="ph/);   // no grey picture placeholders
 });
 
