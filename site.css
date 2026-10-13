@@ -82,13 +82,17 @@ p{margin:0}
 @media (max-width:860px){ .hero{grid-template-columns:1fr;padding-top:16px;padding-bottom:12px} .hero-media{display:none} .skyline{padding-bottom:32px} }
 /* sections */
 .section{padding-top:64px;padding-bottom:8px}
-/* performance assessment: the page's main message, three columns on the page's thin rules */
+/* performance assessment: the page's main target. Six numbered steps (same look as Hizmetler), then what the owner gets and a quote button */
 .perf .lead{margin-top:16px;max-width:640px}
-.perf-grid{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:0 40px;margin-top:36px;padding-bottom:40px}
-.perf-grid>div{border-top:1px solid var(--rule);padding-top:18px}
-.perf-grid h3{margin:0 0 10px;font-family:var(--serif);font-weight:600;font-size:22px;line-height:1.15;letter-spacing:-.01em}
-.perf-grid p{color:var(--body)}
-@media (max-width:860px){ .perf-grid{grid-template-columns:1fr;gap:0;padding-bottom:24px} .perf-grid>div{padding:18px 0} }
+.perf-sub{margin:36px 0 0;font-family:var(--serif);font-weight:600;font-size:22px;letter-spacing:-.01em}
+ol.steps{list-style:none;padding:0;margin-top:14px}
+.perf-get{margin:32px 0 40px;padding:24px 26px;background:var(--tint);border-radius:8px;max-width:760px}
+.perf-get h3{margin:0 0 10px;font-family:var(--serif);font-weight:600;font-size:22px;letter-spacing:-.01em}
+.perf-get ul{margin:0;padding:0;list-style:none} .perf-get li{position:relative;padding-left:22px;margin-top:6px;color:var(--body)}
+.perf-get li::before{content:"";position:absolute;left:0;top:.75em;width:12px;height:2px;background:var(--accent)}
+.perf-calm{margin-top:14px;color:var(--muted);font-size:15px}
+.perf-get .btn{margin-top:18px}
+@media (max-width:560px){ .perf-get{padding:20px 18px} .perf-get .btn{width:100%} }
 .list2{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:0 48px;margin-top:20px;border-bottom:1px solid var(--rule)}
 .item{border-top:1px solid var(--rule);padding:18px 0} .item h3{margin:0;font-size:19px;font-weight:600} .item p{margin-top:6px;color:var(--body)}
 .item{position:relative;padding-left:44px} .item .num{position:absolute;left:0;top:20px;font-size:13px;font-weight:600;color:var(--muted);letter-spacing:.06em}
