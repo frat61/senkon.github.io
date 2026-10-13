@@ -20,6 +20,15 @@ test('the six assessment steps, in order', () => {
   assert.deepEqual(steps, ['Sismik zemin etüdü', 'Karot testi', 'Röntgen ve donatı okuması', 'Üç boyutlu analiz', 'Deprem performansının belirlenmesi', 'Gerekirse, güçlendirme projesi']);
 });
 
+test('the story figure: six pictures with alt text, in order, before the steps, plus the two buttons', () => {
+  const figAt = html.indexOf('<figure class="surec-stage"'), stepsAt = html.indexOf('<ol class="steps">');
+  assert.ok(figAt > 0 && figAt < stepsAt);
+  const srcs = [...html.matchAll(/<img src="\/assets\/senkon\/surec\/(\d\d)\.webp\?v=[0-9a-f]{8}" alt="[^"]{10,}" width="1200" height="900" loading="lazy">/g)].map(m => m[1]);
+  assert.deepEqual(srcs, ['01', '02', '03', '04', '05', '06']);
+  assert.match(html, /<button type="button" class="surec-prev">/);
+  assert.match(html, /<button type="button" class="surec-next">/);
+});
+
 test('what the owner receives, including a strengthening project if needed', () => {
   assert.match(html, /<h3>Çalışmanın sonunda<\/h3>/);
   assert.match(html, /güçlendirme projesi/);
