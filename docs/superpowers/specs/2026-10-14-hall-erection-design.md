@@ -79,8 +79,8 @@ the camera, then `node tools/versions.js`.
 `index.html`, Deneyim banner, the existing `figure.xp-figure` slot:
 
 ```html
-<figure class="hall xp-figure" data-hall="assets/senkon/hal.json" data-speed="1.4" aria-label="…">
-  <div class="hall-stage"><img class="hall-static" src="assets/senkon/hal.webp?v=…" alt="…" width="1500" height="1125" loading="lazy"></div>
+<figure class="hall xp-figure" data-hall="assets/senkon/hal.json" data-speed="1.4" aria-label="Endüstriyel çelik yapının taşıyıcı sisteminin montaj animasyonu">
+  <div class="hall-stage"><img class="hall-static" src="assets/senkon/hal.webp?v=…" alt="Kafes kolonlu çelik endüstriyel yapının taşıyıcı sistem çizimi" width="1500" height="1125" loading="lazy"></div>
   <figcaption class="skyline-caption">Endüstriyel çelik yapı, taşıyıcı sistem modeli</figcaption>
 </figure>
 <script src="assets/senkon/hal.js?v=…" defer></script>
