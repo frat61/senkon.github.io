@@ -16,7 +16,7 @@ Titles are his; descriptions reuse the current sentences where they fit and are 
 
 | # | Title | Description (draft) |
 |---|---|---|
-| 01 | Sismik zemin etüdü | Binanın oturduğu zemin incelenir; zeminin deprem dalgalarını nasıl büyüttüğü belirlenir. |
+| 01 | Zemin etüdü | Binanın oturduğu zemin incelenir; zeminin deprem dalgalarını nasıl büyüttüğü belirlenir. |
 | 02 | Karot testi | Kolon ve perdelerden silindir beton numuneler alınır; betonun gerçek dayanımı laboratuvarda ölçülür. |
 | 03 | Röntgen ve donatı okuması | Betonu kırmadan, tarama cihazıyla donatının yeri ve aralığı belirlenir; seçilen noktalarda pas payı açılır, donatının çapı, adedi ve korozyon durumu yerinde görülür. |
 | 04 | Üç boyutlu analiz | Toplanan verilerle binanın 3B modeli kurulur; TBDY 2018 ve ASCE 41'e göre doğrusal olmayan analiz yapılır. Gerektiğinde 6 Şubat 2023 Kahramanmaraş depremleri gibi gerçek deprem kayıtları, sahanın deprem tehlikesine göre ölçeklenerek uygulanır. |

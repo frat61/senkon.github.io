@@ -14,7 +14,7 @@
 
 - No library, no build step; one script file, `defer`, like `assets/senkon/skyline.js`.
 - Pictures: `assets/senkon/surec/01.webp … 06.webp`, 1200×900 greyscale WebP quality 80, 60–90 KB each; no text or colour in them.
-- Step titles, in order: `Sismik zemin etüdü`, `Karot testi`, `Röntgen ve donatı okuması`, `Üç boyutlu analiz`, `Deprem performansının belirlenmesi`, `Gerekirse, güçlendirme projesi`. Never "performans düzeyi" in a title.
+- Step titles, in order: `Zemin etüdü`, `Karot testi`, `Röntgen ve donatı okuması`, `Üç boyutlu analiz`, `Deprem performansının belirlenmesi`, `Gerekirse, güçlendirme projesi`. Never "performans düzeyi" in a title.
 - Markup shape `li.item > span.num + h3 + p` stays (styles and `tests/perf-page.test.js` depend on it).
 - Timing: 5 s per frame, 0.6 s cross-fade, 6 % zoom per frame, 6 s resume delay after a touch.
 - Script exits early (static strip stays) without `IntersectionObserver` or with `prefers-reduced-motion: reduce`.
