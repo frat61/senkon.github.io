@@ -22,13 +22,19 @@ test('Esenboğa is animated only once on the page', () => {
   assert.equal(html.split('esenboga.json').length - 1, 1);
 });
 
-test('Deneyim shows six building types with the cleared project names, and never Amazon', () => {
+test('Deneyim is a banner: the figure, six still building types, and the cleared project names sliding, never Amazon', () => {
   const d = deneyim();
-  assert.equal([...d.matchAll(/<article class="type">/g)].length, 6);
-  assert.match(d, /Esenboğa Havalimanı Kontrol Kulesi/);
-  for (const name of ['Koç Üniversitesi', 'Antalya', 'Malatya', 'Vem', 'Biem', 'Alfraganus', 'Karmall', 'Tuzla']) assert.match(d, new RegExp(name));
+  assert.match(d, /<b>400\.000\+ m²<\/b>/);
+  const types = [...d.matchAll(/<li><b>\d\d<\/b>([^<]+)<\/li>/g)].map(m => m[1]);
+  assert.deepEqual(types, ['Havalimanı ve ulaşım', 'Endüstriyel', 'Ticari', 'Konut ve ofis', 'Bina değerlendirme', 'Güçlendirme']);
+  for (const name of ['Esenboğa Havalimanı Kontrol Kulesi', 'Koç Üniversitesi', 'Antalya', 'Malatya', 'Vem', 'Biem', 'Alfraganus', 'Karmall', 'Tuzla']) assert.match(d, new RegExp(name));
+  assert.match(d, /<ul class="xp-list" aria-hidden="true">/);   // the loop's second copy is hidden from screen readers
   assert.doesNotMatch(d, /Amazon/);
-  assert.doesNotMatch(d, /class="ph/);   // no grey picture placeholders
+});
+
+test('the sliding names stop for visitors who ask for less motion, and pause on hover', () => {
+  assert.match(css, /prefers-reduced-motion: reduce\)\{ \.xp-run\{[^}]*\} \.xp-track\{animation:none\}/);
+  assert.match(css, /\.xp-run:hover \.xp-track\{animation-play-state:paused\}/);
 });
 
 const css = fs.readFileSync(path.join(__dirname, '..', 'site.css'), 'utf8');
@@ -86,10 +92,11 @@ test('the phone dock offers WhatsApp and e-mail, and starts hidden', () => {
   assert.match(dock, /href="mailto:firatsenturk@senkonmuhendislik\.com"/);
 });
 
-test('the site names the codes it works to: TBDY 2018, ASCE, ACI and Eurocode (TS 500 dropped by choice)', () => {
+test('the home page names no TS 500 and no vague "uluslararası yönetmelik" (the code tags live on hakkinda/)', () => {
   assert.doesNotMatch(html, /TS 500/);
-  for (const code of ['ASCE', 'ACI', 'Eurocode']) assert.match(html, new RegExp('<span>' + code + '</span>'));
-  assert.doesNotMatch(html, /uluslararası yönetmelik/);   // the vague wording is replaced by the code names
+  assert.doesNotMatch(html, /uluslararası yönetmelik/);
+  assert.match(html, /<a href="hakkinda\/">Hakkında<\/a>/);
+  assert.doesNotMatch(html, /id="hakkinda"/);
 });
 
 // Performans on the home page is a short summary; the six steps live on deprem-performans/ (tests/perf-page.test.js)

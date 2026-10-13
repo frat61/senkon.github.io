@@ -13,7 +13,7 @@ const path = require('path');
 const crypto = require('crypto');
 
 const ROOT = path.join(__dirname, '..');
-const PAGES = ['index.html', '404.html', 'deprem-performans/index.html'];           // index.html must link every file; the others may link a subset
+const PAGES = ['index.html', '404.html', 'deprem-performans/index.html', 'hakkinda/index.html'];           // index.html must link every file; the others may link a subset
 // link as written in index.html → files whose content the tag covers
 const LINKS = {
   'site.css': ['site.css'],
