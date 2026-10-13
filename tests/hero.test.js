@@ -44,8 +44,21 @@ test('hero figure rule beats the generic .skyline margin and padding', () => {
   assert.match(css, /\.skyline\.hero-figure\{[^}]*padding:0/);
 });
 
-test('phones do not download the hidden hero picture', () => {
-  assert.match(hero(), /<img class="skyline-static"[^>]*loading="lazy"/);
+test('the hero picture loads eagerly: it is on the first screen on every device', () => {
+  assert.doesNotMatch(hero(), /<img class="skyline-static"[^>]*loading="lazy"/);
+});
+
+test('on phones the tower shows above the headline, narrower', () => {
+  const phone = css.match(/@media \(max-width:860px\)\{([^\n]*)\}/)[1];
+  assert.doesNotMatch(phone, /\.hero-media\{[^}]*display:none/);
+  assert.match(phone, /\.hero-media\{[^}]*order:-1/);
+  assert.match(phone, /\.hero-figure\{[^}]*max-width:240px/);
+});
+
+test('both build animations run 1.4 times faster, through data-speed that skyline.js reads', () => {
+  assert.match(hero(), /<figure class="skyline hero-figure"[^>]*data-speed="1.4"/);
+  assert.match(html, /<figure id="skyline"[^>]*data-speed="1.4"/);
+  assert.match(fs.readFileSync(path.join(__dirname, '..', 'assets', 'senkon', 'skyline.js'), 'utf8'), /data-speed/);
 });
 
 // service switcher: four buttons under the text swap the headline and paragraph above them
