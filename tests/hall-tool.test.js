@@ -23,10 +23,12 @@ function makeGlb(meshes) {
     const idx = m.index16 ? Uint16Array.from(m.indices) : Uint32Array.from(m.indices);
     const ix = push(Buffer.from(idx.buffer), m.index16 ? 5123 : 5125, 'SCALAR', idx.length);
     gltfMeshes.push({ primitives: [{ attributes: { POSITION: p }, indices: ix }] });
-    nodes.push({ name: m.name, mesh: i });
+    if (m.parent) { nodes.push({ name: m.parent, children: [nodes.length + 1] }); nodes.push({ mesh: i }); }   // the viewer's converter names the group, not the mesh node
+    else nodes.push({ name: m.name, mesh: i });
   });
   const bin = Buffer.concat(chunks);
-  const json = { asset: { version: '2.0' }, buffers: [{ byteLength: bin.length }], bufferViews: views, accessors, meshes: gltfMeshes, nodes, scenes: [{ nodes: nodes.map((_, i) => i) }], scene: 0 };
+  const roots = nodes.map((_, i) => i).filter(i => !nodes.some(n => n.children && n.children.includes(i)));
+  const json = { asset: { version: '2.0' }, buffers: [{ byteLength: bin.length }], bufferViews: views, accessors, meshes: gltfMeshes, nodes, scenes: [{ nodes: roots }], scene: 0 };
   let js = Buffer.from(JSON.stringify(json)); js = Buffer.concat([js, Buffer.alloc((4 - js.length % 4) % 4, 0x20)]);
   const head = Buffer.alloc(12), jh = Buffer.alloc(8), bh = Buffer.alloc(8);
   head.writeUInt32LE(0x46546C67, 0); head.writeUInt32LE(2, 4); head.writeUInt32LE(12 + 8 + js.length + 8 + bin.length, 8);
@@ -101,6 +103,8 @@ test('findGrid reads the tower x positions and the two rows from the tall column
   assert.equal(g.rows.length, 2);
   assert.ok(g.rows[0].z0 <= -43 && g.rows[0].z1 >= -40);
   assert.equal(g.zMin, -43); assert.equal(g.zMax, 51.5);
+  const flanges = H.findGrid([M([19.7, -35, -43], [19.7, 3, -43], 0.3, 'col'), M([20.3, -35, -43], [20.3, 3, -43], 0.3, 'col'), M([20.3, -35, -40], [20.3, 3, -40], 0.3, 'col')]);
+  assert.deepEqual(flanges.xs, [20]);                                // the two flanges of one chord are one tower x
 });
 
 test('splitAtGrid cuts a long x member at the grid, leaves short ones, and never emits zero-length pieces', () => {
@@ -134,6 +138,34 @@ test('group makes a tower of chords plus lacing, floors by level and bay, roof b
   assert.equal(new Set(o).size, pieces.length);
   const types = o.map(i => pieces[i].t);
   assert.ok(types.lastIndexOf('tower') < types.indexOf('floor') && types.lastIndexOf('floor') < types.indexOf('roof'));
+});
+
+test('parseGlb takes the mesh name from the nearest named ancestor node, as the viewer converter writes it', () => {
+  const p = prism([0, 0, 0], [5, 0, 0], 0.2);
+  const g = H.parseGlb(makeGlb([{ parent: 'IfcColumn', ...p }, { parent: 'IfcBeam', ...p }]));
+  assert.deepEqual(g.meshes.map(m => m.name), ['IfcColumn', 'IfcBeam']);
+});
+
+test('project maps a point in front of the camera inside the canvas, nearer members wider, far ones first in depthOrder', () => {
+  const ms = [M([50, -16, 5], [60, -16, 5], 1, 'beam'), M([50, -16, -40], [60, -16, -40], 1, 'beam')];
+  const out = H.project(ms, [{ t: 'floor', key: {}, m: [0, 1] }], [0]);
+  assert.equal(out.w, 1500); assert.equal(out.h, 1125);
+  const [x1, y1, , , w0] = out.members[0];
+  assert.ok(x1 > 0 && x1 < 1500 && y1 > 0 && y1 < 1125);
+  assert.ok(Math.abs(x1 - 750) < 1 && Math.abs(y1 - 562.5) < 1);     // the target projects to the centre
+  assert.ok(out.members[1][4] < w0);                                 // z=-40 is farther from the eye at z=130
+  assert.deepEqual(out.depthOrder, [1, 0]);
+  assert.ok(out.pieces[0].fly >= 60);
+  assert.deepEqual(out.order, [0]);
+});
+
+test('the generated hal.json is sane', { skip: !require('fs').existsSync(require('path').join(__dirname, '..', 'assets', 'senkon', 'hal.json')) }, () => {
+  const d = JSON.parse(require('fs').readFileSync(require('path').join(__dirname, '..', 'assets', 'senkon', 'hal.json'), 'utf8'));
+  assert.ok(d.members.length > 2500 && d.members.length < 8000);   // 3,782 from the model; the spec's 4,000 came from an over-split probe
+  assert.ok(d.pieces.every(p => p.m.length > 0));
+  assert.equal(new Set(d.order).size, d.pieces.length);
+  assert.equal(d.depthOrder.length, d.members.length);
+  assert.ok(d.pieces.filter(p => p.t === 'tower').length >= 20);
 });
 
 module.exports = { makeGlb, prism };

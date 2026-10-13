@@ -28,8 +28,10 @@ function parseGlb(buf) {
     if (a.componentType === 5123) return Uint32Array.from(new Uint16Array(copy.buffer, copy.byteOffset, n));
     throw new Error('unsupported componentType ' + a.componentType);
   }
-  const nameOf = new Map();
-  (json.nodes || []).forEach(nd => { if (nd.mesh !== undefined && nd.name) nameOf.set(nd.mesh, nd.name); });
+  const nameOf = new Map();                              // mesh index -> own name or the nearest named ancestor's
+  const nodes = json.nodes || [];
+  const walk = (i, inherited) => { const nd = nodes[i], name = nd.name || inherited; if (nd.mesh !== undefined) nameOf.set(nd.mesh, name); (nd.children || []).forEach(c => walk(c, name)); };
+  ((json.scenes && json.scenes[json.scene || 0] && json.scenes[json.scene || 0].nodes) || nodes.map((_, i) => i)).forEach(i => walk(i, ''));
   const meshes = (json.meshes || []).map((m, i) => {
     const p = m.primitives[0];
     if (p.indices === undefined) throw new Error('mesh without indices');
@@ -156,12 +158,14 @@ const r1 = v => Math.round(v * 10) / 10;
 // ---- the plan grid: tower x positions and the chord rows, from the tall column members
 function findGrid(members) {
   const tall = members.filter(m => m.mesh === 'col' && mlen(m) > 30);
-  const xs = [...new Set(tall.map(m => r1(mid(m)[0])))].sort((a, b) => a - b);
+  const xsRaw = tall.map(m => mid(m)[0]).sort((a, b) => a - b), xs = [];
+  xsRaw.forEach(x => { const c = xs[xs.length - 1]; if (c && x - c.max <= 1.5) c.max = x; else xs.push({ min: x, max: x }); });   // the flanges of one chord are one tower x
+  const xsOut = xs.map(c => r1((c.min + c.max) / 2));
   const zs = [...new Set(tall.flatMap(m => [r1(m.a[2]), r1(m.b[2])]))].sort((a, b) => a - b);
   const rows = [];
   zs.forEach(z => { const r = rows[rows.length - 1]; if (r && z - r.z1 <= 5) r.z1 = z; else rows.push({ z0: z, z1: z }); });   // chords of one tower sit 3 m apart, rows 93 m
   const allZ = members.flatMap(m => [m.a[2], m.b[2]]);
-  return { xs, rows, zMin: Math.min(...allZ), zMax: Math.max(...allZ) };
+  return { xs: xsOut, rows, zMin: Math.min(...allZ), zMax: Math.max(...allZ) };
 }
 
 // ---- cut long members at the grid so a piece is one bay
@@ -251,4 +255,46 @@ function order(pieces) {
   return pieces.map((_, i) => i).sort((i, j) => { const a = keys[i], b = keys[j]; for (let n = 0; n < Math.max(a.length, b.length); n++) { const d = (a[n] || 0) - (b[n] || 0); if (d) return d; } return i - j; });
 }
 
-module.exports = { parseGlb, weld, featureEdges, bundle, findGrid, splitAtGrid, group, order };
+// ---- projection: a fixed perspective camera, canvas pixels; wpx is the member's width at its depth
+const CAMERA = { eye: [-70, 40, 130], at: [50, -16, 5], focal: 1.85, w: 1500, h: 1125 };
+function project(members, pieces, orderIdx, camera) {
+  const C = camera || CAMERA;
+  const fwd = norm(sub(C.at, C.eye)), right = norm(cross(fwd, [0, 1, 0])), up = cross(right, fwd);
+  const r1d = v => Math.round(v * 10) / 10;
+  const pt = p => { const d = sub(p, C.eye), depth = dot(d, fwd); return [C.w / 2 + dot(d, right) / depth * C.focal * C.w / 2, C.h / 2 - dot(d, up) / depth * C.focal * C.w / 2, depth]; };
+  const rows = members.map(m => {
+    const a = pt(m.a), b = pt(m.b), depth = (a[2] + b[2]) / 2;
+    return [r1d(a[0]), r1d(a[1]), r1d(b[0]), r1d(b[1]), r1d(m.w * C.focal * C.w / 2 / depth), Math.round(depth * 100) / 100];
+  });
+  const outPieces = pieces.map(p => {
+    let y0 = Infinity, y1 = -Infinity;
+    p.m.forEach(i => { y0 = Math.min(y0, rows[i][1], rows[i][3]); y1 = Math.max(y1, rows[i][1], rows[i][3]); });
+    return { t: p.t, m: p.m, fly: Math.max(60, Math.round(1.5 * (y1 - y0))) };
+  });
+  const depthOrder = rows.map((_, i) => i).sort((i, j) => rows[j][5] - rows[i][5] || i - j);
+  return { w: C.w, h: C.h, members: rows, pieces: outPieces, order: orderIdx.slice(), depthOrder };
+}
+
+// ---- the whole pipeline on a GLB buffer
+function build(buf) {
+  const g = parseGlb(buf), edges = [];
+  g.meshes.forEach(m => {
+    const w = weld(m.positions, m.indices), mesh = m.name === 'IfcColumn' ? 'col' : 'beam';
+    featureEdges(w.points, w.tris).forEach(e => edges.push({ a: e.a, b: e.b, mesh }));
+  });
+  const grid = findGrid(bundle(edges));
+  const members = splitAtGrid(bundle(edges), grid);
+  const pieces = group(members, grid);
+  return project(members, pieces, order(pieces));
+}
+
+module.exports = { parseGlb, weld, featureEdges, bundle, findGrid, splitAtGrid, group, order, project, build, CAMERA };
+
+if (require.main === module) {
+  const [inFile, outFile] = process.argv.slice(2);
+  if (!inFile || !outFile) { console.error('usage: node tools/make-hall.js <in.glb> <out.json>'); process.exit(2); }
+  const data = build(fs.readFileSync(inFile));
+  const text = JSON.stringify(data);
+  fs.writeFileSync(outFile, text);
+  console.log('members ' + data.members.length + ', pieces ' + data.pieces.length + ', bytes ' + Buffer.byteLength(text));
+}
