@@ -22,9 +22,13 @@ test('Esenboğa is animated only once on the page', () => {
   assert.equal(html.split('esenboga.json').length - 1, 1);
 });
 
-test('Deneyim keeps the project text with a placeholder', () => {
-  assert.match(deneyim(), /Esenboğa Havalimanı Kontrol Kulesi/);
-  assert.match(deneyim(), /class="ph featured-ph"/);
+test('Deneyim shows building types with only Esenboğa and Koç Üniversitesi named', () => {
+  const d = deneyim();
+  assert.equal([...d.matchAll(/<article class="type">/g)].length, 5);
+  assert.match(d, /Esenboğa Havalimanı Kontrol Kulesi/);
+  assert.match(d, /Koç Üniversitesi/);
+  for (const anon of ['Antalya', 'Vem', 'Alfraganus', 'Karmall', 'Taşkent']) assert.doesNotMatch(d, new RegExp(anon));
+  assert.doesNotMatch(d, /class="ph/);   // no grey picture placeholders
 });
 
 const css = fs.readFileSync(path.join(__dirname, '..', 'site.css'), 'utf8');
