@@ -15,7 +15,7 @@
   if (!document.createElement('canvas').getContext) return;
 
   const TOTAL = 25, FLY = 0.6;                 // seconds for the whole erection at speed 1; seconds a piece is in the air
-  const INK = '#3a3f44', A_NEAR = 0.95, A_FAR = 0.45, W_MIN = 1.2, W_MAX = 6;   // widths in CSS px
+  const INK = '#3a3f44', A_NEAR = 0.95, A_FAR = 0.45, W_MIN = 1.2, W_MAX = 6;   // widths in the picture's pixels (1500 wide), as in the still
   const ease = p => 1 - Math.pow(1 - p, 3);
 
   document.querySelectorAll('figure[data-hall]').forEach(fig => {
@@ -55,8 +55,12 @@
     });
     let dMin = Infinity, dMax = -Infinity;
     M.forEach(m => { dMin = Math.min(dMin, m[5]); dMax = Math.max(dMax, m[5]); });
+    // widths live in the picture's own pixels (the still is drawn with the same clamps), so they scale with the canvas by k, never by dpr alone
     const alphaOf = m => A_NEAR - (A_NEAR - A_FAR) * (m[5] - dMin) / (dMax - dMin || 1);
-    const widthOf = m => Math.max(W_MIN, Math.min(W_MAX, m[4])) * dpr;
+    const widthOf = m => Math.max(W_MIN, Math.min(W_MAX, m[4])) * k;
+    const alpha = new Float32Array(M.length), width = new Float32Array(M.length);
+    M.forEach((m, i) => { alpha[i] = alphaOf(m); width[i] = widthOf(m); });
+    const border = 1.5 * k, whiteFrom = 2 * k;
     const started = new Uint8Array(M.length), progress = new Float64Array(pieces.length);
     ctx.lineCap = 'butt';
 
@@ -76,12 +80,12 @@
         const i = depthOrder[q];
         if (!started[i]) continue;                                   // nothing shows through from the future
         const m = M[i], pi = pieceOf[i], p = progress[pi], dy = -fly[pi] * (1 - ease(p));
-        const a = alphaOf(m) * (0.25 + 0.75 * p), w = widthOf(m);
-        ctx.globalAlpha = a; ctx.strokeStyle = INK; ctx.lineWidth = w + 1.5 * dpr;
+        const w = width[i];
+        ctx.globalAlpha = alpha[i] * (0.25 + 0.75 * p); ctx.strokeStyle = INK; ctx.lineWidth = w + border;
         ctx.beginPath(); ctx.moveTo(m[0] * k, m[1] * k + dy); ctx.lineTo(m[2] * k, m[3] * k + dy); ctx.stroke();
-        if (w >= 2 * dpr) { ctx.strokeStyle = '#fff'; ctx.lineWidth = w; ctx.stroke(); }
+        if (w >= whiteFrom) { ctx.strokeStyle = '#fff'; ctx.lineWidth = w; ctx.stroke(); }
       }
-      ctx.globalAlpha = 0.8; ctx.strokeStyle = INK; ctx.lineWidth = 1 * dpr;
+      ctx.globalAlpha = 0.8; ctx.strokeStyle = INK; ctx.lineWidth = Math.max(0.75 * dpr, 1 * k);
       for (let pi = 0; pi < pieces.length; pi++) {                   // hook lines on the pieces in the air
         const p = progress[pi];
         if (p <= 0 || p >= 1) continue;

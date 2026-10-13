@@ -153,3 +153,10 @@ test('hal.js fails quietly, waits for both the JSON and the view, and never draw
   assert.match(js, /const TOTAL = 25, FLY = 0\.6/);
   assert.match(js, /if \(!started\[/);   // the per-member skip guard in the frame loop
 });
+
+test('hal.js scales line widths with the canvas, so the final frame matches the still at any figure size', () => {
+  const js = fs.readFileSync(path.join(__dirname, '..', 'assets', 'senkon', 'hal.js'), 'utf8');
+  assert.match(js, /Math\.max\(W_MIN, Math\.min\(W_MAX, m\[4\]\)\) \* k/);   // data px -> canvas px, never by dpr alone
+  assert.match(js, /1\.5 \* k/);                                                  // the ink border too
+  assert.doesNotMatch(js, /W_MAX, m\[4\]\)\) \* dpr/);
+});
