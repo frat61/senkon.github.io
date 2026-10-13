@@ -50,3 +50,7 @@ test('the sitemap lists the page', () => {
   const map = fs.readFileSync(path.join(__dirname, '..', 'sitemap.xml'), 'utf8');
   assert.match(map, /<loc>https:\/\/senkonmuhendislik\.com\/deprem-performans\/<\/loc>/);
 });
+
+test('the headline asks the owner question in Fırat words', () => {
+  assert.ok(html.includes('<h1>Binanız, içinde yaşamak için güvenli mi?</h1>'));
+});
