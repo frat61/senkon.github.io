@@ -227,31 +227,32 @@ function group(members, grid) {
   const nearestLevel = y => levels.length ? levels.reduce((best, l) => Math.abs(l - y) < Math.abs(best - y) ? l : best, levels[0]) : Math.round(y);
   const floorAt = y => levels.length ? floorOf.get(nearestLevel(y)) : Math.round(y);
   const bay = x => { let i = 0; while (i + 1 < grid.xs.length - 1 && x >= grid.xs[i + 1]) i++; return i; };
-  members.forEach((m, i) => {
+  const strip = z => Math.floor((z - grid.zMin) / 10);
+  members.forEach((m, i) => {                                         // small pieces: one bay by one 10 m strip, for several work fronts at once
     if (assigned[i]) return;
     const c = mids[i];
     if (c[1] <= 0.5) {
       const level = kinds[i] === 'horizontal' ? floorAt(c[1]) : floorAt(Math.min(m.a[1], m.b[1]));   // bracing joins the floor it stands on
-      piece('floor', { level, x: bay(c[0]) }).m.push(i);
+      piece('floor', { level, x: bay(c[0]), z: strip(c[2]) }).m.push(i);
     } else if (along(m, 2)) {
       const x = grid.xs.reduce((best, v) => Math.abs(v - c[0]) < Math.abs(best - c[0]) ? v : best, grid.xs[0]);
-      piece('roof', { x }).m.push(i);                                 // a whole truss line
-    } else piece('roofx', { x: bay(c[0]) }).m.push(i);               // purlins and roof bracing of one bay
+      piece('roof', { x, z: strip(c[2]) }).m.push(i);                 // one segment of a truss line
+    } else piece('roofx', { x: bay(c[0]), z: strip(c[2]) }).m.push(i);   // purlins and roof bracing of one bay strip
     assigned[i] = true;
   });
   return [...pieces.values()];
 }
 
-// ---- site order: towers, posts, floors bottom up bay by bay, roof truss lines, roof bracing by bay
+// ---- site order: towers, posts, floors bottom up bay by bay and strip by strip, roof truss segments, roof bracing
 function order(pieces) {
   const sortKey = p => {
     const k = p.key;
     switch (p.t) {
       case 'tower': return [0, k.row, k.x, 0];
       case 'post': return [1, k.x, k.z, 0];
-      case 'floor': return [2, k.level, k.x, 0];
-      case 'roof': return [3, k.x, 0, 0];
-      default: return [4, k.x, 0, 0];
+      case 'floor': return [2, k.level, k.x, k.z];
+      case 'roof': return [3, k.x, k.z, 0];
+      default: return [4, k.x, k.z, 0];
     }
   };
   const keys = pieces.map(sortKey);

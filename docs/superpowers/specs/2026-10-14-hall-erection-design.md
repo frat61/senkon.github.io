@@ -147,3 +147,11 @@ Changed, with his yes:
   arc with ease-in-out over `FLY = 1` s, fading in over the first third.
 - **Columns quick, the rest deliberate.** Start times follow cumulative weights: towers and posts weigh 1,
   every other piece 3, over the same 25 s at speed 1.
+
+## 9. Revision 2026-10-14, five work fronts
+
+Fırat: with four or five fronts assembling at once the pieces can be small again. So: pieces are one bay by one
+10 m strip (`floor {level, x, z}`, `roof {x, z}`, `roofx {x, z}`; about 556 in all), and `hal.js` cuts the picture
+into `LANES = 5` vertical zones. Each zone erects its own pieces in site order, the next starting when the previous
+is 1/1.4 of the way in, every zone finishing at `TOTAL`; a piece swings down from above its zone, leaning in from
+the outside edge (full lean at the edge zones, straight down in the middle). The weighted column phase is gone.

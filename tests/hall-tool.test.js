@@ -133,9 +133,9 @@ test('group makes a tower of chords plus lacing, floors by level and bay, roof b
   const floor20 = pieces.find(p => p.t === 'floor' && p.key.level === -20 && p.key.x === 0);
   assert.ok(floor20.m.includes(7) && floor20.m.includes(8) && floor20.m.includes(12));   // beam, bracing above it, lower chord 3.5 m below: one bay piece
   assert.ok(pieces.some(p => p.t === 'floor' && p.key.level === -10 && p.m.includes(9)));
-  assert.ok(pieces.every(p => p.t !== 'floor' || p.key.z === undefined));   // no z strips: a bay spans the hall
-  assert.ok(pieces.some(p => p.t === 'roof' && p.key.x === 10 && p.key.z === undefined && p.m.includes(10)));
-  assert.ok(pieces.some(p => p.t === 'roofx' && p.key.x === 0 && p.m.includes(11)));
+  assert.ok(pieces.every(p => p.t !== 'floor' || p.key.z !== undefined));  // bay by 10 m strip: small pieces for five work fronts
+  assert.ok(pieces.some(p => p.t === 'roof' && p.key.x === 10 && p.key.z === 0 && p.m.includes(10)));
+  assert.ok(pieces.some(p => p.t === 'roofx' && p.key.x === 0 && p.key.z === 0 && p.m.includes(11)));
   assert.ok(pieces.every(p => p.m.length > 0));
   const o = H.order(pieces);
   assert.equal(new Set(o).size, pieces.length);

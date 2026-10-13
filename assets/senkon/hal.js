@@ -3,9 +3,9 @@
    drawing. The JSON (written by tools/make-hall.js from the viewer's GLB) holds the members as projected
    lines [x1, y1, x2, y2, width px, depth], the erection pieces (towers, posts, floor bays, roof truss
    lines, roof bays) with their member indices, the site order of the pieces and the members' far-to-near
-   order. A piece swings in from the upper left or right, whichever side it stands on, like a crane load, slowing as it lands; the whole
-   erection takes TOTAL seconds at speed 1 (data-speed runs it faster), columns quickly and the rest at a
-   steadier pace, each piece flying FLY seconds. Members are painted far to near, an ink stroke under a
+   order. The picture is cut into LANES vertical zones that assemble at once, each zone's pieces one after
+   another in site order, swinging down from above the zone like crane loads; the whole erection takes
+   TOTAL seconds at speed 1 (data-speed runs it faster). Members are painted far to near, an ink stroke under a
    white one, so the front hides the back like a line drawing; farther members fade a little. Without
    JavaScript, with reduced motion, or if anything fails, the still picture simply shows.
    Spec: docs/superpowers/specs/2026-10-14-hall-erection-design.md */
@@ -15,9 +15,9 @@
   if (matchMedia('(prefers-reduced-motion: reduce)').matches) return;
   if (!document.createElement('canvas').getContext) return;
 
-  const TOTAL = 25, FLY = 1;                   // seconds for the whole erection at speed 1; seconds a piece is in the air
+  const TOTAL = 25, LANES = 5;                 // seconds for the whole erection at speed 1; work fronts assembling at once
+  const OVERLAP = 1.4;                         // a lane's next piece starts when the previous one is 1/OVERLAP of the way in
   const SWING_X = 0.35, SWING_Y = -0.3, LIFT = 0.08;   // how far off a piece starts, as fractions of the canvas, and the arc's rise
-  const WEIGHT = { tower: 1, post: 1 };        // columns go up quickly; every other piece weighs 3
   const INK = '#3a3f44', A_NEAR = 0.95, A_FAR = 0.45, W_MIN = 1.2, W_MAX = 6;   // widths in the picture's pixels (1500 wide), as in the still
   const ease = p => p < 0.5 ? 4 * p * p * p : 1 - Math.pow(-2 * p + 2, 3) / 2;   // ease in and out
 
@@ -47,15 +47,18 @@
     stage.appendChild(canvas); fig.setAttribute('data-live', '1');
 
     const M = data.members, pieces = data.pieces, order = data.order, depthOrder = data.depthOrder;
-    const startAt = new Float64Array(pieces.length), pieceOf = new Int32Array(M.length);
-    let total = 0; order.forEach(pi => { total += WEIGHT[pieces[pi].t] || 3; });   // start times follow cumulative weight
-    let acc = 0; order.forEach(pi => { startAt[pi] = (TOTAL - FLY) * acc / (total || 1); acc += WEIGHT[pieces[pi].t] || 3; });
-    const side = new Float32Array(pieces.length);                     // -1: swings in from the upper left, +1: from the upper right
+    // five work fronts: the picture is cut into LANES vertical zones; each zone erects its own pieces in site order,
+    // one after another, all zones finishing together at TOTAL; a piece swings in from above its zone, leaning in from the outside
+    const pieceOf = new Int32Array(M.length), lane = new Int32Array(pieces.length), startAt = new Float64Array(pieces.length), flyOf = new Float64Array(pieces.length);
     pieces.forEach((p, pi) => {
       let sx = 0; p.m.forEach(i => { pieceOf[i] = pi; sx += M[i][0] + M[i][2]; });
-      side[pi] = sx / (2 * p.m.length) < data.w / 2 ? -1 : 1;
+      lane[pi] = Math.min(LANES - 1, Math.floor(sx / (2 * p.m.length) / data.w * LANES));
     });
+    const count = new Int32Array(LANES); order.forEach(pi => { count[lane[pi]]++; });
+    const pos = new Int32Array(LANES);
+    order.forEach(pi => { const l = lane[pi], n = count[l], step = TOTAL / (n - 1 + OVERLAP); startAt[pi] = pos[l] * step; flyOf[pi] = step * OVERLAP; pos[l]++; });
     const swingX = SWING_X * canvas.width, swingY = SWING_Y * canvas.height, lift = LIFT * canvas.height;
+    const sideOf = l => (l - (LANES - 1) / 2) / ((LANES - 1) / 2);     // -1 at the left edge, +1 at the right, 0 in the middle
     let dMin = Infinity, dMax = -Infinity;
     M.forEach(m => { dMin = Math.min(dMin, m[5]); dMax = Math.max(dMax, m[5]); });
     // widths live in the picture's own pixels (the still is drawn with the same clamps), so they scale with the canvas by k, never by dpr alone
@@ -76,14 +79,14 @@
       if (start === null) start = now;
       if (document.hidden) { requestAnimationFrame(frame); return; }
       const t = (now - start - paused) / 1000 * speed;
-      for (let pi = 0; pi < pieces.length; pi++) progress[pi] = Math.min(Math.max((t - startAt[pi]) / FLY, 0), 1);
+      for (let pi = 0; pi < pieces.length; pi++) progress[pi] = Math.min(Math.max((t - startAt[pi]) / flyOf[pi], 0), 1);
       for (let i = 0; i < M.length; i++) started[i] = t >= startAt[pieceOf[i]] ? 1 : 0;
       ctx.clearRect(0, 0, canvas.width, canvas.height);
       for (let q = 0; q < depthOrder.length; q++) {
         const i = depthOrder[q];
         if (!started[i]) continue;                                   // nothing shows through from the future
         const m = M[i], pi = pieceOf[i], p = progress[pi], e = ease(p);
-        const dx = side[pi] * swingX * (1 - e), dy = swingY * (1 - e) - lift * Math.sin(Math.PI * p);   // the swing: in from its side, a little lift on the way
+        const dx = sideOf(lane[pi]) * swingX * (1 - e), dy = swingY * (1 - e) - lift * Math.sin(Math.PI * p);   // the swing: down from above its zone, leaning in from the outside
         const w = width[i];
         ctx.globalAlpha = alpha[i] * Math.min(1, 0.15 + p * 2.5); ctx.strokeStyle = INK; ctx.lineWidth = w + border;
         ctx.beginPath(); ctx.moveTo(m[0] * k + dx, m[1] * k + dy); ctx.lineTo(m[2] * k + dx, m[3] * k + dy); ctx.stroke();
