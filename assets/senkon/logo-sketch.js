@@ -36,8 +36,10 @@
       run.push([el, [{ fillOpacity: 0 }, { fillOpacity: 0 }, { fillOpacity: 1 }], t, 0.5]);
       t += 0.06;
     });
+    // phones: the same drawing, sped up to about two seconds, so the header is not empty while the visitor decides to stay
+    const k = matchMedia('(max-width:700px)').matches ? Math.min(1, 2 / (t + 0.5)) : 1;
     svg.style.visibility = 'visible';
-    run.forEach(([el, kf, delay, dur]) => el.animate(kf, { delay: delay * 1000, duration: Math.max(dur * 1000, 16), fill: 'both', easing: 'linear' }));
-    svg.dataset.sketchTotal = (t + 0.5).toFixed(1);
+    run.forEach(([el, kf, delay, dur]) => el.animate(kf, { delay: delay * k * 1000, duration: Math.max(dur * k * 1000, 16), fill: 'both', easing: 'linear' }));
+    svg.dataset.sketchTotal = ((t + 0.5) * k).toFixed(1);
   }
 })();

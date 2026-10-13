@@ -68,3 +68,16 @@ test('every service panel ends with a contact link', () => {
 test('panels share one grid cell so swapping text never moves the buttons', () => {
   assert.match(css, /\.hero-panel\{[^}]*grid-area:1\/1/);
 });
+
+// phone polish: tabs above the text with no reserved gap, and a WhatsApp + e-mail dock pinned to the bottom
+test('on phones the hero buttons sit above the text and hidden panels take no space', () => {
+  assert.match(css, /\.hero-tabs\{order:-1\}/);
+  assert.match(css, /\.hero-panel:not\(\.on\)\{display:none\}/);
+});
+
+test('the phone dock offers WhatsApp and e-mail, and starts hidden', () => {
+  const dock = block(/<nav class="dock[^"]*"[\s\S]*?<\/nav>/);
+  assert.match(dock, /class="dock away" inert/);
+  assert.match(dock, /href="https:\/\/wa\.me\/905309250461"/);
+  assert.match(dock, /href="mailto:firatsenturk@senkonmuhendislik\.com"/);
+});

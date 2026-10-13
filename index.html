@@ -31,7 +31,7 @@
 </script>
 <script>if(!matchMedia("(prefers-reduced-motion: reduce)").matches)document.documentElement.classList.add("sketch")</script>
 <link rel="stylesheet" href="assets/senkon/fonts/fonts.css?v=5a84d35c">
-<link rel="stylesheet" href="site.css?v=739dd823">
+<link rel="stylesheet" href="site.css?v=e594308f">
 </head>
 <body>
 <header id="top" class="wrap top">
@@ -522,7 +522,24 @@
   <div>Senkon Mühendislik · İstanbul</div>
   <div><a class="foot-link" href="structkit/">StructKit</a> · <a class="foot-quiet" href="model/panel.html" rel="nofollow" aria-label="Yönetim paneli">© 2026</a></div>
 </footer>
+<nav class="dock away" inert aria-label="Hızlı iletişim">
+  <a class="btn btn-main" href="https://wa.me/905309250461">WhatsApp</a>
+  <a class="btn btn-line" href="mailto:firatsenturk@senkonmuhendislik.com">E-posta</a>
+</nav>
 <script>
+(function () {
+  // phone contact dock: slides in once the hero has scrolled away, and out again while İletişim (which has the same buttons) is on screen
+  var dock = document.querySelector('.dock'), hero = document.querySelector('.hero'), contact = document.getElementById('iletisim');
+  if (!dock || !('IntersectionObserver' in window)) return;
+  var seen = new Map();
+  var io = new IntersectionObserver(function (es) {
+    es.forEach(function (e) { seen.set(e.target, e.isIntersecting); });
+    var away = seen.get(hero) !== false || seen.get(contact) === true;
+    dock.classList.toggle('away', away); dock.toggleAttribute('inert', away);
+  });
+  io.observe(hero); io.observe(contact);
+  document.body.classList.add('has-dock');
+})();
 (function () {
   // phone menu: the Menü button shows the page's nav as a column under the header
   var top = document.getElementById('top'), btn = top.querySelector('.menu-btn');
@@ -556,6 +573,6 @@
 })();
 </script>
 <script src="assets/senkon/skyline.js?v=c19e32a9" defer></script>
-<script src="assets/senkon/logo-sketch.js?v=7a17fb7d" defer></script>
+<script src="assets/senkon/logo-sketch.js?v=5afd9c45" defer></script>
 </body>
 </html>
