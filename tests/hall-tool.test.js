@@ -68,4 +68,26 @@ test('weld merges the duplicated corners of a prism into 8 points and keeps 12 t
   assert.ok(w.tris.every(i => i < 8));
 });
 
+test('featureEdges keeps the 12 corner edges of a prism and drops the face diagonals', () => {
+  const p = prism([0, 0, 0], [5, 0, 0], 0.2);
+  const w = H.weld(Float32Array.from(p.positions), Uint32Array.from(p.indices));
+  const e = H.featureEdges(w.points, w.tris, { minLen: 0 });
+  assert.equal(e.length, 12);
+  assert.equal(e.filter(x => Math.abs(x.a[0] - x.b[0]) > 4.9).length, 4);   // the four long edges
+  assert.equal(H.featureEdges(w.points, w.tris).length, 4);                    // minLen 0.3 drops the 0.2 m end edges
+});
+
+test('bundle turns the four long edges of a prism into one member with the prism width, and keeps two prisms apart', () => {
+  const edgesOf = (p, mesh) => { const w = H.weld(Float32Array.from(p.positions), Uint32Array.from(p.indices)); return H.featureEdges(w.points, w.tris).map(e => ({ ...e, mesh })); };
+  const one = H.bundle(edgesOf(prism([0, 0, 0], [5, 0, 0], 0.2), 'beam'));
+  assert.equal(one.length, 1);
+  assert.ok(Math.abs(one[0].w - 0.2 * Math.SQRT2) < 0.02);        // corners sit on the section's diagonal
+  assert.ok(Math.abs(one[0].a[0] - 0) < 0.01 && Math.abs(one[0].b[0] - 5) < 0.01);
+  assert.equal(one[0].mesh, 'beam');
+  const two = H.bundle([...edgesOf(prism([0, 0, 0], [5, 0, 0], 0.2), 'beam'), ...edgesOf(prism([0, 2, 0], [5, 2, 0], 0.2), 'beam')]);
+  assert.equal(two.length, 2);
+  const collinear = H.bundle([...edgesOf(prism([0, 0, 0], [5, 0, 0], 0.2), 'beam'), ...edgesOf(prism([5.1, 0, 0], [9, 0, 0], 0.2), 'beam')]);
+  assert.equal(collinear.length, 1);                                // gap 0.1 < 0.3 joins them
+});
+
 module.exports = { makeGlb, prism };
