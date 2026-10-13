@@ -3,7 +3,8 @@
    per page load, then leaves the finished picture. The JSON (written by tools/measure-skyline.py) gives
    each building's column and top in image pixels; a column may carry its own "cranes" list. Optional
    data-tallest-m on the figure gives the real height of its tallest building, which sets the crane
-   scale (default 828, Burj Khalifa); optional data-speed (default 1) runs the whole show that many times faster. Without JavaScript, with reduced motion, or if anything fails,
+   scale (default 828, Burj Khalifa); optional data-speed (default 1) runs the whole show that many times faster; optional data-stagger
+   (seconds between neighbouring starts, default 0.05) lets a picture cut into strips rise strip by strip. Without JavaScript, with reduced motion, or if anything fails,
    the static picture simply shows. */
 (function () {
   'use strict';
@@ -23,11 +24,12 @@
     const SRC = stat.getAttribute('src'), V = SRC.indexOf('?') > -1 ? SRC.slice(SRC.indexOf('?')) : '';
     const tallestM = parseFloat(fig.getAttribute('data-tallest-m')) || 828;
     const speed = parseFloat(fig.getAttribute('data-speed')) || 1;
+    const stagger = fig.hasAttribute('data-stagger') ? parseFloat(fig.getAttribute('data-stagger')) : STAGGER;
     fetch(fig.getAttribute('data-skyline') + V).then(r => r.ok ? r.json() : Promise.reject(r.status))
-      .then(data => prepare(fig, stage, SRC, tallestM, speed, data)).catch(() => {});
+      .then(data => prepare(fig, stage, SRC, tallestM, speed, isNaN(stagger) ? STAGGER : stagger, data)).catch(() => {});
   });
 
-  function prepare(fig, stage, SRC, tallestM, speed, data) {
+  function prepare(fig, stage, SRC, tallestM, speed, stagger, data) {
     const W = data.w, H = data.h, G = data.ground, cols = data.cols || [];
     if (!cols.length) return;
     const hmax = Math.max.apply(null, cols.map(c => G - c.top));
@@ -35,7 +37,7 @@
 
     const jobs = cols.map((c, i) => {
       const dur = MIN_BUILD + (MAX_BUILD - MIN_BUILD) * (G - c.top) / hmax;
-      const t0 = i * STAGGER, w = c.x1 - c.x0;
+      const t0 = i * stagger, w = c.x1 - c.x0;
       let cranes;
       if (c.cranes) {                                            // placed by hand in the JSON
         cranes = c.cranes.map((k, n) => ({ kind: k.kind || 'hammer', x: c.x0 + w * k.fx, dir: k.dir || -1, cap: k.cap || 1,
