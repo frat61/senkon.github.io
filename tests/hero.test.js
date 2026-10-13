@@ -30,6 +30,7 @@ test('Deneyim is a banner: the figure, six still building types, and the cleared
   for (const name of ['Esenboğa Havalimanı Kontrol Kulesi', 'Koç Üniversitesi', 'Antalya', 'Malatya', 'Vem', 'Biem', 'Alfraganus', 'Karmall', 'Tuzla']) assert.match(d, new RegExp(name));
   assert.match(d, /<ul class="xp-list" aria-hidden="true">/);   // the loop's second copy is hidden from screen readers
   assert.doesNotMatch(d, /Amazon/);
+  assert.doesNotMatch(d, /GVN|Yapı Akademisi|Referanslar/);   // the note under the banner was removed
 });
 
 test('the sliding names stop for visitors who ask for less motion, and pause on hover', () => {
