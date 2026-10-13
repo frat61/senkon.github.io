@@ -275,6 +275,24 @@ function project(members, pieces, orderIdx, camera) {
   return { w: C.w, h: C.h, members: rows, pieces: outPieces, order: orderIdx.slice(), depthOrder };
 }
 
+// ---- fit: scale and shift the projected picture so the hall fills the canvas inside the margins (fractions of w, h);
+//      the top margin leaves room for the hook lines. Depths stay; widths and fly distances scale with the picture.
+const MARGINS = { left: 0.04, right: 0.04, top: 0.08, bottom: 0.04 };
+function fit(data, margins) {
+  const M = margins || MARGINS, W = data.w, H = data.h;
+  let x0 = Infinity, x1 = -Infinity, y0 = Infinity, y1 = -Infinity;
+  data.members.forEach(m => { x0 = Math.min(x0, m[0], m[2]); x1 = Math.max(x1, m[0], m[2]); y0 = Math.min(y0, m[1], m[3]); y1 = Math.max(y1, m[1], m[3]); });
+  const bw = Math.max(x1 - x0, 1e-9), bh = Math.max(y1 - y0, 1e-9);
+  const s = Math.min(W * (1 - M.left - M.right) / bw, H * (1 - M.top - M.bottom) / bh);
+  const dx = W * M.left + (W * (1 - M.left - M.right) - bw * s) / 2 - x0 * s;   // centred in the slack direction
+  const dy = H * M.top + (H * (1 - M.top - M.bottom) - bh * s) / 2 - y0 * s;
+  const r1d = v => Math.round(v * 10) / 10;
+  return Object.assign({}, data, {
+    members: data.members.map(m => [r1d(m[0] * s + dx), r1d(m[1] * s + dy), r1d(m[2] * s + dx), r1d(m[3] * s + dy), r1d(m[4] * s), m[5]]),
+    pieces: data.pieces.map(p => ({ t: p.t, m: p.m, fly: Math.round(p.fly * s) }))
+  });
+}
+
 // ---- the whole pipeline on a GLB buffer
 function build(buf) {
   const g = parseGlb(buf), edges = [];
@@ -285,10 +303,10 @@ function build(buf) {
   const grid = findGrid(bundle(edges));
   const members = splitAtGrid(bundle(edges), grid);
   const pieces = group(members, grid);
-  return project(members, pieces, order(pieces));
+  return fit(project(members, pieces, order(pieces)));
 }
 
-module.exports = { parseGlb, weld, featureEdges, bundle, findGrid, splitAtGrid, group, order, project, build, CAMERA };
+module.exports = { parseGlb, weld, featureEdges, bundle, findGrid, splitAtGrid, group, order, project, fit, build, CAMERA, MARGINS };
 
 if (require.main === module) {
   const [inFile, outFile] = process.argv.slice(2);

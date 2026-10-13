@@ -168,4 +168,15 @@ test('the generated hal.json is sane', { skip: !require('fs').existsSync(require
   assert.ok(d.pieces.filter(p => p.t === 'tower').length >= 20);
 });
 
+test('fit scales and shifts the projected members so the hall fills the canvas inside the margins', () => {
+  const data = { w: 1500, h: 1125, members: [[100, 300, 1300, 300, 2, 50], [100, 300, 100, 600, 1, 60]], pieces: [{ t: 'floor', m: [0, 1], fly: 60 }], order: [0], depthOrder: [1, 0] };
+  const out = H.fit(data, { left: 0.04, right: 0.04, top: 0.08, bottom: 0.04 });
+  const xs = out.members.flatMap(m => [m[0], m[2]]), ys = out.members.flatMap(m => [m[1], m[3]]);
+  assert.ok(Math.abs(Math.min(...xs) - 60) < 0.2 && Math.abs(Math.max(...xs) - 1440) < 0.2);   // 4 % margins: width is the limit
+  assert.ok(Math.min(...ys) >= 90 && Math.max(...ys) <= 1080);
+  assert.ok(Math.abs(out.members[0][4] - 2 * 1.15) < 0.01);                                 // widths scale with the picture
+  assert.equal(out.members[0][5], 50);                                                      // depth untouched
+  assert.ok(out.pieces[0].fly > 60);                                                        // fly distances scale too
+});
+
 module.exports = { makeGlb, prism };
