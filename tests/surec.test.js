@@ -3,7 +3,7 @@
 // a hand-fed clock (tick(now)), so every timing rule is checked without a browser.
 const test = require('node:test');
 const assert = require('node:assert/strict');
-const { setup } = require('../assets/senkon/surec.js');
+const { setup, label } = require('../assets/senkon/surec.js');
 
 // the few DOM features the script touches
 function el(tag, cls) {
@@ -137,4 +137,43 @@ test('marks the figure live, the list items focusable, the lit step aria-current
   s.show(4);
   assert.equal(lis[0].getAttribute('aria-current'), null);
   assert.equal(lis[4].getAttribute('aria-current'), 'step');
+});
+
+// the pen-drawing order: ink pixels grouped into connected strokes, strokes in top-left-first order, each stroke
+// growing outward from its first pixel
+function pic(rows) { const h = rows.length, w = rows[0].length, g = new Uint8Array(w * h); rows.forEach((r, y) => [...r].forEach((c, x) => { g[y * w + x] = c === '#' ? 0 : 255; })); return { g, w, h }; }
+
+test('label(): three separate strokes come out as three groups, top-left first, each whole before the next', () => {
+  const { g, w, h } = pic([
+    '##........',
+    '..........',
+    '....###...',
+    '..........',
+    '.........#',
+  ]);
+  const { order, groups } = label(g, w, h);
+  assert.equal(groups, 3);
+  assert.deepEqual([...order], [0, 1, 24, 25, 26, 49]);
+});
+
+test('label(): a line is drawn along its length from its first pixel, and diagonal touches count as one stroke', () => {
+  const { g, w, h } = pic([
+    '#####.....',
+    '.....#....',
+  ]);
+  const { order, groups } = label(g, w, h);
+  assert.equal(groups, 1);
+  assert.deepEqual([...order], [0, 1, 2, 3, 4, 15]);
+});
+
+test('label(): light grey is paper, dark grey is ink', () => {
+  const g = new Uint8Array([255, 230, 120, 0]);
+  assert.deepEqual([...label(g, 4, 1).order], [2, 3]);
+});
+
+test('show() calls the onshow hook with the new frame index', () => {
+  const { s } = dom();
+  const seen = []; s.onshow = i => seen.push(i);
+  s.show(3); s.show(3); s.show(0);
+  assert.deepEqual(seen, [3, 0]);
 });
