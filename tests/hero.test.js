@@ -129,3 +129,27 @@ test('the page never says premium and never cites law 6306', () => {
   assert.doesNotMatch(html, /premium/i);
   assert.doesNotMatch(html, /6306/);
 });
+
+test('skyline.js reads data-stagger, the seconds between neighbouring starts, so a figure can rise strip by strip', () => {
+  const js = fs.readFileSync(path.join(__dirname, '..', 'assets', 'senkon', 'skyline.js'), 'utf8');
+  assert.match(js, /data-stagger/);
+});
+
+test('the steel hall erection sits in the Deneyim banner, once, drawn by hal.js from hal.json', () => {
+  const d = deneyim();
+  assert.match(d, /<figure class="hall xp-figure"[^>]*data-hall="assets\/senkon\/hal\.json"[^>]*data-speed="1.4"/);
+  assert.match(d, /<img class="hall-static" src="assets\/senkon\/hal\.webp\?v=[0-9a-f]{8}"[^>]*loading="lazy"/);
+  assert.equal(html.split('hal.json').length - 1, 1);
+  assert.doesNotMatch(d, /data-skyline/);
+  assert.match(html, /<script src="assets\/senkon\/hal\.js\?v=[0-9a-f]{8}" defer><\/script>/);
+  assert.match(css, /\.hall-stage\{/);
+});
+
+test('hal.js fails quietly, waits for both the JSON and the view, and never draws unstarted pieces', () => {
+  const js = fs.readFileSync(path.join(__dirname, '..', 'assets', 'senkon', 'hal.js'), 'utf8');
+  assert.match(js, /\.catch\(\(\) => \{\}\)/);
+  assert.match(js, /prefers-reduced-motion: reduce/);
+  assert.match(js, /IntersectionObserver/);
+  assert.match(js, /const TOTAL = 25, FLY = 0\.6/);
+  assert.match(js, /if \(!started\[/);   // the per-member skip guard in the frame loop
+});

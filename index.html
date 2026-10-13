@@ -31,7 +31,7 @@
 </script>
 <script>if(!matchMedia("(prefers-reduced-motion: reduce)").matches)document.documentElement.classList.add("sketch")</script>
 <link rel="stylesheet" href="assets/senkon/fonts/fonts.css?v=5a84d35c">
-<link rel="stylesheet" href="site.css?v=753121fa">
+<link rel="stylesheet" href="site.css?v=0a3220fb">
 </head>
 <body>
 <header id="top" class="wrap top">
@@ -463,6 +463,11 @@
       <div class="xp-top">
         <p class="xp-fig"><b>400.000+ m²</b><span>Türkiye ve yurt dışında tasarım ve değerlendirme alanı</span></p>
         <ul class="xp-types"><li><b>01</b>Havalimanı ve ulaşım</li><li><b>02</b>Endüstriyel</li><li><b>03</b>Ticari</li><li><b>04</b>Konut ve ofis</li><li><b>05</b>Bina değerlendirme</li><li><b>06</b>Güçlendirme</li></ul>
+        <!-- the steel hall (about 100 × 96 m in plan, 35 m lattice towers) erected element by element from Fırat's own model: hal.js draws the member data made by tools/make-hall.js; the still shows without JavaScript -->
+        <figure class="hall xp-figure" data-hall="assets/senkon/hal.json" data-speed="1.4" aria-label="Endüstriyel çelik yapının taşıyıcı sisteminin montaj animasyonu">
+          <div class="hall-stage"><img class="hall-static" src="assets/senkon/hal.webp?v=104c831e" alt="Kafes kolonlu çelik endüstriyel yapının taşıyıcı sistem çizimi" width="1500" height="1125" loading="lazy"></div>
+          <figcaption class="skyline-caption">Endüstriyel çelik yapı, taşıyıcı sistem modeli</figcaption>
+        </figure>
       </div>
       <div class="xp-run"><div class="xp-track"><ul class="xp-list"><li>Esenboğa Havalimanı Kontrol Kulesi<small>Ankara</small></li><li>Antalya Havalimanı yeni terminal</li><li>Vem İlaç fabrikası<small>200.000 m²</small></li><li>Alfraganus AVM<small>Taşkent</small></li><li>Karmall Rezidans</li><li>Koç Üniversitesi<small>performans</small></li><li>Malatya Havalimanı<small>performans</small></li><li>Biem İlaç fabrikası</li><li>Tuzla lojistik depo<small>güçlendirme</small></li></ul><ul class="xp-list" aria-hidden="true"><li>Esenboğa Havalimanı Kontrol Kulesi<small>Ankara</small></li><li>Antalya Havalimanı yeni terminal</li><li>Vem İlaç fabrikası<small>200.000 m²</small></li><li>Alfraganus AVM<small>Taşkent</small></li><li>Karmall Rezidans</li><li>Koç Üniversitesi<small>performans</small></li><li>Malatya Havalimanı<small>performans</small></li><li>Biem İlaç fabrikası</li><li>Tuzla lojistik depo<small>güçlendirme</small></li></ul></div></div>
     </div>
@@ -549,7 +554,8 @@
   });
 })();
 </script>
-<script src="assets/senkon/skyline.js?v=d85135ad" defer></script>
+<script src="assets/senkon/skyline.js?v=61c5aba5" defer></script>
+<script src="assets/senkon/hal.js?v=b0968e37" defer></script>
 <script src="assets/senkon/logo-sketch.js?v=5afd9c45" defer></script>
 <script src="assets/senkon/track.js?v=7720eb1c" defer></script>
 </body>
