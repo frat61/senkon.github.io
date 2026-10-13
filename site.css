@@ -109,7 +109,7 @@ p{margin:0}
 .about{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:40px;margin-top:24px}
 .about-text{color:var(--body);font-size:17px;line-height:1.6;max-width:520px}
 .about dl{margin:0} .about dt{font-weight:600;margin-top:14px} .about dd{margin:2px 0 0;color:var(--body)}
-.chips{display:flex;flex-wrap:wrap;gap:8px;margin-top:10px} .chips span{background:var(--tint);border-radius:999px;padding:6px 12px;font-size:14px}
+.chips{display:flex;flex-wrap:wrap;gap:8px;margin-top:10px} .chips-next{margin-top:20px} .chips span{background:var(--tint);border-radius:999px;padding:6px 12px;font-size:14px}
 @media (max-width:640px){ .about{grid-template-columns:1fr;gap:12px} }
 .sk .lead{margin-top:14px} .sk .btns{margin-top:22px}
 .sk{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:40px;align-items:center;padding-top:56px;padding-bottom:56px;margin-top:48px}
