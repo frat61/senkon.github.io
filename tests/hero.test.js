@@ -101,7 +101,7 @@ test('Performans lists the six assessment steps in order', () => {
 });
 
 test('Performans ends with what the owner receives and a WhatsApp quote button', () => {
-  assert.match(perf(), /<h3>Ne alırsınız<\/h3>/);
+  assert.match(perf(), /<h3>Çalışmanın sonunda<\/h3>/);
   assert.match(perf(), /güçlendirme projesi/);
   assert.match(perf(), /<a class="btn btn-main" href="https:\/\/wa\.me\/905309250461\?text=[^"]+">Binanız için teklif alın<\/a>/);
 });
