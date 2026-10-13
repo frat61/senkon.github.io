@@ -1,11 +1,11 @@
 #!/usr/bin/env node
 'use strict';
-/* Cache-busting tags for the home page. GitHub Pages caches every file for four hours, so index.html
-   links site.css, the fonts, the skyline and logo scripts and the two drawings with a ?v= tag that must change
-   whenever the file does. The tag is the first eight hex digits of the file's SHA-1; a drawing's tag
-   also covers its JSON sidecar, because skyline.js fetches the JSON with the picture's tag.
-   404.html links a subset of the same files (with a leading slash, since GitHub Pages serves it at
-   any path); its tags are rewritten and checked too, but it need not link every file.
+/* Cache-busting tags for the pages. GitHub Pages caches every file for four hours, so each page links
+   site.css, the fonts, the scripts and the drawings it uses with a ?v= tag that must change whenever
+   the file does. The tag is the first eight hex digits of the file's SHA-1; a drawing's tag also
+   covers its JSON sidecar, because skyline.js fetches the JSON with the picture's tag. Every file in
+   LINKS must be linked by at least one page (the story pictures live only on deprem-performans/);
+   404.html and the sub-pages link with a leading slash, since they are served from a folder.
      node tools/versions.js          rewrites the tags in index.html, 404.html and the sub-pages
      node tools/versions.js --check  prints the stale ones and exits 1 (what tests/versions.test.js does) */
 const fs = require('fs');
@@ -22,6 +22,13 @@ const LINKS = {
   'assets/senkon/logo-sketch.js': ['assets/senkon/logo-sketch.js'],
   'assets/senkon/skyline.webp': ['assets/senkon/skyline.webp', 'assets/senkon/skyline.json'],
   'assets/senkon/esenboga.webp': ['assets/senkon/esenboga.webp', 'assets/senkon/esenboga.json'],
+  'assets/senkon/surec.js': ['assets/senkon/surec.js'],                         // the story on deprem-performans/ only
+  'assets/senkon/surec/01.webp': ['assets/senkon/surec/01.webp'],
+  'assets/senkon/surec/02.webp': ['assets/senkon/surec/02.webp'],
+  'assets/senkon/surec/03.webp': ['assets/senkon/surec/03.webp'],
+  'assets/senkon/surec/04.webp': ['assets/senkon/surec/04.webp'],
+  'assets/senkon/surec/05.webp': ['assets/senkon/surec/05.webp'],
+  'assets/senkon/surec/06.webp': ['assets/senkon/surec/06.webp'],
 };
 
 function tag(files, root) {
@@ -45,15 +52,15 @@ function found(html) {
 }
 
 function stale(root) {
-  const want = expected(root), bad = [];
+  const want = expected(root), bad = [], seen = new Set();
   for (const page of PAGES) {
-    const html = fs.readFileSync(path.join(root || ROOT, page), 'utf8'), seen = new Set();
+    const html = fs.readFileSync(path.join(root || ROOT, page), 'utf8');
     for (const { link, tag: t } of found(html)) {
       seen.add(link);
       if (t !== want[link]) bad.push(`${page}: ${link}?v=${t} should be ?v=${want[link]}`);
     }
-    if (page === 'index.html') for (const link of Object.keys(LINKS)) if (!seen.has(link)) bad.push(`${link} is not linked with a ?v= tag`);
   }
+  for (const link of Object.keys(LINKS)) if (!seen.has(link)) bad.push(`${link} is not linked with a ?v= tag`);   // by at least one page
   return bad;
 }
 

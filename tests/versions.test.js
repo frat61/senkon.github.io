@@ -6,9 +6,22 @@ const os = require('os');
 const path = require('path');
 const V = require('../tools/versions.js');
 
-test('index.html and 404.html link every versioned file with the tag of its current content', () => {
+test('every page links its versioned files with the tag of their current content, and every file is linked somewhere', () => {
   const bad = V.stale();
   assert.deepEqual(bad, [], 'run: node tools/versions.js\n' + bad.join('\n'));
+});
+
+test('a file linked only by a sub-page is tagged and checked there', () => {
+  const dir = fs.mkdtempSync(path.join(os.tmpdir(), 'senkon-v-'));
+  for (const f of Object.values(V.LINKS).flat()) { fs.mkdirSync(path.dirname(path.join(dir, f)), { recursive: true }); fs.writeFileSync(path.join(dir, f), f); }
+  for (const p of V.PAGES) { fs.mkdirSync(path.dirname(path.join(dir, p)), { recursive: true }); fs.writeFileSync(path.join(dir, p), ''); }
+  const want = V.expected(dir);
+  fs.writeFileSync(path.join(dir, 'index.html'), Object.keys(V.LINKS).filter(l => !l.includes('surec')).map(l => `<a href="${l}?v=${want[l]}">`).join(''));
+  fs.writeFileSync(path.join(dir, 'deprem-performans/index.html'), Object.keys(V.LINKS).filter(l => l.includes('surec')).map(l => `<a href="/${l}?v=${want[l]}">`).join(''));
+  assert.deepEqual(V.stale(dir), []);
+  fs.writeFileSync(path.join(dir, 'deprem-performans/index.html'), '');
+  assert.ok(V.stale(dir).some(m => m.includes('surec.js is not linked')));
+  fs.rmSync(dir, { recursive: true });
 });
 
 test('a drawing tag covers its JSON sidecar, so a changed JSON changes the tag', () => {
