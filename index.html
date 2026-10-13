@@ -377,30 +377,36 @@
 </header>
 
 <main>
+  <!-- METİN 1 · ÜST BÖLÜM (hero): ana başlık ve dört düğmenin açtığı yazılar. Her panelde başlık (h1/h2) ve paragraf (p) değiştirilebilir. -->
   <section class="wrap hero">
     <div class="hero-text">
       <!-- hero text: the overview shows on load; each button below swaps in its own panel. Edit the wording freely,
            but keep each panel's id and its button's aria-controls the same. -->
       <div class="hero-stage">
+        <!-- METİN 1a · Açılışta görünen başlık ve paragraf -->
         <div class="hero-panel on" id="hero-overview">
           <h1 class="hero-title">Taşıyıcı sistem tasarımı ve deprem performans değerlendirmesi</h1>
           <p class="lead">Çelik ve betonarme yapıların taşıyıcı sistemlerini tasarlıyor, mevcut binaların depremde nasıl davranacağını hesaplıyoruz. Konsept aşamasındaki modelleri telefonda açılan bir bağlantıyla paylaşıyoruz.</p>
         </div>
+        <!-- METİN 1b · "Yapı tasarımı" düğmesinin yazısı -->
         <div class="hero-panel" id="hero-tasarim">
           <h2 class="hero-title">Çelik ve betonarme yapı tasarımı</h2>
           <p class="lead">Yeni yapıların taşıyıcı sistemini konseptten uygulama projesine kadar tasarlıyoruz. Endüstriyel yapılar, laboratuvar ve ofis binaları, çatı ve platformlar için TBDY 2018, ACI ve Eurocode'a uygun hesap ve çizimler hazırlıyoruz. Konsept aşamasındaki modeli telefonda açılan bir bağlantıyla paylaşıyor, kararları birlikte veriyoruz.</p>
           <a class="hero-more" href="#iletisim">İletişim →</a>
         </div>
+        <!-- METİN 1c · "Performans" düğmesinin yazısı -->
         <div class="hero-panel" id="hero-performans">
           <h2 class="hero-title">Mevcut binanız depremde nasıl davranır?</h2>
           <p class="lead">Zemin etüdü, karot testi, röntgen ve donatı okumasıyla binanızı yerinde inceliyor; TBDY 2018 ve ASCE 41'e göre üç boyutlu analizle deprem davranışını hesaplıyoruz. Gerektiğinde gerçek deprem kayıtlarıyla analiz ve güçlendirme projesi.</p>
           <a class="hero-more" href="#performans">Nasıl çalışıyoruz →</a>
         </div>
+        <!-- METİN 1d · "Güçlendirme" düğmesinin yazısı -->
         <div class="hero-panel" id="hero-guclendirme">
           <h2 class="hero-title">Yetersiz çıkan binalar için güçlendirme</h2>
           <p class="lead">Performans değerlendirmesi binanın yetersiz kaldığını gösterirse güçlendirme seçeneklerini karşılaştırıyor, uygun olanın projesini hazırlıyoruz. Amaç, binaya gereğinden fazla müdahale etmeden onu hedef performans düzeyine taşımak.</p>
           <a class="hero-more" href="#iletisim">İletişim →</a>
         </div>
+        <!-- METİN 1e · "Danışmanlık" düğmesinin yazısı -->
         <div class="hero-panel" id="hero-danismanlik">
           <h2 class="hero-title">Statik rapor, danışmanlık ve ikinci görüş</h2>
           <p class="lead">Statik rapor hazırlıyor, tasarım ve uygulama sürecinde teknik danışmanlık veriyoruz. Başka bir mühendisin hazırladığı projeye bağımsız ikinci görüş istediğinizde hesapları ve çizimleri inceleyip bulguları yazılı olarak iletiyoruz.</p>
@@ -427,6 +433,7 @@
     <figcaption class="skyline-caption">Yapı mühendisliğinin simge yapıları.</figcaption>
   </figure>
 
+  <!-- METİN 2 · DEPREM PERFORMANSI: başlık, giriş paragrafı, altı adım (h3 = adım adı, p = açıklama), "Çalışmanın sonunda" listesi -->
   <section id="performans" class="wrap section perf rule">
     <p class="eyebrow">Deprem performansı</p>
     <h2>Mevcut binalar depremde nasıl davranır?</h2>
@@ -454,6 +461,7 @@
     </div>
   </section>
 
+  <!-- METİN 3 · HİZMETLER: beş hizmet (h3 = hizmet adı, p = açıklama) -->
   <section id="hizmetler" class="wrap section rule">
     <p class="eyebrow">Hizmetler</p>
     <h2>Ne yapıyoruz</h2>
@@ -466,6 +474,7 @@
     </div>
   </section>
 
+  <!-- METİN 4 · 3B MODEL: başlık ve açıklama -->
   <section id="model" class="wrap viewer rule">
     <p class="eyebrow">3B model görüntüleyici</p>
     <h2>Paylaşılan modeli açın</h2>
@@ -480,6 +489,7 @@
     <p class="aside"><a href="structkit/">StructKit</a>, tarayıcıda çalışan küçük hesap araçlarımız: çelik, betonarme, deprem ve rüzgar.</p>
   </section>
 
+  <!-- METİN 5 · DENEYİM: büyük rakam, altı yapı türü kartı (h3 = başlık, p = açıklama, li = proje satırları), alttaki not -->
   <section id="deneyim" class="wrap section rule">
     <p class="eyebrow">Deneyim</p>
     <h2>Ekibimizin çalıştığı yapı türleri</h2>
@@ -497,6 +507,7 @@
     <p class="note">Ekibimizin GVN Tasarım ve Mühendislik ile Yapı Akademisi Mühendislik bünyesinde görev aldığı projelerden. Referanslar talep üzerine iletilir.</p>
   </section>
 
+  <!-- METİN 6 · HAKKINDA: tanıtım paragrafı, yönetmelik ve yazılım etiketleri (her <span>…</span> bir etiket) -->
   <section id="hakkinda" class="wrap section rule">
     <p class="eyebrow">Hakkında</p>
     <h2>Senkon Mühendislik</h2>
@@ -511,6 +522,7 @@
     </div>
   </section>
 
+  <!-- METİN 7 · İLETİŞİM: başlık ve düğme yazıları (telefon ve e-posta değişirse href="…" içindekini de değiştirin) -->
   <section id="iletisim" class="wrap contact rule">
     <p class="eyebrow">İletişim</p>
     <h2>Bir projeniz mi var?</h2>
