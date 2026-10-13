@@ -29,7 +29,7 @@
 }
 </script>
 <link rel="stylesheet" href="/assets/senkon/fonts/fonts.css?v=5a84d35c">
-<link rel="stylesheet" href="/site.css?v=dc094bfc">
+<link rel="stylesheet" href="/site.css?v=753121fa">
 </head>
 <body>
 <!-- Deprem performansı sayfası (Google reklamlarının açacağı sayfa). Yazılar METİN P1-P4 işaretleriyle gruplanmıştır. -->
@@ -108,6 +108,25 @@
       <a class="btn btn-line" href="tel:+905309250461">+90 530 925 04 61</a>
       <a class="btn btn-line" href="mailto:firatsenturk@senkonmuhendislik.com">firatsenturk@senkonmuhendislik.com</a>
     </div>
+    <!-- METİN P5 · FORM: bilgi bırakın, biz arayalım (alan adları name="…" değişirse tests/track.test.js de değişir) -->
+    <div class="lead-wrap">
+      <p class="lead-lead">Dilerseniz bilgilerinizi bırakın, sizi biz arayalım.</p>
+      <form class="lead-form" method="POST" action="" novalidate="">
+        <label>Ad Soyad<input type="text" name="ad" autocomplete="name" required></label>
+        <label>Telefon<input type="tel" name="telefon" autocomplete="tel" inputmode="tel" placeholder="05xx xxx xx xx" required></label>
+        <label>Şehir / ilçe<input type="text" name="sehir" autocomplete="address-level2" placeholder="İstanbul, Kadıköy"></label>
+        <label>Binanın yapım yılı<input type="text" name="yapim_yili" inputmode="numeric" placeholder="Biliyorsanız"></label>
+        <label class="wide">Mesaj<textarea name="mesaj" placeholder="Kat sayısı, yapı türü, sizi düşündüren şey…"></textarea></label>
+        <input type="hidden" name="_subject" value="senkonmuhendislik.com · yeni talep">
+        <label class="gotcha" aria-hidden="true">Boş bırakın<input type="text" name="_gotcha" tabindex="-1" autocomplete="off"></label>
+        <p class="lead-err" hidden>Gönderilemedi. Lütfen tekrar deneyin ya da WhatsApp'tan yazın.</p>
+        <div class="lead-foot">
+          <button type="submit" class="btn btn-main">Gönder</button>
+          <p class="lead-note">Bilgileriniz yalnızca size dönüş yapmak için kullanılır. <a href="/kvkk/">Aydınlatma metni</a></p>
+        </div>
+      </form>
+      <p class="lead-done" hidden>Teşekkürler, mesajınız ulaştı. En kısa sürede sizi arayacağız.</p>
+    </div>
   </section>
 </main>
 
@@ -120,6 +139,7 @@
   <a class="btn btn-line" href="mailto:firatsenturk@senkonmuhendislik.com">E-posta</a>
 </nav>
 <script src="/assets/senkon/surec.js?v=7fa19361" defer></script>
+<script src="/assets/senkon/track.js?v=84c345ea" defer></script>
 <script>
 (function () {
   // phone menu: the Menü button shows the nav as a column under the header

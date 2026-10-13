@@ -162,6 +162,10 @@ h2.perf-sub{font-size:clamp(30px,4vw,40px);margin:0}
 .mv-text{margin-top:10px;color:var(--body);font-size:17px;line-height:1.65}
 @media (max-width:760px){ .mv{grid-template-columns:1fr} }
 .about-text{color:var(--body);font-size:18px;line-height:1.65;max-width:680px;margin-top:8px}
+/* kvkk/: plain legal text */
+.legal{max-width:720px;padding-top:32px;padding-bottom:48px}
+.legal h2{font-family:var(--serif);font-weight:600;font-size:24px;line-height:1.2;letter-spacing:-.01em;margin:28px 0 8px}
+.legal p{color:var(--body);line-height:1.6;margin:0 0 12px} .legal a{color:var(--link)}
 .sk .lead{margin-top:14px} .sk .btns{margin-top:22px}
 .sk{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:40px;align-items:center;padding-top:56px;padding-bottom:56px;margin-top:48px}
 .sk-grid{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:12px}
@@ -181,6 +185,27 @@ h2.perf-sub{font-size:clamp(30px,4vw,40px);margin:0}
 @media (max-width:640px){ .open-form{flex-direction:column} .open-form .btn{width:100%} }
 .contact{padding-top:64px;padding-bottom:48px}
 .contact .btns{margin-top:24px} @media (max-width:640px){ .contact .btns{flex-direction:column} .contact .btn{width:100%} }
+/* contact form on deprem-performans/ (posts to Formspree from track.js); hidden until the form address is set */
+.lead-wrap{margin-top:40px;max-width:720px}
+.lead-wrap .lead-lead{color:var(--body);margin:0 0 18px}
+.lead-form{display:grid;grid-template-columns:1fr 1fr;gap:14px 16px}
+.lead-form label{display:grid;gap:6px;font-size:14px;font-weight:600;color:var(--ink)}
+.lead-form label.wide{grid-column:1/-1}
+.lead-form input,.lead-form textarea{min-height:48px;padding:10px 16px;font:inherit;font-size:16px;color:var(--ink);background:var(--ground);border:1.5px solid var(--ink);border-radius:14px}
+.lead-form textarea{min-height:120px;resize:vertical}
+.lead-form input:focus-visible,.lead-form textarea:focus-visible{outline:2px solid var(--accent);outline-offset:3px}
+.lead-form input::placeholder,.lead-form textarea::placeholder{color:var(--muted)}
+.lead-form .lead-foot{grid-column:1/-1;display:flex;align-items:center;gap:18px;flex-wrap:wrap}
+.lead-form .lead-note{margin:0;font-size:13px;color:var(--muted)} .lead-form .lead-note a{color:var(--link)}
+.lead-form .lead-err{grid-column:1/-1;margin:0;color:#9b3d2a}
+.lead-done{margin-top:40px;padding:22px 24px;background:var(--tint);border-radius:14px;color:var(--ink);max-width:720px}
+.lead-form .gotcha{position:absolute;left:-9999px;width:1px;height:1px;overflow:hidden}
+@media (max-width:640px){ .lead-form{grid-template-columns:1fr} .lead-form label.wide{grid-column:auto} .lead-form .btn{width:100%} }
+/* cookie consent bar (built by track.js); above the phone dock */
+.consent{position:fixed;left:0;right:0;bottom:0;z-index:30;display:flex;align-items:center;justify-content:center;gap:16px;flex-wrap:wrap;padding:12px 16px calc(12px + env(safe-area-inset-bottom,0px));background:rgba(255,255,255,.97);border-top:1px solid var(--rule);box-shadow:0 -6px 24px rgba(29,43,51,.06)}
+.consent p{margin:0;font-size:14px;color:var(--body)} .consent a{color:var(--link)}
+.consent-btns{display:flex;gap:8px} .consent .btn{min-height:40px;padding:0 16px;font-size:14px}
+@media (max-width:640px){ .consent{flex-direction:column;align-items:stretch;text-align:center} .consent-btns{display:grid;grid-template-columns:1fr 1fr} }
 .foot{display:flex;justify-content:space-between;align-items:center;gap:16px;padding-top:22px;padding-bottom:calc(28px + env(safe-area-inset-bottom,0px));font-size:14px;color:var(--muted);flex-wrap:wrap}
 .foot-link,.foot-quiet{display:inline-block;padding:12px 4px}   /* 44 px tall tap area, same look */
 /* phone: WhatsApp and e-mail pinned to the bottom of the screen; hidden while the hero or the İletişim section is on screen */

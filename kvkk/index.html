@@ -1,0 +1,67 @@
+<!doctype html>
+<html lang="tr">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>Kişisel verilerin korunması · Senkon Mühendislik</title>
+<meta name="description" content="senkonmuhendislik.com'da iletişim formu ve çerezler yoluyla işlenen kişisel veriler, işlenme amacı, saklama süresi ve KVKK kapsamındaki haklarınız.">
+<meta name="robots" content="noindex, follow">
+<link rel="icon" type="image/png" href="/assets/senkon/favicon.png">
+<link rel="apple-touch-icon" href="/assets/senkon/apple-touch-icon.png">
+<meta name="theme-color" content="#ffffff">
+<link rel="canonical" href="https://senkonmuhendislik.com/kvkk/">
+<link rel="stylesheet" href="/assets/senkon/fonts/fonts.css?v=5a84d35c">
+<link rel="stylesheet" href="/site.css?v=753121fa">
+</head>
+<body>
+<!-- KVKK aydınlatma metni. Yazılar METİN K1-K2 işaretleriyle gruplanmıştır. -->
+<header id="top" class="wrap top">
+  <a class="brand" href="/" aria-label="Senkon Mühendislik ana sayfa"><img class="lockup" src="/assets/senkon/logo-lockup.svg" alt="Senkon Mühendislik"></a>
+  <nav id="nav" class="nav" aria-label="Site">
+    <a href="/">Ana sayfa</a><a href="/deprem-performans/">Performans</a><a href="/#hizmetler">Hizmetler</a><a href="/hakkinda/">Hakkında</a><a href="/#iletisim">İletişim</a>
+  </nav>
+  <button class="btn btn-line menu-btn" type="button" aria-expanded="false" aria-controls="nav">Menü</button>
+</header>
+
+<main>
+  <!-- METİN K1 · BAŞLIK -->
+  <section class="wrap page-hero">
+    <p class="eyebrow">Aydınlatma metni</p>
+    <h1>Kişisel verilerin korunması</h1>
+    <p class="about-text">6698 sayılı Kişisel Verilerin Korunması Kanunu (KVKK) kapsamında, bu sitede hangi verilerinizin hangi amaçla işlendiğini aşağıda açıklıyoruz.</p>
+  </section>
+
+  <!-- METİN K2 · METİN: başlıklar ve paragraflar -->
+  <section class="wrap section rule legal">
+    <h2>Veri sorumlusu</h2>
+    <p>Senkon Mühendislik, İstanbul. E-posta: <a href="mailto:firatsenturk@senkonmuhendislik.com">firatsenturk@senkonmuhendislik.com</a>.</p>
+
+    <h2>İletişim formu</h2>
+    <p>Formu doldurduğunuzda ad soyad, telefon, şehir / ilçe, binanın yapım yılı ve mesajınız işlenir. Bu bilgiler yalnızca talebinize dönüş yapmak ve teklif hazırlamak için kullanılır; reklam amacıyla kullanılmaz, üçüncü kişilerle paylaşılmaz. Hukuki dayanağı, sözleşme kurulmadan önce talebinizle ilgili adımların atılması (KVKK 5/2-c) ve veri sorumlusunun meşru menfaatidir (KVKK 5/2-f).</p>
+    <p>Form gönderimleri, sunucuları yurt dışında bulunan Formspree hizmeti aracılığıyla e-posta olarak bize iletilir. Formu göndererek bu aktarımı kabul etmiş olursunuz. Talebiniz sonuçlanana kadar ve en çok iki yıl saklanır; dilerseniz daha önce silinmesini isteyebilirsiniz.</p>
+    <p>WhatsApp, telefon veya e-posta ile ulaştığınızda ise verileriniz o kanalın kendi koşullarına göre işlenir.</p>
+
+    <h2>Çerezler ve ölçüm</h2>
+    <p>Sitede ziyaretçi sayısını ve reklamlarımızın sonucunu ölçmek için Google Analytics ve Google Ads kullanıyoruz. Bu araçlar yalnızca sayfanın altındaki çubukta <strong>Kabul et</strong> dediğinizde çerez bırakır; <strong>Reddet</strong> derseniz çerez bırakılmaz ve seçiminiz tarayıcınızda hatırlanır. Ölçüm verileri Google'ın yurt dışındaki sunucularında işlenir. Seçiminizi değiştirmek için tarayıcınızın site verilerini silmeniz yeterlidir.</p>
+
+    <h2>Haklarınız</h2>
+    <p>KVKK'nın 11. maddesi uyarınca, verilerinizin işlenip işlenmediğini öğrenme, işlenmişse bilgi isteme, düzeltilmesini veya silinmesini isteme ve işlenmesine itiraz etme hakkınız vardır. Başvurularınızı yukarıdaki e-posta adresine iletebilirsiniz; en geç 30 gün içinde cevaplanır.</p>
+  </section>
+</main>
+
+<footer class="wrap foot rule">
+  <div><a class="foot-link" href="/">Senkon Mühendislik</a> · İstanbul</div>
+  <div><a class="foot-link" href="/structkit/">StructKit</a> · © 2026</div>
+</footer>
+<script src="/assets/senkon/track.js?v=84c345ea" defer></script>
+<script>
+(function () {
+  // phone menu: the Menü button shows the nav as a column under the header
+  var top = document.getElementById('top'), btn = top.querySelector('.menu-btn');
+  function set(open) { top.classList.toggle('open', open); btn.setAttribute('aria-expanded', String(open)); btn.textContent = open ? 'Kapat' : 'Menü'; }
+  btn.addEventListener('click', function () { set(!top.classList.contains('open')); });
+  top.querySelectorAll('.nav a').forEach(function (a) { a.addEventListener('click', function () { set(false); }); });
+})();
+</script>
+</body>
+</html>
