@@ -86,7 +86,8 @@ test('the phone dock offers WhatsApp and e-mail, and starts hidden', () => {
   assert.match(dock, /href="mailto:firatsenturk@senkonmuhendislik\.com"/);
 });
 
-test('the site names the international codes it works to: ASCE, ACI and Eurocode', () => {
+test('the site names the codes it works to: TBDY 2018, ASCE, ACI and Eurocode (TS 500 dropped by choice)', () => {
+  assert.doesNotMatch(html, /TS 500/);
   for (const code of ['ASCE', 'ACI', 'Eurocode']) assert.match(html, new RegExp('<span>' + code + '</span>'));
   assert.doesNotMatch(html, /uluslararası yönetmelik/);   // the vague wording is replaced by the code names
 });
