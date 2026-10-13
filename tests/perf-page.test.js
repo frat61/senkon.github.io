@@ -29,6 +29,11 @@ test('the story figure: six pictures with alt text, in order, before the steps, 
   assert.match(html, /<button type="button" class="surec-next">/);
 });
 
+test('a live picture rests at the zoomed size, so the outgoing one does not shrink while it fades', () => {
+  const css = fs.readFileSync(path.join(__dirname, '..', 'site.css'), 'utf8');
+  assert.match(css, /\.surec-live img\{[^}]*transform:scale\(1\.06\)/);
+});
+
 test('what the owner receives, including a strengthening project if needed', () => {
   assert.match(html, /<h3>Çalışmanın sonunda<\/h3>/);
   assert.match(html, /güçlendirme projesi/);

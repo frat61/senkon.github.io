@@ -13,7 +13,7 @@ function el(tag, cls) {
       add: c => classes.add(c), remove: c => classes.delete(c), contains: c => classes.has(c),
       toggle: (c, on) => { (on === undefined ? !classes.has(c) : on) ? classes.add(c) : classes.delete(c); },
     },
-    setAttribute: (k, v) => { attrs[k] = String(v); }, getAttribute: k => attrs[k] ?? null,
+    setAttribute: (k, v) => { attrs[k] = String(v); }, getAttribute: k => attrs[k] ?? null, removeAttribute: k => { delete attrs[k]; },
     addEventListener: (type, fn) => { (handlers[type] = handlers[type] || []).push(fn); },
     dispatch: (type, ev) => { (handlers[type] || []).forEach(fn => fn(Object.assign({ preventDefault() {} }, ev))); },
     querySelectorAll: sel => all(node).filter(n => matches(n, sel)),
@@ -76,11 +76,33 @@ test('Enter or Space on a focused step selects it', () => {
 
 test('mouse over the picture pauses, leaving resumes', () => {
   const { s, fig } = dom();
-  fig.dispatch('mouseenter');
+  fig.dispatch('pointerenter', { pointerType: 'mouse' });
   s.tick(9000); assert.equal(s.cur, 0); assert.equal(s.playing, false);
-  fig.dispatch('mouseleave');
+  fig.dispatch('pointerleave', { pointerType: 'mouse' });
   s.tick(9000 + 100); assert.equal(s.cur, 0);
   s.tick(9000 + 100 + 5001); assert.equal(s.cur, 1);
+});
+
+test('a finger on the picture (touch pointerenter with no pointerleave) does not pause for good', () => {
+  const { s, fig, next } = dom();
+  fig.dispatch('pointerenter', { pointerType: 'touch' });
+  fig.dispatch('mouseenter');                       // the compatibility event phones send after a tap
+  next.dispatch('click');
+  assert.equal(s.cur, 1); assert.equal(s.playing, false);
+  s.tick(6001); assert.equal(s.playing, true);
+  s.tick(6001 + 5001); assert.equal(s.cur, 2);
+});
+
+test('keyboard focus on a step pauses while it stays; pointer focus does not', () => {
+  const { s, lis } = dom();
+  lis[3].dispatch('focusin');                       // Tab landed here
+  s.tick(9000); assert.equal(s.cur, 0); assert.equal(s.playing, false);
+  lis[3].dispatch('focusout');
+  s.tick(9100); assert.equal(s.playing, true); assert.equal(s.cur, 0);   // resumed: a fresh 5 s from here
+  s.tick(9100 + 5001); assert.equal(s.cur, 1);
+  lis[2].dispatch('pointerdown'); lis[2].dispatch('focusin'); lis[2].dispatch('click');   // a click focuses too
+  assert.equal(s.cur, 2);
+  s.tick(9100 + 5001 + 6001); assert.equal(s.playing, true);
 });
 
 test('leaving and re-entering the viewport keeps the current frame', () => {
@@ -106,9 +128,13 @@ test('the progress bar fills over the 5 s and empties on a touch', () => {
   lis[0].dispatch('click'); assert.equal(fill.style.width, '0%');
 });
 
-test('marks the figure live, the list items focusable, the figure polite', () => {
-  const { fig, lis } = dom();
+test('marks the figure live, the list items focusable, the lit step aria-current, no live region', () => {
+  const { s, fig, lis } = dom();
   assert.ok(fig.classList.contains('surec-live'));
   lis.forEach(l => assert.equal(l.getAttribute('tabindex'), '0'));
-  assert.equal(fig.getAttribute('aria-live'), 'polite');
+  assert.equal(fig.getAttribute('aria-live'), null);
+  assert.equal(lis[0].getAttribute('aria-current'), 'step');
+  s.show(4);
+  assert.equal(lis[0].getAttribute('aria-current'), null);
+  assert.equal(lis[4].getAttribute('aria-current'), 'step');
 });
