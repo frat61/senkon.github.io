@@ -112,11 +112,29 @@ h2.perf-sub{font-size:clamp(30px,4vw,40px);margin:0}
 @media (max-width:640px){ .list2{grid-template-columns:1fr;gap:0} }
 /* Nasıl çalışıyoruz story (deprem-performans/): without JavaScript the six pictures are a plain strip above the steps; surec.js adds .surec-live and the slideshow rules below take over */
 .surec{margin-top:20px}
-.surec-stage{margin:0;display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:12px}
-.surec-stage img{width:100%;height:auto;border:1px solid var(--rule);background:#fff}
+.surec-stage{margin:0}
+.surec-pic{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:12px}
+.surec-pic img{width:100%;height:auto;border:1px solid var(--rule);background:#fff}
 .surec-ctrl{display:none}
 .surec ol.steps{border-bottom:1px solid var(--rule)}
-@media (max-width:640px){ .surec-stage{grid-template-columns:repeat(2,minmax(0,1fr))} }
+@media (max-width:640px){ .surec-pic{grid-template-columns:repeat(2,minmax(0,1fr))} }
+/* the story, live: one picture at a time with a slow zoom and a cross-fade, the steps beside it, the lit one with a bar on its left */
+.surec:has(.surec-live){display:grid;grid-template-columns:45fr 55fr;gap:0 48px;align-items:start}
+.surec-stage.surec-live{position:sticky;top:24px}
+.surec-live .surec-pic{display:block;position:relative;aspect-ratio:4/3;overflow:hidden;border:1px solid var(--rule);background:#fff}
+.surec-live img{position:absolute;inset:0;border:0;opacity:0;transition:opacity .6s;transform-origin:50% 50%}
+.surec-live img.on{opacity:1;animation:surec-zoom 5s ease-out forwards}
+@keyframes surec-zoom{from{transform:scale(1)}to{transform:scale(1.06)}}
+.surec-live .surec-ctrl{display:flex;align-items:center;gap:12px;margin-top:12px}
+.surec-ctrl button{font:inherit;font-weight:600;font-size:14px;padding:6px 12px;border:1.5px solid var(--ink);border-radius:999px;background:transparent;color:var(--ink);cursor:pointer}
+.surec-ctrl button:hover{border-color:var(--accent)}
+.surec-bar{flex:1;height:3px;background:var(--rule)} .surec-bar i{display:block;height:100%;width:0;background:var(--ink)}
+.surec:has(.surec-live) .item{transition:opacity .3s;border-left:3px solid transparent;padding-left:44px;cursor:pointer}
+.surec:has(.surec-live) .item.on{border-left-color:var(--ink)}
+.surec:has(.surec-live) .item:not(.on){opacity:.4}
+.surec:has(.surec-live) .item:focus-visible{outline:2px solid var(--accent);outline-offset:2px}
+@media (max-width:640px){ .surec:has(.surec-live){grid-template-columns:1fr} .surec-stage.surec-live{position:static;margin-bottom:8px} }
+@media (prefers-reduced-motion:reduce){ .surec-live img.on{animation:none} }
 /* Deneyim banner: the figure and six building types stay still; the project names slide underneath (paused on hover, still with reduced motion) */
 .xp{margin:14px 0 48px;border-top:1px solid var(--rule);border-bottom:1px solid var(--rule)}
 .xp-top{display:grid;grid-template-columns:auto 1fr;gap:16px 44px;align-items:center;padding:22px 0}
