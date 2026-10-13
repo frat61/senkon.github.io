@@ -6,14 +6,14 @@
    also covers its JSON sidecar, because skyline.js fetches the JSON with the picture's tag.
    404.html links a subset of the same files (with a leading slash, since GitHub Pages serves it at
    any path); its tags are rewritten and checked too, but it need not link every file.
-     node tools/versions.js          rewrites the tags in index.html and 404.html
+     node tools/versions.js          rewrites the tags in index.html, 404.html and the sub-pages
      node tools/versions.js --check  prints the stale ones and exits 1 (what tests/versions.test.js does) */
 const fs = require('fs');
 const path = require('path');
 const crypto = require('crypto');
 
 const ROOT = path.join(__dirname, '..');
-const PAGES = ['index.html', '404.html'];           // index.html must link every file; the others may link a subset
+const PAGES = ['index.html', '404.html', 'deprem-performans/index.html'];           // index.html must link every file; the others may link a subset
 // link as written in index.html → files whose content the tag covers
 const LINKS = {
   'site.css': ['site.css'],
