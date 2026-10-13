@@ -13,13 +13,14 @@ const path = require('path');
 const crypto = require('crypto');
 
 const ROOT = path.join(__dirname, '..');
-const PAGES = ['index.html', '404.html', 'deprem-performans/index.html', 'hakkinda/index.html'];           // index.html must link every file; the others may link a subset
+const PAGES = ['index.html', '404.html', 'deprem-performans/index.html', 'hakkinda/index.html', 'kvkk/index.html'];           // index.html must link every file; the others may link a subset
 // link as written in index.html → files whose content the tag covers
 const LINKS = {
   'site.css': ['site.css'],
   'assets/senkon/fonts/fonts.css': ['assets/senkon/fonts/fonts.css'],
   'assets/senkon/skyline.js': ['assets/senkon/skyline.js'],
   'assets/senkon/logo-sketch.js': ['assets/senkon/logo-sketch.js'],
+  'assets/senkon/track.js': ['assets/senkon/track.js'],                         // Google tag, consent bar, conversions, contact form
   'assets/senkon/skyline.webp': ['assets/senkon/skyline.webp', 'assets/senkon/skyline.json'],
   'assets/senkon/esenboga.webp': ['assets/senkon/esenboga.webp', 'assets/senkon/esenboga.json'],
   'assets/senkon/surec.js': ['assets/senkon/surec.js'],                         // the story on deprem-performans/ only
