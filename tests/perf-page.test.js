@@ -17,7 +17,7 @@ test('the page has its own title, description and canonical address', () => {
 
 test('the six assessment steps, in order', () => {
   const steps = [...html.matchAll(/<li class="item"><span class="num"[^>]*>\d\d<\/span><h3>([^<]+)<\/h3>/g)].map(m => m[1]);
-  assert.deepEqual(steps, ['Sismik zemin etüdü', 'Karot testi', 'Röntgen', 'Donatı okuması', 'Üç boyutlu analiz', 'Gerçek deprem kayıtlarıyla analiz']);
+  assert.deepEqual(steps, ['Sismik zemin etüdü', 'Karot testi', 'Röntgen ve donatı okuması', 'Üç boyutlu analiz', 'Deprem performansının belirlenmesi', 'Gerekirse, güçlendirme projesi']);
 });
 
 test('what the owner receives, including a strengthening project if needed', () => {
