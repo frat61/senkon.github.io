@@ -100,7 +100,7 @@ test('Performans lists the six assessment steps in order', () => {
   assert.deepEqual(steps, ['Sismik zemin etüdü', 'Karot testi', 'Röntgen', 'Donatı okuması', 'Üç boyutlu analiz', 'Gerçek deprem kayıtlarıyla analiz']);
 });
 
-test('Performans ends with what the owner gets and a WhatsApp quote button', () => {
+test('Performans ends with what the owner receives and a WhatsApp quote button', () => {
   assert.match(perf(), /<h3>Ne alırsınız<\/h3>/);
   assert.match(perf(), /güçlendirme projesi/);
   assert.match(perf(), /<a class="btn btn-main" href="https:\/\/wa\.me\/905309250461\?text=[^"]+">Binanız için teklif alın<\/a>/);
