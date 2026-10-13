@@ -3,7 +3,7 @@
    per page load, then leaves the finished picture. The JSON (written by tools/measure-skyline.py) gives
    each building's column and top in image pixels; a column may carry its own "cranes" list. Optional
    data-tallest-m on the figure gives the real height of its tallest building, which sets the crane
-   scale (default 828, Burj Khalifa). Without JavaScript, with reduced motion, or if anything fails,
+   scale (default 828, Burj Khalifa); optional data-speed (default 1) runs the whole show that many times faster. Without JavaScript, with reduced motion, or if anything fails,
    the static picture simply shows. */
 (function () {
   'use strict';
@@ -22,11 +22,12 @@
     if (!stage || !stat) return;
     const SRC = stat.getAttribute('src'), V = SRC.indexOf('?') > -1 ? SRC.slice(SRC.indexOf('?')) : '';
     const tallestM = parseFloat(fig.getAttribute('data-tallest-m')) || 828;
+    const speed = parseFloat(fig.getAttribute('data-speed')) || 1;
     fetch(fig.getAttribute('data-skyline') + V).then(r => r.ok ? r.json() : Promise.reject(r.status))
-      .then(data => prepare(fig, stage, SRC, tallestM, data)).catch(() => {});
+      .then(data => prepare(fig, stage, SRC, tallestM, speed, data)).catch(() => {});
   });
 
-  function prepare(fig, stage, SRC, tallestM, data) {
+  function prepare(fig, stage, SRC, tallestM, speed, data) {
     const W = data.w, H = data.h, G = data.ground, cols = data.cols || [];
     if (!cols.length) return;
     const hmax = Math.max.apply(null, cols.map(c => G - c.top));
@@ -96,7 +97,7 @@
       function frame(now) {
         if (start === null) start = now;
         if (document.hidden) { requestAnimationFrame(frame); return; }
-        const t = (now - start - paused) / 1000;
+        const t = (now - start - paused) / 1000 * speed;
         jobs.forEach(j => {
           if (j.finished) return;
           const p = Math.min(Math.max((t - j.b0) / (j.b1 - j.b0), 0), 1);
