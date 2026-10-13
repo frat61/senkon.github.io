@@ -22,9 +22,13 @@ test('Esenboğa is animated only once on the page', () => {
   assert.equal(html.split('esenboga.json').length - 1, 1);
 });
 
-test('Deneyim keeps the project text with a placeholder', () => {
-  assert.match(deneyim(), /Esenboğa Havalimanı Kontrol Kulesi/);
-  assert.match(deneyim(), /class="ph featured-ph"/);
+test('Deneyim shows six building types with the cleared project names, and never Amazon', () => {
+  const d = deneyim();
+  assert.equal([...d.matchAll(/<article class="type">/g)].length, 6);
+  assert.match(d, /Esenboğa Havalimanı Kontrol Kulesi/);
+  for (const name of ['Koç Üniversitesi', 'Antalya', 'Malatya', 'Vem', 'Biem', 'Alfraganus', 'Karmall', 'Tuzla']) assert.match(d, new RegExp(name));
+  assert.doesNotMatch(d, /Amazon/);
+  assert.doesNotMatch(d, /class="ph/);   // no grey picture placeholders
 });
 
 const css = fs.readFileSync(path.join(__dirname, '..', 'site.css'), 'utf8');
@@ -80,4 +84,10 @@ test('the phone dock offers WhatsApp and e-mail, and starts hidden', () => {
   assert.match(dock, /class="dock away" inert/);
   assert.match(dock, /href="https:\/\/wa\.me\/905309250461"/);
   assert.match(dock, /href="mailto:firatsenturk@senkonmuhendislik\.com"/);
+});
+
+test('the site names the codes it works to: TBDY 2018, ASCE, ACI and Eurocode (TS 500 dropped by choice)', () => {
+  assert.doesNotMatch(html, /TS 500/);
+  for (const code of ['ASCE', 'ACI', 'Eurocode']) assert.match(html, new RegExp('<span>' + code + '</span>'));
+  assert.doesNotMatch(html, /uluslararası yönetmelik/);   // the vague wording is replaced by the code names
 });
