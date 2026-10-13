@@ -142,7 +142,7 @@ Changed, with his yes:
   truss, levels under 4 m apart, are one floor named by its top level; bracing joins the floor it stands on).
   A roof truss line is one piece; purlins and roof bracing group per bay. Towers and posts as before.
   Keys: `floor {level, x}`, `roof {x}`, `roofx {x}`. No `fly` field in the JSON.
-- **A crane swing instead of a drop.** No hook lines. A piece starts off the upper right of the canvas,
+- **A crane swing instead of a drop.** No hook lines. A piece starts off the upper left or upper right, whichever side of the picture its place is on (two cranes),
   `SWING_X = 0.35` of the width and `SWING_Y = −0.3` of the height away from its place, and swings in along an
   arc with ease-in-out over `FLY = 1` s, fading in over the first third.
 - **Columns quick, the rest deliberate.** Start times follow cumulative weights: towers and posts weigh 1,

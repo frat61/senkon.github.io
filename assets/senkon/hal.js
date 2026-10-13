@@ -3,7 +3,7 @@
    drawing. The JSON (written by tools/make-hall.js from the viewer's GLB) holds the members as projected
    lines [x1, y1, x2, y2, width px, depth], the erection pieces (towers, posts, floor bays, roof truss
    lines, roof bays) with their member indices, the site order of the pieces and the members' far-to-near
-   order. A piece swings in from the upper right like a crane load, slowing as it lands; the whole
+   order. A piece swings in from the upper left or right, whichever side it stands on, like a crane load, slowing as it lands; the whole
    erection takes TOTAL seconds at speed 1 (data-speed runs it faster), columns quickly and the rest at a
    steadier pace, each piece flying FLY seconds. Members are painted far to near, an ink stroke under a
    white one, so the front hides the back like a line drawing; farther members fade a little. Without
@@ -16,7 +16,7 @@
   if (!document.createElement('canvas').getContext) return;
 
   const TOTAL = 25, FLY = 1;                   // seconds for the whole erection at speed 1; seconds a piece is in the air
-  const SWING_X = 0.35, SWING_Y = -0.3, LIFT = 0.08;   // where a piece starts, as fractions of the canvas, and the arc's rise
+  const SWING_X = 0.35, SWING_Y = -0.3, LIFT = 0.08;   // how far off a piece starts, as fractions of the canvas, and the arc's rise
   const WEIGHT = { tower: 1, post: 1 };        // columns go up quickly; every other piece weighs 3
   const INK = '#3a3f44', A_NEAR = 0.95, A_FAR = 0.45, W_MIN = 1.2, W_MAX = 6;   // widths in the picture's pixels (1500 wide), as in the still
   const ease = p => p < 0.5 ? 4 * p * p * p : 1 - Math.pow(-2 * p + 2, 3) / 2;   // ease in and out
@@ -50,7 +50,11 @@
     const startAt = new Float64Array(pieces.length), pieceOf = new Int32Array(M.length);
     let total = 0; order.forEach(pi => { total += WEIGHT[pieces[pi].t] || 3; });   // start times follow cumulative weight
     let acc = 0; order.forEach(pi => { startAt[pi] = (TOTAL - FLY) * acc / (total || 1); acc += WEIGHT[pieces[pi].t] || 3; });
-    pieces.forEach((p, pi) => p.m.forEach(i => { pieceOf[i] = pi; }));
+    const side = new Float32Array(pieces.length);                     // -1: swings in from the upper left, +1: from the upper right
+    pieces.forEach((p, pi) => {
+      let sx = 0; p.m.forEach(i => { pieceOf[i] = pi; sx += M[i][0] + M[i][2]; });
+      side[pi] = sx / (2 * p.m.length) < data.w / 2 ? -1 : 1;
+    });
     const swingX = SWING_X * canvas.width, swingY = SWING_Y * canvas.height, lift = LIFT * canvas.height;
     let dMin = Infinity, dMax = -Infinity;
     M.forEach(m => { dMin = Math.min(dMin, m[5]); dMax = Math.max(dMax, m[5]); });
@@ -79,7 +83,7 @@
         const i = depthOrder[q];
         if (!started[i]) continue;                                   // nothing shows through from the future
         const m = M[i], pi = pieceOf[i], p = progress[pi], e = ease(p);
-        const dx = swingX * (1 - e), dy = swingY * (1 - e) - lift * Math.sin(Math.PI * p);   // the swing: in from the upper right, a little lift on the way
+        const dx = side[pi] * swingX * (1 - e), dy = swingY * (1 - e) - lift * Math.sin(Math.PI * p);   // the swing: in from its side, a little lift on the way
         const w = width[i];
         ctx.globalAlpha = alpha[i] * Math.min(1, 0.15 + p * 2.5); ctx.strokeStyle = INK; ctx.lineWidth = w + border;
         ctx.beginPath(); ctx.moveTo(m[0] * k + dx, m[1] * k + dy); ctx.lineTo(m[2] * k + dx, m[3] * k + dy); ctx.stroke();
