@@ -17,7 +17,21 @@ test('the page has its own title, description and canonical address', () => {
 
 test('the six assessment steps, in order', () => {
   const steps = [...html.matchAll(/<li class="item"><span class="num"[^>]*>\d\d<\/span><h3>([^<]+)<\/h3>/g)].map(m => m[1]);
-  assert.deepEqual(steps, ['Sismik zemin etüdü', 'Karot testi', 'Röntgen', 'Donatı okuması', 'Üç boyutlu analiz', 'Gerçek deprem kayıtlarıyla analiz']);
+  assert.deepEqual(steps, ['Zemin etüdü', 'Karot testi', 'Röntgen ve donatı okuması', 'Üç boyutlu analiz', 'Deprem performansının belirlenmesi', 'Gerekirse, güçlendirme projesi']);
+});
+
+test('the story figure: six pictures with alt text, in order, before the steps, plus the two buttons', () => {
+  const figAt = html.indexOf('<figure class="surec-stage"'), stepsAt = html.indexOf('<ol class="steps">');
+  assert.ok(figAt > 0 && figAt < stepsAt);
+  const srcs = [...html.matchAll(/<img src="\/assets\/senkon\/surec\/(\d\d)\.webp\?v=[0-9a-f]{8}" alt="[^"]{10,}" width="1200" height="900" loading="lazy">/g)].map(m => m[1]);
+  assert.deepEqual(srcs, ['01', '02', '03', '04', '05', '06']);
+  assert.match(html, /<button type="button" class="surec-prev">/);
+  assert.match(html, /<button type="button" class="surec-next">/);
+});
+
+test('a live picture rests at the zoomed size, so the outgoing one does not shrink while it fades', () => {
+  const css = fs.readFileSync(path.join(__dirname, '..', 'site.css'), 'utf8');
+  assert.match(css, /\.surec-live img\{[^}]*transform:scale\(1\.06\)/);
 });
 
 test('what the owner receives, including a strengthening project if needed', () => {
