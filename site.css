@@ -128,11 +128,10 @@ h2.perf-sub{font-size:clamp(30px,4vw,40px);margin:0}
 @media (prefers-reduced-motion: reduce){ .xp-run{overflow-x:auto;-webkit-mask-image:none;mask-image:none} .xp-track{animation:none} .xp-list[aria-hidden]{display:none} }
 @media (max-width:640px){ .xp-top{grid-template-columns:1fr} .xp-types{grid-template-columns:repeat(2,minmax(0,1fr));gap:8px 16px} .xp-types li{font-size:15px} }
 .note{margin-top:18px;color:var(--muted);font-size:14px}
-/* Hakkında: mission and vision side by side, then three numbered principles (same look as the steps) */
+/* Hakkında: mission and vision side by side */
 .mv{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:24px 48px;padding-bottom:40px}
 .mv-text{margin-top:10px;color:var(--body);font-size:17px;line-height:1.65}
-.principles{margin:18px 0 40px;grid-template-columns:repeat(3,minmax(0,1fr));gap:0 32px}
-@media (max-width:760px){ .mv{grid-template-columns:1fr} .principles{grid-template-columns:1fr} }
+@media (max-width:760px){ .mv{grid-template-columns:1fr} }
 .about-text{color:var(--body);font-size:18px;line-height:1.65;max-width:680px;margin-top:8px}
 .sk .lead{margin-top:14px} .sk .btns{margin-top:22px}
 .sk{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:40px;align-items:center;padding-top:56px;padding-bottom:56px;margin-top:48px}

@@ -44,7 +44,6 @@ test('Misyonumuz and Vizyonumuz, with the owner question in Fırat words', () =>
   assert.ok(html.includes('"binam, içinde yaşamak için güvenli mi?"'));
 });
 
-test('three working principles, in order', () => {
-  const p = [...html.matchAll(/<li class="item"><span class="num"[^>]*>\d\d<\/span><h3>([^<]+)<\/h3>/g)].map(m => m[1]);
-  assert.deepEqual(p, ['Veriye dayanan kararlar', 'Anlaşılır raporlar', 'Gereğinden fazla müdahale yok']);
+test('no numbered principles section (Fırat found the slogans cheesy)', () => {
+  assert.doesNotMatch(html, /Nasıl çalışıyoruz|class="item"/);
 });
