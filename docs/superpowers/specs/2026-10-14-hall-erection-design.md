@@ -132,3 +132,18 @@ Vanilla script in the style of `skyline.js` and `surec.js`; about 150 lines.
 
 Cranes, dust, sound; three.js on the home page (kept as the fallback if painter's ordering shows
 artefacts: the same JSON would feed it); scroll-driven playback; naming the project.
+
+## 8. Revision 2026-10-14, after Fırat watched it
+
+The first build (556 pieces dropping straight down on hook lines, 0.6 s each) read as "lines moving down".
+Changed, with his yes:
+
+- **Coarser pieces.** A floor piece is one bay across the whole hall width at one floor (the chords of a floor
+  truss, levels under 4 m apart, are one floor named by its top level; bracing joins the floor it stands on).
+  A roof truss line is one piece; purlins and roof bracing group per bay. Towers and posts as before.
+  Keys: `floor {level, x}`, `roof {x}`, `roofx {x}`. No `fly` field in the JSON.
+- **A crane swing instead of a drop.** No hook lines. A piece starts off the upper right of the canvas,
+  `SWING_X = 0.35` of the width and `SWING_Y = −0.3` of the height away from its place, and swings in along an
+  arc with ease-in-out over `FLY = 1` s, fading in over the first third.
+- **Columns quick, the rest deliberate.** Start times follow cumulative weights: towers and posts weigh 1,
+  every other piece 3, over the same 25 s at speed 1.

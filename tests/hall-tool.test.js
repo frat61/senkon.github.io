@@ -123,16 +123,19 @@ test('group makes a tower of chords plus lacing, floors by level and bay, roof b
     M([0, -20, -41.5], [10, -20, -41.5], 0.2, 'beam'),             // floor beam, level -20
     M([0, -20, -41.5], [10, -10, -41.5], 0.15, 'beam'),            // bracing between -20 and -10
     M([0, -10, -41.5], [10, -10, -41.5], 0.2, 'beam'),             // floor beam, level -10
-    M([5, 3, -43], [5, 3, -33], 0.3, 'beam'),                      // roof truss chord along z at x=5
-    M([0, 5, -41.5], [10, 5, -41.5], 0.1, 'beam')];                // roof purlin along x
-  for (let i = 0; i < 25; i++) ms.push(M([i, -20, 0], [i + 0.5, -20, 0], 0.1, 'beam'), M([i, -10, 0], [i + 0.5, -10, 0], 0.1, 'beam'));   // enough horizontals to make levels -20 and -10 peaks
+    M([6, 3, -43], [6, 3, -33], 0.3, 'beam'),                      // roof truss chord along z at x=6: nearest line x=10
+    M([0, 5, -41.5], [10, 5, -41.5], 0.1, 'beam'),                 // roof purlin along x
+    M([0, -23.5, -41.5], [10, -23.5, -41.5], 0.2, 'beam')];        // lower chord of the floor truss at -20: same floor piece
+  for (let i = 0; i < 25; i++) ms.push(M([i, -20, 0], [i + 0.5, -20, 0], 0.1, 'beam'), M([i, -10, 0], [i + 0.5, -10, 0], 0.1, 'beam'), M([i, -23.5, 0], [i + 0.5, -23.5, 0], 0.1, 'beam'));   // enough horizontals to make levels -23.5, -20 and -10 peaks
   const pieces = H.group(ms, H.findGrid(ms));
   const tower0 = pieces.find(p => p.t === 'tower' && p.key.x === 0 && p.key.row === 0);
   assert.deepEqual(tower0.m.sort((a, b) => a - b), [0, 1, 6]);
-  assert.ok(pieces.some(p => p.t === 'floor' && p.key.level === -20 && !p.key.band && p.m.includes(7)));
-  assert.ok(pieces.some(p => p.t === 'floor' && p.key.band && p.m.includes(8)));
-  assert.ok(pieces.some(p => p.t === 'roof' && p.m.includes(10)));
-  assert.ok(pieces.some(p => p.t === 'roofx' && p.m.includes(11)));
+  const floor20 = pieces.find(p => p.t === 'floor' && p.key.level === -20 && p.key.x === 0);
+  assert.ok(floor20.m.includes(7) && floor20.m.includes(8) && floor20.m.includes(12));   // beam, bracing above it, lower chord 3.5 m below: one bay piece
+  assert.ok(pieces.some(p => p.t === 'floor' && p.key.level === -10 && p.m.includes(9)));
+  assert.ok(pieces.every(p => p.t !== 'floor' || p.key.z === undefined));   // no z strips: a bay spans the hall
+  assert.ok(pieces.some(p => p.t === 'roof' && p.key.x === 10 && p.key.z === undefined && p.m.includes(10)));
+  assert.ok(pieces.some(p => p.t === 'roofx' && p.key.x === 0 && p.m.includes(11)));
   assert.ok(pieces.every(p => p.m.length > 0));
   const o = H.order(pieces);
   assert.equal(new Set(o).size, pieces.length);
@@ -155,7 +158,6 @@ test('project maps a point in front of the camera inside the canvas, nearer memb
   assert.ok(Math.abs(x1 - 750) < 1 && Math.abs(y1 - 562.5) < 1);     // the target projects to the centre
   assert.ok(out.members[1][4] < w0);                                 // z=-40 is farther from the eye at z=130
   assert.deepEqual(out.depthOrder, [1, 0]);
-  assert.ok(out.pieces[0].fly >= 60);
   assert.deepEqual(out.order, [0]);
 });
 
@@ -169,14 +171,13 @@ test('the generated hal.json is sane', { skip: !require('fs').existsSync(require
 });
 
 test('fit scales and shifts the projected members so the hall fills the canvas inside the margins', () => {
-  const data = { w: 1500, h: 1125, members: [[100, 300, 1300, 300, 2, 50], [100, 300, 100, 600, 1, 60]], pieces: [{ t: 'floor', m: [0, 1], fly: 60 }], order: [0], depthOrder: [1, 0] };
+  const data = { w: 1500, h: 1125, members: [[100, 300, 1300, 300, 2, 50], [100, 300, 100, 600, 1, 60]], pieces: [{ t: 'floor', m: [0, 1] }], order: [0], depthOrder: [1, 0] };
   const out = H.fit(data, { left: 0.04, right: 0.04, top: 0.08, bottom: 0.04 });
   const xs = out.members.flatMap(m => [m[0], m[2]]), ys = out.members.flatMap(m => [m[1], m[3]]);
   assert.ok(Math.abs(Math.min(...xs) - 60) < 0.2 && Math.abs(Math.max(...xs) - 1440) < 0.2);   // 4 % margins: width is the limit
   assert.ok(Math.min(...ys) >= 90 && Math.max(...ys) <= 1080);
   assert.ok(Math.abs(out.members[0][4] - 2 * 1.15) < 0.01);                                 // widths scale with the picture
   assert.equal(out.members[0][5], 50);                                                      // depth untouched
-  assert.ok(out.pieces[0].fly > 60);                                                        // fly distances scale too
 });
 
 module.exports = { makeGlb, prism };

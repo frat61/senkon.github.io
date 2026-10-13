@@ -150,7 +150,9 @@ test('hal.js fails quietly, waits for both the JSON and the view, and never draw
   assert.match(js, /\.catch\(\(\) => \{\}\)/);
   assert.match(js, /prefers-reduced-motion: reduce/);
   assert.match(js, /IntersectionObserver/);
-  assert.match(js, /const TOTAL = 25, FLY = 0\.6/);
+  assert.match(js, /const TOTAL = 25, FLY = 1/);
+  assert.match(js, /SWING_X = 0\.35, SWING_Y = -0\.3/);   // pieces swing in from the upper right, no hook lines
+  assert.doesNotMatch(js, /hook/i);
   assert.match(js, /if \(!started\[/);   // the per-member skip guard in the frame loop
 });
 

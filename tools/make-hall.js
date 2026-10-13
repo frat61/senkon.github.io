@@ -216,39 +216,42 @@ function group(members, grid) {
     const c = mids[i], post = posts.find(p => Math.abs(c[0] - p.x) <= 0.6 && Math.abs(c[2] - p.z) <= 0.6);
     if (post) { piece('post', post.key).m.push(i); assigned[i] = true; }
   });
-  // floor levels: peaks of the horizontal members' y histogram, 0.5 m bins, at least 20 members
+  // floor levels: peaks of the horizontal members' y histogram, 0.5 m bins, at least 20 members; the chords of one
+  // floor truss (levels under 4 m apart) are one floor, named by its top level
   const bins = new Map();
   members.forEach((m, i) => { if (!assigned[i] && kinds[i] === 'horizontal' && mids[i][1] <= 0.5) { const b = Math.round(mids[i][1] / 0.5); bins.set(b, (bins.get(b) || 0) + 1); } });
   const levels = [...bins.keys()].filter(b => bins.get(b) >= 20 && bins.get(b) >= (bins.get(b - 1) || 0) && bins.get(b) >= (bins.get(b + 1) || 0)).map(b => b * 0.5).sort((a, b) => a - b);
+  const floorOf = new Map(); let run = [];
+  const close = () => { if (run.length) { const top = run[run.length - 1]; run.forEach(l => floorOf.set(l, top)); } run = []; };
+  levels.forEach(l => { if (run.length && l - run[run.length - 1] > 4) close(); run.push(l); }); close();
   const nearestLevel = y => levels.length ? levels.reduce((best, l) => Math.abs(l - y) < Math.abs(best - y) ? l : best, levels[0]) : Math.round(y);
+  const floorAt = y => levels.length ? floorOf.get(nearestLevel(y)) : Math.round(y);
   const bay = x => { let i = 0; while (i + 1 < grid.xs.length - 1 && x >= grid.xs[i + 1]) i++; return i; };
-  const strip = z => Math.floor((z - grid.zMin) / 10);
   members.forEach((m, i) => {
     if (assigned[i]) return;
     const c = mids[i];
     if (c[1] <= 0.5) {
-      const band = kinds[i] !== 'horizontal';
-      const level = band ? nearestLevel(Math.min(m.a[1], m.b[1])) : nearestLevel(c[1]);
-      piece('floor', { level, band, x: bay(c[0]), z: strip(c[2]) }).m.push(i);
+      const level = kinds[i] === 'horizontal' ? floorAt(c[1]) : floorAt(Math.min(m.a[1], m.b[1]));   // bracing joins the floor it stands on
+      piece('floor', { level, x: bay(c[0]) }).m.push(i);
     } else if (along(m, 2)) {
       const x = grid.xs.reduce((best, v) => Math.abs(v - c[0]) < Math.abs(best - c[0]) ? v : best, grid.xs[0]);
-      piece('roof', { x, z: strip(c[2]) }).m.push(i);
-    } else piece('roofx', { x: bay(c[0]), z: strip(c[2]) }).m.push(i);
+      piece('roof', { x }).m.push(i);                                 // a whole truss line
+    } else piece('roofx', { x: bay(c[0]) }).m.push(i);               // purlins and roof bracing of one bay
     assigned[i] = true;
   });
   return [...pieces.values()];
 }
 
-// ---- site order: towers, posts, floors bottom up (beams of a level, then the bracing band above it), roof trusses, roof bracing
+// ---- site order: towers, posts, floors bottom up bay by bay, roof truss lines, roof bracing by bay
 function order(pieces) {
   const sortKey = p => {
     const k = p.key;
     switch (p.t) {
       case 'tower': return [0, k.row, k.x, 0];
       case 'post': return [1, k.x, k.z, 0];
-      case 'floor': return [2, k.level, k.band ? 1 : 0, k.x, k.z];
-      case 'roof': return [3, k.x, k.z, 0];
-      default: return [4, k.x, k.z, 0];
+      case 'floor': return [2, k.level, k.x, 0];
+      case 'roof': return [3, k.x, 0, 0];
+      default: return [4, k.x, 0, 0];
     }
   };
   const keys = pieces.map(sortKey);
@@ -266,17 +269,13 @@ function project(members, pieces, orderIdx, camera) {
     const a = pt(m.a), b = pt(m.b), depth = (a[2] + b[2]) / 2;
     return [r1d(a[0]), r1d(a[1]), r1d(b[0]), r1d(b[1]), r1d(m.w * C.focal * C.w / 2 / depth), Math.round(depth * 100) / 100];
   });
-  const outPieces = pieces.map(p => {
-    let y0 = Infinity, y1 = -Infinity;
-    p.m.forEach(i => { y0 = Math.min(y0, rows[i][1], rows[i][3]); y1 = Math.max(y1, rows[i][1], rows[i][3]); });
-    return { t: p.t, m: p.m, fly: Math.max(60, Math.round(1.5 * (y1 - y0))) };
-  });
+  const outPieces = pieces.map(p => ({ t: p.t, m: p.m }));
   const depthOrder = rows.map((_, i) => i).sort((i, j) => rows[j][5] - rows[i][5] || i - j);
   return { w: C.w, h: C.h, members: rows, pieces: outPieces, order: orderIdx.slice(), depthOrder };
 }
 
 // ---- fit: scale and shift the projected picture so the hall fills the canvas inside the margins (fractions of w, h);
-//      the top margin leaves room for the hook lines. Depths stay; widths and fly distances scale with the picture.
+//      the top margin leaves room for pieces swinging in. Depths stay; widths scale with the picture.
 const MARGINS = { left: 0.04, right: 0.04, top: 0.08, bottom: 0.04 };
 function fit(data, margins) {
   const M = margins || MARGINS, W = data.w, H = data.h;
@@ -289,7 +288,7 @@ function fit(data, margins) {
   const r1d = v => Math.round(v * 10) / 10;
   return Object.assign({}, data, {
     members: data.members.map(m => [r1d(m[0] * s + dx), r1d(m[1] * s + dy), r1d(m[2] * s + dx), r1d(m[3] * s + dy), r1d(m[4] * s), m[5]]),
-    pieces: data.pieces.map(p => ({ t: p.t, m: p.m, fly: Math.round(p.fly * s) }))
+    pieces: data.pieces.map(p => ({ t: p.t, m: p.m }))
   });
 }
 
