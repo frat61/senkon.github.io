@@ -11,6 +11,28 @@
    Spec: docs/superpowers/specs/2026-10-14-hall-erection-design.md */
 (function () {
   'use strict';
+
+  // ---- camera math, shared in spirit with tools/make-hall.js and tools/make-hall-still.py (spec section 3)
+  const EL_MIN = 0.0524, EL_MAX = 1.2217;      // elevation limits, 3° and 70°
+  const sub = (a, b) => [a[0] - b[0], a[1] - b[1], a[2] - b[2]];
+  const dot = (a, b) => a[0] * b[0] + a[1] * b[1] + a[2] * b[2];
+  const cross = (a, b) => [a[1] * b[2] - a[2] * b[1], a[2] * b[0] - a[0] * b[2], a[0] * b[1] - a[1] * b[0]];
+  const norm = a => { const l = Math.hypot(a[0], a[1], a[2]) || 1; return [a[0] / l, a[1] / l, a[2] / l]; };
+  function basis(cam) { const fwd = norm(sub(cam.at, cam.eye)), right = norm(cross(fwd, [0, 1, 0])); return { fwd, right, up: cross(right, fwd) }; }
+  // a point in metres -> [x, y, depth] on a W × H canvas, with the data file's framing scale and offset applied
+  function project(p, cam, W, H, b) {
+    b = b || basis(cam);
+    const d = sub(p, cam.eye), depth = dot(d, b.fwd), f = cam.focal * W / 2 / depth;
+    return [(W / 2 + dot(d, b.right) * f) * cam.s + cam.dx, (H / 2 - dot(d, b.up) * f) * cam.s + cam.dy, depth];
+  }
+  const widthPx = (wm, depth, cam, W) => wm * cam.focal * W / 2 / depth * cam.s;
+  // the eye about the target in spherical terms, the viewer's convention: az = 0 looks along -z from +z
+  function spherical(eye, at) { const d = sub(eye, at), dist = Math.hypot(d[0], d[1], d[2]); return { dist, az: Math.atan2(d[0], d[2]), el: Math.asin(d[1] / dist) }; }
+  const eyeAt = (at, dist, az, el) => [at[0] + dist * Math.cos(el) * Math.sin(az), at[1] + dist * Math.sin(el), at[2] + dist * Math.cos(el) * Math.cos(az)];
+  const clampEl = el => Math.max(EL_MIN, Math.min(EL_MAX, el));
+
+  if (typeof module !== 'undefined') module.exports = { project, widthPx, spherical, eyeAt, clampEl, basis };
+  if (typeof window === 'undefined') return;
   if (!('fetch' in window) || !('IntersectionObserver' in window)) return;
   if (matchMedia('(prefers-reduced-motion: reduce)').matches) return;
   if (!document.createElement('canvas').getContext) return;
