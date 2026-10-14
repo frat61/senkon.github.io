@@ -2,7 +2,8 @@
 'use strict';
 /* The steel hall erection data: turns the viewer's GLB of Fırat's lattice-column hall (gitignored
    local/hall-ref/model.glb) into assets/senkon/hal.json, the projected member lines grouped into
-   erection pieces in site order that assets/senkon/hal.js draws on the home page.
+   erection pieces in site order that assets/senkon/hal.js draws on the home page (format 2: members in
+   metres with the camera and its framing, so the page can turn the hall after the erection).
    Spec: docs/superpowers/specs/2026-10-14-hall-erection-design.md.
      node tools/make-hall.js local/hall-ref/model.glb assets/senkon/hal.json
    Every stage is a pure function, exported for tests/hall-tool.test.js. */
@@ -278,19 +279,40 @@ function project(members, pieces, orderIdx, camera) {
 // ---- fit: scale and shift the projected picture so the hall fills the canvas inside the margins (fractions of w, h);
 //      the top margin leaves room for pieces swinging in. Depths stay; widths scale with the picture.
 const MARGINS = { left: 0.04, right: 0.04, top: 0.08, bottom: 0.04 };
-function fit(data, margins) {
-  const M = margins || MARGINS, W = data.w, H = data.h;
+function framingOf(rows, W, H, margins) {                            // scale and offset that fit the rows' bounding box inside the margins
+  const M = margins || MARGINS;
   let x0 = Infinity, x1 = -Infinity, y0 = Infinity, y1 = -Infinity;
-  data.members.forEach(m => { x0 = Math.min(x0, m[0], m[2]); x1 = Math.max(x1, m[0], m[2]); y0 = Math.min(y0, m[1], m[3]); y1 = Math.max(y1, m[1], m[3]); });
+  rows.forEach(m => { x0 = Math.min(x0, m[0], m[2]); x1 = Math.max(x1, m[0], m[2]); y0 = Math.min(y0, m[1], m[3]); y1 = Math.max(y1, m[1], m[3]); });
   const bw = Math.max(x1 - x0, 1e-9), bh = Math.max(y1 - y0, 1e-9);
   const s = Math.min(W * (1 - M.left - M.right) / bw, H * (1 - M.top - M.bottom) / bh);
   const dx = W * M.left + (W * (1 - M.left - M.right) - bw * s) / 2 - x0 * s;   // centred in the slack direction
   const dy = H * M.top + (H * (1 - M.top - M.bottom) - bh * s) / 2 - y0 * s;
+  return { s: Math.round(s * 1e6) / 1e6, dx: Math.round(dx * 10) / 10, dy: Math.round(dy * 10) / 10 };
+}
+function fit(data, margins) {
+  const { s, dx, dy } = framingOf(data.members, data.w, data.h, margins);
   const r1d = v => Math.round(v * 10) / 10;
   return Object.assign({}, data, {
     members: data.members.map(m => [r1d(m[0] * s + dx), r1d(m[1] * s + dy), r1d(m[2] * s + dx), r1d(m[3] * s + dy), r1d(m[4] * s), m[5]]),
     pieces: data.pieces.map(p => ({ t: p.t, m: p.m }))
   });
+}
+// the default view's framing, recorded in the data file so the page projects other views with the same scale
+function framing(members, camera, margins) {
+  const C = camera || CAMERA;
+  return framingOf(project(members, [], [], C).members, C.w, C.h, margins);
+}
+
+// ---- format 2: members in metres with the camera and its framing; the page projects them itself every frame
+function pack(members, pieces, orderIdx, camera) {
+  const C = camera || CAMERA, f = framing(members, C), r3 = v => Math.round(v * 1000) / 1000;
+  return {
+    v: 2, w: C.w, h: C.h,
+    cam: { eye: C.eye.slice(), at: C.at.slice(), focal: C.focal, s: f.s, dx: f.dx, dy: f.dy },
+    members: members.map(m => [r3(m.a[0]), r3(m.a[1]), r3(m.a[2]), r3(m.b[0]), r3(m.b[1]), r3(m.b[2]), r3(m.w)]),
+    pieces: pieces.map(p => ({ t: p.t, m: p.m })),
+    order: orderIdx.slice()
+  };
 }
 
 // ---- the whole pipeline on a GLB buffer
@@ -303,10 +325,10 @@ function build(buf) {
   const grid = findGrid(bundle(edges));
   const members = splitAtGrid(bundle(edges), grid);
   const pieces = group(members, grid);
-  return fit(project(members, pieces, order(pieces)));
+  return pack(members, pieces, order(pieces));
 }
 
-module.exports = { parseGlb, weld, featureEdges, bundle, findGrid, splitAtGrid, group, order, project, fit, build, CAMERA, MARGINS };
+module.exports = { parseGlb, weld, featureEdges, bundle, findGrid, splitAtGrid, group, order, project, fit, framing, pack, build, CAMERA, MARGINS };
 
 if (require.main === module) {
   const [inFile, outFile] = process.argv.slice(2);

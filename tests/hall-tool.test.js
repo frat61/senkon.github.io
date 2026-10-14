@@ -163,10 +163,13 @@ test('project maps a point in front of the camera inside the canvas, nearer memb
 
 test('the generated hal.json is sane', { skip: !require('fs').existsSync(require('path').join(__dirname, '..', 'assets', 'senkon', 'hal.json')) }, () => {
   const d = JSON.parse(require('fs').readFileSync(require('path').join(__dirname, '..', 'assets', 'senkon', 'hal.json'), 'utf8'));
+  assert.equal(d.v, 2);
   assert.ok(d.members.length > 2500 && d.members.length < 8000);   // 3,782 from the model; the spec's 4,000 came from an over-split probe
+  assert.ok(d.members.every(m => m.length === 7));
+  assert.ok(d.cam.s > 0 && d.cam.eye.length === 3);
   assert.ok(d.pieces.every(p => p.m.length > 0));
   assert.equal(new Set(d.order).size, d.pieces.length);
-  assert.equal(d.depthOrder.length, d.members.length);
+  assert.equal(d.depthOrder, undefined);
   assert.ok(d.pieces.filter(p => p.t === 'tower').length >= 20);
 });
 
@@ -178,6 +181,26 @@ test('fit scales and shifts the projected members so the hall fills the canvas i
   assert.ok(Math.min(...ys) >= 90 && Math.max(...ys) <= 1080);
   assert.ok(Math.abs(out.members[0][4] - 2 * 1.15) < 0.01);                                 // widths scale with the picture
   assert.equal(out.members[0][5], 50);                                                      // depth untouched
+});
+
+test('framing returns the scale and offset that fit the default view inside the margins', () => {
+  const ms = [M([0, -35, -43], [100, -35, -43], 0.3, 'col'), M([0, 8, 53], [100, 8, 53], 0.3, 'col'), M([0, -35, 53], [0, 8, -43], 0.3, 'col')];
+  const f = H.framing(ms);
+  assert.ok(f.s > 0 && Number.isFinite(f.dx) && Number.isFinite(f.dy));
+  const rows = H.fit(H.project(ms, [], []));                           // the applied version
+  const raw = H.project(ms, [], []).members[0];
+  assert.ok(Math.abs(raw[0] * f.s + f.dx - rows.members[0][0]) < 0.11 && Math.abs(raw[1] * f.s + f.dy - rows.members[0][1]) < 0.11);
+});
+
+test('pack writes format 2: members in metres, the camera with its framing, pieces and order', () => {
+  const ms = [M([0, -35, -43], [0, 3, -43], 0.3, 'col'), M([0, -20, -41.5], [10, -20, -41.5], 0.2, 'beam')];
+  const d = H.pack(ms, [{ t: 'tower', key: {}, m: [0] }, { t: 'floor', key: {}, m: [1] }], [0, 1]);
+  assert.equal(d.v, 2); assert.equal(d.w, 1500); assert.equal(d.h, 1125);
+  assert.deepEqual(d.members[0], [0, -35, -43, 0, 3, -43, 0.3]);
+  assert.deepEqual(d.cam.eye, [-70, 40, 130]); assert.equal(d.cam.focal, 1.85); assert.ok(d.cam.s > 0);
+  assert.deepEqual(d.pieces, [{ t: 'tower', m: [0] }, { t: 'floor', m: [1] }]);
+  assert.deepEqual(d.order, [0, 1]);
+  assert.equal(d.depthOrder, undefined);
 });
 
 module.exports = { makeGlb, prism };
