@@ -104,3 +104,7 @@ label (the hero hides captions), three.js.
   frames are drawn; it resumes when the hero is back. A hidden tab resets the turn's clock so there is no jump.
 - One pointer steers: the hold remembers its pointer id, a second finger ends the hold, lost capture ends it,
   only the main mouse button starts it. The canvas allows `pan-y pinch-zoom`, so pinches still zoom the page.
+
+## 10. Revision 2026-10-14: the turn resumes
+
+Fırat: it should spin again after a touch. A touch still stops the turn, but `IDLE = 4` s after the visitor lets go (pointer up, cancel or lost capture) with no new touch, the hall turns again from the angle it was left at. A new touch within those seconds cancels the pending resume.

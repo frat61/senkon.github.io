@@ -6,7 +6,7 @@
    another in site order, swinging down from above the zone like crane loads; the whole erection takes
    TOTAL seconds at speed 1 (data-speed runs it faster). The members come in metres (format 2) and are
    projected every frame, so once the last piece lands the hall turns slowly by itself and the visitor can
-   drag it to turn and tilt it; the first touch stops the turning for good. Members are painted far to near, an ink stroke under a
+   drag it to turn and tilt it; a touch stops the turning, and IDLE seconds after the visitor lets go it turns again. Members are painted far to near, an ink stroke under a
    white one, so the front hides the back like a line drawing; farther members fade a little. Without
    JavaScript, with reduced motion, or if anything fails, the still picture simply shows.
    Specs: docs/superpowers/specs/2026-10-14-hall-erection-design.md and 2026-10-14-hall-rotate-design.md */
@@ -42,7 +42,7 @@
   const OVERLAP = 1.4;                         // a lane's next piece starts when the previous one is 1/OVERLAP of the way in
   const SWING_X = 0.35, SWING_Y = -0.3, LIFT = 0.08;   // how far off a piece starts, as fractions of the canvas, and the arc's rise
   const INK = '#3a3f44', A_NEAR = 0.95, A_FAR = 0.45, W_MIN = 1.2, W_MAX = 6;   // widths in the picture's pixels (1500 wide), as in the still
-  const TURN = 60, DRAG_AZ = 0.006, DRAG_EL = 0.005;   // seconds per revolution after the erection; radians per dragged pixel
+  const TURN = 60, DRAG_AZ = 0.006, DRAG_EL = 0.005, IDLE = 4;   // seconds per revolution after the erection; radians per dragged pixel; idle seconds before the turn resumes
   const ease = p => p < 0.5 ? 4 * p * p * p : 1 - Math.pow(-2 * p + 2, 3) / 2;   // ease in and out
 
   document.querySelectorAll('figure[data-hall]').forEach(fig => {
@@ -115,7 +115,7 @@
     ctx.lineCap = 'butt';
 
     // states: building (the erection, view fixed) -> turning (slow orbit) -> held (dragging) -> still (idle, no frames)
-    let state = 'building', start = null, paused = 0, hiddenAt = null, last = null, looping = true, holdX = 0, holdY = 0, holdId = null;
+    let state = 'building', start = null, paused = 0, hiddenAt = null, last = null, looping = true, holdX = 0, holdY = 0, holdId = null, resumeTimer = null;
     let inView = fig.__inView !== false;
     document.addEventListener('visibilitychange', () => {
       if (document.hidden) hiddenAt = performance.now();
@@ -155,11 +155,17 @@
     }
     const kick = () => { if (!looping) { looping = true; last = null; requestAnimationFrame(frame); } };
     fig.__wake = on => { inView = on; if (on) kick(); };
-    const release = () => { if (state !== 'held') return; state = 'still'; holdId = null; canvas.style.cursor = 'grab'; kick(); };
+    const release = () => {
+      if (state !== 'held') return;
+      state = 'still'; holdId = null; canvas.style.cursor = 'grab'; kick();
+      clearTimeout(resumeTimer);
+      resumeTimer = setTimeout(() => { if (state === 'still') { state = 'turning'; last = null; kick(); } }, IDLE * 1000);   // left alone: it turns again from here
+    };
     canvas.addEventListener('pointerdown', e => {
       if (state === 'building') return;                              // the erection is never interrupted
       if (e.pointerType === 'mouse' && e.button !== 0) return;
       if (state === 'held') { release(); return; }                    // a second finger ends the hold; it never steers
+      clearTimeout(resumeTimer);
       state = 'held'; holdId = e.pointerId; holdX = e.clientX; holdY = e.clientY; canvas.style.cursor = 'grabbing';
       try { canvas.setPointerCapture(e.pointerId); } catch (err) { /* capture is a courtesy */ }
       kick();
