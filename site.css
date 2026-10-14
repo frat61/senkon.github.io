@@ -222,3 +222,15 @@ h2.perf-sub{font-size:clamp(30px,4vw,40px);margin:0}
   body.has-dock .foot{padding-bottom:calc(96px + env(safe-area-inset-bottom,0px))}
 }
 @media (prefers-reduced-motion: reduce){ .dock{transition:none} }
+/* tasarim/: the hall beside the headline (the home hero's grid), two written arguments side by side, prose after; no lists */
+.tsr-hero .hero-text{gap:18px}
+.tsr-hero h1{font-size:clamp(34px,4.4vw,50px);line-height:1.05;margin:0}
+.tsr-hero .lead{max-width:600px}
+.tsr-hero .btns{margin-top:6px}
+@media (max-width:640px){ .tsr-hero .btns{flex-direction:column} .tsr-hero .btn{width:100%} }
+.tsr-two{margin-top:4px;padding-bottom:24px}
+.tsr-two h2{font-size:clamp(26px,2.8vw,32px);line-height:1.1}
+.tsr-two .mv-text{margin-top:12px}
+#adimlar.tsr-how{padding-top:64px}
+.tsr-xp{margin:36px 0 40px;padding-top:18px;border-top:1px solid var(--rule);max-width:680px;color:var(--body);line-height:1.6}
+.tsr-xp b{font-family:var(--serif);font-weight:600;font-size:26px;letter-spacing:-.01em;color:var(--ink);margin-right:6px}

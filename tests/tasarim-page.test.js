@@ -1,6 +1,8 @@
 'use strict';
 // tasarim/: the page the second ad campaign opens, for architects, contractors and investors who need
-// the structural design of a new building. What we design, how the work goes, what they receive, contact.
+// the structural design of a new building. Written, not listed (Fırat, 2026-10-14: the first version read as
+// generated): the headline with the steel hall beside it, two arguments side by side (optimize çözümler,
+// ileri mühendislik çözümleri), how the work goes as prose, the experience line, contact and the form.
 const test = require('node:test');
 const assert = require('node:assert/strict');
 const fs = require('fs');
@@ -9,13 +11,14 @@ const path = require('path');
 const root = path.join(__dirname, '..');
 const html = fs.readFileSync(path.join(root, 'tasarim', 'index.html'), 'utf8');
 const quote = /<a class="btn btn-main" href="https:\/\/wa\.me\/905309250461\?text=[^"]+">/g;
+const h2s = [...html.matchAll(/<h2[^>]*>([^<]+)<\/h2>/g)].map(m => m[1]);
 
-test('the page has its own title, description and canonical address, and one headline', () => {
+test('the page has its own title, description and canonical address, and one headline: the four-word claim', () => {
   assert.match(html, /<title>Statik proje: çelik ve betonarme yapı tasarımı · Senkon Mühendislik<\/title>/);
   assert.match(html, /<meta name="description" content="[^"]{80,}">/);
   assert.match(html, /<link rel="canonical" href="https:\/\/senkonmuhendislik\.com\/tasarim\/">/);
   assert.equal(html.split('<h1').length - 1, 1);
-  assert.ok(html.includes('<h1>Projeniz için statik proje: çelik ve betonarme</h1>'));
+  assert.ok(html.includes('<h1>Güvenli, ekonomik ve uygulanabilir taşıyıcı sistemler.</h1>'));
 });
 
 test('it speaks to professionals, not to building owners', () => {
@@ -23,36 +26,56 @@ test('it speaks to professionals, not to building owners', () => {
   assert.doesNotMatch(html, /içinde yaşamak için güvenli mi/);
 });
 
-test('what we design: four building kinds, in order', () => {
-  const kinds = [...html.matchAll(/<div class="item"><span class="num"[^>]*>\d\d<\/span><h3>([^<]+)<\/h3>/g)].map(m => m[1]);
-  assert.deepEqual(kinds, ['Çelik endüstriyel yapılar', 'Betonarme konut ve ticari yapılar', 'Havalimanı ve ulaşım yapıları', 'Platform, çatı ve özel çelik']);
+test('the steel hall stands beside the headline, in the home hero grid, with absolute paths and the still tagged', () => {
+  assert.match(html, /<section class="wrap hero tsr-hero">/);
+  assert.match(html, /<div class="hero-media">\s*(<!--[^]*?-->\s*)?<figure class="hall hero-figure" data-hall="\/assets\/senkon\/hal\.json"/);
+  assert.match(html, /<img class="hall-static" src="\/assets\/senkon\/hal\.webp\?v=[0-9a-f]{8}"/);
+  assert.equal((html.match(/<script src="\/assets\/senkon\/hal\.js\?v=[0-9a-f]{8}" defer><\/script>/g) || []).length, 1);
 });
 
-test('the codes Fırat works to, named once in a sentence; never TS 500', () => {
+test('written, not listed: no eyebrows, no numbered items, no checklist box, no FAQ on this page', () => {
+  assert.doesNotMatch(html, /class="eyebrow"/);
+  assert.doesNotMatch(html, /class="num"/);
+  assert.doesNotMatch(html, /class="(steps|list2|perf-get|faq)"/);
+  assert.doesNotMatch(html, /<ol|<ul/);
+});
+
+test('the two arguments, side by side and in this order, with linear and nonlinear named', () => {
+  assert.deepEqual(h2s.slice(0, 2), ['Optimize çözümler', 'İleri mühendislik çözümleri']);
+  assert.match(html, /<div class="mv tsr-two">/);
+  assert.match(html, /Lineer ve nonlineer çözümleri/);
+});
+
+test('optimisation never reads as saving on safety (Fırat): no "en az malzeme", the codes are the fixed floor', () => {
+  assert.doesNotMatch(html, /en az malzeme/i);
+  assert.match(html, /yönetmeliğin istediği güvenliği sabit tutup/);
+});
+
+test('what we design, in a sentence: industrial, housing and commercial, airport and transport; no platform-and-roof line', () => {
+  assert.match(html, /endüstriyel yapılar, konut ve ticari yapılar, havalimanı ve ulaşım yapıları/);
+  assert.doesNotMatch(html, /Platform, çatı/);
+});
+
+test('the codes Fırat works to, named in a sentence; never TS 500', () => {
   for (const c of ['TBDY 2018', 'ASCE', 'ACI', 'Eurocode']) assert.ok(html.includes(c), c);
   assert.doesNotMatch(html, /TS ?500/);
 });
 
-test('how the work goes: three numbered steps, from drawings to delivery', () => {
-  const steps = [...html.matchAll(/<li class="item"><span class="num"[^>]*>\d\d<\/span><h3>([^<]+)<\/h3>/g)].map(m => m[1]);
-  assert.deepEqual(steps, ['Mimari projeyi gönderin', 'Kapsam, süre ve teklif', 'Tasarım ve teslim']);
-});
-
-test('what they receive: report, drawings and the phone-openable 3D model; no prices on the page', () => {
-  assert.match(html, /<h3>Teslim ettiklerimiz<\/h3>/);
-  for (const w of ['hesap raporu', 'donatı', 'imalat', '3B model']) assert.ok(html.includes(w), w);
+test('how the work goes, as prose under #adimlar (the ad sitelink): the model on a phone link, report and drawings; no prices', () => {
+  assert.match(html, /<section id="adimlar" class="wrap section rule tsr-how">\s*<h2>Nasıl çalışıyoruz<\/h2>/);
+  for (const w of ['telefonda açılan', 'hesap raporu', 'donatı', 'imalat ve montaj', 'IFC']) assert.ok(html.includes(w), w);
   assert.doesNotMatch(html, /\d\s?TL\b|₺|fiyat listesi/i);
 });
 
 test('experience: the one figure and only the cleared project names; never the Tuzla client, never Malatya', () => {
-  assert.match(html, /400\.000\+ m²/);
+  assert.match(html, /<p class="tsr-xp"><b>400\.000\+ m²<\/b>/);
   assert.match(html, /Esenboğa/);
   assert.doesNotMatch(html, /Amazon/);
   assert.doesNotMatch(html, /Malatya/);
 });
 
-test('contact: WhatsApp quote button at the top, in the box, in İletişim and in the dock; e-mail; the form with a project-type field', () => {
-  assert.ok((html.match(quote) || []).length >= 4);
+test('contact: WhatsApp quote button at the top, in İletişim and in the dock; e-mail; the form with a project-type field', () => {
+  assert.ok((html.match(quote) || []).length >= 3);
   assert.match(html, /href="mailto:firatsenturk@senkonmuhendislik\.com"/);
   const form = html.match(/<form class="lead-form"[\s\S]*?<\/form>/);
   assert.ok(form, 'no .lead-form');
@@ -61,13 +84,14 @@ test('contact: WhatsApp quote button at the top, in the box, in İletişim and i
   assert.doesNotMatch(f, /name="yapim_yili"/);
   assert.match(f, /href="\/kvkk\/"/);
   assert.match(html, /<p class="lead-done" hidden>/);
+  assert.match(html, /document\.querySelector\('\.hero'\)/);   // the phone dock hides while the hero is on screen
 });
 
 test('firm voice: no personal names, no premium, no 6306, no slogans in headings', () => {
   assert.doesNotMatch(html, /Fırat|Şentürk/);
   assert.doesNotMatch(html, /premium/i);
   assert.doesNotMatch(html, /6306/);
-  assert.doesNotMatch(html, /<h[23][^>]*>[^<]*!<\/h[23]>/);
+  assert.doesNotMatch(html, /<h[123][^>]*>[^<]*!<\/h[123]>/);
 });
 
 test('the page links the shared stylesheet, fonts and track.js with absolute paths and cache tags', () => {
