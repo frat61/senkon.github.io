@@ -1,10 +1,10 @@
 /* Erection animation for the steel hall: every <figure data-hall="…json"> erects Fırat's lattice-column hall
    piece by piece on a canvas over the still picture, once per page load, then leaves the finished
    drawing. The JSON (written by tools/make-hall.js from the viewer's GLB) holds the members as projected
-   members [x1, y1, z1, x2, y2, z2, width m] with the camera and its framing, the erection pieces (towers, posts, floor bays, roof truss
-   lines, roof bays) with their member indices and the site order of the pieces. The picture is cut into LANES vertical zones that assemble at once, each zone's pieces one after
+   members [x1, y1, z1, x2, y2, z2, width m] with the camera and its framing, the erection pieces (towers, posts, floor bays, whole roof
+   truss lines, roof bays) with their member indices and the site order of the pieces. The picture is cut into LANES vertical zones that assemble at once, each zone's pieces one after
    another in site order, swinging down from above the zone like crane loads; the whole erection takes
-   TOTAL seconds at speed 1 (data-speed runs it faster). The members come in metres (format 2) and are
+   TOTAL seconds at speed 1 (data-speed runs it faster), a little more when the big roof pieces, which swing in longer, land last. The members come in metres (format 2) and are
    projected every frame, so once the last piece lands the hall turns slowly by itself and the visitor can
    drag it to turn and tilt it; a touch stops the turning, and IDLE seconds after the visitor lets go it turns again. Members are painted far to near, an ink stroke under a
    white one, so the front hides the back like a line drawing; farther members fade a little. Without
@@ -32,14 +32,32 @@
   const eyeAt = (at, dist, az, el) => [at[0] + dist * Math.cos(el) * Math.sin(az), at[1] + dist * Math.sin(el), at[2] + dist * Math.cos(el) * Math.cos(az)];
   const clampEl = el => Math.max(EL_MIN, Math.min(EL_MAX, el));
 
-  if (typeof module !== 'undefined') module.exports = { project, widthPx, spherical, eyeAt, clampEl, basis };
+  // the erection timeline: each zone's pieces come one after another, every step seconds, each swinging in for OVERLAP steps,
+  // the zone's last piece landing at TOTAL; a piece spanning more than SPAN of the canvas (a whole roof truss) swings in longer
+  // in proportion, and the erection ends when the last piece has landed. lane[pi] is a piece's zone, span[pi] its size as a
+  // fraction of the canvas; order lists every piece
+  function schedule(order, lane, span, T) {
+    const n = order.length, count = new Int32Array(T.LANES), pos = new Int32Array(T.LANES);
+    const startAt = new Float64Array(n), flyOf = new Float64Array(n);
+    order.forEach(pi => { count[lane[pi]]++; });
+    let end = 0;
+    order.forEach(pi => {
+      const l = lane[pi], step = T.TOTAL / (count[l] - 1 + T.OVERLAP);
+      startAt[pi] = pos[l]++ * step; flyOf[pi] = step * T.OVERLAP * Math.max(1, span[pi] / T.SPAN);
+      end = Math.max(end, startAt[pi] + flyOf[pi]);
+    });
+    return { startAt, flyOf, end };
+  }
+
+  if (typeof module !== 'undefined') module.exports = { project, widthPx, spherical, eyeAt, clampEl, basis, schedule };
   if (typeof window === 'undefined') return;
   if (!('fetch' in window) || !('IntersectionObserver' in window)) return;
   if (matchMedia('(prefers-reduced-motion: reduce)').matches) return;
   if (!document.createElement('canvas').getContext) return;
 
-  const TOTAL = 25, LANES = 5;                 // seconds for the whole erection at speed 1; work fronts assembling at once
+  const TOTAL = 15, LANES = 5;                 // seconds for the whole erection at speed 1 (the tempo of the 25 s, 536-piece build, with the roof now 21 pieces); work fronts assembling at once
   const OVERLAP = 1.4;                         // a lane's next piece starts when the previous one is 1/OVERLAP of the way in
+  const SPAN = 0.3;                            // a piece spanning more of the canvas than this swings in longer, in proportion: the roof trusses
   const SWING_X = 0.35, SWING_Y = -0.3, LIFT = 0.08;   // how far off a piece starts, as fractions of the canvas, and the arc's rise
   const INK = '#3a3f44', A_NEAR = 0.95, A_FAR = 0.45, W_MIN = 1.2, W_MAX = 6;   // widths in the picture's pixels (1500 wide), as in the still
   const TURN = 60, DRAG_AZ = 0.006, DRAG_EL = 0.005, IDLE = 4;   // seconds per revolution after the erection; radians per dragged pixel; idle seconds before the turn resumes
@@ -100,14 +118,17 @@
 
     // five work fronts: the picture is cut into LANES vertical zones; each zone erects its own pieces in site order,
     // one after another, all zones finishing together at TOTAL; a piece swings in from above its zone, leaning in from the outside
-    const pieceOf = new Int32Array(N), lane = new Int32Array(pieces.length), startAt = new Float64Array(pieces.length), flyOf = new Float64Array(pieces.length);
+    const pieceOf = new Int32Array(N), lane = new Int32Array(pieces.length), span = new Float64Array(pieces.length);
     pieces.forEach((p, pi) => {
-      let sx = 0; p.m.forEach(i => { pieceOf[i] = pi; sx += px1[i] + px2[i]; });
+      let sx = 0, x0 = Infinity, x1 = -Infinity, y0 = Infinity, y1 = -Infinity;
+      p.m.forEach(i => {
+        pieceOf[i] = pi; sx += px1[i] + px2[i];
+        x0 = Math.min(x0, px1[i], px2[i]); x1 = Math.max(x1, px1[i], px2[i]); y0 = Math.min(y0, py1[i], py2[i]); y1 = Math.max(y1, py1[i], py2[i]);
+      });
       lane[pi] = Math.min(LANES - 1, Math.max(0, Math.floor(sx / (2 * p.m.length) / canvas.width * LANES)));
+      span[pi] = Math.max((x1 - x0) / canvas.width, (y1 - y0) / canvas.height);
     });
-    const count = new Int32Array(LANES); order.forEach(pi => { count[lane[pi]]++; });
-    const pos = new Int32Array(LANES);
-    order.forEach(pi => { const l = lane[pi], n = count[l], step = TOTAL / (n - 1 + OVERLAP); startAt[pi] = pos[l] * step; flyOf[pi] = step * OVERLAP; pos[l]++; });
+    const { startAt, flyOf, end } = schedule(order, lane, span, { TOTAL, LANES, OVERLAP, SPAN });
     const swingX = SWING_X * canvas.width, swingY = SWING_Y * canvas.height, lift = LIFT * canvas.height;
     const sideOf = l => (l - (LANES - 1) / 2) / ((LANES - 1) / 2);     // -1 at the left edge, +1 at the right, 0 in the middle
     const border = 1.5 * k, whiteFrom = 2 * k;
@@ -125,10 +146,10 @@
     function frame(now) {
       if (start === null) start = now;
       if (document.hidden) { last = null; requestAnimationFrame(frame); return; }
-      let t = TOTAL + 1;
+      let t = end + 1;
       if (state === 'building') {
         t = (now - start - paused) / 1000 * speed;
-        if (t >= TOTAL + 0.1) { state = 'turning'; fig.setAttribute('data-done', '1'); canvas.style.cursor = 'grab'; }
+        if (t >= end + 0.1) { state = 'turning'; fig.setAttribute('data-done', '1'); canvas.style.cursor = 'grab'; }
       }
       if (state === 'turning' && last !== null) az += 2 * Math.PI / TURN * (now - last) / 1000;
       last = now;

@@ -134,8 +134,8 @@ test('group makes a tower of chords plus lacing, floors by level and bay, roof b
   assert.ok(floor20.m.includes(7) && floor20.m.includes(8) && floor20.m.includes(12));   // beam, bracing above it, lower chord 3.5 m below: one bay piece
   assert.ok(pieces.some(p => p.t === 'floor' && p.key.level === -10 && p.m.includes(9)));
   assert.ok(pieces.every(p => p.t !== 'floor' || p.key.z !== undefined));  // bay by 10 m strip: small pieces for five work fronts
-  assert.ok(pieces.some(p => p.t === 'roof' && p.key.x === 10 && p.key.z === 0 && p.m.includes(10)));
-  assert.ok(pieces.some(p => p.t === 'roofx' && p.key.x === 0 && p.key.z === 0 && p.m.includes(11)));
+  assert.ok(pieces.some(p => p.t === 'roof' && p.key.x === 10 && p.key.z === undefined && p.m.includes(10)));   // a whole truss line, like a tower
+  assert.ok(pieces.some(p => p.t === 'roofx' && p.key.x === 0 && p.key.z === undefined && p.m.includes(11)));   // purlins and bracing of a whole bay
   assert.ok(pieces.every(p => p.m.length > 0));
   const o = H.order(pieces);
   assert.equal(new Set(o).size, pieces.length);
@@ -171,6 +171,8 @@ test('the generated hal.json is sane', { skip: !require('fs').existsSync(require
   assert.equal(new Set(d.order).size, d.pieces.length);
   assert.equal(d.depthOrder, undefined);
   assert.ok(d.pieces.filter(p => p.t === 'tower').length >= 20);
+  assert.ok(d.pieces.filter(p => p.t === 'roof').length <= 12);     // one piece per truss line: 11 lines
+  assert.ok(d.pieces.filter(p => p.t === 'roofx').length <= 10);    // one per bay
 });
 
 test('fit scales and shifts the projected members so the hall fills the canvas inside the margins', () => {

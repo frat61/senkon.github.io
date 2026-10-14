@@ -191,7 +191,7 @@ function splitAtGrid(members, grid, opts) {
   return out;
 }
 
-// ---- erection pieces: towers, end-wall posts, floor beams and bracing by level and bay, roof trusses by line
+// ---- erection pieces: towers, end-wall posts, floor beams and bracing by level, bay and strip, roof trusses by whole line, roof bracing by bay
 function group(members, grid) {
   const pieces = new Map();
   const piece = (t, key) => { const k = t + JSON.stringify(key); let p = pieces.get(k); if (!p) { p = { t, key, m: [] }; pieces.set(k, p); } return p; };
@@ -237,14 +237,14 @@ function group(members, grid) {
       piece('floor', { level, x: bay(c[0]), z: strip(c[2]) }).m.push(i);
     } else if (along(m, 2)) {
       const x = grid.xs.reduce((best, v) => Math.abs(v - c[0]) < Math.abs(best - c[0]) ? v : best, grid.xs[0]);
-      piece('roof', { x, z: strip(c[2]) }).m.push(i);                 // one segment of a truss line
-    } else piece('roofx', { x: bay(c[0]), z: strip(c[2]) }).m.push(i);   // purlins and roof bracing of one bay strip
+      piece('roof', { x }).m.push(i);                                 // a whole truss line, lifted in one like a tower
+    } else piece('roofx', { x: bay(c[0]) }).m.push(i);               // purlins and roof bracing of one whole bay
     assigned[i] = true;
   });
   return [...pieces.values()];
 }
 
-// ---- site order: towers, posts, floors bottom up bay by bay and strip by strip, roof truss segments, roof bracing
+// ---- site order: towers, posts, floors bottom up bay by bay and strip by strip, roof truss lines, roof bracing by bay
 function order(pieces) {
   const sortKey = p => {
     const k = p.key;
@@ -252,8 +252,8 @@ function order(pieces) {
       case 'tower': return [0, k.row, k.x, 0];
       case 'post': return [1, k.x, k.z, 0];
       case 'floor': return [2, k.level, k.x, k.z];
-      case 'roof': return [3, k.x, k.z, 0];
-      default: return [4, k.x, k.z, 0];
+      case 'roof': return [3, k.x, 0, 0];
+      default: return [4, k.x, 0, 0];
     }
   };
   const keys = pieces.map(sortKey);

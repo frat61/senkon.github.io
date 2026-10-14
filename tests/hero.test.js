@@ -153,7 +153,8 @@ test('hal.js fails quietly, waits for both the JSON and the view, and never draw
   assert.match(js, /\.catch\(\(\) => \{\}\)/);
   assert.match(js, /prefers-reduced-motion: reduce/);
   assert.match(js, /IntersectionObserver/);
-  assert.match(js, /const TOTAL = 25, LANES = 5/);          // five work fronts assemble at once, 25 s in all at speed 1
+  assert.match(js, /const TOTAL = 15, LANES = 5/);          // five work fronts assemble at once, 15 s in all at speed 1: the 25 s tempo with the roof as 21 pieces
+  assert.match(js, /const SPAN = 0\.3/);                     // the big roof pieces swing in longer
   assert.match(js, /SWING_X = 0\.35, SWING_Y = -0\.3/);   // pieces swing in from above their zone, no hook lines
   assert.doesNotMatch(js, /hook/i);
   assert.match(js, /lane\[pi\] = /);                                   // each piece belongs to the zone it stands in
