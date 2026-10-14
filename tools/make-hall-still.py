@@ -26,8 +26,8 @@ def norm(a):
 
 src, out = sys.argv[1], sys.argv[2]
 d = json.load(open(src, encoding='utf-8'))
-if d.get('v') != 2:
-    sys.exit('expected a format-2 hal.json')
+if d.get('v') not in (2, 3):
+    sys.exit('expected a format-2 or format-3 hal.json')
 cam, W0, H0 = d['cam'], d['w'], d['h']
 fwd = norm(sub(cam['at'], cam['eye'])); right = norm(cross(fwd, [0, 1, 0])); up = cross(right, fwd)
 

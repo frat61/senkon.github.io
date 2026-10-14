@@ -1,10 +1,13 @@
 /* Erection animation for the steel hall: every <figure data-hall="…json"> erects Fırat's lattice-column hall
    piece by piece on a canvas over the still picture, once per page load, then leaves the finished
-   drawing. The JSON (written by tools/make-hall.js from the viewer's GLB) holds the members as projected
-   members [x1, y1, z1, x2, y2, z2, width m] with the camera and its framing, the erection pieces (towers, posts, floor bays, whole roof
-   truss lines, roof bays) with their member indices and the site order of the pieces. The picture is cut into LANES vertical zones that assemble at once, each zone's pieces one after
-   another in site order, swinging down from above the zone like crane loads; the whole erection takes
-   TOTAL seconds at speed 1 (data-speed runs it faster), a little more when the big roof pieces, which swing in longer, land last. The members come in metres (format 2) and are
+   drawing. The JSON (written by tools/make-hall.js from the viewer's GLB, format 3) holds the members
+   [x1, y1, z1, x2, y2, z2, width m] in metres with the camera and its framing, and the erection pieces (towers, posts,
+   floor bays, whole roof truss lines, roof bays) with their member indices, their grid key and the crew slot each goes
+   up in: the tool schedules five crews by a site's logic (columns first, beams only on standing columns, floors bottom
+   up, the roof on tied columns, one front moving along the hall; tests/hall-logic.test.js holds the rules). Here a slot
+   is a step of TOTAL / (last slot + OVERLAP) seconds at speed 1 (data-speed runs it faster), so the last slot lands at
+   TOTAL; a piece swings down from above like a crane load, leaning in from the side of the picture it stands on, for
+   OVERLAP steps, the big pieces (roof trusses, towers) a little longer in proportion to their size. The members come in metres (format 2) and are
    projected every frame, so once the last piece lands the hall turns slowly by itself and the visitor can
    drag it to turn and tilt it; a touch stops the turning, and IDLE seconds after the visitor lets go it turns again. Members are painted far to near, an ink stroke under a
    white one, so the front hides the back like a line drawing; farther members fade a little. Without
@@ -32,32 +35,40 @@
   const eyeAt = (at, dist, az, el) => [at[0] + dist * Math.cos(el) * Math.sin(az), at[1] + dist * Math.sin(el), at[2] + dist * Math.cos(el) * Math.cos(az)];
   const clampEl = el => Math.max(EL_MIN, Math.min(EL_MAX, el));
 
-  // the erection timeline: each zone's pieces come one after another, every step seconds, each swinging in for OVERLAP steps,
-  // the zone's last piece landing at TOTAL; a piece spanning more than SPAN of the canvas (a whole roof truss) swings in longer
-  // in proportion, and the erection ends when the last piece has landed. lane[pi] is a piece's zone, span[pi] its size as a
-  // fraction of the canvas; order lists every piece
-  function schedule(order, lane, span, T) {
-    const n = order.length, count = new Int32Array(T.LANES), pos = new Int32Array(T.LANES);
-    const startAt = new Float64Array(n), flyOf = new Float64Array(n);
-    order.forEach(pi => { count[lane[pi]]++; });
+  const TOTAL = 15, OVERLAP = 1.4, SPAN = 0.3;   // seconds for the whole erection at speed 1; a piece swings in for OVERLAP slots, the
+                                                 // next slot starting when it is 1/OVERLAP of the way in; a piece spanning more of the
+                                                 // canvas than SPAN swings in longer, in proportion: the roof trusses and the towers
+  const FLY_MAX = 2;                             // slots: no piece swings in longer, because the tool lets a dependent piece go up
+                                                 // LAND = 2 slots after what it rests on started (tools/make-hall.js)
+  // the erection timeline from the data file's crew slots, in seconds at speed 1: startAt and flyOf per piece, end when the
+  // last piece has landed, and side, where the piece stands in the default view (-1 at the left edge, +1 at the right), so it
+  // leans in from its own side. The spans are measured in the default view; the erection never changes the view.
+  function timeline(data) {
+    const cam = data.cam, b = basis(cam), W = data.w, H = data.h, M = data.members, n = data.pieces.length;
+    const startAt = new Float64Array(n), flyOf = new Float64Array(n), side = new Float64Array(n);
+    let lastSlot = 0; data.pieces.forEach(p => { lastSlot = Math.max(lastSlot, p.at); });
+    const step = TOTAL / (lastSlot + OVERLAP);
     let end = 0;
-    order.forEach(pi => {
-      const l = lane[pi], step = T.TOTAL / (count[l] - 1 + T.OVERLAP);
-      startAt[pi] = pos[l]++ * step; flyOf[pi] = step * T.OVERLAP * Math.max(1, span[pi] / T.SPAN);
+    data.pieces.forEach((p, pi) => {
+      let x0 = Infinity, x1 = -Infinity, y0 = Infinity, y1 = -Infinity;
+      p.m.forEach(i => {
+        const m = M[i];
+        for (const q of [project(m, cam, W, H, b), project([m[3], m[4], m[5]], cam, W, H, b)]) { x0 = Math.min(x0, q[0]); x1 = Math.max(x1, q[0]); y0 = Math.min(y0, q[1]); y1 = Math.max(y1, q[1]); }
+      });
+      const span = Math.max((x1 - x0) / W, (y1 - y0) / H);
+      startAt[pi] = p.at * step; flyOf[pi] = step * Math.min(FLY_MAX, OVERLAP * Math.max(1, span / SPAN));
+      side[pi] = Math.max(-1, Math.min(1, ((x0 + x1) / 2 / W - 0.5) * 2));
       end = Math.max(end, startAt[pi] + flyOf[pi]);
     });
-    return { startAt, flyOf, end };
+    return { startAt, flyOf, end, side, step };
   }
 
-  if (typeof module !== 'undefined') module.exports = { project, widthPx, spherical, eyeAt, clampEl, basis, schedule };
+  if (typeof module !== 'undefined') module.exports = { project, widthPx, spherical, eyeAt, clampEl, basis, timeline, T: { TOTAL, OVERLAP, SPAN, FLY_MAX } };
   if (typeof window === 'undefined') return;
   if (!('fetch' in window) || !('IntersectionObserver' in window)) return;
   if (matchMedia('(prefers-reduced-motion: reduce)').matches) return;
   if (!document.createElement('canvas').getContext) return;
 
-  const TOTAL = 15, LANES = 5;                 // seconds for the whole erection at speed 1 (the tempo of the 25 s, 536-piece build, with the roof now 21 pieces); work fronts assembling at once
-  const OVERLAP = 1.4;                         // a lane's next piece starts when the previous one is 1/OVERLAP of the way in
-  const SPAN = 0.3;                            // a piece spanning more of the canvas than this swings in longer, in proportion: the roof trusses
   const SWING_X = 0.35, SWING_Y = -0.3, LIFT = 0.08;   // how far off a piece starts, as fractions of the canvas, and the arc's rise
   const INK = '#3a3f44', A_NEAR = 0.95, A_FAR = 0.45, W_MIN = 1.2, W_MAX = 6;   // widths in the picture's pixels (1500 wide), as in the still
   const TURN = 60, DRAG_AZ = 0.006, DRAG_EL = 0.005, IDLE = 4;   // seconds per revolution after the erection; radians per dragged pixel; idle seconds before the turn resumes
@@ -83,7 +94,7 @@
   });
 
   function run(fig, stage, data, speed) {
-    if (data.v !== 2 || !data.cam || !data.members || !data.pieces || !data.order) return;   // an old or odd file: the still stays
+    if (data.v !== 3 || !data.cam || !data.members || !data.pieces) return;   // an old or odd file: the still stays
     const dpr = Math.min(window.devicePixelRatio || 1, 2);
     const cssW = stage.clientWidth || data.w, k = cssW * dpr / data.w;
     const canvas = document.createElement('canvas');
@@ -92,7 +103,7 @@
     if (!ctx) return;
     stage.appendChild(canvas); fig.setAttribute('data-live', '1');
 
-    const M = data.members, pieces = data.pieces, order = data.order, N = M.length, W = data.w, H = data.h;
+    const M = data.members, pieces = data.pieces, N = M.length, W = data.w, H = data.h;
     const cam = { eye: data.cam.eye.slice(), at: data.cam.at, focal: data.cam.focal, s: data.cam.s, dx: data.cam.dx, dy: data.cam.dy };
     const sph = spherical(cam.eye, cam.at), dist = sph.dist;
     let az = sph.az, el = sph.el;
@@ -114,23 +125,13 @@
       }
       idx.sort((i, j) => depth[j] - depth[i]);
     }
-    view();                                                            // the default view, for the lanes below
+    view();                                                            // the default view
 
-    // five work fronts: the picture is cut into LANES vertical zones; each zone erects its own pieces in site order,
-    // one after another, all zones finishing together at TOTAL; a piece swings in from above its zone, leaning in from the outside
-    const pieceOf = new Int32Array(N), lane = new Int32Array(pieces.length), span = new Float64Array(pieces.length);
-    pieces.forEach((p, pi) => {
-      let sx = 0, x0 = Infinity, x1 = -Infinity, y0 = Infinity, y1 = -Infinity;
-      p.m.forEach(i => {
-        pieceOf[i] = pi; sx += px1[i] + px2[i];
-        x0 = Math.min(x0, px1[i], px2[i]); x1 = Math.max(x1, px1[i], px2[i]); y0 = Math.min(y0, py1[i], py2[i]); y1 = Math.max(y1, py1[i], py2[i]);
-      });
-      lane[pi] = Math.min(LANES - 1, Math.max(0, Math.floor(sx / (2 * p.m.length) / canvas.width * LANES)));
-      span[pi] = Math.max((x1 - x0) / canvas.width, (y1 - y0) / canvas.height);
-    });
-    const { startAt, flyOf, end } = schedule(order, lane, span, { TOTAL, LANES, OVERLAP, SPAN });
+    // the erection: each piece's start and swing from the crew slots in the file; it swings in from above, leaning in from its side
+    const { startAt, flyOf, end, side } = timeline(data);
+    const pieceOf = new Int32Array(N);
+    pieces.forEach((p, pi) => { p.m.forEach(i => { pieceOf[i] = pi; }); });
     const swingX = SWING_X * canvas.width, swingY = SWING_Y * canvas.height, lift = LIFT * canvas.height;
-    const sideOf = l => (l - (LANES - 1) / 2) / ((LANES - 1) / 2);     // -1 at the left edge, +1 at the right, 0 in the middle
     const border = 1.5 * k, whiteFrom = 2 * k;
     const started = new Uint8Array(N), progress = new Float64Array(pieces.length);
     ctx.lineCap = 'butt';
@@ -162,7 +163,7 @@
         const i = idx[q];
         if (!started[i]) continue;                                   // nothing shows through from the future
         const pi = pieceOf[i], p = progress[pi], e = ease(p);
-        const dx = sideOf(lane[pi]) * swingX * (1 - e), dy = swingY * (1 - e) - lift * Math.sin(Math.PI * p);   // the swing: down from above its zone, leaning in from the outside
+        const dx = side[pi] * swingX * (1 - e), dy = swingY * (1 - e) - lift * Math.sin(Math.PI * p);   // the swing: down from above, leaning in from the side it stands on
         const w = width[i], alpha = A_NEAR - (A_NEAR - A_FAR) * (depth[i] - dMin) / dRange;
         ctx.globalAlpha = alpha * Math.min(1, 0.15 + p * 2.5); ctx.strokeStyle = INK; ctx.lineWidth = w + border;
         ctx.beginPath(); ctx.moveTo(px1[i] + dx, py1[i] + dy); ctx.lineTo(px2[i] + dx, py2[i] + dy); ctx.stroke();
