@@ -19,9 +19,9 @@ test('spherical and eyeAt round-trip the fixed eye, and a full turn comes back',
 });
 
 test('the elevation clamp holds and projection stays finite at both limits', () => {
-  assert.equal(R.clampEl(-1), 0.0524); assert.equal(R.clampEl(3), 1.2217);
+  assert.equal(R.clampEl(-1), 0.0524); assert.equal(R.clampEl(3), 0.4887);   // 3° and 28°
   const s = R.spherical(cam.eye, cam.at);
-  for (const el of [0.0524, 1.2217]) {
+  for (const el of [0.0524, 0.4887]) {
     const eye = R.eyeAt(cam.at, s.dist, s.az, el);
     const [x, y, d] = R.project([0, -35, -43], { ...cam, eye }, 1500, 1125);
     assert.ok(Number.isFinite(x) && Number.isFinite(y) && d > 0);
@@ -30,4 +30,18 @@ test('the elevation clamp holds and projection stays finite at both limits', () 
 
 test('widthPx scales a width in metres by the focal factor, the depth and the framing', () => {
   assert.ok(Math.abs(R.widthPx(1, 100, { focal: 2, s: 0.5 }, 1500) - 7.5) < 1e-9);
+});
+
+const fs = require('fs'), path = require('path');
+const real = path.join(__dirname, '..', 'assets', 'senkon', 'hal.json');
+test('at the steepest tilt the whole hall stays inside the canvas through a full turn', { skip: !fs.existsSync(real) }, () => {
+  const d = JSON.parse(fs.readFileSync(real, 'utf8')), s = R.spherical(d.cam.eye, d.cam.at);
+  for (const el of [R.clampEl(-1), R.clampEl(9)]) {
+    let x0 = Infinity, x1 = -Infinity, y0 = Infinity, y1 = -Infinity;
+    for (let a = 0; a < 360; a += 10) {
+      const cam = { ...d.cam, eye: R.eyeAt(d.cam.at, s.dist, s.az + a * Math.PI / 180, el) }, b = R.basis(cam);
+      d.members.forEach(m => { for (const p of [m, [m[3], m[4], m[5]]]) { const q = R.project(p, cam, d.w, d.h, b); x0 = Math.min(x0, q[0]); x1 = Math.max(x1, q[0]); y0 = Math.min(y0, q[1]); y1 = Math.max(y1, q[1]); } });
+    }
+    assert.ok(x0 > -6 && x1 < d.w + 6 && y0 > 0 && y1 < d.h, `el ${el}: x ${x0.toFixed(0)}..${x1.toFixed(0)} y ${y0.toFixed(0)}..${y1.toFixed(0)}`);
+  }
 });

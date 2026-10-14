@@ -176,4 +176,14 @@ test('hal.js turns the hall after the erection and lets the visitor drag it, wit
   assert.match(css, /\.hall-stage canvas\{[^}]*touch-action:pan-y/);
   assert.match(hero(), /aria-label="Endüstriyel çelik yapının taşıyıcı sisteminin montaj animasyonu; sürükleyerek döndürülebilir"/);
 });
+test('hal.js stops turning off screen, keeps pinch-zoom, and follows one finger only', () => {
+  const js = fs.readFileSync(path.join(__dirname, '..', 'assets', 'senkon', 'hal.js'), 'utf8');
+  assert.match(js, /EL_MAX = 0\.4887/);                                 // 28°: steeper tilts crop the hall
+  assert.match(js, /if \(!inView && state !== 'building'\)/);          // the turn pauses while the hero is scrolled away
+  assert.match(js, /visibilitychange[\s\S]*last = null/);              // no jump after a hidden tab
+  assert.match(js, /holdId/);                                          // a second finger never steers
+  assert.match(js, /addEventListener\('lostpointercapture'/);
+  assert.match(css, /\.hall-stage canvas\{[^}]*touch-action:pan-y pinch-zoom/);
+});
+
 

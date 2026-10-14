@@ -95,3 +95,12 @@ returns `pack(...)`. The CLI prints the same counts plus the file size.
 
 Zoom, inertia, resetting to the default view, a visible "drag to turn" hint beyond the caption and the
 label (the hero hides captions), three.js.
+
+## 9. Revision after review, 2026-10-14
+
+- Elevation clamp is 3°…28°, not 70°: at the default framing the hall leaves the frame above about 28° of tilt
+  (measured over a full turn on the real data; a runtime test sweeps it).
+- The figure's intersection observer stays alive; while the hero is scrolled off screen the turn pauses and no
+  frames are drawn; it resumes when the hero is back. A hidden tab resets the turn's clock so there is no jump.
+- One pointer steers: the hold remembers its pointer id, a second finger ends the hold, lost capture ends it,
+  only the main mouse button starts it. The canvas allows `pan-y pinch-zoom`, so pinches still zoom the page.

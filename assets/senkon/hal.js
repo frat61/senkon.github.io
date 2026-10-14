@@ -9,12 +9,12 @@
    drag it to turn and tilt it; the first touch stops the turning for good. Members are painted far to near, an ink stroke under a
    white one, so the front hides the back like a line drawing; farther members fade a little. Without
    JavaScript, with reduced motion, or if anything fails, the still picture simply shows.
-   Spec: docs/superpowers/specs/2026-10-14-hall-erection-design.md */
+   Specs: docs/superpowers/specs/2026-10-14-hall-erection-design.md and 2026-10-14-hall-rotate-design.md */
 (function () {
   'use strict';
 
   // ---- camera math, shared in spirit with tools/make-hall.js and tools/make-hall-still.py (spec section 3)
-  const EL_MIN = 0.0524, EL_MAX = 1.2217;      // elevation limits, 3° and 70°
+  const EL_MIN = 0.0524, EL_MAX = 0.4887;      // elevation limits, 3° and 28°: steeper tilts push the hall out of the frame
   const sub = (a, b) => [a[0] - b[0], a[1] - b[1], a[2] - b[2]];
   const dot = (a, b) => a[0] * b[0] + a[1] * b[1] + a[2] * b[2];
   const cross = (a, b) => [a[1] * b[2] - a[2] * b[1], a[2] * b[0] - a[0] * b[2], a[0] * b[1] - a[1] * b[0]];
@@ -55,8 +55,11 @@
     fetch(fig.getAttribute('data-hall') + V).then(r => r.ok ? r.json() : Promise.reject(r.status))
       .then(d => { data = d; maybeStart(); }).catch(() => {});
     const io = new IntersectionObserver(entries => {
-      if (!entries.some(e => e.isIntersecting)) return;
-      io.disconnect(); seen = true; maybeStart();
+      const on = entries.some(e => e.isIntersecting);
+      fig.__inView = on;
+      if (fig.__wake) fig.__wake(on);
+      if (!on) return;
+      seen = true; maybeStart();
     }, { threshold: 0.25 });
     io.observe(fig);
   });
@@ -112,10 +115,12 @@
     ctx.lineCap = 'butt';
 
     // states: building (the erection, view fixed) -> turning (slow orbit) -> held (dragging) -> still (idle, no frames)
-    let state = 'building', start = null, paused = 0, hiddenAt = null, last = null, looping = true, holdX = 0, holdY = 0;
+    let state = 'building', start = null, paused = 0, hiddenAt = null, last = null, looping = true, holdX = 0, holdY = 0, holdId = null;
+    let inView = fig.__inView !== false;
     document.addEventListener('visibilitychange', () => {
       if (document.hidden) hiddenAt = performance.now();
       else if (hiddenAt !== null) { paused += performance.now() - hiddenAt; hiddenAt = null; }
+      last = null;                                                     // no jump in the turn after a hidden tab
     });
     function frame(now) {
       if (start === null) start = now;
@@ -143,25 +148,30 @@
         if (w >= whiteFrom) { ctx.strokeStyle = '#fff'; ctx.lineWidth = w; ctx.stroke(); }
       }
       ctx.globalAlpha = 1;
+      if (!inView && state !== 'building') { looping = false; return; }   // scrolled away: the turn waits, no frames
       looping = state !== 'still';
       if (state === 'still') return;
       requestAnimationFrame(frame);
     }
     const kick = () => { if (!looping) { looping = true; last = null; requestAnimationFrame(frame); } };
+    fig.__wake = on => { inView = on; if (on) kick(); };
+    const release = () => { if (state !== 'held') return; state = 'still'; holdId = null; canvas.style.cursor = 'grab'; kick(); };
     canvas.addEventListener('pointerdown', e => {
       if (state === 'building') return;                              // the erection is never interrupted
-      state = 'held'; holdX = e.clientX; holdY = e.clientY; canvas.style.cursor = 'grabbing';
+      if (e.pointerType === 'mouse' && e.button !== 0) return;
+      if (state === 'held') { release(); return; }                    // a second finger ends the hold; it never steers
+      state = 'held'; holdId = e.pointerId; holdX = e.clientX; holdY = e.clientY; canvas.style.cursor = 'grabbing';
       try { canvas.setPointerCapture(e.pointerId); } catch (err) { /* capture is a courtesy */ }
       kick();
     });
     canvas.addEventListener('pointermove', e => {
-      if (state !== 'held') return;
+      if (state !== 'held' || e.pointerId !== holdId) return;
       az -= (e.clientX - holdX) * DRAG_AZ; el = clampEl(el + (e.clientY - holdY) * DRAG_EL);
       holdX = e.clientX; holdY = e.clientY; kick();
     });
-    const release = () => { if (state !== 'held') return; state = 'still'; canvas.style.cursor = 'grab'; kick(); };
-    canvas.addEventListener('pointerup', release);
-    canvas.addEventListener('pointercancel', release);               // the browser took the touch for scrolling (touch-action: pan-y)
+    canvas.addEventListener('pointerup', e => { if (e.pointerId === holdId) release(); });
+    canvas.addEventListener('pointercancel', e => { if (e.pointerId === holdId) release(); });   // the browser took the touch for scrolling or a pinch
+    canvas.addEventListener('lostpointercapture', e => { if (e.pointerId === holdId) release(); });
     requestAnimationFrame(frame);
   }
 })();
