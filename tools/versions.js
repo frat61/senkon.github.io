@@ -22,8 +22,7 @@ const LINKS = {
   'assets/senkon/logo-sketch.js': ['assets/senkon/logo-sketch.js'],
   'assets/senkon/track.js': ['assets/senkon/track.js'],                         // Google tag, consent bar, conversions, contact form
   'assets/senkon/skyline.webp': ['assets/senkon/skyline.webp', 'assets/senkon/skyline.json'],
-  'assets/senkon/esenboga.webp': ['assets/senkon/esenboga.webp', 'assets/senkon/esenboga.json'],
-  'assets/senkon/hal.js': ['assets/senkon/hal.js'],                             // the steel hall erection in the Deneyim banner
+  'assets/senkon/hal.js': ['assets/senkon/hal.js'],                             // the steel hall erection in the hero
   'assets/senkon/hal.webp': ['assets/senkon/hal.webp', 'assets/senkon/hal.json'],  // its still and the member JSON hal.js fetches with the still's tag
   'assets/senkon/surec.js': ['assets/senkon/surec.js'],                         // the story on deprem-performans/ only
   'assets/senkon/surec/01.webp': ['assets/senkon/surec/01.webp'],

@@ -13,13 +13,16 @@ test('hero has no eyebrow (the logo already names the firm)', () => {
   assert.doesNotMatch(hero(), /class="eyebrow"/);
 });
 
-test('Esenboğa animation sits in the hero media slot', () => {
+test('the steel hall erection sits in the hero media slot, drawn by hal.js from hal.json', () => {
   assert.match(hero(), /class="hero-media"/);
-  assert.match(hero(), /data-skyline="assets\/senkon\/esenboga\.json"/);
+  assert.match(hero(), /<figure class="hall hero-figure"[^>]*data-hall="assets\/senkon\/hal\.json"[^>]*data-speed="1.4"/);
+  assert.match(html, /<script src="assets\/senkon\/hal\.js\?v=[0-9a-f]{8}" defer><\/script>/);
+  assert.match(css, /\.hall-stage\{/);
 });
 
-test('Esenboğa is animated only once on the page', () => {
-  assert.equal(html.split('esenboga.json').length - 1, 1);
+test('the hall is animated only once on the page, and the Esenboğa tower is off the page', () => {
+  assert.equal(html.split('hal.json').length - 1, 1);
+  assert.doesNotMatch(html, /esenboga\.(json|webp)/);
 });
 
 test('Deneyim is a banner: the figure, six still building types, and the cleared project names sliding, never Amazon', () => {
@@ -40,25 +43,28 @@ test('the sliding names stop for visitors who ask for less motion, and pause on 
 
 const css = fs.readFileSync(path.join(__dirname, '..', 'site.css'), 'utf8');
 
-test('hero figure rule beats the generic .skyline margin and padding', () => {
-  assert.match(css, /\.skyline\.hero-figure\{[^}]*padding:0/);
+test('hero figure rule beats the generic figure margin and padding', () => {
+  assert.match(css, /\.hall\.hero-figure\{[^}]*padding:0/);
 });
 
 test('the hero picture loads eagerly: it is on the first screen on every device', () => {
-  assert.doesNotMatch(hero(), /<img class="skyline-static"[^>]*loading="lazy"/);
+  assert.doesNotMatch(hero(), /<img class="hall-static"[^>]*loading="lazy"/);
+  assert.match(hero(), /<img class="hall-static" src="assets\/senkon\/hal\.webp\?v=[0-9a-f]{8}"/);
 });
 
-test('on phones the tower shows above the headline, narrower', () => {
+test('on phones the hall shows above the headline, narrower', () => {
   const phone = css.match(/@media \(max-width:860px\)\{([^\n]*)\}/)[1];
   assert.doesNotMatch(phone, /\.hero-media\{[^}]*display:none/);
   assert.match(phone, /\.hero-media\{[^}]*order:-1/);
-  assert.match(phone, /\.hero-figure\{[^}]*max-width:240px/);
+  assert.match(phone, /\.hero-figure\{[^}]*max-width:300px/);
+  assert.match(css, /\.hall\.hero-figure\{[^}]*max-width:400px/);
 });
 
-test('both build animations run 1.4 times faster, through data-speed that skyline.js reads', () => {
-  assert.match(hero(), /<figure class="skyline hero-figure"[^>]*data-speed="1.4"/);
+test('both build animations run 1.4 times faster, through data-speed that hal.js and skyline.js read', () => {
+  assert.match(hero(), /<figure class="hall hero-figure"[^>]*data-speed="1.4"/);
   assert.match(html, /<figure id="skyline"[^>]*data-speed="1.4"/);
   assert.match(fs.readFileSync(path.join(__dirname, '..', 'assets', 'senkon', 'skyline.js'), 'utf8'), /data-speed/);
+  assert.match(fs.readFileSync(path.join(__dirname, '..', 'assets', 'senkon', 'hal.js'), 'utf8'), /data-speed/);
 });
 
 // service switcher: four buttons under the text swap the headline and paragraph above them
@@ -135,14 +141,10 @@ test('skyline.js reads data-stagger, the seconds between neighbouring starts, so
   assert.match(js, /data-stagger/);
 });
 
-test('the steel hall erection sits in the Deneyim banner, once, drawn by hal.js from hal.json', () => {
-  const d = deneyim();
-  assert.match(d, /<figure class="hall xp-figure"[^>]*data-hall="assets\/senkon\/hal\.json"[^>]*data-speed="1.4"/);
-  assert.match(d, /<img class="hall-static" src="assets\/senkon\/hal\.webp\?v=[0-9a-f]{8}"[^>]*loading="lazy"/);
-  assert.equal(html.split('hal.json').length - 1, 1);
-  assert.doesNotMatch(d, /data-skyline/);
-  assert.match(html, /<script src="assets\/senkon\/hal\.js\?v=[0-9a-f]{8}" defer><\/script>/);
-  assert.match(css, /\.hall-stage\{/);
+test('the Deneyim banner is text only again: no figure, three columns of types', () => {
+  assert.doesNotMatch(deneyim(), /<figure/);
+  assert.match(css, /\.xp-types\{[^}]*grid-template-columns:repeat\(3,minmax\(0,1fr\)\)/);
+  assert.doesNotMatch(css, /\.xp-figure/);
 });
 
 test('hal.js fails quietly, waits for both the JSON and the view, and never draws unstarted pieces', () => {
