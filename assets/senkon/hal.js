@@ -1,11 +1,12 @@
 /* Erection animation for the steel hall: every <figure data-hall="…json"> erects Fırat's lattice-column hall
    piece by piece on a canvas over the still picture, once per page load, then leaves the finished
    drawing. The JSON (written by tools/make-hall.js from the viewer's GLB) holds the members as projected
-   lines [x1, y1, x2, y2, width px, depth], the erection pieces (towers, posts, floor bays, roof truss
-   lines, roof bays) with their member indices, the site order of the pieces and the members' far-to-near
-   order. The picture is cut into LANES vertical zones that assemble at once, each zone's pieces one after
+   members [x1, y1, z1, x2, y2, z2, width m] with the camera and its framing, the erection pieces (towers, posts, floor bays, roof truss
+   lines, roof bays) with their member indices and the site order of the pieces. The picture is cut into LANES vertical zones that assemble at once, each zone's pieces one after
    another in site order, swinging down from above the zone like crane loads; the whole erection takes
-   TOTAL seconds at speed 1 (data-speed runs it faster). Members are painted far to near, an ink stroke under a
+   TOTAL seconds at speed 1 (data-speed runs it faster). The members come in metres (format 2) and are
+   projected every frame, so once the last piece lands the hall turns slowly by itself and the visitor can
+   drag it to turn and tilt it; the first touch stops the turning for good. Members are painted far to near, an ink stroke under a
    white one, so the front hides the back like a line drawing; farther members fade a little. Without
    JavaScript, with reduced motion, or if anything fails, the still picture simply shows.
    Spec: docs/superpowers/specs/2026-10-14-hall-erection-design.md */
@@ -41,6 +42,7 @@
   const OVERLAP = 1.4;                         // a lane's next piece starts when the previous one is 1/OVERLAP of the way in
   const SWING_X = 0.35, SWING_Y = -0.3, LIFT = 0.08;   // how far off a piece starts, as fractions of the canvas, and the arc's rise
   const INK = '#3a3f44', A_NEAR = 0.95, A_FAR = 0.45, W_MIN = 1.2, W_MAX = 6;   // widths in the picture's pixels (1500 wide), as in the still
+  const TURN = 60, DRAG_AZ = 0.006, DRAG_EL = 0.005;   // seconds per revolution after the erection; radians per dragged pixel
   const ease = p => p < 0.5 ? 4 * p * p * p : 1 - Math.pow(-2 * p + 2, 3) / 2;   // ease in and out
 
   document.querySelectorAll('figure[data-hall]').forEach(fig => {
@@ -60,6 +62,7 @@
   });
 
   function run(fig, stage, data, speed) {
+    if (data.v !== 2 || !data.cam || !data.members || !data.pieces || !data.order) return;   // an old or odd file: the still stays
     const dpr = Math.min(window.devicePixelRatio || 1, 2);
     const cssW = stage.clientWidth || data.w, k = cssW * dpr / data.w;
     const canvas = document.createElement('canvas');
@@ -68,56 +71,97 @@
     if (!ctx) return;
     stage.appendChild(canvas); fig.setAttribute('data-live', '1');
 
-    const M = data.members, pieces = data.pieces, order = data.order, depthOrder = data.depthOrder;
+    const M = data.members, pieces = data.pieces, order = data.order, N = M.length, W = data.w, H = data.h;
+    const cam = { eye: data.cam.eye.slice(), at: data.cam.at, focal: data.cam.focal, s: data.cam.s, dx: data.cam.dx, dy: data.cam.dy };
+    const sph = spherical(cam.eye, cam.at), dist = sph.dist;
+    let az = sph.az, el = sph.el;
+
+    // the current view: every member projected to canvas pixels, sorted far to near
+    const px1 = new Float32Array(N), py1 = new Float32Array(N), px2 = new Float32Array(N), py2 = new Float32Array(N);
+    const depth = new Float32Array(N), width = new Float32Array(N), idx = new Int32Array(N);
+    for (let i = 0; i < N; i++) idx[i] = i;
+    let dMin = 0, dMax = 1;
+    function view() {
+      cam.eye = eyeAt(cam.at, dist, az, el);
+      const b = basis(cam); dMin = Infinity; dMax = -Infinity;
+      for (let i = 0; i < N; i++) {
+        const m = M[i], a = project(m, cam, W, H, b), c = project([m[3], m[4], m[5]], cam, W, H, b);
+        px1[i] = a[0] * k; py1[i] = a[1] * k; px2[i] = c[0] * k; py2[i] = c[1] * k;
+        depth[i] = (a[2] + c[2]) / 2;
+        width[i] = Math.max(W_MIN, Math.min(W_MAX, widthPx(m[6], depth[i], cam, W))) * k;   // picture px scaled by k, as in the still
+        if (depth[i] < dMin) dMin = depth[i]; if (depth[i] > dMax) dMax = depth[i];
+      }
+      idx.sort((i, j) => depth[j] - depth[i]);
+    }
+    view();                                                            // the default view, for the lanes below
+
     // five work fronts: the picture is cut into LANES vertical zones; each zone erects its own pieces in site order,
     // one after another, all zones finishing together at TOTAL; a piece swings in from above its zone, leaning in from the outside
-    const pieceOf = new Int32Array(M.length), lane = new Int32Array(pieces.length), startAt = new Float64Array(pieces.length), flyOf = new Float64Array(pieces.length);
+    const pieceOf = new Int32Array(N), lane = new Int32Array(pieces.length), startAt = new Float64Array(pieces.length), flyOf = new Float64Array(pieces.length);
     pieces.forEach((p, pi) => {
-      let sx = 0; p.m.forEach(i => { pieceOf[i] = pi; sx += M[i][0] + M[i][2]; });
-      lane[pi] = Math.min(LANES - 1, Math.floor(sx / (2 * p.m.length) / data.w * LANES));
+      let sx = 0; p.m.forEach(i => { pieceOf[i] = pi; sx += px1[i] + px2[i]; });
+      lane[pi] = Math.min(LANES - 1, Math.max(0, Math.floor(sx / (2 * p.m.length) / canvas.width * LANES)));
     });
     const count = new Int32Array(LANES); order.forEach(pi => { count[lane[pi]]++; });
     const pos = new Int32Array(LANES);
     order.forEach(pi => { const l = lane[pi], n = count[l], step = TOTAL / (n - 1 + OVERLAP); startAt[pi] = pos[l] * step; flyOf[pi] = step * OVERLAP; pos[l]++; });
     const swingX = SWING_X * canvas.width, swingY = SWING_Y * canvas.height, lift = LIFT * canvas.height;
     const sideOf = l => (l - (LANES - 1) / 2) / ((LANES - 1) / 2);     // -1 at the left edge, +1 at the right, 0 in the middle
-    let dMin = Infinity, dMax = -Infinity;
-    M.forEach(m => { dMin = Math.min(dMin, m[5]); dMax = Math.max(dMax, m[5]); });
-    // widths live in the picture's own pixels (the still is drawn with the same clamps), so they scale with the canvas by k, never by dpr alone
-    const alphaOf = m => A_NEAR - (A_NEAR - A_FAR) * (m[5] - dMin) / (dMax - dMin || 1);
-    const widthOf = m => Math.max(W_MIN, Math.min(W_MAX, m[4])) * k;
-    const alpha = new Float32Array(M.length), width = new Float32Array(M.length);
-    M.forEach((m, i) => { alpha[i] = alphaOf(m); width[i] = widthOf(m); });
     const border = 1.5 * k, whiteFrom = 2 * k;
-    const started = new Uint8Array(M.length), progress = new Float64Array(pieces.length);
+    const started = new Uint8Array(N), progress = new Float64Array(pieces.length);
     ctx.lineCap = 'butt';
 
-    let start = null, paused = 0, hiddenAt = null;
+    // states: building (the erection, view fixed) -> turning (slow orbit) -> held (dragging) -> still (idle, no frames)
+    let state = 'building', start = null, paused = 0, hiddenAt = null, last = null, looping = true, holdX = 0, holdY = 0;
     document.addEventListener('visibilitychange', () => {
       if (document.hidden) hiddenAt = performance.now();
       else if (hiddenAt !== null) { paused += performance.now() - hiddenAt; hiddenAt = null; }
     });
     function frame(now) {
       if (start === null) start = now;
-      if (document.hidden) { requestAnimationFrame(frame); return; }
-      const t = (now - start - paused) / 1000 * speed;
+      if (document.hidden) { last = null; requestAnimationFrame(frame); return; }
+      let t = TOTAL + 1;
+      if (state === 'building') {
+        t = (now - start - paused) / 1000 * speed;
+        if (t >= TOTAL + 0.1) { state = 'turning'; fig.setAttribute('data-done', '1'); canvas.style.cursor = 'grab'; }
+      }
+      if (state === 'turning' && last !== null) az += 2 * Math.PI / TURN * (now - last) / 1000;
+      last = now;
+      if (state !== 'building') view();
       for (let pi = 0; pi < pieces.length; pi++) progress[pi] = Math.min(Math.max((t - startAt[pi]) / flyOf[pi], 0), 1);
-      for (let i = 0; i < M.length; i++) started[i] = t >= startAt[pieceOf[i]] ? 1 : 0;
+      for (let i = 0; i < N; i++) started[i] = t >= startAt[pieceOf[i]] ? 1 : 0;
       ctx.clearRect(0, 0, canvas.width, canvas.height);
-      for (let q = 0; q < depthOrder.length; q++) {
-        const i = depthOrder[q];
+      const dRange = dMax - dMin || 1;
+      for (let q = 0; q < N; q++) {
+        const i = idx[q];
         if (!started[i]) continue;                                   // nothing shows through from the future
-        const m = M[i], pi = pieceOf[i], p = progress[pi], e = ease(p);
+        const pi = pieceOf[i], p = progress[pi], e = ease(p);
         const dx = sideOf(lane[pi]) * swingX * (1 - e), dy = swingY * (1 - e) - lift * Math.sin(Math.PI * p);   // the swing: down from above its zone, leaning in from the outside
-        const w = width[i];
-        ctx.globalAlpha = alpha[i] * Math.min(1, 0.15 + p * 2.5); ctx.strokeStyle = INK; ctx.lineWidth = w + border;
-        ctx.beginPath(); ctx.moveTo(m[0] * k + dx, m[1] * k + dy); ctx.lineTo(m[2] * k + dx, m[3] * k + dy); ctx.stroke();
+        const w = width[i], alpha = A_NEAR - (A_NEAR - A_FAR) * (depth[i] - dMin) / dRange;
+        ctx.globalAlpha = alpha * Math.min(1, 0.15 + p * 2.5); ctx.strokeStyle = INK; ctx.lineWidth = w + border;
+        ctx.beginPath(); ctx.moveTo(px1[i] + dx, py1[i] + dy); ctx.lineTo(px2[i] + dx, py2[i] + dy); ctx.stroke();
         if (w >= whiteFrom) { ctx.strokeStyle = '#fff'; ctx.lineWidth = w; ctx.stroke(); }
       }
       ctx.globalAlpha = 1;
-      if (t < TOTAL + 0.1) requestAnimationFrame(frame);
-      else fig.setAttribute('data-done', '1');
+      looping = state !== 'still';
+      if (state === 'still') return;
+      requestAnimationFrame(frame);
     }
+    const kick = () => { if (!looping) { looping = true; last = null; requestAnimationFrame(frame); } };
+    canvas.addEventListener('pointerdown', e => {
+      if (state === 'building') return;                              // the erection is never interrupted
+      state = 'held'; holdX = e.clientX; holdY = e.clientY; canvas.style.cursor = 'grabbing';
+      try { canvas.setPointerCapture(e.pointerId); } catch (err) { /* capture is a courtesy */ }
+      kick();
+    });
+    canvas.addEventListener('pointermove', e => {
+      if (state !== 'held') return;
+      az -= (e.clientX - holdX) * DRAG_AZ; el = clampEl(el + (e.clientY - holdY) * DRAG_EL);
+      holdX = e.clientX; holdY = e.clientY; kick();
+    });
+    const release = () => { if (state !== 'held') return; state = 'still'; canvas.style.cursor = 'grab'; kick(); };
+    canvas.addEventListener('pointerup', release);
+    canvas.addEventListener('pointercancel', release);               // the browser took the touch for scrolling (touch-action: pan-y)
     requestAnimationFrame(frame);
   }
 })();

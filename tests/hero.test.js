@@ -161,7 +161,19 @@ test('hal.js fails quietly, waits for both the JSON and the view, and never draw
 
 test('hal.js scales line widths with the canvas, so the final frame matches the still at any figure size', () => {
   const js = fs.readFileSync(path.join(__dirname, '..', 'assets', 'senkon', 'hal.js'), 'utf8');
-  assert.match(js, /Math\.max\(W_MIN, Math\.min\(W_MAX, m\[4\]\)\) \* k/);   // data px -> canvas px, never by dpr alone
+  assert.match(js, /Math\.max\(W_MIN, Math\.min\(W_MAX, widthPx\([^)]*\)\)\) \* k/);   // picture px -> canvas px, never by dpr alone
   assert.match(js, /1\.5 \* k/);                                                  // the ink border too
-  assert.doesNotMatch(js, /W_MAX, m\[4\]\)\) \* dpr/);
+  assert.doesNotMatch(js, /W_MAX, widthPx\([^)]*\)\)\) \* dpr/);
 });
+test('hal.js turns the hall after the erection and lets the visitor drag it, without stealing vertical swipes', () => {
+  const js = fs.readFileSync(path.join(__dirname, '..', 'assets', 'senkon', 'hal.js'), 'utf8');
+  assert.match(js, /const TURN = 60/);
+  assert.match(js, /data\.v !== 2/);                                   // old files leave the still
+  assert.match(js, /addEventListener\('pointerdown'/);
+  assert.match(js, /addEventListener\('pointercancel'/);
+  assert.match(js, /if \(state === 'building'\) return;/);             // a drag never interrupts the erection
+  assert.match(js, /if \(state === 'still'\) return;/);                // no frame loop while idle
+  assert.match(css, /\.hall-stage canvas\{[^}]*touch-action:pan-y/);
+  assert.match(hero(), /aria-label="Endüstriyel çelik yapının taşıyıcı sisteminin montaj animasyonu; sürükleyerek döndürülebilir"/);
+});
+
