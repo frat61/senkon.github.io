@@ -30,7 +30,8 @@ test('Deneyim is a banner: the figure, six still building types, and the cleared
   assert.match(d, /<b>400\.000\+ m²<\/b>/);
   const types = [...d.matchAll(/<li><b>\d\d<\/b>([^<]+)<\/li>/g)].map(m => m[1]);
   assert.deepEqual(types, ['Havalimanı ve ulaşım', 'Endüstriyel', 'Ticari', 'Konut ve ofis', 'Bina değerlendirme', 'Güçlendirme']);
-  for (const name of ['Esenboğa Havalimanı Kontrol Kulesi', 'Koç Üniversitesi', 'Antalya', 'Malatya', 'Vem', 'Biem', 'Alfraganus', 'Karmall', 'Tuzla']) assert.match(d, new RegExp(name));
+  for (const name of ['Esenboğa Havalimanı Kontrol Kulesi', 'Koç Üniversitesi', 'Antalya', 'Vem', 'Biem', 'Alfraganus', 'Karmall', 'Tuzla']) assert.match(d, new RegExp(name));
+  assert.doesNotMatch(d, /Malatya/);   // removed by Fırat on 2026-10-14
   assert.match(d, /<ul class="xp-list" aria-hidden="true">/);   // the loop's second copy is hidden from screen readers
   assert.doesNotMatch(d, /Amazon/);
   assert.doesNotMatch(d, /GVN|Yapı Akademisi|Referanslar/);   // the note under the banner was removed
