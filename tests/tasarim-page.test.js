@@ -43,12 +43,12 @@ test('written, not listed: no eyebrows, no numbered items, no checklist box, no 
 test('the two arguments, side by side and in this order, with linear and nonlinear named', () => {
   assert.deepEqual(h2s.slice(0, 2), ['Optimize çözümler', 'İleri mühendislik çözümleri']);
   assert.match(html, /<div class="mv tsr-two">/);
-  assert.match(html, /Lineer ve nonlineer çözümleri/);
+  assert.match(html, /Lineer ve nonlineer çözümler /);
 });
 
 test('optimisation never reads as saving on safety (Fırat): no "en az malzeme", the codes are the fixed floor', () => {
   assert.doesNotMatch(html, /en az malzeme/i);
-  assert.match(html, /yönetmeliğin istediği güvenliği sabit tutup/);
+  assert.match(html, /yönetmeliklerin öngördüğü güvenlik düzeyi değişmeksizin/);
 });
 
 test('what we design, in a sentence: industrial, housing and commercial, airport and transport; no platform-and-roof line', () => {
