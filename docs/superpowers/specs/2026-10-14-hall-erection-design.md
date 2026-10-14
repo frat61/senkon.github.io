@@ -159,3 +159,24 @@ the outside edge (full lean at the edge zones, straight down in the middle). The
 ## 10. Superseded in part
 
 `2026-10-14-hall-rotate-design.md` (same day) replaces the data file with format 2 (members in metres, camera and framing) and moves the projection into the runtime, so the hall can be turned after the erection. Sections 3 step 8–9 and 5 describe the older format.
+
+## 11. Revision 2026-10-14, the roof as big pieces
+
+Fırat: the roof took too long. Measured: the roof was 210 of the 536 pieces (110 truss segments of under three
+members each, 100 bracing strips) but a quarter of the drawing, and every piece in a work front gets the same slice of
+time, so the roof filled the last 40 % of the erection, about 7 of the 18 s on the page, as a rain of tiny segments.
+Changed, with his yes (option 1 of three: big roof pieces at the same tempo; the others were time weights per piece
+kind, or simply a higher speed):
+
+- **Roof pieces are whole again.** A roof truss line is one piece, `roof {x}` (11 lines), and the purlins and roof bracing
+  of one bay are one piece, `roofx {x}` (10 bays), lifted in one like the towers. Towers, posts and floor pieces are
+  unchanged (347 pieces in all). `order` sorts the roof by x line, then the bracing by bay.
+- **Same tempo, shorter erection.** `TOTAL` goes from 25 s to 15 s, which keeps the busiest work front's step at about
+  0.14 s a piece (its count fell from 181 to 109), so the towers and floors arrive at the pace they did; the roof now
+  lands in the last second or two. On the page at speed 1.4 the erection takes about 11 s instead of 18.
+- **Big pieces swing in longer.** A piece's span is the larger of its projected width and height as a fraction of the
+  canvas; a piece spanning more than `SPAN = 0.3` flies for `step × OVERLAP × span / SPAN` instead of `step × OVERLAP`,
+  so a 96 m truss (span about 0.5) swings in about 1.6 times as long as a floor bay. The tall towers (span up to 0.5)
+  get the same treatment. The erection ends, and the turn begins, when the last piece has landed (`end`, the latest
+  `startAt + flyOf`), not at `TOTAL`, since a late big piece lands a little after it. The timeline is `schedule()` in
+  `hal.js`, exported and tested in `tests/hall-runtime.test.js`.
