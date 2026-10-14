@@ -184,7 +184,7 @@ test('hal.js stops turning off screen, keeps pinch-zoom, and follows one finger 
   assert.match(js, /holdId/);                                          // a second finger never steers
   assert.match(js, /addEventListener\('lostpointercapture'/);
   assert.match(css, /\.hall-stage canvas\{[^}]*touch-action:pan-y pinch-zoom/);
-  assert.match(js, /const IDLE = 4/);                                  // the turn resumes 4 s after the visitor lets go
+  assert.match(js, /IDLE = 4;/);                                  // the turn resumes 4 s after the visitor lets go
   assert.match(js, /resumeTimer = setTimeout/);
 });
 
