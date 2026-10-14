@@ -32,24 +32,36 @@ test('widthPx scales a width in metres by the focal factor, the depth and the fr
   assert.ok(Math.abs(R.widthPx(1, 100, { focal: 2, s: 0.5 }, 1500) - 7.5) < 1e-9);
 });
 
-test("schedule: a lane's pieces come every step, each flies OVERLAP steps, the last lands at TOTAL", () => {
-  const T = { TOTAL: 10, LANES: 2, OVERLAP: 1.4, SPAN: 0.3 };
-  const s = R.schedule([0, 1, 2, 3], [0, 0, 0, 1], [0.1, 0.1, 0.1, 0.1], T);
-  const step = 10 / (3 - 1 + 1.4);
-  assert.ok(Math.abs(s.startAt[1] - step) < 1e-9 && Math.abs(s.startAt[2] - 2 * step) < 1e-9);
-  assert.ok(Math.abs(s.flyOf[0] - step * 1.4) < 1e-9);
-  assert.ok(Math.abs(s.startAt[2] + s.flyOf[2] - 10) < 1e-9);          // the lane's last piece lands at TOTAL
-  assert.equal(s.startAt[3], 0); assert.ok(Math.abs(s.flyOf[3] - 10) < 1e-9);   // a lone piece takes the whole time
-  assert.ok(Math.abs(s.end - 10) < 1e-9);
+// a hall of two members at the default camera: a short beam at the target and a 100 m chord along x, left of centre
+const DATA = { v: 3, w: 1500, h: 1125, cam: { eye: [-70, 40, 130], at: [50, -16, 5], focal: 1.85, s: 1, dx: 0, dy: 0 },
+  members: [[50, -16, 5, 51, -16, 5, 0.2], [-60, -16, 5, 40, -16, 5, 0.3]],
+  pieces: [{ t: 'tower', k: {}, m: [0], at: 0 }, { t: 'roof', k: {}, m: [1], at: 3 }] };
+
+test('timeline: crew slots become seconds, TOTAL / (last slot + OVERLAP) a slot, the last slot landing at TOTAL', () => {
+  const tl = R.timeline(DATA), step = R.T.TOTAL / (3 + R.T.OVERLAP);
+  assert.ok(Math.abs(tl.step - step) < 1e-9);
+  assert.equal(tl.startAt[0], 0); assert.ok(Math.abs(tl.startAt[1] - 3 * step) < 1e-9);
+  assert.ok(Math.abs(tl.flyOf[0] - step * R.T.OVERLAP) < 1e-9);          // a small piece: the usual swing
 });
 
-test('schedule: a piece spanning more than SPAN of the canvas swings in longer, in proportion, and the erection ends when it lands', () => {
-  const T = { TOTAL: 10, LANES: 1, OVERLAP: 1.4, SPAN: 0.3 };
-  const s = R.schedule([0, 1, 2], [0, 0, 0], [0.1, 0.3, 0.6], T);
-  const step = 10 / (3 - 1 + 1.4);
-  assert.ok(Math.abs(s.flyOf[0] - step * 1.4) < 1e-9 && Math.abs(s.flyOf[1] - step * 1.4) < 1e-9);   // small and just-at-SPAN pieces: the usual swing
-  assert.ok(Math.abs(s.flyOf[2] - step * 1.4 * 2) < 1e-9);               // twice SPAN: twice the swing
-  assert.ok(Math.abs(s.end - (2 * step + step * 1.4 * 2)) < 1e-9);       // later than TOTAL by the extra swing
+test('timeline: a piece spanning more than SPAN of the canvas swings in longer, in proportion, and the erection ends when it lands', () => {
+  const tl = R.timeline(DATA), step = R.T.TOTAL / (3 + R.T.OVERLAP);
+  const b = R.basis(DATA.cam), x0 = R.project([-60, -16, 5], DATA.cam, 1500, 1125, b)[0], x1 = R.project([40, -16, 5], DATA.cam, 1500, 1125, b)[0];
+  const span = (x1 - x0) / 1500;
+  assert.ok(span > R.T.SPAN, 'the chord is a big piece in the picture');
+  assert.ok(Math.abs(tl.flyOf[1] - step * Math.min(R.T.FLY_MAX, R.T.OVERLAP * span / R.T.SPAN)) < 1e-9);
+  assert.ok(tl.flyOf[1] > tl.flyOf[0] && tl.flyOf[1] <= step * R.T.FLY_MAX + 1e-9);   // longer, never past the tool's landing wait
+  assert.ok(Math.abs(tl.end - (3 * step + tl.flyOf[1])) < 1e-9);          // later than TOTAL by the extra swing
+});
+
+test('the runtime never lets a piece fly longer than the tool waits for a dependency to land', () => {
+  assert.equal(R.T.FLY_MAX, require('../tools/make-hall.js').LAND);
+});
+
+test('timeline: side says where a piece stands in the picture, so it leans in from its own side', () => {
+  const tl = R.timeline(DATA);
+  assert.ok(Math.abs(tl.side[0]) < 0.01);                                  // at the target: the middle, straight down
+  assert.ok(tl.side[1] < 0 && tl.side[1] >= -1);                           // left of centre
 });
 
 const fs = require('fs'), path = require('path');

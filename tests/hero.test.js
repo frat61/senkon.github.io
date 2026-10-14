@@ -154,11 +154,11 @@ test('hal.js fails quietly, waits for both the JSON and the view, and never draw
   assert.match(js, /\.catch\(\(\) => \{\}\)/);
   assert.match(js, /prefers-reduced-motion: reduce/);
   assert.match(js, /IntersectionObserver/);
-  assert.match(js, /const TOTAL = 15, LANES = 5/);          // five work fronts assemble at once, 15 s in all at speed 1: the 25 s tempo with the roof as 21 pieces
-  assert.match(js, /const SPAN = 0\.3/);                     // the big roof pieces swing in longer
-  assert.match(js, /SWING_X = 0\.35, SWING_Y = -0\.3/);   // pieces swing in from above their zone, no hook lines
+  assert.match(js, /const TOTAL = 15, OVERLAP = 1\.4, SPAN = 0\.3/);   // 15 s in all at speed 1; the big roof pieces swing in longer
+  assert.match(js, /SWING_X = 0\.35, SWING_Y = -0\.3/);   // pieces swing in from above, leaning in from their own side, no hook lines
   assert.doesNotMatch(js, /hook/i);
-  assert.match(js, /lane\[pi\] = /);                                   // each piece belongs to the zone it stands in
+  assert.doesNotMatch(js, /LANES/);                                      // no picture zones: the crew slots in the data file set the order
+  assert.match(js, /timeline\(data\)/);
   assert.match(js, /if \(!started\[/);   // the per-member skip guard in the frame loop
 });
 
@@ -171,7 +171,7 @@ test('hal.js scales line widths with the canvas, so the final frame matches the 
 test('hal.js turns the hall after the erection and lets the visitor drag it, without stealing vertical swipes', () => {
   const js = fs.readFileSync(path.join(__dirname, '..', 'assets', 'senkon', 'hal.js'), 'utf8');
   assert.match(js, /const TURN = 60/);
-  assert.match(js, /data\.v !== 2/);                                   // old files leave the still
+  assert.match(js, /data\.v !== 3/);                                   // old files leave the still
   assert.match(js, /addEventListener\('pointerdown'/);
   assert.match(js, /addEventListener\('pointercancel'/);
   assert.match(js, /if \(state === 'building'\) return;/);             // a drag never interrupts the erection

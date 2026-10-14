@@ -1,10 +1,12 @@
 #!/usr/bin/env node
 'use strict';
 /* The steel hall erection data: turns the viewer's GLB of Fırat's lattice-column hall (gitignored
-   local/hall-ref/model.glb) into assets/senkon/hal.json, the projected member lines grouped into
-   erection pieces in site order that assets/senkon/hal.js draws on the home page (format 2: members in
-   metres with the camera and its framing, so the page can turn the hall after the erection).
-   Spec: docs/superpowers/specs/2026-10-14-hall-erection-design.md.
+   local/hall-ref/model.glb) into assets/senkon/hal.json, the member lines grouped into erection pieces,
+   each with its grid key and the crew slot it goes up in, that assets/senkon/hal.js draws on the home page
+   (format 3: members in metres with the camera and its framing, so the page can turn the hall after the
+   erection). The slots come from a site's logic: what a piece needs in place first (deps), the site priority
+   along the hall (order) and CREWS cranes each taking the first ready piece (schedule); tests/hall-logic.test.js
+   checks the result against the erection rules. Spec: docs/superpowers/specs/2026-10-14-hall-erection-design.md.
      node tools/make-hall.js local/hall-ref/model.glb assets/senkon/hal.json
    Every stage is a pure function, exported for tests/hall-tool.test.js. */
 
@@ -244,20 +246,84 @@ function group(members, grid) {
   return [...pieces.values()];
 }
 
-// ---- site order: towers, posts, floors bottom up bay by bay and strip by strip, roof truss lines, roof bracing by bay
-function order(pieces) {
+// ---- the grid in piece terms: a piece's tower line (index into grid.xs) and the 10 m strip a z sits in; a tower row
+//      sits in one strip, the strip of the floor cells along its near side
+const lineOf = (grid, x) => grid.xs.reduce((best, v, i) => Math.abs(v - x) < Math.abs(grid.xs[best] - x) ? i : best, 0);
+const stripOf = (grid, z) => Math.floor((z - grid.zMin) / 10);
+
+// ---- what must be in place before a piece goes up (spec section 12, the erection rules): a floor piece needs the
+//      towers at its four corners and the floor below it in the same cell; an end-wall post the towers either side of
+//      it; a roof truss line all the towers of its line and every floor piece of the bays either side, so the columns
+//      are tied before they carry it; the purlins and bracing of a bay the trusses either side. A tower needs nothing
+//      under it, but the column front keeps one bay ahead of the floors: a line's towers wait for the floors two bays
+//      back to be complete, so columns go up line by line with the beams right behind them.
+function deps(pieces, grid) {
+  const rowStrip = grid.rows.map(r => stripOf(grid, (r.z0 + r.z1) / 2));
+  const tower = new Map(), roof = new Map(), cell = new Map(), bay = new Map();
+  pieces.forEach((p, i) => {
+    const k = p.key;
+    if (p.t === 'tower') tower.set(rowStrip[k.row] + ',' + lineOf(grid, k.x), i);
+    else if (p.t === 'roof') roof.set(lineOf(grid, k.x), i);
+    else if (p.t === 'floor') {
+      const c = k.x + ',' + k.z; if (!cell.has(c)) cell.set(c, []); cell.get(c).push(i);
+      if (!bay.has(k.x)) bay.set(k.x, []); bay.get(k.x).push(i);
+    }
+  });
+  const towerAt = (s, l) => tower.get(s + ',' + l);
+  return pieces.map(p => {
+    const k = p.key, out = [];
+    if (p.t === 'tower') { const behind = bay.get(lineOf(grid, k.x) - 2); if (behind) out.push(...behind); }
+    else if (p.t === 'post') { const l = lineOf(grid, k.x), s = stripOf(grid, k.z); [s, s + 1].forEach(r => { const t = towerAt(r, l); if (t !== undefined) out.push(t); }); }
+    else if (p.t === 'floor') {
+      [[k.z, k.x], [k.z, k.x + 1], [k.z + 1, k.x], [k.z + 1, k.x + 1]].forEach(([s, l]) => { const t = towerAt(s, l); if (t !== undefined) out.push(t); });
+      const below = cell.get(k.x + ',' + k.z).filter(j => pieces[j].key.level < k.level).sort((a, b) => pieces[b].key.level - pieces[a].key.level)[0];
+      if (below !== undefined) out.push(below);
+    } else if (p.t === 'roof') {
+      const l = lineOf(grid, k.x);
+      tower.forEach((t, sl) => { if (Number(sl.split(',')[1]) === l) out.push(t); });
+      pieces.forEach((q, j) => { if (q.t === 'floor' && (q.key.x === l - 1 || q.key.x === l)) out.push(j); });
+    } else if (p.t === 'roofx') [k.x, k.x + 1].forEach(l => { const r = roof.get(l); if (r !== undefined) out.push(r); });
+    return out.sort((a, b) => a - b);
+  });
+}
+
+// ---- site priority: the columns and the end-wall posts first, line by line along the hall, the towers of a line front
+//      row to back row (deps hold a line back until the floors two bays behind are in); then the rest by the tower line
+//      it is done at: a bay's floors bottom up at its far line, a truss once the line beyond it stands, a bay's roof
+//      bracing once its far truss is in.
+function order(pieces, grid) {
+  const xs = grid.xs, last = xs.length - 1, at = l => xs[Math.min(l, last)];
   const sortKey = p => {
     const k = p.key;
     switch (p.t) {
-      case 'tower': return [0, k.row, k.x, 0];
-      case 'post': return [1, k.x, k.z, 0];
-      case 'floor': return [2, k.level, k.x, k.z];
-      case 'roof': return [3, k.x, 0, 0];
-      default: return [4, k.x, 0, 0];
+      case 'tower': return [0, k.x, 0, k.row];
+      case 'post': return [0, k.x, 1, k.z];
+      case 'floor': return [1, at(k.x + 1), 2, k.level, k.z];
+      case 'roof': return [1, at(lineOf(grid, k.x) + 1), 3, k.x];
+      default: return [1, at(k.x + 2), 4, k.x];
     }
   };
   const keys = pieces.map(sortKey);
   return pieces.map((_, i) => i).sort((i, j) => { const a = keys[i], b = keys[j]; for (let n = 0; n < Math.max(a.length, b.length); n++) { const d = (a[n] || 0) - (b[n] || 0); if (d) return d; } return i - j; });
+}
+
+// ---- the crews: in every slot each of the crews takes the first piece in priority order that is not up yet and whose
+//      dependencies all started at least LAND slots ago: a piece has landed by then, since hal.js never lets one swing in
+//      for more than FLY_MAX = LAND slots. Returns each piece's slot. A cycle in the dependencies can never be placed.
+const CREWS = 5, LAND = 2;
+function schedule(deps, order, crews, land) {
+  const n = deps.length, at = new Array(n).fill(-1);
+  let placed = 0, t = 0;
+  while (placed < n) {
+    let free = crews;
+    for (const pi of order) {
+      if (free === 0) break;
+      if (at[pi] >= 0) continue;
+      if (deps[pi].every(d => at[d] >= 0 && at[d] + land <= t)) { at[pi] = t; placed++; free--; }
+    }
+    if (++t > (n + 1) * (land + 1)) throw new Error('schedule: cannot place every piece (a cycle in the dependencies?)');
+  }
+  return at;
 }
 
 // ---- projection: a fixed perspective camera, canvas pixels; wpx is the member's width at its depth
@@ -303,15 +369,15 @@ function framing(members, camera, margins) {
   return framingOf(project(members, [], [], C).members, C.w, C.h, margins);
 }
 
-// ---- format 2: members in metres with the camera and its framing; the page projects them itself every frame
-function pack(members, pieces, orderIdx, camera) {
+// ---- format 3: members in metres with the camera and its framing (the page projects them itself every frame), and
+//      every piece with its kind, its grid key and the crew slot it goes up in
+function pack(members, pieces, at, camera) {
   const C = camera || CAMERA, f = framing(members, C), r3 = v => Math.round(v * 1000) / 1000;
   return {
-    v: 2, w: C.w, h: C.h,
+    v: 3, w: C.w, h: C.h,
     cam: { eye: C.eye.slice(), at: C.at.slice(), focal: C.focal, s: f.s, dx: f.dx, dy: f.dy },
     members: members.map(m => [r3(m.a[0]), r3(m.a[1]), r3(m.a[2]), r3(m.b[0]), r3(m.b[1]), r3(m.b[2]), r3(m.w)]),
-    pieces: pieces.map(p => ({ t: p.t, m: p.m })),
-    order: orderIdx.slice()
+    pieces: pieces.map((p, i) => ({ t: p.t, k: p.key, m: p.m, at: at[i] }))
   };
 }
 
@@ -325,10 +391,10 @@ function build(buf) {
   const grid = findGrid(bundle(edges));
   const members = splitAtGrid(bundle(edges), grid);
   const pieces = group(members, grid);
-  return pack(members, pieces, order(pieces));
+  return pack(members, pieces, schedule(deps(pieces, grid), order(pieces, grid), CREWS, LAND));
 }
 
-module.exports = { parseGlb, weld, featureEdges, bundle, findGrid, splitAtGrid, group, order, project, fit, framing, pack, build, CAMERA, MARGINS };
+module.exports = { parseGlb, weld, featureEdges, bundle, findGrid, splitAtGrid, group, deps, order, schedule, project, fit, framing, pack, build, CAMERA, MARGINS, CREWS, LAND };
 
 if (require.main === module) {
   const [inFile, outFile] = process.argv.slice(2);
@@ -336,5 +402,6 @@ if (require.main === module) {
   const data = build(fs.readFileSync(inFile));
   const text = JSON.stringify(data);
   fs.writeFileSync(outFile, text);
-  console.log('members ' + data.members.length + ', pieces ' + data.pieces.length + ', bytes ' + Buffer.byteLength(text));
+  const slots = Math.max(...data.pieces.map(p => p.at)) + 1;
+  console.log('members ' + data.members.length + ', pieces ' + data.pieces.length + ', slots ' + slots + ' for ' + CREWS + ' crews, bytes ' + Buffer.byteLength(text));
 }

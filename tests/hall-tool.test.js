@@ -137,10 +137,61 @@ test('group makes a tower of chords plus lacing, floors by level and bay, roof b
   assert.ok(pieces.some(p => p.t === 'roof' && p.key.x === 10 && p.key.z === undefined && p.m.includes(10)));   // a whole truss line, like a tower
   assert.ok(pieces.some(p => p.t === 'roofx' && p.key.x === 0 && p.key.z === undefined && p.m.includes(11)));   // purlins and bracing of a whole bay
   assert.ok(pieces.every(p => p.m.length > 0));
-  const o = H.order(pieces);
+  const o = H.order(pieces, H.findGrid(ms));
   assert.equal(new Set(o).size, pieces.length);
+  assert.equal(o[0], pieces.indexOf(tower0));                       // the near corner tower first
   const types = o.map(i => pieces[i].t);
-  assert.ok(types.lastIndexOf('tower') < types.indexOf('floor') && types.lastIndexOf('floor') < types.indexOf('roof'));
+  assert.ok(types.indexOf('roof') > types.indexOf('floor'));
+});
+
+/* A keyed grid of pieces for the dependency, priority and crew-schedule tests: three tower lines (x = 0, 10, 20)
+   by two rows (strips 0 and 1), floors in the two bays of strip 0 at two levels, a post on line 0, a truss on every
+   line, roof bracing in both bays. Members are not needed: only the keys. */
+const GRID = { xs: [0, 10, 20], rows: [{ z0: -42.9, z1: -39.9 }, { z0: -29.9, z1: -29.9 }], zMin: -42.93, zMax: 53.26 };
+const K = (t, key) => ({ t, key, m: [0] });
+const KEYED = [
+  K('tower', { row: 0, x: 0 }), K('tower', { row: 1, x: 0 }), K('tower', { row: 0, x: 10 }), K('tower', { row: 1, x: 10 }), K('tower', { row: 0, x: 20 }), K('tower', { row: 1, x: 20 }),   // 0-5
+  K('floor', { level: -20, x: 0, z: 0 }), K('floor', { level: -10, x: 0, z: 0 }), K('floor', { level: -20, x: 1, z: 0 }),   // 6-8
+  K('post', { x: 0, z: -34.9 }),                                                                                            // 9
+  K('roof', { x: 0 }), K('roof', { x: 10 }), K('roof', { x: 20 }),                                                           // 10-12
+  K('roofx', { x: 0 }), K('roofx', { x: 1 })];                                                                               // 13-14
+
+test('deps: a floor piece needs its corner towers and the floor below; a post the towers either side; a truss its towers and the floors either side; roof bracing both trusses; a tower line the floors two bays back', () => {
+  const D = H.deps(KEYED, GRID);
+  assert.deepEqual(D[0], []); assert.deepEqual(D[3], []);                 // the first two lines stand on their own
+  assert.deepEqual(D[4], [6, 7]); assert.deepEqual(D[5], [6, 7]);         // line 20 waits for bay 0's floors: the column front keeps one bay ahead
+  assert.deepEqual(D[6], [0, 1, 2, 3]);                                   // floor (-20, bay 0, strip 0): towers rows 0 and 1 on lines 0 and 10
+  assert.deepEqual(D[7], [0, 1, 2, 3, 6]);                                // the level above: the same towers and the floor below
+  assert.deepEqual(D[8], [2, 3, 4, 5]);
+  assert.deepEqual(D[9], [0, 1]);                                         // post at z = -34.9 on line 0: between rows 0 and 1
+  assert.deepEqual(D[10], [0, 1, 6, 7]);                                  // truss on line 0: its towers and bay 0's floors
+  assert.deepEqual(D[11], [2, 3, 6, 7, 8]);                               // line 10: bays 0 and 1
+  assert.deepEqual(D[12], [4, 5, 8]);
+  assert.deepEqual(D[13], [10, 11]); assert.deepEqual(D[14], [11, 12]);
+});
+
+test('order: columns and posts first, line by line; then along the hall floors before the truss before the roof bracing', () => {
+  const o = H.order(KEYED, GRID), pos = i => o.indexOf(i);
+  assert.equal(o[0], 0); assert.equal(o[1], 1);                           // line 0, rows 0 then 1
+  assert.ok(pos(9) > pos(1) && pos(9) < pos(2));                          // the post on line 0 before line 10's towers
+  assert.ok(pos(5) < pos(6));                                             // every tower outranks every floor: the gate in deps holds a line back, not the priority
+  assert.ok(pos(6) < pos(7));                                             // bottom up
+  assert.ok(pos(7) < pos(10));                                            // truss 0 after bay 0's floors
+  assert.ok(pos(8) < pos(11) && pos(11) < pos(13));                       // truss 10 after bay 1, bracing of bay 0 after truss 10
+  assert.equal(o[o.length - 1], 14);
+});
+
+test('schedule: crews take the first ready piece in priority order, a piece is ready LAND slots after its last dependency started', () => {
+  const D = H.deps(KEYED, GRID), o = H.order(KEYED, GRID);
+  const at = H.schedule(D, o, 2, 1);
+  assert.equal(at.length, KEYED.length); assert.ok(at.every(a => Number.isInteger(a) && a >= 0));
+  assert.deepEqual([at[0], at[1]], [0, 0]);                               // two crews: both towers of line 0 in slot 0
+  D.forEach((deps, i) => deps.forEach(j => assert.ok(at[i] >= at[j] + 1, `${i} at ${at[i]} before its dependency ${j} at ${at[j]} + LAND`)));
+  assert.ok(at[9] >= 1 && at[9] <= 2);                                    // the post goes in as soon as its towers are up
+  assert.ok(at[14] === Math.max(...at));                                  // the last bay's roof bracing closes the erection
+  const slow = H.schedule(D, o, 1, 3);                                    // one crew, slow landing: still every piece, still in order
+  D.forEach((deps, i) => deps.forEach(j => assert.ok(slow[i] >= slow[j] + 3)));
+  assert.throws(() => H.schedule([[1], [0]], [0, 1], 1, 1), /cycle/);    // a cycle can never be placed
 });
 
 test('parseGlb takes the mesh name from the nearest named ancestor node, as the viewer converter writes it', () => {
@@ -163,12 +214,12 @@ test('project maps a point in front of the camera inside the canvas, nearer memb
 
 test('the generated hal.json is sane', { skip: !require('fs').existsSync(require('path').join(__dirname, '..', 'assets', 'senkon', 'hal.json')) }, () => {
   const d = JSON.parse(require('fs').readFileSync(require('path').join(__dirname, '..', 'assets', 'senkon', 'hal.json'), 'utf8'));
-  assert.equal(d.v, 2);
+  assert.equal(d.v, 3);
   assert.ok(d.members.length > 2500 && d.members.length < 8000);   // 3,782 from the model; the spec's 4,000 came from an over-split probe
   assert.ok(d.members.every(m => m.length === 7));
   assert.ok(d.cam.s > 0 && d.cam.eye.length === 3);
-  assert.ok(d.pieces.every(p => p.m.length > 0));
-  assert.equal(new Set(d.order).size, d.pieces.length);
+  assert.ok(d.pieces.every(p => p.m.length > 0 && p.k && Number.isInteger(p.at)));
+  assert.equal(d.order, undefined);
   assert.equal(d.depthOrder, undefined);
   assert.ok(d.pieces.filter(p => p.t === 'tower').length >= 20);
   assert.ok(d.pieces.filter(p => p.t === 'roof').length <= 12);     // one piece per truss line: 11 lines
@@ -194,14 +245,14 @@ test('framing returns the scale and offset that fit the default view inside the 
   assert.ok(Math.abs(raw[0] * f.s + f.dx - rows.members[0][0]) < 0.11 && Math.abs(raw[1] * f.s + f.dy - rows.members[0][1]) < 0.11);
 });
 
-test('pack writes format 2: members in metres, the camera with its framing, pieces and order', () => {
+test('pack writes format 3: members in metres, the camera with its framing, pieces with their keys and crew slots', () => {
   const ms = [M([0, -35, -43], [0, 3, -43], 0.3, 'col'), M([0, -20, -41.5], [10, -20, -41.5], 0.2, 'beam')];
-  const d = H.pack(ms, [{ t: 'tower', key: {}, m: [0] }, { t: 'floor', key: {}, m: [1] }], [0, 1]);
-  assert.equal(d.v, 2); assert.equal(d.w, 1500); assert.equal(d.h, 1125);
+  const d = H.pack(ms, [{ t: 'tower', key: { row: 0, x: 0 }, m: [0] }, { t: 'floor', key: { level: -20, x: 0, z: 0 }, m: [1] }], [0, 3]);
+  assert.equal(d.v, 3); assert.equal(d.w, 1500); assert.equal(d.h, 1125);
   assert.deepEqual(d.members[0], [0, -35, -43, 0, 3, -43, 0.3]);
   assert.deepEqual(d.cam.eye, [-70, 40, 130]); assert.equal(d.cam.focal, 1.85); assert.ok(d.cam.s > 0);
-  assert.deepEqual(d.pieces, [{ t: 'tower', m: [0] }, { t: 'floor', m: [1] }]);
-  assert.deepEqual(d.order, [0, 1]);
+  assert.deepEqual(d.pieces, [{ t: 'tower', k: { row: 0, x: 0 }, m: [0], at: 0 }, { t: 'floor', k: { level: -20, x: 0, z: 0 }, m: [1], at: 3 }]);
+  assert.equal(d.order, undefined);
   assert.equal(d.depthOrder, undefined);
 });
 

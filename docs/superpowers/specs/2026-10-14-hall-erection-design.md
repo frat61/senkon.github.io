@@ -180,3 +180,43 @@ kind, or simply a higher speed):
   get the same treatment. The erection ends, and the turn begins, when the last piece has landed (`end`, the latest
   `startAt + flyOf`), not at `TOTAL`, since a late big piece lands a little after it. The timeline is `schedule()` in
   `hal.js`, exported and tested in `tests/hall-runtime.test.js`.
+
+## 12. Revision 2026-10-14, the erection follows a site's logic
+
+Fırat: the column and beam order looked illogical; it is the first thing a customer sees and must be as real as
+possible, with a construction logic test. The five work fronts were vertical strips of the picture, each erecting all
+its columns and then all its beams, at different speeds, so a beam in a fast strip could arrive before the column it
+sits on. Changed, with his yes on the rules:
+
+**The rules** (`tests/hall-logic.test.js`, checked in seconds on the timeline the visitor sees, landing times included):
+
+1. Supported before placed: a floor piece starts only after the towers at its four corners have landed; an end-wall
+   post only after the towers either side of it.
+2. Bottom up: in every cell the levels go in at −25, −15, −5, then 0, each after the one below has landed.
+3. Columns tied before loaded: a roof truss on line x waits for all ten towers of the line and for the floors of the
+   bays on both sides of it to be complete.
+4. Trusses before the roof between them: a bay's purlins and bracing wait for both trusses.
+5. A compact front along the hall: towers go up line by line from x = 0, front row to back row, the first piece the
+   tower at the near corner; a line's towers all start after the line before has started and after the floors two bays
+   back are complete; no tower waits more than 1 s (at speed 1) for its first beam to land; when a line starts, the
+   floors two bays back are complete and the roof trusses three lines back are in; the last piece to land is roof.
+
+**How the data file produces it** (`tools/make-hall.js`; the file is format 3: format 2 plus, per piece, its grid key
+`k` and its crew slot `at`; `order` and the picture zones are gone):
+
+- `deps(pieces, grid)`: what each piece needs in place first, rules 1–4 as dependencies, plus the gate of rule 5: a
+  line's towers depend on every floor piece of the bay two back, so the column front stays one bay ahead of the floors.
+- `order(pieces, grid)`: site priority. Towers and posts first, line by line, a line's towers front row to back row
+  (the gate holds a line back, not the priority); then everything else by the tower line it is done at: a bay's floors
+  bottom up at its far line, a truss once the line beyond it stands, a bay's roof bracing once its far truss is in.
+- `schedule(deps, order, CREWS = 5, LAND = 2)`: five crews, like cranes on a site. In every slot each free crew takes
+  the first piece in priority order whose dependencies all started at least `LAND` slots ago. 111 slots for the 347
+  pieces; the crews are busy while a line's towers and the first floor pieces go up, then thin out while a bay's
+  levels follow each other, which gives the erection a rhythm: ten towers, the beams behind them, the truss, the bracing.
+
+**The runtime** (`assets/senkon/hal.js`): `timeline(data)` turns the slots into seconds: a slot is
+`TOTAL / (last slot + OVERLAP)` so the last slot lands at `TOTAL` (15 s at speed 1, about 11 s on the page); a piece
+swings in for `OVERLAP` slots, a big one longer in proportion to its span but never more than `FLY_MAX = LAND` slots,
+so everything a piece rests on has landed when it starts. A piece leans in from the side of the picture it stands on
+(`side`, −1 at the left edge to +1 at the right) rather than from its zone. `timeline` and the constants are exported
+for the tests. The logic test reads the real data file and skips when it is absent.
