@@ -155,3 +155,7 @@ Fırat: with four or five fronts assembling at once the pieces can be small agai
 into `LANES = 5` vertical zones. Each zone erects its own pieces in site order, the next starting when the previous
 is 1/1.4 of the way in, every zone finishing at `TOTAL`; a piece swings down from above its zone, leaning in from
 the outside edge (full lean at the edge zones, straight down in the middle). The weighted column phase is gone.
+
+## 10. Superseded in part
+
+`2026-10-14-hall-rotate-design.md` (same day) replaces the data file with format 2 (members in metres, camera and framing) and moves the projection into the runtime, so the hall can be turned after the erection. Sections 3 step 8–9 and 5 describe the older format.
