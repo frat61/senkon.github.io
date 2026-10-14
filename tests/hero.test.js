@@ -90,10 +90,11 @@ test('the overview panel is the one shown on load and holds the only h1', () => 
   assert.equal(html.split('<h1').length - 1, 1);
 });
 
-test('every service panel ends with a link onward (Performans to its steps, the others to contact)', () => {
+test('every service panel ends with a link onward (Performans and Yapı tasarımı to their pages, the others to contact)', () => {
   const services = hero().split('<div class="hero-panel" ').slice(1);
   assert.equal(services.length, 4);
-  for (const s of services) assert.match(s, s.startsWith('id="hero-performans"') ? /href="deprem-performans\/"/ : /href="#iletisim"/);
+  const onward = { 'id="hero-performans"': /href="deprem-performans\/"/, 'id="hero-tasarim"': /href="tasarim\/"/ };
+  for (const s of services) assert.match(s, Object.entries(onward).find(([id]) => s.startsWith(id))?.[1] || /href="#iletisim"/);
 });
 
 test('panels share one grid cell so swapping text never moves the buttons', () => {
