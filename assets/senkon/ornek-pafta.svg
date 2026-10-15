@@ -143,59 +143,84 @@
 <text x="20.5" y="238" font-size="2.5" fill="#000" stroke="none">Detaylardaki sistem çizgileri modeldeki eleman eksenleridir.</text>
 </g>
 <g class="pafta-detail">
-<!-- DETAY 1, ölçek 1/10: the head of tower A's inner chord (z = −39.89 in hal.json), where the roof truss
-     meets it. Hand-written. The main view and section A–A are drawn in real millimetres inside scale(0.1)
-     groups: u to the right from the column axis, y = −v (v up from the bottom chord axis, level +35.00).
-     The view is broken between the bottom chord and the cap: the upper band (v 2700…3560) is shifted down
-     by 2240. Top chord axis meets the column axis at v = 3281 (from the model), slope 9.37 % (5.353°);
-     the end diagonal's axis runs from there to the bottom chord 5000 further on (33.27°).
-     Callouts, leaders, weld symbols and dimensions are in sheet millimetres: a point (u, v) of the lower
-     band is at (281 + u/10, 148 − v/10), of the upper band at (281 + u/10, 372 − v/10). -->
+<!-- DETAY 1, ölçek 1/10: the head of tower A's inner chord (z = −39.89 in hal.json), where the roof truss and
+     the tower bracing meet it. Hand-written. The main view is drawn in real millimetres inside a scale(0.1) group:
+     u to the right from the column axis, y = −v (v up from the bottom chord axis, level +35.00). The view is
+     broken between the bottom chord node and the cap: the upper band (v 2710…3560) is shifted down by 2120.
+     From the model: top chord axis meets the column axis at v = 3281, slope 9.37 % (5.353°); the end diagonal
+     runs from there to the bottom chord 5000 further on (33.27°); inside the tower (to the left, outer chord
+     3000 away) the head diagonal comes up from the outer chord at v = 0 into the same point (47.56°), and at the
+     bottom node the head diagonal goes up to the outer chord top (45°) and the lacing down to v = −5000 (59.04°).
+     Callouts, leaders, weld symbols and dimensions are in sheet millimetres: a point (u, v) of the lower band is
+     at (303 + u/10, 157 − v/10), of the upper band at (303 + u/10, 369 − v/10). The groups translate(22 9) and
+     translate(22 −3) hold callouts first written for an earlier placement of the view. -->
 <defs><pattern id="pafta-hatch" width="15" height="15" patternUnits="userSpaceOnUse" patternTransform="rotate(45)"><line x1="0" y1="0" x2="0" y2="15" stroke="#000" stroke-width="1.8"/></pattern></defs>
 
-<g transform="translate(281 148) scale(0.1)" stroke-width="5">
-  <!-- lower band: column HE 500 B, bottom chord HE 400 B with end plates both sides -->
-  <path d="M-250 330V-380M250 330V-380"/>
-  <path d="M-222 330V-380M222 330V-380" stroke-width="2.5"/>
-  <path d="M-275 330H-30l15-30 30 60 15-30H275M-275 -380H-30l15-30 30 60 15-30H275" stroke-width="2.5"/>
+<g transform="translate(303 157) scale(0.1)" stroke-width="5">
+  <!-- lower band: inner tower chord HE 500 B; bottom chord HE 400 B, extended end plate on the span side,
+       flush end plate on the tower side; head diagonal and lacing on corner gussets inside the tower -->
+  <path d="M-250 660V-510M250 660V-510"/>
+  <path d="M-222 660V-510M222 660V-510" stroke-width="2.5"/>
+  <path d="M-275 660H-30l15-30 30 60 15-30H275M-275 -510H-30l15-30 30 60 15-30H275" stroke-width="2.5"/>
   <path d="M-222 -195.5H222V-180.5H-222ZM-222 180.5H222V195.5H-222Z" stroke-width="3.5"/>
-  <path d="M250 -300H275V300H250ZM-250 -300H-275V300H-250Z" stroke-width="3.5"/>
-  <path d="M275 -200H770M275 200H770M-275 -200H-380M-275 200H-380"/>
-  <path d="M275 -176H770M275 176H770M-275 -176H-380M-275 176H-380" stroke-width="2.5"/>
-  <path d="M770 -215V-25l-20 10 40 20-20 10V215M-380 -215V-25l-20 10 40 20-20 10V215" stroke-width="2.5"/>
-  <path fill="#000" stroke="none" d="M275 -200h11l-11 -11zM275 -176h11l-11 11zM275 200h11l-11 11zM275 176h11l-11 -11zM-275 -200h-11l11 -11zM-275 -176h-11l11 11zM-275 200h-11l11 11zM-275 176h-11l11 -11z"/>
+  <path d="M250 -300H275V300H250ZM-250 -220H-275V220H-250Z" stroke-width="3.5"/>
+  <path d="M-275 -200H-468.8V-393.8L-362.7 -499.9L-250 -400V-225H-275Z" stroke-width="3.5"/>
+  <path d="M-275 200H-451.1V563.2L-322.5 640.4L-250 560V225H-275Z" stroke-width="3.5"/>
+  <path d="M275 -200H770M275 200H770M-275 -200H-500M-275 200H-500"/>
+  <path d="M275 -176H770M275 176H770M-275 -176H-500M-275 176H-500" stroke-width="2.5"/>
+  <path d="M770 -215V-25l-20 10 40 20-20 10V215M-500 -215V-25l-20 10 40 20-20 10V215" stroke-width="2.5"/>
+  <path fill="#000" stroke="none" d="M275 -200h11l-11 -11zM275 -176h11l-11 11zM275 200h11l-11 11zM275 176h11l-11 -11zM-275 -176h-11l11 11zM-275 176h-11l11 -11z"/>
   <g stroke-width="2.5">
     <path transform="translate(0 -245)" d="M275 -22h4v44h-4zM279 -20.5h15v41h-15zM279 -10h15M279 10h15M222 -22h-4v44h4zM218 -20.5h-24v41h24zM218 -10h-24M218 10h-24M194 -12h-8v24h8"/>
     <path transform="translate(0 -131)" d="M275 -22h4v44h-4zM279 -20.5h15v41h-15zM279 -10h15M279 10h15M222 -22h-4v44h4zM218 -20.5h-24v41h24zM218 -10h-24M218 10h-24M194 -12h-8v24h8"/>
     <path transform="translate(0 131)" d="M275 -22h4v44h-4zM279 -20.5h15v41h-15zM279 -10h15M279 10h15M222 -22h-4v44h4zM218 -20.5h-24v41h24zM218 -10h-24M218 10h-24M194 -12h-8v24h8"/>
     <path transform="translate(0 245)" d="M275 -22h4v44h-4zM279 -20.5h15v41h-15zM279 -10h15M279 10h15M222 -22h-4v44h4zM218 -20.5h-24v41h24zM218 -10h-24M218 10h-24M194 -12h-8v24h8"/>
     <g transform="scale(-1 1)">
-      <path transform="translate(0 -245)" d="M275 -22h4v44h-4zM279 -20.5h15v41h-15zM279 -10h15M279 10h15M222 -22h-4v44h4zM218 -20.5h-24v41h24zM218 -10h-24M218 10h-24M194 -12h-8v24h8"/>
       <path transform="translate(0 -131)" d="M275 -22h4v44h-4zM279 -20.5h15v41h-15zM279 -10h15M279 10h15M222 -22h-4v44h4zM218 -20.5h-24v41h24zM218 -10h-24M218 10h-24M194 -12h-8v24h8"/>
       <path transform="translate(0 131)" d="M275 -22h4v44h-4zM279 -20.5h15v41h-15zM279 -10h15M279 10h15M222 -22h-4v44h4zM218 -20.5h-24v41h24zM218 -10h-24M218 10h-24M194 -12h-8v24h8"/>
-      <path transform="translate(0 245)" d="M275 -22h4v44h-4zM279 -20.5h15v41h-15zM279 -10h15M279 10h15M222 -22h-4v44h4zM218 -20.5h-24v41h24zM218 -10h-24M218 10h-24M194 -12h-8v24h8"/>
     </g>
   </g>
-  <path d="M-400 0H790M0 345V-395M175 -245H305M175 -131H305M175 131H305M175 245H305M-175 -245H-305M-175 -131H-305M-175 131H-305M-175 245H-305" stroke-width="1.8" stroke-dasharray="60 20 10 20"/>
+  <!-- head diagonal up to the outer chord top (45°) and lacing down to the outer chord (59.04°): 2 L 100×10,
+       heel 28 / toe 72 from the axis, 2 × M20 on the gauge line 45 from the heel -->
+  <g transform="rotate(-135)">
+    <rect x="460" y="-28" width="180" height="100" fill="#fff" stroke="none"/>
+    <path d="M640 -28H460V72H640"/>
+    <path d="M460 -18H640" stroke-width="2.5"/>
+    <path d="M640 -45V12l-20 10 40 20-20 10V90" stroke-width="2.5"/>
+    <g stroke-width="2.5"><circle cx="500" cy="17" r="10"/><circle cx="570" cy="17" r="10"/></g>
+    <path d="M482 17h36M500 -1v36M552 17h36M570 -1v36" stroke-width="1.8"/>
+  </g>
+  <g transform="rotate(120.96)">
+    <rect x="565" y="-28" width="170" height="100" fill="#fff" stroke="none"/>
+    <path d="M735 -28H565V72H735"/>
+    <path d="M565 -18H735" stroke-width="2.5"/>
+    <path d="M735 -45V12l-20 10 40 20-20 10V90" stroke-width="2.5"/>
+    <g stroke-width="2.5"><circle cx="605" cy="17" r="10"/><circle cx="675" cy="17" r="10"/></g>
+    <path d="M587 17h36M605 -1v36M657 17h36M675 -1v36" stroke-width="1.8"/>
+  </g>
+  <path d="M-520 0H790M0 675V-525M175 -245H305M175 -131H305M175 131H305M175 245H305M-175 -131H-305M-175 131H-305" stroke-width="1.8" stroke-dasharray="60 20 10 20"/>
+  <path d="M0 0L-466.7 -466.7M0 0L-378.2 630.2" stroke-width="1.8" stroke-dasharray="60 20 10 20"/>
 
-  <!-- upper band: column top with cap plate, top chord HE 400 B on it, gusset and end diagonal -->
-  <g transform="translate(0 2240)">
-    <path d="M-250 -2700V-3031.6L250 -3078.4V-2700"/>
-    <path d="M-222 -2700V-3034.2M222 -2700V-3075.8" stroke-width="2.5"/>
-    <path d="M-275 -2700H-30l15-30 30 60 15-30H275" stroke-width="2.5"/>
+  <!-- upper band: column top with cap plate, top chord HE 400 B on it, end diagonal on the span side, head
+       diagonal from the outer chord on the tower side, each on a gusset under the top chord -->
+  <g transform="translate(0 2120)">
+    <path d="M-250 -2710V-3031.6L250 -3078.4V-2710"/>
+    <path d="M-222 -2710V-3034.2M222 -2710V-3075.8" stroke-width="2.5"/>
+    <path d="M-275 -2710H-30l15-30 30 60 15-30H275" stroke-width="2.5"/>
     <path fill="#000" stroke="none" d="M-250 -3031.6v11l-11 -10zM250 -3078.4v11l11 -12.1z"/>
     <path d="M315 -3109.6L770 -3152.3L694.3 -2890L601.1 -2747.9L315 -2935.7Z" stroke-width="3.5"/>
+    <path d="M-270 -3054.8L-500 -3033.2L-469.7 -2911.1L-359 -2809.8L-270 -2907.2Z" stroke-width="3.5"/>
     <g transform="translate(0 -3281) rotate(-5.353)">
-      <path d="M-385 -200H775M-385 200H775"/>
-      <path d="M-385 -176H775M-385 176H775" stroke-width="2.5"/>
-      <path d="M-385 -215V-25l-20 10 40 20-20 10V215M775 -215V-25l-20 10 40 20-20 10V215" stroke-width="2.5"/>
+      <path d="M-540 -200H775M-540 200H775"/>
+      <path d="M-540 -176H775M-540 176H775" stroke-width="2.5"/>
+      <path d="M-540 -215V-25l-20 10 40 20-20 10V215M775 -215V-25l-20 10 40 20-20 10V215" stroke-width="2.5"/>
       <rect x="-280" y="200" width="560" height="25" stroke-width="3.5"/>
       <path d="M-244.5 -176H-229.5V176H-244.5ZM229.5 -176H244.5V176H229.5Z" stroke-width="3.5"/>
       <g stroke-width="2.5">
         <path transform="translate(-150 0)" d="M-20.5 157h41v15h-41zM-22 172h44v4h-44zM-10 157v15M10 157v15M-22 225h44v4h-44zM-20.5 229h41v24h-41zM-10 229v24M10 229v24M-12 253v8h24v-8"/>
         <path transform="translate(150 0)" d="M-20.5 157h41v15h-41zM-22 172h44v4h-44zM-10 157v15M10 157v15M-22 225h44v4h-44zM-20.5 229h41v24h-41zM-10 229v24M10 229v24M-12 253v8h24v-8"/>
       </g>
-      <path d="M-400 0H790M-150 140V275M150 140V275" stroke-width="1.8" stroke-dasharray="60 20 10 20"/>
+      <path d="M-560 0H790M-150 140V275M150 140V275" stroke-width="1.8" stroke-dasharray="60 20 10 20"/>
     </g>
     <g transform="translate(0 -3281) rotate(33.27)">
       <rect x="460" y="-34" width="440" height="120" fill="#fff" stroke="none"/>
@@ -206,105 +231,146 @@
       <path d="M490 16h40M510 -4v40M570 16h40M590 -4v40M650 16h40M670 -4v40M730 16h40M750 -4v40" stroke-width="1.8"/>
       <path d="M0 0H920" stroke-width="1.8" stroke-dasharray="60 20 10 20"/>
     </g>
+    <g transform="translate(0 -3281) rotate(132.44)">
+      <rect x="440" y="-28" width="210" height="100" fill="#fff" stroke="none"/>
+      <path d="M650 -28H440V72H650"/>
+      <path d="M440 -18H650" stroke-width="2.5"/>
+      <path d="M650 -45V12l-20 10 40 20-20 10V90" stroke-width="2.5"/>
+      <g stroke-width="2.5"><circle cx="480" cy="17" r="10"/><circle cx="550" cy="17" r="10"/></g>
+      <path d="M462 17h36M480 -1v36M532 17h36M550 -1v36" stroke-width="1.8"/>
+      <path d="M0 0H670" stroke-width="1.8" stroke-dasharray="60 20 10 20"/>
+    </g>
   </g>
 </g>
 
-<!-- section A–A through the bottom chord, looking at the end plate -->
-<g transform="translate(384 148) scale(0.1)" stroke-width="5">
-  <rect x="-170" y="-300" width="340" height="600" stroke-width="3.5"/>
-  <path fill="url(#pafta-hatch)" d="M-150 -200H150V-176H6.75V176H150V200H-150V176H-6.75V-176H-150Z"/>
-  <g stroke-width="2.5"><circle cx="-90" cy="-245" r="12"/><circle cx="90" cy="-245" r="12"/><circle cx="-90" cy="-131" r="12"/><circle cx="90" cy="-131" r="12"/><circle cx="-90" cy="131" r="12"/><circle cx="90" cy="131" r="12"/><circle cx="-90" cy="245" r="12"/><circle cx="90" cy="245" r="12"/></g>
-  <path d="M-90 -330V330M90 -330V330M-125 -245H125M-125 -131H125M-125 131H125M-125 245H125" stroke-width="1.8" stroke-dasharray="60 20 10 20"/>
+<!-- section A–A through the bottom chord, looking at the end plate; placed left of the detail, below the frame -->
+<g transform="translate(-199 57)">
+  <g transform="translate(384 148) scale(0.1)" stroke-width="5">
+    <rect x="-170" y="-300" width="340" height="600" stroke-width="3.5"/>
+    <path fill="url(#pafta-hatch)" d="M-150 -200H150V-176H6.75V176H150V200H-150V176H-6.75V-176H-150Z"/>
+    <g stroke-width="2.5"><circle cx="-90" cy="-245" r="12"/><circle cx="90" cy="-245" r="12"/><circle cx="-90" cy="-131" r="12"/><circle cx="90" cy="-131" r="12"/><circle cx="-90" cy="131" r="12"/><circle cx="90" cy="131" r="12"/><circle cx="-90" cy="245" r="12"/><circle cx="90" cy="245" r="12"/></g>
+    <path d="M-90 -330V330M90 -330V330M-125 -245H125M-125 -131H125M-125 131H125M-125 245H125" stroke-width="1.8" stroke-dasharray="60 20 10 20"/>
+  </g>
+  <g stroke-width="0.25">
+    <path d="M366.9 117V112.5M375 115V112.5M393 115V112.5M401.1 117V112.5M367 114H401M401.5 118H407.5M397 123.5H407.5M397 134.9H407.5M397 161.1H407.5M397 172.5H407.5M401.5 178H407.5M406 118V178"/>
+    <path d="M365.8 115.2l2.4 -2.4M373.8 115.2l2.4 -2.4M391.8 115.2l2.4 -2.4M399.8 115.2l2.4 -2.4M404.8 119.2l2.4 -2.4M404.8 124.7l2.4 -2.4M404.8 136.1l2.4 -2.4M404.8 162.3l2.4 -2.4M404.8 173.7l2.4 -2.4M404.8 179.2l2.4 -2.4" stroke-width="0.35"/>
+  </g>
+  <g fill="#000" stroke="none" font-size="2.5" text-anchor="middle">
+    <text x="371" y="113">80</text><text x="384" y="113">180</text><text x="397" y="113">80</text>
+    <text x="405" y="120.75" transform="rotate(-90 405 120.75)">55</text>
+    <text x="405" y="129.2" transform="rotate(-90 405 129.2)">114</text>
+    <text x="405" y="148" transform="rotate(-90 405 148)">262</text>
+    <text x="405" y="166.8" transform="rotate(-90 405 166.8)">114</text>
+    <text x="405" y="175.25" transform="rotate(-90 405 175.25)">55</text>
+    <text x="384" y="190" font-size="3.5" font-weight="600">KESİT A–A</text>
+    <text x="384" y="195">ÖLÇEK 1/10</text>
+  </g>
+  <path d="M370 191.2H398" stroke-width="0.25"/>
 </g>
 
-<!-- dimensions -->
-<g stroke-width="0.25">
-  <path d="M238.5 43.9H281M238.5 148H241M240 148V43.9M366.9 117V112.5M375 115V112.5M393 115V112.5M401.1 117V112.5M367 114H401M401.5 118H407.5M397 123.5H407.5M397 134.9H407.5M397 161.1H407.5M397 172.5H407.5M401.5 178H407.5M406 118V178"/>
-  <path d="M238.8 149.2l2.4 -2.4M238.8 45.1l2.4 -2.4M365.8 115.2l2.4 -2.4M373.8 115.2l2.4 -2.4M391.8 115.2l2.4 -2.4M399.8 115.2l2.4 -2.4M404.8 119.2l2.4 -2.4M404.8 124.7l2.4 -2.4M404.8 136.1l2.4 -2.4M404.8 162.3l2.4 -2.4M404.8 173.7l2.4 -2.4M404.8 179.2l2.4 -2.4" stroke-width="0.35"/>
-</g>
-<g fill="#000" stroke="none" font-size="2.5" text-anchor="middle">
-  <text x="239" y="96" transform="rotate(-90 239 96)">3281</text>
-  <text x="371" y="113">80</text><text x="384" y="113">180</text><text x="397" y="113">80</text>
-  <text x="405" y="120.75" transform="rotate(-90 405 120.75)">55</text>
-  <text x="405" y="129.2" transform="rotate(-90 405 129.2)">114</text>
-  <text x="405" y="148" transform="rotate(-90 405 148)">262</text>
-  <text x="405" y="166.8" transform="rotate(-90 405 166.8)">114</text>
-  <text x="405" y="175.25" transform="rotate(-90 405 175.25)">55</text>
-</g>
-
-<!-- level of the bottom chord axis -->
-<path d="M232 148H240M236 148l-1.6 -2.4h3.2z" stroke-width="0.25"/>
-<text x="233.6" y="146.8" font-size="2.5" text-anchor="end" fill="#000" stroke="none">+35.00</text>
-
-<!-- section marks A–A on the bottom chord -->
-<g stroke-width="0.7"><path d="M343 121.5V125.5M343 170.5V174.5"/></g>
-<g stroke-width="0.25"><path d="M343 121.5H339M343 174.5H339"/></g>
-<path fill="#000" stroke="none" d="M338 121.5l1.8 -0.7v1.4zM338 174.5l1.8 -0.7v1.4z"/>
-<g fill="#000" stroke="none" font-size="3.5" font-weight="600"><text x="344.5" y="122.6">A</text><text x="344.5" y="178">A</text></g>
-
-<!-- leaders -->
-<g stroke-width="0.25">
-  <path d="M317.3 114.6L307.6 120M317.3 120.2L310.6 123.5M285.5 51L296.5 57M290 88.6V66.3M361.5 96.2L352.5 93M361.5 65.2L343.7 85.6"/>
-</g>
-<g fill="#000" stroke="none"><circle cx="307.6" cy="120" r="0.4"/><circle cx="310.6" cy="123.5" r="0.4"/><circle cx="296.5" cy="57" r="0.4"/><circle cx="290" cy="66.3" r="0.4"/><circle cx="352.5" cy="93" r="0.4"/><circle cx="343.7" cy="85.6" r="0.4"/></g>
-
-<!-- weld symbols (TS EN ISO 2553, system A): arrow, reference line, identification line, fillet triangle -->
-<g stroke-width="0.25">
-  <path d="M263 84L255.7 69.6M263 84H279M316 175.5L309.2 168.6M316 175.5H334M362 51L353 57.3M362 51H378"/>
-  <path d="M263 85H279M316 176.5H334" stroke-width="0.18" stroke-dasharray="1.5 0.8"/>
-  <circle cx="263" cy="84" r="1"/><circle cx="316" cy="175.5" r="1"/>
-  <path d="M270 84v-2.2l2.5 2.2zM324 175.5v-2.2l2.5 2.2zM370 51v-2.2l2.5 2.2zM370 51v2.2l2.5 -2.2z"/>
-</g>
-<path fill="#000" stroke="none" d="M255.7 69.6l0.5 1.9 0.9 -0.5zM309.2 168.6l0.6 1.9 0.8 -0.6zM353 57.3l1.9 -0.4 -0.6 -0.8z"/>
-
-<!-- callouts -->
+<!-- bottom chord axis to top chord axis at the column, and the level of the bottom chord axis -->
+<g stroke-width="0.25"><path d="M235.5 40.9H303M235.5 157H251M237 157V40.9M229 157H237M233 157l-1.6 -2.4h3.2z"/></g>
+<path d="M235.8 158.2l2.4 -2.4M235.8 42.1l2.4 -2.4" stroke-width="0.35"/>
 <g fill="#000" stroke="none" font-size="2.5">
-  <text x="265" y="83.4">a8</text>
-  <text x="319" y="175">a8</text>
-  <text x="364.5" y="50.4">a6</text>
-  <text x="276" y="50" text-anchor="middle">4 × M24 10.9</text>
-  <text x="306.5" y="32">PL 15</text>
-  <text x="333" y="37" text-anchor="middle" transform="rotate(-5.353 333 37)">üst başlık HE 400 B</text>
-  <text x="337" y="68" text-anchor="middle">PL 20</text>
-  <text x="283" y="91" text-anchor="middle">PL 25×360×560</text>
-  <text x="270" y="97.5" text-anchor="middle">kolon HE 500 B</text>
-  <text x="362" y="66">4 × M24 10.9</text>
-  <text x="362" y="97">2 L 120×12</text>
-  <text x="318" y="115.5">PL 25×340×600</text>
-  <text x="318" y="121">8 × M24 10.9</text>
-  <text x="271" y="127.6" text-anchor="middle">PL 15</text>
-  <text x="335" y="146" text-anchor="middle">alt başlık HE 400 B</text>
+  <text x="236" y="99" text-anchor="middle" transform="rotate(-90 236 99)">3281</text>
+  <text x="230.6" y="155.8" text-anchor="end">+35.00</text>
 </g>
 
-<!-- headings -->
-<g fill="#000" stroke="none">
-  <text x="300" y="190" font-size="3.5" font-weight="600" text-anchor="middle">DETAY 1 · ÖLÇEK 1/10</text>
-  <text x="384" y="190" font-size="3.5" font-weight="600" text-anchor="middle">KESİT A–A</text>
-  <text x="384" y="195" font-size="2.5" text-anchor="middle">ÖLÇEK 1/10</text>
+<!-- lower band callouts -->
+<g transform="translate(22 9)">
+  <g stroke-width="0.7"><path d="M343 121.5V125.5M343 170.5V174.5"/></g>
+  <g stroke-width="0.25"><path d="M343 121.5H339M343 174.5H339"/></g>
+  <path fill="#000" stroke="none" d="M338 121.5l1.8 -0.7v1.4zM338 174.5l1.8 -0.7v1.4z"/>
+  <g fill="#000" stroke="none" font-size="3.5" font-weight="600"><text x="344.5" y="122.6">A</text><text x="344.5" y="178">A</text></g>
+  <g stroke-width="0.25"><path d="M317.3 114.6L307.6 120M317.3 120.2L310.6 123.5"/></g>
+  <g fill="#000" stroke="none"><circle cx="307.6" cy="120" r="0.4"/><circle cx="310.6" cy="123.5" r="0.4"/></g>
+  <g stroke-width="0.25">
+    <path d="M316 175.5L309.2 168.6M316 175.5H334"/>
+    <path d="M316 176.5H334" stroke-width="0.18" stroke-dasharray="1.5 0.8"/>
+    <circle cx="316" cy="175.5" r="1"/>
+    <path d="M324 175.5v-2.2l2.5 2.2z"/>
+  </g>
+  <path fill="#000" stroke="none" d="M309.2 168.6l0.6 1.9 0.8 -0.6z"/>
+  <g fill="#000" stroke="none" font-size="2.5">
+    <text x="319" y="175">a8</text>
+    <text x="318" y="115.5">PL 25×340×600</text>
+    <text x="318" y="121">8 × M24 10.9</text>
+    <text x="271" y="127.6" text-anchor="middle">PL 15</text>
+    <text x="335" y="146" text-anchor="middle">alt başlık HE 400 B</text>
+  </g>
 </g>
-<path d="M280 191.2H320M370 191.2H398" stroke-width="0.25"/>
+
+<!-- upper band callouts -->
+<g transform="translate(22 -3)">
+  <g stroke-width="0.25">
+    <path d="M293.5 54.5L296.5 57M294 88.6V65.3M361.5 96.2L352.5 93M361.5 65.2L343.7 85.6"/>
+  </g>
+  <g fill="#000" stroke="none"><circle cx="296.5" cy="57" r="0.4"/><circle cx="294" cy="65.3" r="0.4"/><circle cx="352.5" cy="93" r="0.4"/><circle cx="343.7" cy="85.6" r="0.4"/></g>
+  <g stroke-width="0.25">
+    <path d="M263 84L255.7 69.6M263 84H279M362 51L353 57.3M362 51H378"/>
+    <path d="M263 85H279" stroke-width="0.18" stroke-dasharray="1.5 0.8"/>
+    <circle cx="263" cy="84" r="1"/>
+    <path d="M270 84v-2.2l2.5 2.2zM370 51v-2.2l2.5 2.2zM370 51v2.2l2.5 -2.2z"/>
+  </g>
+  <path fill="#000" stroke="none" d="M255.7 69.6l0.5 1.9 0.9 -0.5zM353 57.3l1.9 -0.4 -0.6 -0.8z"/>
+  <g fill="#000" stroke="none" font-size="2.5">
+    <text x="265" y="83.4">a8</text>
+    <text x="364.5" y="50.4">a6</text>
+    <text x="284" y="55" text-anchor="middle">4 × M24 10.9</text>
+    <text x="306.5" y="32">PL 15</text>
+    <text x="333" y="37" text-anchor="middle" transform="rotate(-5.353 333 37)">üst başlık HE 400 B</text>
+    <text x="337" y="68" text-anchor="middle">PL 20</text>
+    <text x="291" y="91" text-anchor="middle">PL 25×360×560</text>
+    <text x="362" y="66">4 × M24 10.9</text>
+    <text x="362" y="97">2 L 120×12</text>
+  </g>
+</g>
+
+<!-- tower bracing callouts (sheet mm as placed) -->
+<g stroke-width="0.25">
+  <path d="M283.5 90.3L269.4 75.2M283.5 94.8L259.6 82.5M283.5 113.2L262 110.3M283.5 118.7L268.8 120.4M283.5 195.2L270.4 208M283.5 200.7L262.5 216.7"/>
+</g>
+<g fill="#000" stroke="none"><circle cx="269.4" cy="75.2" r="0.4"/><circle cx="259.6" cy="82.5" r="0.4"/><circle cx="262" cy="110.3" r="0.4"/><circle cx="268.8" cy="120.4" r="0.4"/><circle cx="270.4" cy="208" r="0.4"/><circle cx="262.5" cy="216.7" r="0.4"/></g>
+<g fill="#000" stroke="none" font-size="2.5">
+  <text x="284" y="91">2 × M20 10.9</text>
+  <text x="284" y="95.5">2 L 100×10</text>
+  <text x="256" y="71">PL 15</text>
+  <text x="284" y="114">2 L 100×10</text>
+  <text x="284" y="119.5">2 × M20 10.9</text>
+  <text x="257" y="134">PL 15</text>
+  <text x="284" y="196">2 × M20 10.9</text>
+  <text x="284" y="201.5">2 L 100×10</text>
+  <text x="259" y="186">PL 15</text>
+  <text x="306" y="112">kafes kolon</text>
+  <text x="306" y="117">iç başlığı</text>
+  <text x="306" y="122">HE 500 B</text>
+</g>
+
+<!-- heading -->
+<text x="313" y="232" font-size="3.5" font-weight="600" text-anchor="middle" fill="#000" stroke="none">DETAY 1 · ÖLÇEK 1/10</text>
+<path d="M293 233.2H333" stroke-width="0.25"/>
 </g>
 <g class="pafta-title">
 <!-- The title block, bottom right, in sheet millimetres. Hand-written; the wording is fixed by the plan. -->
-<rect x="236" y="222" width="174" height="65" stroke-width="0.5"/>
-<path d="M236 236H410M236 258H410M236 272H410M368 222V258M294 272V287M352 272V287" stroke-width="0.25"/>
+<rect x="236" y="236" width="174" height="51" stroke-width="0.5"/>
+<path d="M236 247H410M236 264H410M236 274H410M368 236V264M294 274V287M352 274V287" stroke-width="0.25"/>
 <g fill="#000" stroke="none">
-  <text x="240" y="231.2" font-size="3.5" font-weight="600">Senkon Mühendislik</text>
-  <text x="371" y="226.8" font-size="2.5" fill="#555">PAFTA NO</text>
-  <text x="371" y="233.2" font-size="3.5" font-weight="600">Ö-01</text>
-  <text x="240" y="243.5" font-size="3.5" font-weight="600">ÖRNEK PAFTA</text>
-  <text x="240" y="249.5" font-size="2.5">Çelik çerçeve görünüşü, kolon başlığı detayı</text>
-  <text x="240" y="254.5" font-size="2.5">6 aksı çerçevesi · Detay 1 · Kesit A–A</text>
-  <text x="371" y="240.8" font-size="2.5" fill="#555">ÖLÇEK</text>
-  <text x="371" y="247" font-size="2.5">1/500 görünüş</text>
-  <text x="371" y="252.5" font-size="2.5">1/10 detay, kesit</text>
-  <text x="240" y="266.6" font-size="2.5">Çizim standardını göstermek amacıyla hazırlanmıştır; gerçek bir projeye ait değildir.</text>
-  <text x="240" y="277" font-size="2.5" fill="#555">FORMAT</text>
-  <text x="240" y="283" font-size="2.5">A3</text>
-  <text x="298" y="277" font-size="2.5" fill="#555">BİRİM</text>
-  <text x="298" y="283" font-size="2.5">mm, kotlar m</text>
-  <text x="356" y="277" font-size="2.5" fill="#555">REVİZYON</text>
-  <text x="356" y="283" font-size="2.5">0</text>
+  <text x="240" y="243.5" font-size="3.5" font-weight="600">Senkon Mühendislik</text>
+  <text x="371" y="240.3" font-size="2.5" fill="#555">PAFTA NO</text>
+  <text x="371" y="245.6" font-size="3.5" font-weight="600">Ö-01</text>
+  <text x="240" y="252.6" font-size="3.5" font-weight="600">ÖRNEK PAFTA</text>
+  <text x="240" y="257.6" font-size="2.5">Çelik çerçeve görünüşü, kolon başlığı detayı</text>
+  <text x="240" y="262.3" font-size="2.5">6 aksı çerçevesi · Detay 1 · Kesit A–A</text>
+  <text x="371" y="251" font-size="2.5" fill="#555">ÖLÇEK</text>
+  <text x="371" y="256.5" font-size="2.5">1/500 görünüş</text>
+  <text x="371" y="261.8" font-size="2.5">1/10 detay, kesit</text>
+  <text x="240" y="270.4" font-size="2.5">Çizim standardını göstermek amacıyla hazırlanmıştır; gerçek bir projeye ait değildir.</text>
+  <text x="240" y="278.8" font-size="2.5" fill="#555">FORMAT</text>
+  <text x="240" y="284.6" font-size="2.5">A3</text>
+  <text x="298" y="278.8" font-size="2.5" fill="#555">BİRİM</text>
+  <text x="298" y="284.6" font-size="2.5">mm, kotlar m</text>
+  <text x="356" y="278.8" font-size="2.5" fill="#555">REVİZYON</text>
+  <text x="356" y="284.6" font-size="2.5">0</text>
 </g>
 </g>
 </g>
