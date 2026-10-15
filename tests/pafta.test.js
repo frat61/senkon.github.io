@@ -17,8 +17,8 @@ test('zoomAt clamps the scale to 1..8', () => {
 test('zoomAt keeps the sheet point under the cursor', () => {
   const v0 = view(400, 283), v = zoomAt(v0, 2, 100, 50);
   assert.equal(v.s, 2);
-  assert.ok(Math.abs(v.s * 100 / 2 + v.x - 100) < 1e-9);   // sheet point (50, 25) is still at (100, 50)
-  assert.ok(Math.abs(v.s * 50 / 2 + v.y - 50) < 1e-9);
+  assert.ok(Math.abs(v.s * 100 + v.x - 100) < 1e-9);   // the sheet point that was at (100, 50) is still there
+  assert.ok(Math.abs(v.s * 50 + v.y - 50) < 1e-9);
 });
 
 test('pan cannot leave the sheet', () => {
