@@ -262,6 +262,12 @@ ol.steps-plain .item,.surec:has(.surec-live) ol.steps-plain .item{padding-left:2
 .pafta-live{cursor:grab} .pafta-live:has(.pafta-zoomed){cursor:grab} .pafta-svg:active{cursor:grabbing}
 .pafta-ctrl{display:none}
 .pafta-live .pafta-ctrl{display:flex;gap:8px;position:absolute;right:12px;bottom:12px}
+/* phones: the buttons sit under the sheet, not over its title block */
+@media (max-width:640px){
+  .pafta-live{aspect-ratio:auto;overflow:visible;border:0;background:none}
+  .pafta-live > .pafta-static,.pafta-live > .pafta-svg{height:auto;aspect-ratio:420/297;border:1px solid var(--rule);background:#fff;overflow:hidden}
+  .pafta-live > .pafta-ctrl{position:static;justify-content:flex-end;margin-top:8px}
+}
 .pafta-ctrl button,.pafta-close{font:inherit;font-weight:600;font-size:14px;padding:6px 12px;border:1.5px solid var(--ink);border-radius:999px;background:#fff;color:var(--ink);cursor:pointer}
 .pafta-ctrl button:hover,.pafta-close:hover{border-color:var(--accent)}
 .pafta-ctrl button:focus-visible,.pafta-close:focus-visible{outline:2px solid var(--accent);outline-offset:2px}

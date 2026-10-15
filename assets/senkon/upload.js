@@ -147,7 +147,11 @@
     box.addEventListener('dragleave', () => box.classList.remove('drag'));
     box.addEventListener('drop', e => { e.preventDefault(); box.classList.remove('drag'); add(e.dataTransfer && e.dataTransfer.files); });
     const win = doc.defaultView;   // a file dropped beside the box would otherwise open in the tab and lose the form
-    if (win) { win.addEventListener('dragover', e => e.preventDefault()); win.addEventListener('drop', e => e.preventDefault()); }
+    if (win) {   // only file drags: dragging selected text into the Mesaj textarea must still work
+      const hasFiles = e => !!(e.dataTransfer && [...e.dataTransfer.types].includes('Files'));
+      win.addEventListener('dragover', e => { if (hasFiles(e)) e.preventDefault(); });
+      win.addEventListener('drop', e => { if (hasFiles(e)) e.preventDefault(); });
+    }
     box.hidden = false;
     return { files, busy };
   }

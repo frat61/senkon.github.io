@@ -322,7 +322,20 @@ test('a file dropped outside the box does not make the browser open it', () => {
   const p = page(), x = fakeXHR(), win = new El('window', null);
   p.form.ownerDocument.defaultView = win;
   attach(p.form, { url: URL0, key: KEY0, XHR: x.X });
-  assert.ok(win.fire('dragover', {}).defaultPrevented);
-  assert.ok(win.fire('drop', {}).defaultPrevented);
+  const drag = { dataTransfer: { types: ['Files'], files: [] } };
+  assert.ok(win.fire('dragover', drag).defaultPrevented);
+  assert.ok(win.fire('drop', drag).defaultPrevented);
   assert.equal(x.sent.length, 0);
+});
+
+test('a text drag over the page is left alone so it can reach the Mesaj textarea; a file drag is prevented', () => {
+  const p = page(), x = fakeXHR(), win = new El('window', null);
+  p.form.ownerDocument.defaultView = win;
+  attach(p.form, { url: URL0, key: KEY0, XHR: x.X });
+  const text = { dataTransfer: { types: ['text/plain'], files: [] } };
+  const files = { dataTransfer: { types: ['Files'], files: [] } };
+  assert.ok(!win.fire('dragover', text).defaultPrevented);
+  assert.ok(!win.fire('drop', text).defaultPrevented);
+  assert.ok(win.fire('dragover', files).defaultPrevented);
+  assert.ok(win.fire('drop', files).defaultPrevented);
 });

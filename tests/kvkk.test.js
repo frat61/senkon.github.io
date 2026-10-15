@@ -14,3 +14,7 @@ test('kvkk: uploaded files are kept only to prepare a quote and deleted after', 
 test('kvkk: Supabase is named as the storage service for files sent with the form', () => {
   assert.ok(html.includes('Form ile gönderilen dosyalar, Supabase hizmeti aracılığıyla saklanır.'));
 });
+
+test('kvkk: no draft marker is left on the page', () => {
+  assert.ok(!html.includes('TASLAK'));
+});
