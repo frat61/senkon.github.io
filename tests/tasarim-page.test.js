@@ -155,7 +155,8 @@ test('the sitemap lists the page, the versions tool checks it, and the home page
 test('the sample sheet section', () => {
   assert.match(html, /<section id="ornek-pafta" class="wrap section rule">/);
   assert.ok(html.includes('<h2>Örnek pafta</h2>'));
-  assert.ok(html.includes('Uygulama projelerimizin çizim standardını gösteren örnek bir paftadır; gerçek bir projeye ait değildir.'));
+  assert.ok(html.includes('Uygulama projelerimizin çizim standardını gösteren örnek bir paftadır; ölçü ve kesitler örnek amaçlıdır.'));
+  assert.ok(!html.includes('gerçek bir projeye ait değildir'));
   assert.match(html, /<img class="pafta-static" src="\/assets\/senkon\/ornek-pafta\.svg\?v=[0-9a-f]{8}"/);
   assert.ok(html.includes('alt="Örnek pafta: çelik endüstriyel yapının çerçeve görünüşü ve kolon–makas birleşim detayı"'));
   assert.match(html, /<a href="\/assets\/senkon\/ornek-pafta\.svg">Paftayı büyük açın<\/a>/);

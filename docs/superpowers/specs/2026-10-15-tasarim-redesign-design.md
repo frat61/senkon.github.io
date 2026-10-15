@@ -77,7 +77,7 @@ One A3 landscape sheet (420 × 297 mm drawing space), black line work on white, 
 - **Connection detail**, larger scale: truss top and bottom chord to lattice column cap. End plate,
   bolt group, stiffeners, welds with weld symbols, plate and bolt callouts, dimensions. A section cut.
 - **Title block** (bottom right): "ÖRNEK PAFTA", "Senkon Mühendislik", "Çizim standardını göstermek
-  amacıyla hazırlanmıştır; gerçek bir projeye ait değildir.", scales, sheet number "Ö-01".
+  amacıyla hazırlanmış örnek paftadır; uygulama projesi değildir.", scales, sheet number "Ö-01".
 
 Profiles, plate thicknesses, bolt sizes and grades and weld sizes are Claude's first proposal and are
 listed in `local/ornek-pafta-check.md` for Fırat to correct. **The section ships only after Fırat has
@@ -94,7 +94,7 @@ checked the sheet** (the merge waits for it).
 ### Viewer
 
 - On the page the whole sheet shows at column width with a thin frame, and a line under it: "Uygulama
-  projelerimizin çizim standardını gösteren örnek bir paftadır; gerçek bir projeye ait değildir."
+  projelerimizin çizim standardını gösteren örnek bir paftadır; ölçü ve kesitler örnek amaçlıdır."
 - Zoom: on the page, trackpad pinch (ctrl + wheel) on desktop, and the plain wheel only once the sheet is
   already zoomed in (over the whole sheet the wheel scrolls the page); in the full-screen dialog the plain wheel
   always zooms. Two-finger pinch on phones, double-click/tap toggles 1× ↔ 4× (a drag or a pinch is not a tap),
@@ -173,7 +173,7 @@ one-time signed upload URLs after a check; not built now.
   a fake `XMLHttpRequest`.
 - `tests/pafta.test.js`: zoom clamped to 1×–8×, zoom about the pointer keeps that point fixed, pan clamped
   to the sheet, double-tap toggle.
-- `tests/pafta-svg.test.js`: the SVG has the title block text "ÖRNEK PAFTA" and "gerçek bir projeye ait
+- `tests/pafta-svg.test.js`: the SVG has the title block text "ÖRNEK PAFTA" and "uygulama projesi
   değildir", a viewBox in A3 proportions, and no project or client names from the CV.
 - `tools/versions.js` covers the new linked files; `tests/versions.test.js` as today.
 - Browser check (Claude, in the pane, desktop and phone width): story plays, sheet zooms and opens full

@@ -21,8 +21,9 @@ test('the sheet file exists and is an A3 sheet in millimetres', () => {
 
 test('the title block says it is a sample sheet of Senkon Mühendislik', () => {
   const svg = read();
-  for (const s of ['ÖRNEK PAFTA', 'Senkon Mühendislik', 'gerçek bir projeye ait değildir', 'Ö-01']) assert.ok(svg.includes(s), s);
-  assert.ok(svg.includes('Çizim standardını göstermek amacıyla hazırlanmıştır; gerçek bir projeye ait değildir.'));
+  for (const s of ['ÖRNEK PAFTA', 'Senkon Mühendislik', 'Ö-01']) assert.ok(svg.includes(s), s);
+  assert.ok(svg.includes('Çizim standardını göstermek amacıyla hazırlanmış örnek paftadır; uygulama projesi değildir.'));
+  assert.ok(!svg.includes('gerçek bir projeye ait değildir'));
 });
 
 test('the sheet is self-contained line work and text', () => {
