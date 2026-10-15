@@ -95,7 +95,9 @@ checked the sheet** (the merge waits for it).
 
 - On the page the whole sheet shows at column width with a thin frame, and a line under it: "Uygulama
   projelerimizin çizim standardını gösteren örnek bir paftadır; gerçek bir projeye ait değildir."
-- Zoom: wheel or trackpad pinch on desktop, two-finger pinch on phones, double-click/tap toggles 1× ↔ 4×,
+- Zoom: on the page, trackpad pinch (ctrl + wheel) on desktop, and the plain wheel only once the sheet is
+  already zoomed in (over the whole sheet the wheel scrolls the page); in the full-screen dialog the plain wheel
+  always zooms. Two-finger pinch on phones, double-click/tap toggles 1× ↔ 4× (a drag or a pinch is not a tap),
   drag pans when zoomed; zoom range 1×–8×; `+`, `−` and "Tam ekran" buttons in a corner.
 - Phones: one-finger vertical swipes scroll the page while the sheet is at 1×; once zoomed, one finger pans.
 - "Tam ekran" opens the sheet in a `<dialog>` filling the viewport, same controls, Esc or "Kapat" closes.

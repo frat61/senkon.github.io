@@ -74,19 +74,20 @@
       used[p] = true;
       return p;
     }
-    function draw(f) {
+    function draw(f) {   // rebuilds the row: only on a change of state, so the buttons are not replaced under a click
       const row = f.row;
       row.textContent = '';
       row.className = 'lead-frow ' + f.state;
       row.appendChild(el('span', 'lead-fname', f.name));
       row.appendChild(el('span', 'lead-fsize', mb(f.size) + ' MB'));
-      const bar = row.appendChild(el('span', 'lead-fbar')), fill = bar.appendChild(el('i'));
-      fill.style.width = f.pct + '%';
-      row.appendChild(el('span', 'lead-fstate', f.state === 'up' ? '%' + f.pct : f.state === 'done' ? 'Yüklendi' : 'Yüklenemedi, tekrar deneyin'));
+      const bar = row.appendChild(el('span', 'lead-fbar'));
+      f.fill = bar.appendChild(el('i'));
+      f.fill.style.width = f.pct + '%';
+      f.label = row.appendChild(el('span', 'lead-fstate', f.state === 'up' ? '%' + f.pct : f.state === 'done' ? 'Yüklendi' : 'Yüklenemedi, tekrar deneyin'));
       if (f.state === 'fail') {
         const again = row.appendChild(el('button', 'lead-retry', 'Tekrar dene'));
         again.type = 'button';
-        again.addEventListener('click', () => send(f));
+        again.addEventListener('click', () => send(f, true));
       }
       const x = row.appendChild(el('button', 'lead-x', '×'));
       x.type = 'button';
@@ -94,7 +95,11 @@
       x.addEventListener('click', () => drop(f));
     }
     function set(f, state, pct) { f.state = state; f.pct = pct; draw(f); refresh(); }
-    function send(f) {
+    function stored(r, retry) {   // a retry after a lost response finds its own first copy: the bucket says duplicate
+      if (r.status >= 200 && r.status < 300) return true;
+      return !!retry && (r.status === 409 || (r.status === 400 && /duplicate|already exists/i.test(r.responseText || '')));
+    }
+    function send(f, retry) {
       const r = new XHR();
       f.xhr = r;
       r.open('POST', opts.url + '/storage/v1/object/talepler/' + f.path);
@@ -102,8 +107,13 @@
       r.setRequestHeader('Authorization', 'Bearer ' + opts.key);
       r.setRequestHeader('x-upsert', 'false');
       r.setRequestHeader('Content-Type', f.file.type || 'application/octet-stream');
-      r.upload.onprogress = e => { if (e.lengthComputable && f.xhr === r) { f.pct = Math.min(99, Math.round(e.loaded / e.total * 100)); draw(f); } };
-      r.onload = () => { if (f.xhr === r) set(f, r.status >= 200 && r.status < 300 ? 'done' : 'fail', r.status >= 200 && r.status < 300 ? 100 : 0); };
+      r.upload.onprogress = e => {
+        if (!e.lengthComputable || f.xhr !== r) return;
+        f.pct = Math.min(99, Math.round(e.loaded / e.total * 100));
+        f.fill.style.width = f.pct + '%';
+        f.label.textContent = '%' + f.pct;
+      };
+      r.onload = () => { if (f.xhr === r) { const ok = stored(r, retry); set(f, ok ? 'done' : 'fail', ok ? 100 : 0); } };
       r.onerror = () => { if (f.xhr === r) set(f, 'fail', 0); };
       set(f, 'up', 0);
       r.send(f.file);
@@ -136,6 +146,8 @@
     box.addEventListener('dragover', e => { e.preventDefault(); box.classList.add('drag'); });
     box.addEventListener('dragleave', () => box.classList.remove('drag'));
     box.addEventListener('drop', e => { e.preventDefault(); box.classList.remove('drag'); add(e.dataTransfer && e.dataTransfer.files); });
+    const win = doc.defaultView;   // a file dropped beside the box would otherwise open in the tab and lose the form
+    if (win) { win.addEventListener('dragover', e => e.preventDefault()); win.addEventListener('drop', e => e.preventDefault()); }
     box.hidden = false;
     return { files, busy };
   }

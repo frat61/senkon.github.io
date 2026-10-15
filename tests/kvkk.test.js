@@ -10,3 +10,7 @@ const html = fs.readFileSync(path.join(__dirname, '..', 'kvkk', 'index.html'), '
 test('kvkk: uploaded files are kept only to prepare a quote and deleted after', () => {
   assert.ok(html.includes('Form ile gönderilen dosyalar yalnızca teklif hazırlamak amacıyla saklanır ve bu amaç sona erdiğinde silinir.'));
 });
+
+test('kvkk: Supabase is named as the storage service for files sent with the form', () => {
+  assert.ok(html.includes('Form ile gönderilen dosyalar, Supabase hizmeti aracılığıyla saklanır.'));
+});

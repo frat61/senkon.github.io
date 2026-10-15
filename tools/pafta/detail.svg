@@ -104,7 +104,7 @@
   <g transform="translate(384 148) scale(0.1)" stroke-width="5">
     <rect x="-170" y="-300" width="340" height="600" stroke-width="3.5"/>
     <path fill="url(#pafta-hatch)" d="M-150 -200H150V-176H6.75V176H150V200H-150V176H-6.75V-176H-150Z"/>
-    <g stroke-width="2.5"><circle cx="-90" cy="-245" r="12"/><circle cx="90" cy="-245" r="12"/><circle cx="-90" cy="-131" r="12"/><circle cx="90" cy="-131" r="12"/><circle cx="-90" cy="131" r="12"/><circle cx="90" cy="131" r="12"/><circle cx="-90" cy="245" r="12"/><circle cx="90" cy="245" r="12"/></g>
+    <g stroke-width="2.5"><circle cx="-90" cy="-245" r="13"/><circle cx="90" cy="-245" r="13"/><circle cx="-90" cy="-131" r="13"/><circle cx="90" cy="-131" r="13"/><circle cx="-90" cy="131" r="13"/><circle cx="90" cy="131" r="13"/><circle cx="-90" cy="245" r="13"/><circle cx="90" cy="245" r="13"/></g>
     <path d="M-90 -330V330M90 -330V330M-125 -245H125M-125 -131H125M-125 131H125M-125 245H125" stroke-width="1.8" stroke-dasharray="60 20 10 20"/>
   </g>
   <g stroke-width="0.25">

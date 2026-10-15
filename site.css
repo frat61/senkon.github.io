@@ -264,6 +264,7 @@ ol.steps-plain .item,.surec:has(.surec-live) ol.steps-plain .item{padding-left:2
 .pafta-live .pafta-ctrl{display:flex;gap:8px;position:absolute;right:12px;bottom:12px}
 .pafta-ctrl button,.pafta-close{font:inherit;font-weight:600;font-size:14px;padding:6px 12px;border:1.5px solid var(--ink);border-radius:999px;background:#fff;color:var(--ink);cursor:pointer}
 .pafta-ctrl button:hover,.pafta-close:hover{border-color:var(--accent)}
+.pafta-ctrl button:focus-visible,.pafta-close:focus-visible{outline:2px solid var(--accent);outline-offset:2px}
 .pafta-dlg{width:100vw;height:100dvh;max-width:none;max-height:none;margin:0;padding:0;border:0;background:#fff}
 .pafta-dlg[open]{display:flex;align-items:center;justify-content:center}
 .pafta-dlg .pafta-svg{width:100%;height:100%}

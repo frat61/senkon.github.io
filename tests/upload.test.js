@@ -278,3 +278,51 @@ test('dropping files on the box uploads them; dragging over marks the box', () =
   assert.ok(!s.box.classList.contains('drag'));
   assert.equal(s.sent.length, 1);
 });
+
+test('a progress event updates the existing row in place: the × button stays the same node', () => {
+  const s = setup();
+  s.choose({ name: 'a.pdf', size: 1000, type: '' });
+  const row = rows(s.list)[0], x = row.querySelector('button.lead-x');
+  s.sent[0].upload.onprogress({ lengthComputable: true, loaded: 400, total: 1000 });
+  assert.equal(rows(s.list)[0].querySelector('button.lead-x'), x);
+  assert.equal(row.querySelector('.lead-fbar').children[0].style.width, '40%');
+  assert.equal(row.querySelector('.lead-fstate').textContent, '%40');
+  x.fire('click');
+  assert.equal(s.sent[0].aborted, true);
+  assert.equal(rows(s.list).length, 0);
+});
+
+test('a retry whose first try already stored the file (409) counts as uploaded', () => {
+  const s = setup();
+  s.choose({ name: 'a.pdf', size: 100, type: '' });
+  s.sent[0].onerror();
+  rows(s.list)[0].querySelector('button.lead-retry').fire('click');
+  s.sent[1].finish(409);
+  assert.equal(s.up.files[0].state, 'done');
+  assert.equal(s.dosyalar.value, summary(FOLDER, [{ name: 'a.pdf', size: 100 }]));
+});
+
+test('a retry answered 400 "Duplicate" or "already exists" counts as uploaded; other 400s and first tries do not', () => {
+  for (const [text, want] of [['{"error":"Duplicate","message":"The resource already exists"}', 'done'], ['{"message":"The Resource ALREADY EXISTS"}', 'done'], ['{"error":"Invalid key"}', 'fail']]) {
+    const s = setup();
+    s.choose({ name: 'a.pdf', size: 100, type: '' });
+    s.sent[0].onerror();
+    rows(s.list)[0].querySelector('button.lead-retry').fire('click');
+    s.sent[1].responseText = text;
+    s.sent[1].finish(400);
+    assert.equal(s.up.files[0].state, want, text);
+  }
+  const s = setup();
+  s.choose({ name: 'a.pdf', size: 100, type: '' });
+  s.sent[0].finish(409);
+  assert.equal(s.up.files[0].state, 'fail');   // a first try never meets its own earlier copy
+});
+
+test('a file dropped outside the box does not make the browser open it', () => {
+  const p = page(), x = fakeXHR(), win = new El('window', null);
+  p.form.ownerDocument.defaultView = win;
+  attach(p.form, { url: URL0, key: KEY0, XHR: x.X });
+  assert.ok(win.fire('dragover', {}).defaultPrevented);
+  assert.ok(win.fire('drop', {}).defaultPrevented);
+  assert.equal(x.sent.length, 0);
+});

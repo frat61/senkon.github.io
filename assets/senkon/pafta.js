@@ -1,18 +1,20 @@
 /* The sample sheet (ornek-pafta.svg) on /tasarim/: a pan and zoom viewer. The script fetches the SVG that
    img.pafta-static points to and puts it inline in the image's place, so the drawing's lines stay sharp at any
-   zoom. The mouse wheel (or ctrl + wheel, or a pinch) zooms about the pointer, dragging pans, a double click or
-   double tap jumps between the whole sheet and 4x, and the +/- buttons zoom 1.5x about the centre. At the
-   whole-sheet scale a finger still scrolls the page (touch-action pan-y); once zoomed in it drags the sheet
-   instead. "Tam ekran" moves the same inline SVG into dialog.pafta-dlg (moved, not cloned, so the hatch pattern
-   id stays unique) and back on close, resetting the view each time. Without JavaScript, or if the fetch fails,
-   the plain image stays as it is and nothing else changes.
+   zoom. On the page a trackpad pinch (ctrl + wheel) zooms about the pointer, and the plain wheel does too once
+   the sheet is zoomed in; over the whole sheet the plain wheel scrolls the page untouched. In the full-screen
+   dialog the plain wheel always zooms. Dragging pans, a double click or double tap jumps between the whole sheet
+   and 4x (a drag or a pinch is not a tap), and the +/- buttons zoom 1.5x about the centre. At the whole-sheet
+   scale a finger still scrolls the page (touch-action pan-y); once zoomed in it drags the sheet instead.
+   "Tam ekran" moves the same inline SVG into dialog.pafta-dlg (moved, not cloned, so the hatch pattern id stays
+   unique) and back on close, resetting the view each time; the dialog has its own +/- buttons. Without
+   JavaScript, or if the fetch fails, the plain image stays as it is and nothing else changes.
    The maths is a state v = { s, x, y, w, h }: scale, offset in CSS px, viewport size in CSS px; a sheet point
    (u, v) in viewport px sits at (u*s + x, v*s + y) and the sheet always covers the viewport. view, zoomAt,
-   pan, toggle and touchAction are pure and exported for tests. */
+   pan, toggle, touchAction, wheelZooms, wheelPixels and tapped are pure and exported for tests. */
 (function () {
   'use strict';
 
-  const MAX = 8, TAP = 4, VBW = 420, VBH = 297;
+  const MAX = 8, TAP = 4, SLOP = 10, VBW = 420, VBH = 297;   // TAP: the double-tap scale; SLOP: px a tap may move
 
   function clampPan(v) {
     const lx = -v.w * (v.s - 1), ly = -v.h * (v.s - 1);
@@ -28,7 +30,11 @@
   function touchAction(s) { return s === 1 ? 'pan-y' : 'none'; }
   function echo(last, now) { return last != null && now - last < 500; }   // a dblclick right after a touch toggle is the browser's echo of it
 
-  if (typeof module !== 'undefined') module.exports = { view, zoomAt, pan, toggle, touchAction, echo };
+  function wheelZooms(ctrl, s, inDialog) { return inDialog || ctrl || s > 1; }
+  function wheelPixels(dy, mode, pageH) { return mode === 1 ? dy * 16 : mode === 2 ? dy * pageH : dy; }   // deltaMode line, page
+  function tapped(down, up, pinched) { return !pinched && !!down && Math.hypot(up[0] - down[0], up[1] - down[1]) < SLOP; }
+
+  if (typeof module !== 'undefined') module.exports = { view, zoomAt, pan, toggle, touchAction, echo, wheelZooms, wheelPixels, tapped };
   if (typeof document === 'undefined') return;
 
   const fig = document.querySelector('figure.pafta'), img = fig && fig.querySelector('img.pafta-static');
@@ -50,8 +56,8 @@
 
   function start(svg, sheet) {
     let v = view(VBW, VBH), ox = 0, oy = 0, k = 1;      // k: CSS px per viewBox unit; ox, oy: letterbox offset
-    const ptrs = new Map();
-    let lastTap = null, pinch = 0, toggledAt = null;
+    const ptrs = new Map(), starts = new Map();          // pointer id -> current / pointerdown position
+    let lastTap = null, pinch = 0, pinched = false, toggledAt = null;
 
     function measure() {                                 // the sheet is drawn "meet" inside the svg box
       const r = svg.getBoundingClientRect();
@@ -69,15 +75,18 @@
     function local(e) { const r = svg.getBoundingClientRect(); return [e.clientX - r.left - ox, e.clientY - r.top - oy]; }
 
     svg.addEventListener('wheel', e => {
-      const [px, py] = local(e), nv = zoomAt(v, Math.exp(-e.deltaY * 0.002), px, py);
-      if (nv.s === v.s) return;                          // at the limit the wheel scrolls the page again
+      if (!wheelZooms(e.ctrlKey, v.s, !!dlg && svg.parentNode === dlg)) return;   // the page scrolls untouched
+      const dy = wheelPixels(e.deltaY, e.deltaMode, window.innerHeight);
+      const [px, py] = local(e), nv = zoomAt(v, Math.exp(-dy * 0.002), px, py);
+      if (nv.s === v.s && !e.ctrlKey) return;            // at the limit the wheel scrolls again (ctrl + wheel would zoom the browser)
       e.preventDefault(); v = nv; apply();
     }, { passive: false });
 
     svg.addEventListener('pointerdown', e => {
       ptrs.set(e.pointerId, [e.clientX, e.clientY]);
+      starts.set(e.pointerId, [e.clientX, e.clientY]);
       if (svg.setPointerCapture) { try { svg.setPointerCapture(e.pointerId); } catch (_) {} }
-      if (ptrs.size === 2) { const [a, b] = [...ptrs.values()]; pinch = Math.hypot(a[0] - b[0], a[1] - b[1]); }
+      if (ptrs.size === 2) { const [a, b] = [...ptrs.values()]; pinch = Math.hypot(a[0] - b[0], a[1] - b[1]); pinched = true; }
     });
     svg.addEventListener('pointermove', e => {
       const prev = ptrs.get(e.pointerId);
@@ -95,9 +104,12 @@
       }
     });
     function up(e) {
-      const had = ptrs.delete(e.pointerId);
+      const had = ptrs.delete(e.pointerId), down = starts.get(e.pointerId), wasPinch = pinched;
+      starts.delete(e.pointerId);
       pinch = 0;
+      if (!ptrs.size) pinched = false;                   // the pinch ends with its last finger
       if (!had || e.type !== 'pointerup' || e.pointerType === 'mouse') return;   // a mouse uses dblclick
+      if (!tapped(down, [e.clientX, e.clientY], wasPinch)) { lastTap = null; return; }   // a drag or a pinch is not a tap
       const now = e.timeStamp;
       if (lastTap && now - lastTap.t < 300 && Math.hypot(e.clientX - lastTap.x, e.clientY - lastTap.y) < 10) {
         const [px, py] = local(e); v = toggle(v, px, py); apply(); lastTap = null; toggledAt = now;
@@ -108,7 +120,11 @@
     svg.addEventListener('dblclick', e => { if (echo(toggledAt, e.timeStamp)) return; const [px, py] = local(e); v = toggle(v, px, py); apply(); });
 
     function step(f) { v = zoomAt(v, f, v.w / 2, v.h / 2); apply(); }
-    const btn = (sel, fn) => { const b = fig.querySelector(sel); if (b) b.addEventListener('click', fn); };
+    const btn = (sel, fn) => {                           // the figure's buttons and the dialog's own +/-
+      const all = Array.from(fig.querySelectorAll(sel));
+      if (dlg && !fig.contains(dlg)) all.push(...dlg.querySelectorAll(sel));
+      all.forEach(b => b.addEventListener('click', fn));
+    };
     btn('.pafta-in', () => step(1.5));
     btn('.pafta-out', () => step(1 / 1.5));
 

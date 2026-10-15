@@ -160,6 +160,11 @@ test('the sample sheet section', () => {
   assert.ok(html.includes('alt="Örnek pafta: çelik endüstriyel yapının çerçeve görünüşü ve kolon–makas birleşim detayı"'));
   assert.match(html, /<a href="\/assets\/senkon\/ornek-pafta\.svg">Paftayı büyük açın<\/a>/);
   assert.ok(html.includes('<dialog class="pafta-dlg"'));
+  const dlg = html.slice(html.indexOf('<dialog class="pafta-dlg"'), html.indexOf('</dialog>'));
+  assert.ok(dlg.includes('<button type="button" class="pafta-in" aria-label="Yakınlaştır">+</button>'), 'the dialog has its own + button');
+  assert.ok(dlg.includes('<button type="button" class="pafta-out" aria-label="Uzaklaştır">−</button>'), 'the dialog has its own − button');
+  assert.ok(dlg.includes('<button type="button" class="pafta-close">Kapat</button>'));
+  assert.ok(!dlg.includes('pafta-full'));
   assert.equal((html.match(/pafta\.js\?v=/g) || []).length, 1);
   const at = id => html.indexOf('id="' + id + '"');
   assert.ok(at('yaklasim') < at('adimlar') && at('adimlar') < at('ornek-pafta') && at('ornek-pafta') < at('iletisim'));

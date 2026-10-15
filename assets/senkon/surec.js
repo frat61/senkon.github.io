@@ -1,4 +1,4 @@
-/* The "Nasıl çalışıyoruz" story on deprem-performans/: the six step pictures in figure.surec-stage play one
+/* The "Nasıl çalışıyoruz" story on deprem-performans/ and tasarim/: the six step pictures in figure.surec-stage play one
    after another (5 s each: the new one is drawn in stroke by stroke like a pen sketch over 2.5 s, with a slow
    zoom, and a cross-fade) while the matching step in ol.steps is lit. Clicking a
    step, Önceki or Sonraki jumps there and pauses; 6 s without a touch and it resumes. A mouse resting on the

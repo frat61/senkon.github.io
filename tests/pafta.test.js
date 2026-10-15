@@ -3,7 +3,7 @@
 // the DOM part needs a browser.
 const test = require('node:test');
 const assert = require('node:assert/strict');
-const { view, zoomAt, pan, toggle, touchAction, echo } = require('../assets/senkon/pafta.js');
+const { view, zoomAt, pan, toggle, touchAction, echo, wheelZooms, wheelPixels, tapped } = require('../assets/senkon/pafta.js');
 
 test('view shows the whole sheet at scale 1', () => {
   assert.deepEqual(view(400, 283), { s: 1, x: 0, y: 0, w: 400, h: 283 });
@@ -45,4 +45,24 @@ test('echo flags a dblclick within 500 ms of a touch toggle', () => {
   assert.equal(echo(null, 1000), false);
   assert.equal(echo(1000, 1300), true);
   assert.equal(echo(1000, 1600), false);
+});
+
+test('wheelZooms: on the page only a pinch (ctrl + wheel) or an already zoomed sheet takes the wheel; in the dialog it always does', () => {
+  assert.equal(wheelZooms(false, 1, false), false);   // a plain wheel over the whole sheet scrolls the page
+  assert.equal(wheelZooms(true, 1, false), true);
+  assert.equal(wheelZooms(false, 2, false), true);
+  assert.equal(wheelZooms(false, 1, true), true);
+});
+
+test('wheelPixels turns line and page deltas into pixels', () => {
+  assert.equal(wheelPixels(100, 0, 800), 100);
+  assert.equal(wheelPixels(3, 1, 800), 48);
+  assert.equal(wheelPixels(1, 2, 800), 800);
+});
+
+test('tapped: a pointer that moved past the slop or was part of a pinch is not a tap', () => {
+  assert.equal(tapped([10, 10], [12, 13], false), true);
+  assert.equal(tapped([10, 10], [40, 10], false), false);
+  assert.equal(tapped([10, 10], [10, 10], true), false);
+  assert.equal(tapped(undefined, [10, 10], false), false);
 });

@@ -4,7 +4,7 @@
    site.css, the fonts, the scripts and the drawings it uses with a ?v= tag that must change whenever
    the file does. The tag is the first eight hex digits of the file's SHA-1; a drawing's tag also
    covers its JSON sidecar, because skyline.js fetches the JSON with the picture's tag. Every file in
-   LINKS must be linked by at least one page (the story pictures live only on deprem-performans/);
+   LINKS must be linked by at least one page (each story page, deprem-performans/ and tasarim/, has its own pictures);
    404.html and the sub-pages link with a leading slash, since they are served from a folder.
      node tools/versions.js          rewrites the tags in index.html, 404.html and the sub-pages
      node tools/versions.js --check  prints the stale ones and exits 1 (what tests/versions.test.js does) */
@@ -28,7 +28,7 @@ const LINKS = {
   'assets/senkon/ornek-pafta.svg': ['assets/senkon/ornek-pafta.svg'],
   'assets/senkon/upload.js': ['assets/senkon/upload.js'],                       // the file box in the tasarim/ form
   'model/config.js': ['model/config.js'],                                       // its Supabase address and publishable key
-  'assets/senkon/surec.js': ['assets/senkon/surec.js'],                         // the story on deprem-performans/ only
+  'assets/senkon/surec.js': ['assets/senkon/surec.js'],                         // the story on deprem-performans/ and tasarim/
   'assets/senkon/surec/01.webp': ['assets/senkon/surec/01.webp'],
   'assets/senkon/surec/02.webp': ['assets/senkon/surec/02.webp'],
   'assets/senkon/surec/03.webp': ['assets/senkon/surec/03.webp'],
