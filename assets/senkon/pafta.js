@@ -26,8 +26,9 @@
   function pan(v, dx, dy) { return clampPan({ s: v.s, x: v.x + dx, y: v.y + dy, w: v.w, h: v.h }); }
   function toggle(v, px, py) { return v.s === 1 ? zoomAt(v, TAP, px, py) : view(v.w, v.h); }
   function touchAction(s) { return s === 1 ? 'pan-y' : 'none'; }
+  function echo(last, now) { return last != null && now - last < 500; }   // a dblclick right after a touch toggle is the browser's echo of it
 
-  if (typeof module !== 'undefined') module.exports = { view, zoomAt, pan, toggle, touchAction };
+  if (typeof module !== 'undefined') module.exports = { view, zoomAt, pan, toggle, touchAction, echo };
   if (typeof document === 'undefined') return;
 
   const fig = document.querySelector('figure.pafta'), img = fig && fig.querySelector('img.pafta-static');
@@ -50,7 +51,7 @@
   function start(svg, sheet) {
     let v = view(VBW, VBH), ox = 0, oy = 0, k = 1;      // k: CSS px per viewBox unit; ox, oy: letterbox offset
     const ptrs = new Map();
-    let lastTap = null, pinch = 0;
+    let lastTap = null, pinch = 0, toggledAt = null;
 
     function measure() {                                 // the sheet is drawn "meet" inside the svg box
       const r = svg.getBoundingClientRect();
@@ -99,12 +100,12 @@
       if (!had || e.type !== 'pointerup' || e.pointerType === 'mouse') return;   // a mouse uses dblclick
       const now = e.timeStamp;
       if (lastTap && now - lastTap.t < 300 && Math.hypot(e.clientX - lastTap.x, e.clientY - lastTap.y) < 10) {
-        const [px, py] = local(e); v = toggle(v, px, py); apply(); lastTap = null;
+        const [px, py] = local(e); v = toggle(v, px, py); apply(); lastTap = null; toggledAt = now;
       } else lastTap = { t: now, x: e.clientX, y: e.clientY };
     }
     svg.addEventListener('pointerup', up);
     svg.addEventListener('pointercancel', up);
-    svg.addEventListener('dblclick', e => { const [px, py] = local(e); v = toggle(v, px, py); apply(); });
+    svg.addEventListener('dblclick', e => { if (echo(toggledAt, e.timeStamp)) return; const [px, py] = local(e); v = toggle(v, px, py); apply(); });
 
     function step(f) { v = zoomAt(v, f, v.w / 2, v.h / 2); apply(); }
     const btn = (sel, fn) => { const b = fig.querySelector(sel); if (b) b.addEventListener('click', fn); };
