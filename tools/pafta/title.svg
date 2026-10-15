@@ -1,0 +1,21 @@
+<!-- The title block, bottom right, in sheet millimetres. Hand-written; the wording is fixed by the plan. -->
+<rect x="236" y="222" width="174" height="65" stroke-width="0.5"/>
+<path d="M236 236H410M236 258H410M236 272H410M368 222V258M294 272V287M352 272V287" stroke-width="0.25"/>
+<g fill="#000" stroke="none">
+  <text x="240" y="231.2" font-size="3.5" font-weight="600">Senkon Mühendislik</text>
+  <text x="371" y="226.8" font-size="2.5" fill="#555">PAFTA NO</text>
+  <text x="371" y="233.2" font-size="3.5" font-weight="600">Ö-01</text>
+  <text x="240" y="243.5" font-size="3.5" font-weight="600">ÖRNEK PAFTA</text>
+  <text x="240" y="249.5" font-size="2.5">Çelik çerçeve görünüşü, kolon başlığı detayı</text>
+  <text x="240" y="254.5" font-size="2.5">6 aksı çerçevesi · Detay 1 · Kesit A–A</text>
+  <text x="371" y="240.8" font-size="2.5" fill="#555">ÖLÇEK</text>
+  <text x="371" y="247" font-size="2.5">1/500 görünüş</text>
+  <text x="371" y="252.5" font-size="2.5">1/10 detay, kesit</text>
+  <text x="240" y="266.6" font-size="2.5">Çizim standardını göstermek amacıyla hazırlanmıştır; gerçek bir projeye ait değildir.</text>
+  <text x="240" y="277" font-size="2.5" fill="#555">FORMAT</text>
+  <text x="240" y="283" font-size="2.5">A3</text>
+  <text x="298" y="277" font-size="2.5" fill="#555">BİRİM</text>
+  <text x="298" y="283" font-size="2.5">mm, kotlar m</text>
+  <text x="356" y="277" font-size="2.5" fill="#555">REVİZYON</text>
+  <text x="356" y="283" font-size="2.5">0</text>
+</g>
