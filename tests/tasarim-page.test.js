@@ -37,7 +37,7 @@ test('written, not listed: no eyebrows, no numbered items, no checklist box, no 
   assert.doesNotMatch(html, /class="eyebrow"/);
   assert.doesNotMatch(html, /class="num"/);
   assert.doesNotMatch(html, /class="(list2|perf-get|faq)"/);
-  assert.doesNotMatch(html, /<ul/);
+  assert.doesNotMatch(html.replace(/<form class="lead-form"[\s\S]*?<\/form>/, ''), /<ul/);   // the form's file list is the one list
   assert.equal((html.match(/<ol/g) || []).length, 1);
   assert.ok(html.includes('<ol class="steps steps-plain">'));
 });
@@ -105,6 +105,24 @@ test('contact: WhatsApp quote button at the top, in İletişim and in the dock; 
   assert.match(f, /href="\/kvkk\/"/);
   assert.match(html, /<p class="lead-done" hidden>/);
   assert.match(html, /document\.querySelector\('\.hero'\)/);   // the phone dock hides while the hero is on screen
+});
+
+test('the form has a file box (hidden until upload.js attaches) whose input has no name, and a hidden dosyalar summary', () => {
+  const f = html.match(/<form class="lead-form"[\s\S]*?<\/form>/)[0];
+  const box = f.match(/<div class="lead-files wide" hidden>[\s\S]*?<\/ul>\s*<\/div>/);
+  assert.ok(box, 'no .lead-files box in the form');
+  const b = box[0];
+  assert.match(b, /<input type="file" multiple accept="\.pdf,\.dwg,\.dxf,\.ifc,\.zip,\.jpg,\.jpeg,\.png">/);
+  assert.doesNotMatch(f, /<input type="file"[^>]*name=/);   // track.js posts new FormData(form): Formspree must not get the files
+  assert.match(b, /<label>Planlarınızı ekleyin/);
+  assert.ok(b.includes('PDF, DWG, DXF, IFC, ZIP, JPG veya PNG · dosya başına en fazla 50 MB'));
+  assert.match(b, /<ul class="lead-flist"><\/ul>/);
+  assert.ok(f.indexOf('name="mesaj"') < f.indexOf('lead-files'));
+  assert.match(f, /name="_subject"[^>]*>\s*<input type="hidden" name="dosyalar" value="">/);
+  assert.equal((html.match(/<script src="\/model\/config\.js\?v=[0-9a-f]{8}" defer><\/script>/g) || []).length, 1);
+  assert.equal((html.match(/<script src="\/assets\/senkon\/upload\.js\?v=[0-9a-f]{8}" defer><\/script>/g) || []).length, 1);
+  assert.ok(html.indexOf('/assets/senkon/upload.js?v=') > html.indexOf('/assets/senkon/track.js?v='));
+  assert.ok(html.indexOf('/assets/senkon/upload.js?v=') > html.indexOf('/model/config.js?v='));
 });
 
 test('firm voice: no personal names, no premium, no 6306, no slogans in headings', () => {

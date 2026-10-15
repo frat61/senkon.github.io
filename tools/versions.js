@@ -26,6 +26,8 @@ const LINKS = {
   'assets/senkon/hal.webp': ['assets/senkon/hal.webp', 'assets/senkon/hal.json'],  // its still and the member JSON hal.js fetches with the still's tag
   'assets/senkon/pafta.js': ['assets/senkon/pafta.js'],                         // the sample-sheet viewer on tasarim/
   'assets/senkon/ornek-pafta.svg': ['assets/senkon/ornek-pafta.svg'],
+  'assets/senkon/upload.js': ['assets/senkon/upload.js'],                       // the file box in the tasarim/ form
+  'model/config.js': ['model/config.js'],                                       // its Supabase address and publishable key
   'assets/senkon/surec.js': ['assets/senkon/surec.js'],                         // the story on deprem-performans/ only
   'assets/senkon/surec/01.webp': ['assets/senkon/surec/01.webp'],
   'assets/senkon/surec/02.webp': ['assets/senkon/surec/02.webp'],

@@ -30,7 +30,7 @@
 }
 </script>
 <link rel="stylesheet" href="/assets/senkon/fonts/fonts.css?v=5a84d35c">
-<link rel="stylesheet" href="/site.css?v=a10f5a05">
+<link rel="stylesheet" href="/site.css?v=60816583">
 </head>
 <body>
 <!-- Yapı tasarımı sayfası (mimar, müteahhit ve yatırımcılara yönelik Google reklamlarının açacağı sayfa). Yazılar METİN T1-T6 işaretleriyle gruplanmıştır. -->
@@ -137,7 +137,13 @@
         <label>Şehir<input type="text" name="sehir" autocomplete="address-level2" placeholder="İstanbul"></label>
         <label>Proje türü<input type="text" name="proje_turu" placeholder="Çelik depo, betonarme konut…"></label>
         <label class="wide">Mesaj<textarea name="mesaj" placeholder="Yaklaşık m², kat sayısı, hedeflenen teslim tarihi…"></textarea></label>
+        <div class="lead-files wide" hidden>
+          <label>Planlarınızı ekleyin<input type="file" multiple accept=".pdf,.dwg,.dxf,.ifc,.zip,.jpg,.jpeg,.png"><span class="lead-drop">Dosyaları buraya sürükleyin ya da seçmek için tıklayın</span></label>
+          <p class="lead-hint">PDF, DWG, DXF, IFC, ZIP, JPG veya PNG · dosya başına en fazla 50 MB</p>
+          <ul class="lead-flist"></ul>
+        </div>
         <input type="hidden" name="_subject" value="senkonmuhendislik.com · yeni proje talebi">
+        <input type="hidden" name="dosyalar" value="">
         <label class="gotcha" aria-hidden="true">Boş bırakın<input type="text" name="_gotcha" tabindex="-1" autocomplete="off"></label>
         <p class="lead-err" hidden>Gönderilemedi. Lütfen tekrar deneyin ya da WhatsApp'tan yazın.</p>
         <div class="lead-foot">
@@ -162,6 +168,8 @@
 <script src="/assets/senkon/hal.js?v=4683c589" defer></script>
 <script src="/assets/senkon/surec.js?v=6efee5d4" defer></script>
 <script src="/assets/senkon/pafta.js?v=4990c553" defer></script>
+<script src="/model/config.js?v=144bae90" defer></script>
+<script src="/assets/senkon/upload.js?v=3c25e4f2" defer></script>
 <script>
 (function () {
   // phone menu: the Menü button shows the nav as a column under the header

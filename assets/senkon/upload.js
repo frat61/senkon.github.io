@@ -43,6 +43,107 @@
     return 'talepler/' + folder + ': ' + files.map(f => f.name + ' (' + mb(f.size) + ' MB)').join('; ');
   }
 
-  if (typeof module !== 'undefined') module.exports = { EXT, MAX_FILES, MAX_BYTES, PATH_RE, cleanName, folderName, check, summary };
+  /* The file box in the form. Each chosen or dropped file is checked, gets a row, and uploads at once by
+     XMLHttpRequest (for the progress bar) to POST <url>/storage/v1/object/talepler/<folder>/<name>. One folder per
+     visit, made when the first file arrives. While anything uploads, Gönder waits; after every change the hidden
+     dosyalar field is rewritten with the uploaded files, by the names they are stored under. The file input has no
+     name, so the form post (track.js) never carries the files themselves. opts = { url, key, XHR, now, rand }. */
+  function attach(form, opts) {
+    const doc = form.ownerDocument, XHR = opts.XHR || XMLHttpRequest;
+    const now = opts.now || (() => new Date()), rand = opts.rand || Math.random;
+    const box = form.querySelector('.lead-files'), input = box.querySelector('input[type="file"]'), list = box.querySelector('.lead-flist');
+    const out = form.querySelector('input[name="dosyalar"]'), btn = form.querySelector('button[type="submit"]');
+    const label = btn.textContent, files = [], used = {};
+    let folder = null, held = false;
+    const msg = doc.createElement('p');
+    msg.className = 'lead-fmsg'; msg.hidden = true; msg.setAttribute('role', 'status');
+    box.appendChild(msg);
+
+    const el = (tag, cls, text) => { const e = doc.createElement(tag); if (cls) e.className = cls; if (text) e.textContent = text; return e; };
+    function busy() { return files.some(f => f.state === 'up'); }
+    function refresh() {
+      // only release the button this box held, so the form's own sending state (track.js) is left alone
+      if (busy() && !held) { held = true; btn.disabled = true; btn.textContent = 'Dosyalar yükleniyor…'; }
+      else if (!busy() && held) { held = false; btn.disabled = false; btn.textContent = label; }
+      out.value = summary(folder, files.filter(f => f.state === 'done').map(f => ({ name: f.path.slice(folder.length + 1), size: f.size })));
+    }
+    function pathFor(name) {   // two names can clean to the same one; the bucket refuses a second object under a name
+      const c = cleanName(name), dot = c.lastIndexOf('.');
+      let p = folder + '/' + c;
+      for (let i = 2; used[p]; i++) p = folder + '/' + c.slice(0, dot) + '-' + i + c.slice(dot);
+      used[p] = true;
+      return p;
+    }
+    function draw(f) {
+      const row = f.row;
+      row.textContent = '';
+      row.className = 'lead-frow ' + f.state;
+      row.appendChild(el('span', 'lead-fname', f.name));
+      row.appendChild(el('span', 'lead-fsize', mb(f.size) + ' MB'));
+      const bar = row.appendChild(el('span', 'lead-fbar')), fill = bar.appendChild(el('i'));
+      fill.style.width = f.pct + '%';
+      row.appendChild(el('span', 'lead-fstate', f.state === 'up' ? '%' + f.pct : f.state === 'done' ? 'Yüklendi' : 'Yüklenemedi, tekrar deneyin'));
+      if (f.state === 'fail') {
+        const again = row.appendChild(el('button', 'lead-retry', 'Tekrar dene'));
+        again.type = 'button';
+        again.addEventListener('click', () => send(f));
+      }
+      const x = row.appendChild(el('button', 'lead-x', '×'));
+      x.type = 'button';
+      x.setAttribute('aria-label', f.name + ' dosyasını kaldır');
+      x.addEventListener('click', () => drop(f));
+    }
+    function set(f, state, pct) { f.state = state; f.pct = pct; draw(f); refresh(); }
+    function send(f) {
+      const r = new XHR();
+      f.xhr = r;
+      r.open('POST', opts.url + '/storage/v1/object/talepler/' + f.path);
+      r.setRequestHeader('apikey', opts.key);
+      r.setRequestHeader('Authorization', 'Bearer ' + opts.key);
+      r.setRequestHeader('x-upsert', 'false');
+      r.setRequestHeader('Content-Type', f.file.type || 'application/octet-stream');
+      r.upload.onprogress = e => { if (e.lengthComputable && f.xhr === r) { f.pct = Math.min(99, Math.round(e.loaded / e.total * 100)); draw(f); } };
+      r.onload = () => { if (f.xhr === r) set(f, r.status >= 200 && r.status < 300 ? 'done' : 'fail', r.status >= 200 && r.status < 300 ? 100 : 0); };
+      r.onerror = () => { if (f.xhr === r) set(f, 'fail', 0); };
+      set(f, 'up', 0);
+      r.send(f.file);
+    }
+    function drop(f) {   // anon cannot delete: a removed upload stays in the bucket and is cleared from the owner panel
+      const i = files.indexOf(f);
+      if (i < 0) return;
+      files.splice(i, 1);
+      if (f.state === 'up') f.xhr.abort();
+      f.xhr = null;
+      f.row.remove();
+      refresh();
+    }
+    function add(chosen) {
+      const refused = [];
+      for (const file of Array.prototype.slice.call(chosen || [])) {
+        const why = check(file, files);
+        if (why) { refused.push(file.name + ': ' + why); continue; }
+        if (!folder) folder = folderName(now(), rand);
+        const f = { name: file.name, size: file.size, path: pathFor(file.name), state: 'up', pct: 0, file, xhr: null, row: el('li') };
+        files.push(f);
+        list.appendChild(f.row);
+        send(f);
+      }
+      msg.textContent = refused.join('\n');
+      msg.hidden = !refused.length;
+    }
+
+    input.addEventListener('change', () => { add(input.files); input.value = ''; });
+    box.addEventListener('dragover', e => { e.preventDefault(); box.classList.add('drag'); });
+    box.addEventListener('dragleave', () => box.classList.remove('drag'));
+    box.addEventListener('drop', e => { e.preventDefault(); box.classList.remove('drag'); add(e.dataTransfer && e.dataTransfer.files); });
+    box.hidden = false;
+    return { files, busy };
+  }
+
+  if (typeof module !== 'undefined') module.exports = { EXT, MAX_FILES, MAX_BYTES, PATH_RE, cleanName, folderName, check, summary, attach };
   if (typeof document === 'undefined') return;
+
+  const form = document.querySelector('.lead-form'), cfg = window.SENKON_CONFIG || {};
+  if (form && !form.hidden && form.querySelector('.lead-files') && cfg.SUPABASE_URL && cfg.SUPABASE_ANON_KEY)
+    attach(form, { url: cfg.SUPABASE_URL, key: cfg.SUPABASE_ANON_KEY });
 })();
