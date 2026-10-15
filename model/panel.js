@@ -6,7 +6,7 @@
   const C = window.SENKON_CONFIG || {}, I = SenkonIngest;
   const SITE = 'https://senkonmuhendislik.com/model/?m=';
   const state = $('state');
-  let sb = null, models = [], replacing = null, delTarget = null, authed = false, working = false;
+  let sb = null, models = [], replacing = null, delTarget = null, authed = false, working = false, delFolder = null;
 
   const say = (el, msg) => { el.textContent = msg || ''; };
   const step = (text, p) => { $('addStep').textContent = text; if (p !== undefined) $('addProg').value = p; };
@@ -25,8 +25,8 @@
     });
   }
   function showAuth(on) {
-    state.hidden = true; $('login').hidden = on; $('list').hidden = !on; $('topActions').hidden = !on;
-    if (on) refresh(); else { models = []; $('cards').innerHTML = ''; }
+    state.hidden = true; $('login').hidden = on; $('list').hidden = !on; $('topActions').hidden = !on; $('inbox').hidden = !on;
+    if (on) { refresh(); loadInbox(); } else { models = []; $('cards').innerHTML = ''; $('inboxList').innerHTML = ''; }
   }
   $('loginForm').onsubmit = async e => {
     e.preventDefault(); say($('loginMsg'), '');
@@ -164,8 +164,53 @@
     if (up.error) throw new Error('Kayıt güncellenemedi: ' + up.error.message);
   }
 
+  // ---- inbox: files visitors sent from /tasarim/, one folder per request in the private "talepler" bucket
+  const BUCKET = 'talepler', FOLDER = /^[0-9]{8}-[a-z0-9]{12}$/i;
+  const mb = n => (n / 1048576).toFixed(1).replace('.', ',') + ' MB';
+  const folderDate = f => f.slice(6, 8) + '.' + f.slice(4, 6) + '.' + f.slice(0, 4);
+  async function loadInbox() {
+    const box = $('inboxList'), msg = $('inboxMsg'); say(msg, '');
+    const top = await sb.storage.from(BUCKET).list('', { limit: 100, sortBy: { column: 'name', order: 'desc' } });
+    if (top.error) { box.innerHTML = ''; $('inboxEmpty').hidden = true; return say(msg, 'Dosyalar alınamadı: ' + top.error.message); }
+    const names = (top.data || []).map(f => f.name).filter(n => FOLDER.test(n));
+    const lists = await Promise.all(names.map(n => sb.storage.from(BUCKET).list(n, { limit: 100, sortBy: { column: 'name', order: 'asc' } })));
+    box.innerHTML = ''; let shown = 0;
+    names.forEach((folder, i) => {
+      if (lists[i].error) return say(msg, 'Dosyalar alınamadı: ' + lists[i].error.message);
+      const files = (lists[i].data || []).filter(f => f.id);
+      if (!files.length) return;
+      shown++;
+      const card = document.createElement('article'); card.className = 'icard';
+      const head = document.createElement('div'); head.className = 'ihead';
+      const h = document.createElement('h3'); h.textContent = folderDate(folder);
+      const del = document.createElement('button'); del.className = 'danger'; del.textContent = 'Sil';
+      del.onclick = () => askDeleteFolder(folder, files.map(f => folder + '/' + f.name));
+      head.append(h, del); card.appendChild(head);
+      files.forEach(f => {
+        const row = document.createElement('div'); row.className = 'irow';
+        const label = document.createElement('span'); label.textContent = f.name + ' · ' + mb((f.metadata && f.metadata.size) || 0);
+        const get = document.createElement('button'); get.textContent = 'İndir';
+        get.onclick = () => download(folder + '/' + f.name);
+        row.append(label, get); card.appendChild(row);
+      });
+      box.appendChild(card);
+    });
+    $('inboxEmpty').hidden = shown > 0;
+  }
+  async function download(path) {
+    const win = window.open('', '_blank');   // opened in the click so popup blockers allow it
+    const { data, error } = await sb.storage.from(BUCKET).createSignedUrl(path, 600);
+    if (error || !data) { if (win) win.close(); return say($('inboxMsg'), 'Bağlantı oluşturulamadı: ' + (error ? error.message : '')); }
+    if (win) win.location.href = data.signedUrl; else window.location.href = data.signedUrl;
+  }
+  function askDeleteFolder(folder, paths) {
+    delFolder = { folder, paths }; delTarget = null;
+    $('delAsk').textContent = 'Bu talebin dosyalarını silmek istediğinize emin misiniz?';
+    $('delName').textContent = folderDate(folder) + ' · ' + paths.length + ' dosya'; say($('delMsg'), ''); $('delDlg').showModal();
+  }
+
   // ---- delete
-  function askDelete(m) { delTarget = m; $('delName').textContent = m.name; say($('delMsg'), ''); $('delDlg').showModal(); }
+  function askDelete(m) { delTarget = m; delFolder = null; $('delAsk').textContent = 'Bu modeli silmek istediğinize emin misiniz?'; $('delName').textContent = m.name; say($('delMsg'), ''); $('delDlg').showModal(); }
   $('delCancel').onclick = () => $('delDlg').close();
   $('linkClose').onclick = () => $('linkDlg').close();
   $('addDlg').addEventListener('cancel', e => { if (working) e.preventDefault(); });
@@ -173,6 +218,11 @@
   $('delOk').onclick = async () => {
     const m = delTarget; $('delOk').disabled = true; say($('delMsg'), '');
     try {
+      if (delFolder) {
+        const { error } = await sb.storage.from(BUCKET).remove(delFolder.paths);
+        if (error) throw new Error('Dosyalar silinemedi: ' + error.message);
+        $('delDlg').close(); delFolder = null; await loadInbox(); $('delOk').disabled = false; return;
+      }
       if (m.kind === 'file' && m.file_path) { const { error } = await sb.storage.from('models').remove([m.file_path]); if (error) throw new Error('Dosya silinemedi: ' + error.message); }
       const { error } = await sb.from('models').delete().eq('id', m.id);
       if (error) throw new Error('Kayıt silinemedi: ' + error.message);

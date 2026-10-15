@@ -6,7 +6,7 @@
 <meta name="robots" content="noindex, nofollow">
 <title>Modeller – SENKON</title>
 <link rel="stylesheet" href="viewer.css?v=20261009">
-<link rel="stylesheet" href="panel.css?v=20261009">
+<link rel="stylesheet" href="panel.css?v=20261015">
 </head>
 <body class="panel">
 <header id="top">
@@ -28,6 +28,12 @@
     <p id="empty" hidden>Henüz model yok. "Model ekle" ile başlayın.</p>
     <div id="cards"></div>
   </section>
+  <section id="inbox" hidden>
+    <h2>Gelen dosyalar</h2>
+    <p id="inboxEmpty" hidden>Henüz dosya yok.</p>
+    <p id="inboxMsg" class="msg" role="alert"></p>
+    <div id="inboxList"></div>
+  </section>
 </main>
 <dialog id="addDlg">
   <form id="addForm" novalidate>
@@ -43,7 +49,7 @@
   </form>
 </dialog>
 <dialog id="delDlg">
-  <p>Bu modeli silmek istediğinize emin misiniz?</p>
+  <p id="delAsk">Bu modeli silmek istediğinize emin misiniz?</p>
   <p id="delName"></p>
   <p id="delMsg" class="msg" role="alert"></p>
   <div class="actions"><button id="delCancel">Vazgeç</button><button id="delOk" class="danger">Sil</button></div>
@@ -79,6 +85,6 @@
 <script src="slug.js"></script>
 <script src="ingest.js"></script>
 <script src="ifc2glb.js"></script>
-<script src="panel.js?v=20261009"></script>
+<script src="panel.js?v=20261015"></script>
 </body>
 </html>

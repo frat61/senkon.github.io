@@ -29,3 +29,11 @@ dialog::backdrop{background:#0006}
 .actions{display:flex;justify-content:flex-end;gap:8px;margin-top:12px}
 #thumbStage{position:fixed;left:-9999px;top:0;width:480px;height:300px;pointer-events:none}
 #empty{color:var(--muted)}
+#inbox{margin-top:28px}
+#inbox h2{font-size:16px;margin:0 0 10px}
+#inboxList{display:grid;grid-template-columns:repeat(auto-fill,minmax(300px,1fr));gap:14px}
+.icard{background:var(--panel);border:1px solid var(--line);border-radius:6px;padding:10px 12px}
+.ihead{display:flex;align-items:center;justify-content:space-between;gap:8px;margin-bottom:6px}
+.ihead h3{font-size:14.5px;margin:0;font-weight:650}
+.irow{display:flex;align-items:center;justify-content:space-between;gap:8px;padding:5px 0;border-top:1px solid var(--line);font-size:12.5px}
+.irow span{overflow-wrap:anywhere}
