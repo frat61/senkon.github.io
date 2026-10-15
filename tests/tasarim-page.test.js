@@ -43,7 +43,8 @@ test('written, not listed: no eyebrows, no numbered items, no checklist box, no 
 test('the two arguments, side by side and in this order, with linear and nonlinear named', () => {
   assert.deepEqual(h2s.slice(0, 2), ['Optimize çözümler', 'İleri mühendislik çözümleri']);
   assert.match(html, /<div class="mv tsr-two">/);
-  assert.match(html, /Lineer ve nonlineer çözümler /);
+  assert.match(html, /lineer veya nonlineer/);
+  assert.doesNotMatch(html, /aynı model üzerinde|teklif aşamasında belirlenir/);   // Fırat: that claim was controversial
 });
 
 test('optimisation never reads as saving on safety (Fırat): no "en az malzeme", the codes are the fixed floor', () => {
