@@ -1,9 +1,10 @@
 """Write one of the six "Nasıl çalışıyoruz" story pictures (assets/senkon/surec/0n.webp, 1200x900,
 greyscale WebP quality 80) that surec.js plays on the Deprem performans page.
 
-Usage: python tools/make-surec.py <in.png> <n>      converts a ChatGPT drawing (prompts in local/surec-prompts.md)
-       python tools/make-surec.py --placeholder <n>  writes a white card with the number, until the drawing exists
-n is 1..6. Needs Pillow (pip install pillow).
+Usage: python tools/make-surec.py [--dir <folder>] <in.png> <n>      converts a ChatGPT drawing (prompts in local/surec-prompts.md)
+       python tools/make-surec.py [--dir <folder>] --placeholder <n>  writes a white card with the number, until the drawing exists
+n is 1..6. --dir is a folder relative to the repo root (default assets/senkon/surec; the Tasarım page
+uses assets/senkon/tasarim-surec). Needs Pillow (pip install pillow).
 """
 import os
 import sys
@@ -39,6 +40,9 @@ def placeholder(n):
 
 if __name__ == '__main__':
     a = sys.argv[1:]
+    if len(a) >= 2 and a[0] == '--dir':
+        DIR = os.path.join(ROOT, a[1])
+        a = a[2:]
     if len(a) == 2 and a[0] == '--placeholder':
         placeholder(int(a[1]))
     elif len(a) == 2:
