@@ -2,7 +2,7 @@
 // tasarim/: the page the second ad campaign opens, for architects, contractors and investors who need
 // the structural design of a new building. Written, not listed (Fırat, 2026-10-14: the first version read as
 // generated): the headline with the steel hall beside it, two arguments side by side (optimize çözümler,
-// ileri mühendislik çözümleri), how the work goes as prose, the experience line, contact and the form.
+// ileri mühendislik çözümleri), how the work goes as prose, contact and the form.
 const test = require('node:test');
 const assert = require('node:assert/strict');
 const fs = require('fs');
@@ -70,9 +70,8 @@ test('how the work goes, as prose under #adimlar (the ad sitelink): report and d
   assert.doesNotMatch(html, /telefonda açılan|Revit|Tekla/);
 });
 
-test('experience: the one figure and only the cleared project names; never the Tuzla client, never Malatya', () => {
-  assert.match(html, /<p class="tsr-xp"><b>400\.000\+ m²<\/b>/);
-  assert.match(html, /Esenboğa/);
+test('no experience line on this page (Fırat, 2026-10-15: the home page carries it); never the Tuzla client, never Malatya', () => {
+  assert.doesNotMatch(html, /tsr-xp|400\.000/);
   assert.doesNotMatch(html, /Amazon/);
   assert.doesNotMatch(html, /Malatya/);
 });
