@@ -74,3 +74,9 @@ is random, so a model is reachable only by its link.
 The card shows the link; "Bağlantıyı kopyala" copies it. "Dosyayı değiştir" keeps the link and
 swaps the file. "Sil" removes the file and the row; the link then shows "Model bulunamadı".
 Limit: 50 MB per file. The IFC file itself never leaves your computer.
+
+## Tasarım requests bucket (once)
+
+SQL editor: run `docs/model/schema-talepler.sql` once, after `schema-stage2.sql`. It creates the private `talepler`
+bucket that receives the project files attached on `/tasarim/`: anonymous visitors may only insert, at a path of the
+shape the page builds; only the owner can read or delete.
