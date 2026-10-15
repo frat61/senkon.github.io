@@ -156,7 +156,7 @@
   if (typeof document === 'undefined') return;
   if (!('IntersectionObserver' in window)) return;
   if (matchMedia('(prefers-reduced-motion: reduce)').matches) return;
-  const fig = document.querySelector('.surec-stage'), list = fig && fig.parentNode.querySelector('ol.steps');
+  const fig = document.querySelector('.surec-stage'), surec = fig && fig.closest('.surec'), list = surec && surec.querySelector('ol.steps');   // the figure sits in .surec-pin with the heading; the steps are the block's other column
   if (!fig || !list) return;
   const api = setup(fig, list);
   let pen = null, last = 0;

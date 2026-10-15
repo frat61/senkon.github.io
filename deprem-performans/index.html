@@ -29,7 +29,7 @@
 }
 </script>
 <link rel="stylesheet" href="/assets/senkon/fonts/fonts.css?v=5a84d35c">
-<link rel="stylesheet" href="/site.css?v=47209f75">
+<link rel="stylesheet" href="/site.css?v=3ac37c86">
 </head>
 <body>
 <!-- Deprem performansı sayfası (Google reklamlarının açacağı sayfa). Yazılar METİN P1-P4 işaretleriyle gruplanmıştır. -->
@@ -52,9 +52,11 @@
 
   <!-- METİN P2 · ADIMLAR ve "Çalışmanın sonunda": h3 = adım adı, p = açıklama, li = liste satırları -->
   <section id="adimlar" class="wrap section perf rule">
-    <h2 class="perf-sub">Nasıl çalışıyoruz</h2>
-    <!-- the six step pictures: a plain strip without JavaScript; surec.js turns them into a story that follows the steps -->
+    <!-- the six step pictures: a plain strip without JavaScript; surec.js turns them into a story that follows the steps.
+         The heading sits in the picture's column, so on a desktop the pinned block starts with the words, not at the picture's edge -->
     <div class="surec">
+    <div class="surec-pin">
+    <h2 class="perf-sub">Nasıl çalışıyoruz</h2>
     <figure class="surec-stage" aria-label="Değerlendirme adımlarının çizimleri">
       <div class="surec-pic">
       <img src="/assets/senkon/surec/01.webp?v=c4b6e3c5" alt="Zemin etüdü: bina kesiti, zemin tabakaları ve çekiçle yapılan sismik serim" width="1200" height="900" loading="lazy">
@@ -66,6 +68,7 @@
       </div>
       <div class="surec-ctrl"><button type="button" class="surec-prev">← Önceki</button><button type="button" class="surec-next">Sonraki →</button><span class="surec-bar"><i></i></span></div>
     </figure>
+    </div>
     <ol class="steps">
       <li class="item"><span class="num" aria-hidden="true">01</span><h3>Zemin etüdü</h3><p>Bina çevresinde sismik serim (MASW) yapılır; zeminin dalga hızları ölçülür ve zeminin deprem dalgalarını nasıl büyüttüğü belirlenir. Varsa mevcut zemin raporu da kullanılır.</p></li>
       <li class="item"><span class="num" aria-hidden="true">02</span><h3>Karot testi</h3><p>Kolon ve perdelerden silindir beton numuneler alınır; betonun gerçek dayanımı laboratuvarda ölçülür.</p></li>
@@ -138,7 +141,7 @@
   <a class="btn btn-main" href="https://wa.me/905309250461?text=Merhaba%2C%20binam%20i%C3%A7in%20deprem%20performans%20de%C4%9Ferlendirmesi%20teklifi%20almak%20istiyorum.">WhatsApp</a>
   <a class="btn btn-line" href="mailto:firatsenturk@senkonmuhendislik.com">E-posta</a>
 </nav>
-<script src="/assets/senkon/surec.js?v=7fa19361" defer></script>
+<script src="/assets/senkon/surec.js?v=9db4c6b6" defer></script>
 <script src="/assets/senkon/track.js?v=7720eb1c" defer></script>
 <script>
 (function () {
