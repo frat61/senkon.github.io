@@ -51,8 +51,9 @@ test('optimisation never reads as saving on safety (Fırat): no "en az malzeme",
   assert.match(html, /yönetmeliklerin öngördüğü güvenlik düzeyi değişmeksizin/);
 });
 
-test('what we design, in a sentence: industrial, housing and commercial, airport and transport; no platform-and-roof line', () => {
-  assert.match(html, /endüstriyel yapılar, konut ve ticari yapılar, havalimanı ve ulaşım yapıları/);
+test('what we design, in a sentence: industrial, housing and commercial, airport; no transport line, no platform-and-roof line', () => {
+  assert.match(html, /endüstriyel yapılar, konut ve ticari yapılar, havalimanı yapıları/);
+  assert.doesNotMatch(html, /ulaşım yapıları/);
   assert.doesNotMatch(html, /Platform, çatı/);
 });
 
@@ -61,10 +62,11 @@ test('the codes Fırat works to, named in a sentence; never TS 500', () => {
   assert.doesNotMatch(html, /TS ?500/);
 });
 
-test('how the work goes, as prose under #adimlar (the ad sitelink): the model on a phone link, report and drawings; no prices', () => {
+test('how the work goes, as prose under #adimlar (the ad sitelink): report and drawings; no model link, no Revit/Tekla line (Fırat), no prices', () => {
   assert.match(html, /<section id="adimlar" class="wrap section rule tsr-how">\s*<h2>Nasıl çalışıyoruz<\/h2>/);
-  for (const w of ['telefonda açılan', 'hesap raporu', 'donatı', 'imalat ve montaj', 'IFC']) assert.ok(html.includes(w), w);
+  for (const w of ['hesap raporu', 'donatı', 'imalat ve montaj', 'IFC']) assert.ok(html.includes(w), w);
   assert.doesNotMatch(html, /\d\s?TL\b|₺|fiyat listesi/i);
+  assert.doesNotMatch(html, /telefonda açılan|Revit|Tekla/);
 });
 
 test('experience: the one figure and only the cleared project names; never the Tuzla client, never Malatya', () => {
