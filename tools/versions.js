@@ -31,6 +31,13 @@ const LINKS = {
   'assets/senkon/surec/04.webp': ['assets/senkon/surec/04.webp'],
   'assets/senkon/surec/05.webp': ['assets/senkon/surec/05.webp'],
   'assets/senkon/surec/06.webp': ['assets/senkon/surec/06.webp'],
+  // the story on tasarim/ only
+  'assets/senkon/tasarim-surec/01.webp': ['assets/senkon/tasarim-surec/01.webp'],
+  'assets/senkon/tasarim-surec/02.webp': ['assets/senkon/tasarim-surec/02.webp'],
+  'assets/senkon/tasarim-surec/03.webp': ['assets/senkon/tasarim-surec/03.webp'],
+  'assets/senkon/tasarim-surec/04.webp': ['assets/senkon/tasarim-surec/04.webp'],
+  'assets/senkon/tasarim-surec/05.webp': ['assets/senkon/tasarim-surec/05.webp'],
+  'assets/senkon/tasarim-surec/06.webp': ['assets/senkon/tasarim-surec/06.webp'],
 };
 
 function tag(files, root) {

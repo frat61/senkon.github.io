@@ -36,8 +36,10 @@ test('the steel hall stands beside the headline, in the home hero grid, with abs
 test('written, not listed: no eyebrows, no numbered items, no checklist box, no FAQ on this page', () => {
   assert.doesNotMatch(html, /class="eyebrow"/);
   assert.doesNotMatch(html, /class="num"/);
-  assert.doesNotMatch(html, /class="(steps|list2|perf-get|faq)"/);
-  assert.doesNotMatch(html, /<ol|<ul/);
+  assert.doesNotMatch(html, /class="(list2|perf-get|faq)"/);
+  assert.doesNotMatch(html, /<ul/);
+  assert.equal((html.match(/<ol/g) || []).length, 1);
+  assert.ok(html.includes('<ol class="steps steps-plain">'));
 });
 
 test('the two arguments, side by side and in this order, with linear and nonlinear named', () => {
@@ -63,11 +65,27 @@ test('the codes Fırat works to, named in a sentence; never TS 500', () => {
   assert.doesNotMatch(html, /TS ?500/);
 });
 
-test('how the work goes, as prose under #adimlar (the ad sitelink): report and drawings; no model link, no Revit/Tekla line (Fırat), no prices', () => {
-  assert.match(html, /<section id="adimlar" class="wrap section rule tsr-how">\s*<h2>Nasıl çalışıyoruz<\/h2>/);
+test('the story under #adimlar (the ad sitelink): six pictures, six captions, report and drawings; no model link, no Revit/Tekla line (Fırat), no prices', () => {
+  assert.match(html, /<section id="adimlar" class="wrap section rule tsr-how">[\s\S]*?<div class="surec-pin">\s*<h2>Nasıl çalışıyoruz<\/h2>/);
+  const imgs = [...html.matchAll(/<img src="\/assets\/senkon\/tasarim-surec\/(0[1-6])\.webp\?v=[0-9a-f]{8}" alt="([^"]+)" width="1200" height="900" loading="lazy">/g)];
+  assert.deepEqual(imgs.map(m => m[1]), ['01', '02', '03', '04', '05', '06']);
+  const items = [...html.matchAll(/<li class="item"><h3>([^<]+)<\/h3>/g)].map(m => m[1]);
+  assert.deepEqual(items, ['Mimari projenin incelenmesi', 'Taşıyıcı sistem seçimi', 'Analiz modeli', 'Birleşim detayları', 'Uygulama projesi', 'Şantiye desteği']);
+  assert.ok(html.includes('Önceki</button>') && html.includes('Sonraki'));
+  assert.equal((html.match(/surec\.js\?v=/g) || []).length, 1);
   for (const w of ['hesap raporu', 'donatı', 'imalat ve montaj', 'IFC']) assert.ok(html.includes(w), w);
   assert.doesNotMatch(html, /\d\s?TL\b|₺|fiyat listesi/i);
   assert.doesNotMatch(html, /telefonda açılan|Revit|Tekla/);
+});
+
+test('the hero sends the project to the form; WhatsApp is the second button', () => {
+  const hero = html.match(/<section class="wrap hero tsr-hero">[\s\S]*?<\/section>/)[0];
+  const btns = [...hero.matchAll(/<a class="(btn [^"]+)" href="([^"]+)">([^<]+)<\/a>/g)];
+  assert.deepEqual(btns[0].slice(1), ['btn btn-main', '#iletisim', 'Projeyi gönderin, teklif alın']);
+  assert.equal(btns[1][1], 'btn btn-line');
+  assert.match(btns[1][2], /^https:\/\/wa\.me\/905309250461\?text=/);
+  assert.equal(btns[1][3], 'WhatsApp ile yazın');
+  assert.doesNotMatch(hero, /href="#adimlar"/);
 });
 
 test('no experience line on this page (Fırat, 2026-10-15: the home page carries it); never the Tuzla client, never Malatya', () => {
@@ -77,7 +95,7 @@ test('no experience line on this page (Fırat, 2026-10-15: the home page carries
 });
 
 test('contact: WhatsApp quote button at the top, in İletişim and in the dock; e-mail; the form with a project-type field', () => {
-  assert.ok((html.match(quote) || []).length >= 3);
+  assert.ok((html.match(quote) || []).length >= 2);
   assert.match(html, /href="mailto:firatsenturk@senkonmuhendislik\.com"/);
   const form = html.match(/<form class="lead-form"[\s\S]*?<\/form>/);
   assert.ok(form, 'no .lead-form');
