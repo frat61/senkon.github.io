@@ -24,6 +24,8 @@ const LINKS = {
   'assets/senkon/skyline.webp': ['assets/senkon/skyline.webp', 'assets/senkon/skyline.json'],
   'assets/senkon/hal.js': ['assets/senkon/hal.js'],                             // the steel hall erection in the hero
   'assets/senkon/hal.webp': ['assets/senkon/hal.webp', 'assets/senkon/hal.json'],  // its still and the member JSON hal.js fetches with the still's tag
+  'assets/senkon/pafta.js': ['assets/senkon/pafta.js'],                         // the sample-sheet viewer on tasarim/
+  'assets/senkon/ornek-pafta.svg': ['assets/senkon/ornek-pafta.svg'],
   'assets/senkon/surec.js': ['assets/senkon/surec.js'],                         // the story on deprem-performans/ only
   'assets/senkon/surec/01.webp': ['assets/senkon/surec/01.webp'],
   'assets/senkon/surec/02.webp': ['assets/senkon/surec/02.webp'],

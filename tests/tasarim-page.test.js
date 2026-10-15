@@ -133,3 +133,16 @@ test('the sitemap lists the page, the versions tool checks it, and the home page
   assert.ok(require(path.join(root, 'tools', 'versions.js')).PAGES.includes('tasarim/index.html'));
   assert.match(fs.readFileSync(path.join(root, 'index.html'), 'utf8'), /<a class="hero-more" href="tasarim\/">/);
 });
+
+test('the sample sheet section', () => {
+  assert.match(html, /<section id="ornek-pafta" class="wrap section rule">/);
+  assert.ok(html.includes('<h2>Örnek pafta</h2>'));
+  assert.ok(html.includes('Uygulama projelerimizin çizim standardını gösteren örnek bir paftadır; gerçek bir projeye ait değildir.'));
+  assert.match(html, /<img class="pafta-static" src="\/assets\/senkon\/ornek-pafta\.svg\?v=[0-9a-f]{8}"/);
+  assert.ok(html.includes('alt="Örnek pafta: çelik endüstriyel yapının çerçeve görünüşü ve kolon–makas birleşim detayı"'));
+  assert.match(html, /<a href="\/assets\/senkon\/ornek-pafta\.svg">Paftayı büyük açın<\/a>/);
+  assert.ok(html.includes('<dialog class="pafta-dlg"'));
+  assert.equal((html.match(/pafta\.js\?v=/g) || []).length, 1);
+  const at = id => html.indexOf('id="' + id + '"');
+  assert.ok(at('yaklasim') < at('adimlar') && at('adimlar') < at('ornek-pafta') && at('ornek-pafta') < at('iletisim'));
+});

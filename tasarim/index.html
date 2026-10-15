@@ -30,10 +30,10 @@
 }
 </script>
 <link rel="stylesheet" href="/assets/senkon/fonts/fonts.css?v=5a84d35c">
-<link rel="stylesheet" href="/site.css?v=af7cb23f">
+<link rel="stylesheet" href="/site.css?v=a10f5a05">
 </head>
 <body>
-<!-- Yapı tasarımı sayfası (mimar, müteahhit ve yatırımcılara yönelik Google reklamlarının açacağı sayfa). Yazılar METİN T1-T5 işaretleriyle gruplanmıştır. -->
+<!-- Yapı tasarımı sayfası (mimar, müteahhit ve yatırımcılara yönelik Google reklamlarının açacağı sayfa). Yazılar METİN T1-T6 işaretleriyle gruplanmıştır. -->
 <header id="top" class="wrap top">
   <a class="brand" href="/" aria-label="Senkon Mühendislik ana sayfa"><img class="lockup" src="/assets/senkon/logo-lockup.svg" alt="Senkon Mühendislik"></a>
   <nav id="nav" class="nav" aria-label="Site">
@@ -102,7 +102,25 @@
     </div>
   </section>
 
-  <!-- METİN T4 · İLETİŞİM: başlık ve düğmeler (telefon/e-posta değişirse href="…" içini de değiştirin) -->
+  <!-- METİN T4 · ÖRNEK PAFTA: başlık ve paftanın altındaki cümle (paftanın kendi yazıları assets/senkon/ornek-pafta.svg içindedir) -->
+  <section id="ornek-pafta" class="wrap section rule">
+    <h2>Örnek pafta</h2>
+    <p class="about-text">Uygulama projelerimizin çizim standardını gösteren örnek bir paftadır; gerçek bir projeye ait değildir.</p>
+    <figure class="pafta">
+      <img class="pafta-static" src="/assets/senkon/ornek-pafta.svg?v=f6cf1138" alt="Örnek pafta: çelik endüstriyel yapının çerçeve görünüşü ve kolon–makas birleşim detayı" width="420" height="297">
+      <div class="pafta-ctrl">
+        <button type="button" class="pafta-in" aria-label="Yakınlaştır">+</button>
+        <button type="button" class="pafta-out" aria-label="Uzaklaştır">−</button>
+        <button type="button" class="pafta-full" aria-label="Tam ekran aç">Tam ekran</button>
+      </div>
+      <dialog class="pafta-dlg" aria-label="Örnek pafta">
+        <button type="button" class="pafta-close">Kapat</button>
+      </dialog>
+    </figure>
+    <noscript><p class="about-text"><a href="/assets/senkon/ornek-pafta.svg">Paftayı büyük açın</a></p></noscript>
+  </section>
+
+  <!-- METİN T5 · İLETİŞİM: başlık ve düğmeler (telefon/e-posta değişirse href="…" içini de değiştirin) -->
   <section id="iletisim" class="wrap contact rule">
     <h2>Projeniz için teklif alın</h2>
     <div class="btns">
@@ -110,7 +128,7 @@
       <a class="btn btn-line" href="tel:+905309250461">+90 530 925 04 61</a>
       <a class="btn btn-line" href="mailto:firatsenturk@senkonmuhendislik.com">firatsenturk@senkonmuhendislik.com</a>
     </div>
-    <!-- METİN T5 · FORM: projeyi anlatın, biz arayalım (alan adları name="…" değişirse tests/tasarim-page.test.js de değişir) -->
+    <!-- METİN T6 · FORM: projeyi anlatın, biz arayalım (alan adları name="…" değişirse tests/tasarim-page.test.js de değişir) -->
     <div class="lead-wrap">
       <p class="lead-lead">Dilerseniz projenizi kısaca anlatın, sizi biz arayalım.</p>
       <form class="lead-form" method="POST" action="" novalidate="">
@@ -143,6 +161,7 @@
 <script src="/assets/senkon/track.js?v=7720eb1c" defer></script>
 <script src="/assets/senkon/hal.js?v=4683c589" defer></script>
 <script src="/assets/senkon/surec.js?v=6efee5d4" defer></script>
+<script src="/assets/senkon/pafta.js?v=4990c553" defer></script>
 <script>
 (function () {
   // phone menu: the Menü button shows the nav as a column under the header
