@@ -34,11 +34,11 @@ test('a live picture rests at the zoomed size, so the outgoing one does not shri
   assert.match(css, /\.surec-live img\{[^}]*transform:scale\(1\.06\)/);
 });
 
-test('on a phone the live picture stays pinned at the top while the steps scroll', () => {
+test('on a phone the heading and the live picture stay pinned at the top while the steps scroll', () => {
   const css = fs.readFileSync(path.join(__dirname, '..', 'site.css'), 'utf8');
-  const phone = css.match(/@media \(max-width:640px\)\{[^\n]*\.surec-stage\.surec-live\{([^}]*)\}/);
-  assert.ok(phone, 'no phone rule for .surec-stage.surec-live');
-  assert.doesNotMatch(phone[1], /position:static/);
+  const phone = css.match(/@media \(max-width:640px\)\{[^\n]*\.surec:has\(\.surec-live\) \.surec-pin\{([^}]*)\}/);
+  assert.ok(phone, 'no phone rule for the pinned block .surec-pin');
+  assert.match(phone[1], /position:sticky/);
   assert.match(phone[1], /top:0/);
 });
 

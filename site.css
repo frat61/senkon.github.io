@@ -143,7 +143,7 @@ h2.perf-sub{font-size:clamp(30px,4vw,40px);margin:0}
 .surec:has(.surec-live) .item.on{border-left-color:var(--ink)}
 .surec:has(.surec-live) .item:not(.on){opacity:.4}
 .surec:has(.surec-live) .item:focus-visible{outline:2px solid var(--accent);outline-offset:2px}
-@media (max-width:640px){ .surec:has(.surec-live){grid-template-columns:1fr} .surec-stage.surec-live{position:sticky;top:0;z-index:2;background:var(--ground);padding:8px 0 10px} .surec:has(.surec-live) .surec-pin{display:contents} }   /* on a phone the picture pins to the top of the screen while the steps scroll past it; the wrapper dissolves so the picture can pin along the whole steps list, and the heading scrolls away */
+@media (max-width:640px){ .surec:has(.surec-live){grid-template-columns:1fr} .surec:has(.surec-live) .surec-pin{position:sticky;top:0;z-index:2;background:var(--ground);padding:6px 0 10px} .surec-pin h2{font-size:24px;margin:0 0 10px} }   /* on a phone the heading and the picture pin together to the top of the screen while the steps scroll past them (Fırat: the title must stay in view); the heading a size smaller so the pinned block stays short */
 @media (prefers-reduced-motion:reduce){ .surec-live img.on{animation:none} }
 ol.steps-plain .item,.surec:has(.surec-live) ol.steps-plain .item{padding-left:20px}   /* tasarim/: no numbers, so no number column to clear */
 /* Deneyim banner: the figure and six building types stay still; the project names slide underneath (paused on hover, still with reduced motion) */
