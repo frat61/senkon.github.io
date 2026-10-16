@@ -14,6 +14,7 @@ ROOT = os.path.join(os.path.dirname(os.path.abspath(__file__)), '..')
 DIR = os.path.join(ROOT, 'assets', 'senkon', 'surec')
 W, H = 1200, 900
 QUALITY = 80
+LIMIT = 120 * 1024                                  # bytes; tests/surec-pictures.test.js holds the same limit
 
 
 def out(n):
@@ -23,7 +24,11 @@ def out(n):
 
 def convert(src, n):
     im = ImageOps.fit(Image.open(src).convert('L'), (W, H))
-    im.save(out(n), 'WEBP', quality=QUALITY)
+    q = QUALITY
+    while True:                                         # a busy drawing can pass LIMIT at QUALITY; step down until it fits
+        im.save(out(n), 'WEBP', quality=q)
+        if os.path.getsize(out(n)) <= LIMIT or q <= 50: break
+        q -= 5
 
 
 def placeholder(n):
