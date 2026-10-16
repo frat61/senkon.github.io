@@ -127,7 +127,7 @@ h2.perf-sub{font-size:clamp(30px,4vw,40px);margin:0}
 /* the story, live: one picture at a time with a slow zoom and a cross-fade, the steps beside it, the lit one with a bar on its left */
 .surec:has(.surec-live){display:grid;grid-template-columns:45fr 55fr;gap:0 48px;align-items:start}
 @media (min-width:641px){ .surec:has(.surec-live) .surec-pin{position:sticky;top:24px} .surec:has(.surec-live) ol.steps{margin-top:calc(clamp(30px,4vw,40px) * 1.05 + 20px)} }   /* the heading pins with the picture; the steps start level with the picture, under the heading's height */
-.surec-pin .perf-sub{margin:0 0 20px}
+.surec-pin h2{margin:0 0 20px}   /* the heading in the pinned block, with or without .perf-sub: room under the descenders before the picture */
 .surec-live .surec-pic{display:block;position:relative;aspect-ratio:4/3;overflow:hidden;border:1px solid var(--rule);background:#fff}
 .surec-live img{position:absolute;inset:0;border:0;opacity:0;transition:opacity .6s;transform-origin:50% 50%;transform:scale(1.06)}   /* rests zoomed, so the one fading out does not shrink */
 .surec-live img.on{opacity:1;animation:surec-zoom 5s ease-out forwards}
