@@ -30,7 +30,7 @@ p{margin:0}
 /* the logo lockup (mammoth with the name beside it): inlined svg on the home page, drawn by logo-sketch.js; an img on 404 */
 .brand svg,.brand .lockup{height:80px;width:auto}
 .sketch .logo-sketch{visibility:hidden}
-.nav{display:flex;gap:22px;font-weight:500;font-size:15px} .nav a{color:var(--ink);text-decoration:none;padding:10px 0} .nav a:hover{color:var(--link)}
+.nav{display:flex;gap:22px;font-weight:500;font-size:15px} .nav a{color:var(--ink);text-decoration:none;padding:10px 0} .nav a:hover{color:var(--link)} .nav a[aria-current="page"]{text-decoration:underline;text-underline-offset:6px;text-decoration-thickness:1.5px}   /* the page you are on */
 .top-contact,.menu-btn{display:none}
 /* phone: the nav folds away; the Menü button opens it as a column under the header */
 @media (max-width:700px){

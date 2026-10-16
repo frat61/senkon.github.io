@@ -96,7 +96,7 @@ test('no experience line on this page (Fırat, 2026-10-15: the home page carries
 
 test('contact: WhatsApp quote button at the top, in İletişim and in the dock; e-mail; the form with a project-type field', () => {
   assert.ok((html.match(quote) || []).length >= 2);
-  assert.match(html, /href="mailto:firatsenturk@senkonmuhendislik\.com"/);
+  assert.match(html, /href="mailto:info@senkonmuhendislik\.com"/);
   const form = html.match(/<form class="lead-form"[\s\S]*?<\/form>/);
   assert.ok(form, 'no .lead-form');
   const f = form[0];
@@ -138,12 +138,14 @@ test('the page links the shared stylesheet, fonts and track.js with absolute pat
   assert.equal((html.match(/<script src="\/assets\/senkon\/track\.js\?v=[0-9a-f]{8}" defer><\/script>/g) || []).length, 1);
 });
 
-test('the site menu links the page after Performans on the other pages; a page never lists itself', () => {
+test('the site menu links the page after Performans on every page, and each page underlines itself (aria-current)', () => {
   const read = f => fs.readFileSync(path.join(root, f), 'utf8');
   assert.match(read('index.html'), /<a href="deprem-performans\/">Performans<\/a><a href="tasarim\/">Tasarım<\/a>/);
   for (const f of ['hakkinda/index.html', 'kvkk/index.html']) assert.match(read(f), /<a href="\/deprem-performans\/">Performans<\/a><a href="\/tasarim\/">Tasarım<\/a>/, f);
-  assert.match(read('deprem-performans/index.html'), /<a href="\/">Ana sayfa<\/a><a href="\/tasarim\/">Tasarım<\/a>/);
-  assert.doesNotMatch(html.match(/<nav id="nav"[\s\S]*?<\/nav>/)[0], /tasarim/);
+  assert.match(read('deprem-performans/index.html'), /<a href="\/deprem-performans\/" aria-current="page">Performans<\/a><a href="\/tasarim\/">Tasarım<\/a>/);
+  assert.match(read('hakkinda/index.html'), /<a href="\/hakkinda\/" aria-current="page">Hakkında<\/a>/);
+  assert.match(html, /<a href="\/tasarim\/" aria-current="page">Tasarım<\/a>/);
+  assert.match(fs.readFileSync(path.join(root, 'site.css'), 'utf8'), /\.nav a\[aria-current="page"\]\{text-decoration:underline/);
 });
 
 test('the sitemap lists the page, the versions tool checks it, and the home page links it from the design panel', () => {

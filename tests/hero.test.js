@@ -111,7 +111,7 @@ test('the phone dock offers WhatsApp and e-mail, and starts hidden', () => {
   const dock = block(/<nav class="dock[^"]*"[\s\S]*?<\/nav>/);
   assert.match(dock, /class="dock away" inert/);
   assert.match(dock, /href="https:\/\/wa\.me\/905309250461"/);
-  assert.match(dock, /href="mailto:firatsenturk@senkonmuhendislik\.com"/);
+  assert.match(dock, /href="mailto:info@senkonmuhendislik\.com"/);
 });
 
 test('the home page names no TS 500 and no vague "uluslararası yönetmelik" (the code tags live on hakkinda/)', () => {
