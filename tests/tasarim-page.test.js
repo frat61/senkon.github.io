@@ -100,7 +100,7 @@ test('contact: WhatsApp quote button at the top, in İletişim and in the dock; 
   const form = html.match(/<form class="lead-form"[\s\S]*?<\/form>/);
   assert.ok(form, 'no .lead-form');
   const f = form[0];
-  for (const name of ['ad', 'telefon', 'sehir', 'proje_turu', 'mesaj', '_gotcha']) assert.match(f, new RegExp(`name="${name}"`));
+  for (const name of ['ad', 'telefon', 'eposta', 'sehir', 'proje_turu', 'mesaj', '_gotcha']) assert.match(f, new RegExp(`name="${name}"`));
   assert.doesNotMatch(f, /name="yapim_yili"/);
   assert.match(f, /href="\/kvkk\/"/);
   assert.match(html, /<p class="lead-done" hidden>/);

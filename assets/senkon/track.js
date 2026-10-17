@@ -69,6 +69,9 @@
     var btn = f.querySelector('button[type="submit"]'), done = document.querySelector('.lead-done'), err = f.querySelector('.lead-err');
     f.addEventListener('submit', function (e) {
       e.preventDefault();
+      var tel = f.elements.telefon, mail = f.elements.eposta;   // a way back to the visitor: phone or e-mail, at least one
+      if (tel && mail) tel.setCustomValidity(tel.value.trim() || mail.value.trim() ? '' : 'Size dönebilmemiz için telefon ya da e-posta yazın.');
+      if (!f.checkValidity()) { f.reportValidity(); return; }   // the form is novalidate: without this, empty fields still send
       btn.disabled = true; if (err) err.hidden = true;
       fetch(IDS.FORM_ENDPOINT, { method: 'POST', body: new FormData(f), headers: { Accept: 'application/json' } })
         .then(function (r) { if (!r.ok) throw new Error(String(r.status)); return r.json(); })

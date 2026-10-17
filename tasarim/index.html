@@ -136,8 +136,9 @@
     <div class="lead-wrap">
       <p class="lead-lead">Dilerseniz projenizi kısaca anlatın, sizi biz arayalım.</p>
       <form class="lead-form" method="POST" action="" novalidate="">
-        <label>Ad Soyad<input type="text" name="ad" autocomplete="name" required></label>
-        <label>Telefon<input type="tel" name="telefon" autocomplete="tel" inputmode="tel" placeholder="05xx xxx xx xx" required></label>
+        <label class="wide">Ad Soyad<input type="text" name="ad" autocomplete="name" required></label>
+        <label>Telefon<input type="tel" name="telefon" autocomplete="tel" inputmode="tel" placeholder="05xx xxx xx xx" pattern="\+?[0-9 ]{10,}" title="Telefonu ör. 0532 123 45 67 biçiminde yazın"></label>
+        <label>E-posta<input type="email" name="eposta" autocomplete="email" placeholder="ornek@mail.com"></label>
         <label>Şehir<input type="text" name="sehir" autocomplete="address-level2" placeholder="İstanbul"></label>
         <label>Proje türü<input type="text" name="proje_turu" placeholder="Çelik depo, betonarme konut…"></label>
         <label class="wide">Mesaj<textarea name="mesaj" placeholder="Yaklaşık m², kat sayısı, hedeflenen teslim tarihi…"></textarea></label>
@@ -168,7 +169,7 @@
   <a class="btn btn-main" href="https://wa.me/905309250461?text=Merhaba%2C%20projemiz%20i%C3%A7in%20statik%20proje%20teklifi%20almak%20istiyorum.">WhatsApp</a>
   <a class="btn btn-line" href="mailto:info@senkonmuhendislik.com">E-posta</a>
 </nav>
-<script src="/assets/senkon/track.js?v=7720eb1c" defer></script>
+<script src="/assets/senkon/track.js?v=8e6b08ed" defer></script>
 <script src="/assets/senkon/hal.js?v=4683c589" defer></script>
 <script src="/assets/senkon/surec.js?v=f85912e5" defer></script>
 <script src="/assets/senkon/pafta.js?v=7938767e" defer></script>
