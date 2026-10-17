@@ -69,6 +69,7 @@
     var btn = f.querySelector('button[type="submit"]'), done = document.querySelector('.lead-done'), err = f.querySelector('.lead-err');
     f.addEventListener('submit', function (e) {
       e.preventDefault();
+      if (!f.checkValidity()) { f.reportValidity(); return; }   // the form is novalidate: without this, an empty phone still sends
       btn.disabled = true; if (err) err.hidden = true;
       fetch(IDS.FORM_ENDPOINT, { method: 'POST', body: new FormData(f), headers: { Accept: 'application/json' } })
         .then(function (r) { if (!r.ok) throw new Error(String(r.status)); return r.json(); })
