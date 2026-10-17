@@ -55,9 +55,10 @@ test('the landing page has the contact form: name, phone, city, optional year, m
   const form = landing.match(/<form class="lead-form"[\s\S]*?<\/form>/);
   assert.ok(form, 'no .lead-form on the landing page');
   const f = form[0];
-  for (const name of ['ad', 'telefon', 'sehir', 'yapim_yili', 'mesaj']) assert.match(f, new RegExp(`name="${name}"`));
+  for (const name of ['ad', 'telefon', 'eposta', 'sehir', 'yapim_yili', 'mesaj']) assert.match(f, new RegExp(`name="${name}"`));
   assert.match(f, /name="ad"[^>]*required/);
-  assert.match(f, /name="telefon"[^>]*required/);
+  assert.doesNotMatch(f, /name="telefon"[^>]*required/);   // phone or e-mail: track.js asks for at least one
+  assert.match(f, /type="email" name="eposta"/);
   assert.doesNotMatch(f, /name="yapim_yili"[^>]*required/);
   assert.match(f, /name="_gotcha"/);
   assert.match(f, /<button type="submit" class="btn btn-main">/);
