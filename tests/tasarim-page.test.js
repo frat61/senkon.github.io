@@ -14,7 +14,7 @@ const quote = /<a class="btn btn-main" href="https:\/\/wa\.me\/905309250461\?tex
 const h2s = [...html.matchAll(/<h2[^>]*>([^<]+)<\/h2>/g)].map(m => m[1]);
 
 test('the page has its own title, description and canonical address, and one headline: the four-word claim', () => {
-  assert.match(html, /<title>Statik proje: çelik ve betonarme yapı tasarımı · Senkon Mühendislik<\/title>/);
+  assert.match(html, /<title>Çelik ve betonarme statik proje · Senkon Mühendislik<\/title>/);
   assert.match(html, /<meta name="description" content="[^"]{80,}">/);
   assert.match(html, /<link rel="canonical" href="https:\/\/senkonmuhendislik\.com\/tasarim\/">/);
   assert.equal(html.split('<h1').length - 1, 1);

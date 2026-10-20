@@ -3,8 +3,8 @@
 <head>
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
-<title>Senkon Mühendislik · Taşıyıcı sistem tasarımı ve deprem performans değerlendirmesi</title>
-<meta name="description" content="Senkon Mühendislik, İstanbul. Çelik ve betonarme yapılar için taşıyıcı sistem tasarımı; mevcut binaların TBDY 2018, ASCE ve Eurocode'a göre, gerçek deprem kayıtlarıyla deprem performans değerlendirmesi.">
+<title>Senkon Mühendislik · Statik proje ve deprem performansı</title>
+<meta name="description" content="Senkon Mühendislik, İstanbul. Çelik ve betonarme yapılar için statik proje ve taşıyıcı sistem tasarımı; mevcut binaların deprem performans değerlendirmesi.">
 <link rel="icon" type="image/png" href="assets/senkon/favicon.png">
 <link rel="apple-touch-icon" href="assets/senkon/apple-touch-icon.png">
 <meta name="theme-color" content="#ffffff">
@@ -25,6 +25,8 @@
   "url": "https://senkonmuhendislik.com/",
   "telephone": "+90 530 925 04 61",
   "email": "info@senkonmuhendislik.com",
+  "logo": "https://senkonmuhendislik.com/assets/senkon/logo.svg",
+  "image": "https://senkonmuhendislik.com/assets/senkon/og.png",
   "areaServed": "İstanbul",
   "description": "Çelik ve betonarme yapılar için taşıyıcı sistem tasarımı; mevcut binaların TBDY 2018, ASCE ve Eurocode'a göre deprem performans değerlendirmesi."
 }
@@ -32,6 +34,8 @@
 <script>if(!matchMedia("(prefers-reduced-motion: reduce)").matches)document.documentElement.classList.add("sketch")</script>
 <link rel="stylesheet" href="assets/senkon/fonts/fonts.css?v=5a84d35c">
 <link rel="stylesheet" href="site.css?v=fb626c61">
+<!-- the hero still is the largest thing on the first screen: fetched before the stylesheets are parsed, in the size the screen needs (same candidates as the img below) -->
+<link rel="preload" as="image" href="assets/senkon/hal.webp?v=f5312e5d" imagesrcset="assets/senkon/hal-640.webp?v=c65509ca 640w, assets/senkon/hal-960.webp?v=c71c8fcc 960w, assets/senkon/hal.webp?v=f5312e5d 1500w" imagesizes="(max-width: 860px) 300px, 400px" fetchpriority="high">
 </head>
 <body>
 <header id="top" class="wrap top">
@@ -423,7 +427,7 @@
     <div class="hero-media">
       <!-- the steel hall (about 100 × 96 m in plan, 35 m lattice towers) erected element by element from Fırat's own model: hal.js draws the member data made by tools/make-hall.js; the still shows without JavaScript -->
       <figure class="hall hero-figure" data-hall="assets/senkon/hal.json" data-speed="1.4" aria-label="Endüstriyel çelik yapının taşıyıcı sisteminin montaj animasyonu; sürükleyerek döndürülebilir">
-        <div class="hall-stage"><img class="hall-static" src="assets/senkon/hal.webp?v=f5312e5d" alt="Kafes kolonlu çelik endüstriyel yapının taşıyıcı sistem çizimi" width="1500" height="1125"></div>
+        <div class="hall-stage"><img class="hall-static" src="assets/senkon/hal.webp?v=f5312e5d" srcset="assets/senkon/hal-640.webp?v=c65509ca 640w, assets/senkon/hal-960.webp?v=c71c8fcc 960w, assets/senkon/hal.webp?v=f5312e5d 1500w" sizes="(max-width: 860px) 300px, 400px" fetchpriority="high" alt="Kafes kolonlu çelik endüstriyel yapının taşıyıcı sistem çizimi" width="1500" height="1125"></div>
         <figcaption class="skyline-caption">Endüstriyel çelik yapı, taşıyıcı sistem modeli</figcaption>
       </figure>
     </div>

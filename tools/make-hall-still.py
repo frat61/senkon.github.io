@@ -1,6 +1,10 @@
 """The finished steel hall as a still picture, for visitors without JavaScript or with reduced motion.
 
 Usage: python tools/make-hall-still.py assets/senkon/hal.json assets/senkon/hal.webp
+       python tools/make-hall-still.py --resize assets/senkon/hal.webp      only the phone sizes, from the still as it is
+
+Beside the still it writes hal-640.webp and hal-960.webp, the sizes a phone (300 px wide on screen) and a
+desktop (400 px) actually show it at, so the pages' srcset lets each screen download only what it needs.
 
 Reads the format-2 hal.json written by tools/make-hall.js (members in metres, the camera and its framing),
 projects every member with the camera the way assets/senkon/hal.js does (spec section 3), draws them in
@@ -23,6 +27,21 @@ def cross(a, b): return [a[1] * b[2] - a[2] * b[1], a[2] * b[0] - a[0] * b[2], a
 def norm(a):
     l = math.hypot(*a) or 1
     return [c / l for c in a]
+
+SIZES = (640, 960)
+
+def resize(out):
+    """hal-640.webp and hal-960.webp beside the still, the same drawing scaled down."""
+    im = Image.open(out)
+    for w in SIZES:
+        h = round(im.height * w / im.width)
+        name = out[:-5] + f'-{w}.webp'
+        im.resize((w, h), Image.LANCZOS).save(name, quality=90)
+        print(f"{w}x{h} -> {name}")
+
+if sys.argv[1] == '--resize':
+    resize(sys.argv[2])
+    sys.exit()
 
 src, out = sys.argv[1], sys.argv[2]
 d = json.load(open(src, encoding='utf-8'))
@@ -58,3 +77,4 @@ im.alpha_composite(layer)
 im = im.convert('L').resize((W0, H0), Image.LANCZOS)
 im.save(out, quality=90)
 print(f"{W0}x{H0} -> {out}")
+resize(out)
